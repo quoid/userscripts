@@ -1,0 +1,188 @@
+*,
+*:before,
+*:after  {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: #272a2e;
+    color: #888;
+    font-family: -apple-system, Helvetica, Arial, Verdana, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    align-items: center;
+    display: flex;
+    padding: 6px 12px;
+}
+
+.header .title {
+    color: #f1f1f1;
+    flex: 100%;
+    font-weight: 900;
+    letter-spacing: -0.50px;
+}
+
+.header .title span {
+    color: #888;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+#info, 
+#download {
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+}
+
+#download {
+    margin-right: 24px;
+}
+
+#info svg,
+#download svg {
+    fill: #888;
+    height: 100%;
+    width: 100%;
+}
+
+.editor {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.buttons {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 12px;
+}
+
+button {
+    border: none;
+    margin: 0;
+    cursor: pointer;
+    color: #272a2e;
+    padding: 4px 8px;
+    text-transform: uppercase;
+    font-size: 10px;
+    border-radius: 3px;
+    background-color: #ccc;
+}
+
+button:disabled,
+button[disabled] {
+    cursor: default;
+    opacity: .25;
+}
+
+#message {
+    font-size: 11px;
+    margin-right: auto;
+}
+
+#save {
+    background-color: #e86c8a;
+    margin-left: 12px;
+}
+
+.CodeMirror {
+    background-color: #272a2e;
+    color: #cfd0d2;
+    font-family: Monaco, monospace;
+    font-size: 12px;
+    height: 100%;
+    line-height: 1.4em;
+}
+
+.CodeMirror-gutters {
+    background-color: #272a2e;
+    border-right: 0px;
+}
+
+.CodeMirror-linenumber {
+    color: #888;
+}
+
+.CodeMirror-activeline-background {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid #f1f1f1;
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+    color: #f1f1f1;
+    border-bottom: 2px solid #77e26a;
+}
+
+.cm-s-default .CodeMirror-selected {
+    background-color: rgba(150, 204, 255, 0.25);
+}
+
+.CodeMirror .CodeMirror-placeholder,
+.cm-s-default .cm-comment {
+    color: #68727e;
+}
+
+.cm-s-default .cm-keyword {
+    color: #96c3ed;
+}
+
+.cm-s-default .cm-def {
+    color: #efc371
+}
+
+.cm-s-default .cm-variable,
+.cm-s-default .cm-variable-2 {
+    color: inherit;
+}
+
+.cm-s-default .cm-operator {
+    color: #8c99a7;
+}
+
+.cm-s-default .cm-property {
+    color: #e86c8a;
+}
+
+.cm-s-default .cm-string {
+    color: #f5eea2;
+}
+
+.cm-s-default .cm-string-2 {
+    color: #cdabff;
+}
+
+.cm-s-default .cm-number {
+    color: #77e26a;
+}
+
+.cm-s-default .cm-atom {
+    color: #f275e9;
+}
+
+.cm-s-default .cm-error {
+    border-bottom:2px solid #f00;
+    color: #f1f1f1;
+}

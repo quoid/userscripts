@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="include/codemirror/codemirror.css">
+        <link rel="stylesheet" href="include/codemirror/addon/hint/show-hint.css">
+        <script src="include/CodeMirror//codemirror.js"></script>
+        <script src="include/CodeMirror/addon/hint/show-hint.js"></script>
+        <script src="include/CodeMirror/addon/hint/javascript-hint.js"></script>
+        <script src="include/CodeMirror/addon/placeholder.js"></script>
+        <script src="include/CodeMirror/addon/active-line.js"></script>
+        <script src="include/CodeMirror/addon/matchbrackets.js"></script>
+        <script src="include/CodeMirror/addon/closebrackets.js"></script>
+        <script src="include/CodeMirror/addon/comment.js"></script>
+        <script src="include/CodeMirror/mode/javascript.js"></script>
+        <link rel="stylesheet" href="include/popover.css">
+    </head>
+    <body class="editor-js">
+        <div id="wrapper">
+            <div class="header">
+                <div class="title">Userscripts<span> v1.0</span></div>
+                <div id="download">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/><path d="M0 0h24v24H0z" fill="none"/>
+                    </svg>
+                </div>
+                <div id="info">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="editor">
+                <textarea id="code" placeholder="//Code input here gets injected into every website you visit..."></textarea>
+            </div>
+            <div class="buttons">
+                <div id="message">This is your message area</div>
+                <button id="discard" disabled="true">Discard</button>
+                <button id="save" disabled="true">Save</button>
+            </div>
+        </div>
+        <script src="./include/js/popover.js"></script>
+    </body>
+</html>

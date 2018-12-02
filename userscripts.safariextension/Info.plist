@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>Justin Wasack</string>
+	<key>Builder Version</key>
+	<string>14606.2.104.1.1</string>
+	<key>CFBundleDisplayName</key>
+	<string>Userscripts</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.quoid.userscripts</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Global Page</key>
+		<string>global.html</string>
+		<key>Popovers</key>
+		<array>
+			<dict>
+				<key>Filename</key>
+				<string>popover.html</string>
+				<key>Height</key>
+				<integer>600</integer>
+				<key>Identifier</key>
+				<string>userscripts_popover</string>
+				<key>Width</key>
+				<integer>700</integer>
+			</dict>
+		</array>
+		<key>Toolbar Items</key>
+		<array>
+			<dict>
+				<key>Identifier</key>
+				<string>userscripts_button</string>
+				<key>Image</key>
+				<string>include/button.png</string>
+				<key>Include By Default</key>
+				<true/>
+				<key>Label</key>
+				<string>Userscripts</string>
+				<key>Palette Label</key>
+				<string>Userscripts</string>
+				<key>Popover</key>
+				<string>userscripts_popover</string>
+				<key>Tool Tip</key>
+				<string>Open Userscripts</string>
+			</dict>
+		</array>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>Start</key>
+			<array>
+				<string>include/js/start.js</string>
+			</array>
+		</dict>
+	</dict>
+	<key>Description</key>
+	<string>A simple, open-source, userscript editor for Safari</string>
+	<key>DeveloperIdentifier</key>
+	<string>J74Q8V8V8N</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>All</string>
+		</dict>
+	</dict>
+	<key>Update Manifest URL</key>
+	<string>https://raw.githubusercontent.com/quoid/userscripts/master/update.plist</string>
+	<key>Website</key>
+	<string>https://github.com/quoid/userscripts</string>
+</dict>
+</plist>
