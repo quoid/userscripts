@@ -17,11 +17,11 @@ Here are some usage notes:
 - `cmd + s` to save changes to the editor
 - hinting is automatic, you can use the shortcut `ctrl + spacebar` to toggle hinting manually
 - your code is saved into `localStorage` of the extension, if you clear the `localStorage` of your browser, you will remove your saved code
-- you can click the download icon to save your scripts locally
+- you can click the download icon to save your script file locally
 
 ## Why?
 
-With the depreciation of `.safariextz` style extension in Safari 12, I wanted a way to quickly and easily create some "quality of life" userscripts. Since it's no longer possible to create and signed, even personal, `.safariextz` extensions, I needed a new way to dynamically create userscripts.
+With the depreciation of `.safariextz` style extension in Safari 12, I wanted a way to quickly and easily create some "quality of life" userscripts. Since it's no longer possible to create and sign, even personal, `.safariextz` extensions, I needed a new way to dynamically create userscripts.
 
 There are other userscripts editors/managers for other browsers, and even good ones for Safari, but I wanted something very simple and *open-source*.
 
