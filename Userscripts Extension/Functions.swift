@@ -37,58 +37,20 @@ func openExtensionHomepage() {
     let url = URL(string: "https://github.com/quoid/userscripts")!
     SFSafariApplication.getActiveWindow { (activeWindow) in
         activeWindow?.openTab(with: url, makeActiveIfPossible: true, completionHandler: {_ in
-            print("loaded \(url)")
+            //print("loaded \(url)")
         })
     }
-    /*
-    SFSafariApplication.getActiveWindow { (window) in
-        if let u = URL(string: url) {
-            window?.openTab(with: u, makeActiveIfPossible: true, completionHandler: nil)
-        }
-    }
- */
 }
 
 func downloadScript() {
     SFSafariApplication.getActiveWindow { (window) in
         window?.getActiveTab { (tab) in
-            //tab?.close()
             tab?.getActivePage { (page) in
                 page?.dispatchMessageToScript(withName: "DOWNLOAD_SCRIPT", userInfo: ["code": EditorData.code])
             }
         }
     }
-    /*
-    SFSafariApplication.getActiveWindow { (window) in
-        window?.getActiveTab { (tab) in
-            tab?.getActivePage(completionHandler: { (page) in
-                page?.dispatchMessageToScript(withName: "DOWNLOAD", userInfo: ["foo": "foo"])
-            }
-        }
-    }
     
-    */
-    //let bundle = Bundle.init(for: MyClass.self)
-    //let path = bundle.main.resourceURL!.absoluteURL
-    //let path = Bundle.main.path(forResource: "editor", ofType: "html")
-    
-    //let bundleURL = Bundle.main.resourceURL!.absoluteURL
-    //let html = bundleURL.appendingPathComponent("editor.html")
-    //print(html)
-    //let url = URL(string: "https://google.com")!
-    
-    //let bundleURL = Bundle.main.resourceURL!.absoluteURL
-    //let html = bundleURL.appendingPathComponent("editor.html")
-    //webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
-    
-    /*
-    SFSafariApplication.getActiveWindow { (activeWindow) in
-        activeWindow?.openTab(with: html, makeActiveIfPossible: true, completionHandler: {_ in
-            print("loaded \(html)")
-        })
-    }
- */
-    //SFSafariPage.dispatchMessageToScript(withName: "DOWNLOAD", userInfo: ["message" : "body"])
 }
 
 func saveData(code: String) {
