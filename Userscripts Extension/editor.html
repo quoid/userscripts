@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="include/codemirror/codemirror.css">
-        <link rel="stylesheet" href="include/codemirror/addon/hint/show-hint.css">
-        <script src="include/CodeMirror//codemirror.js"></script>
-        <script src="include/CodeMirror/addon/hint/show-hint.js"></script>
-        <script src="include/CodeMirror/addon/hint/javascript-hint.js"></script>
-        <script src="include/CodeMirror/addon/placeholder.js"></script>
-        <script src="include/CodeMirror/addon/active-line.js"></script>
-        <script src="include/CodeMirror/addon/matchbrackets.js"></script>
-        <script src="include/CodeMirror/addon/closebrackets.js"></script>
-        <script src="include/CodeMirror/addon/comment.js"></script>
-        <script src="include/CodeMirror/mode/javascript.js"></script>
-        <link rel="stylesheet" href="include/popover.css">
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="editor/CodeMirror/codemirror.css">
+        <link rel="stylesheet" href="editor/CodeMirror/addon/hint/show-hint.css">
+        <script src="editor/CodeMirror/codemirror.js"></script>
+        <script src="editor/CodeMirror/addon/hint/show-hint.js"></script>
+        <script src="editor/CodeMirror/addon/hint/javascript-hint.js"></script>
+        <script src="editor/CodeMirror/addon/placeholder.js"></script>
+        <script src="editor/CodeMirror/addon/active-line.js"></script>
+        <script src="editor/CodeMirror/addon/matchbrackets.js"></script>
+        <script src="editor/CodeMirror/addon/closebrackets.js"></script>
+        <script src="editor/CodeMirror/addon/comment.js"></script>
+        <script src="editor/CodeMirror/mode/javascript.js"></script>
+        <link rel="stylesheet" href="editor/editor.css">
     </head>
-    <body class="editor-js">
+    <body>
         <div id="wrapper">
             <div class="header">
-                <div class="title">Userscripts<span> v1.0</span></div>
+                <div class="title">Userscripts<span id="version"> vX</span></div>
                 <div id="download">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/><path d="M0 0h24v24H0z" fill="none"/>
@@ -34,11 +35,11 @@
                 <textarea id="code" placeholder="//Code input here gets injected into every website you visit..."></textarea>
             </div>
             <div class="buttons">
-                <div id="message">This is your message area</div>
+                <div id="message">Ready for code...</div>
                 <button id="discard" disabled="true">Discard</button>
                 <button id="save" disabled="true">Save</button>
             </div>
         </div>
-        <script src="./include/js/popover.js"></script>
+        <script src="editor/editor.js"></script>
     </body>
 </html>

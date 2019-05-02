@@ -61,7 +61,13 @@ body {
 #download svg {
     fill: #888;
     height: 100%;
+    transition: fill 250ms;
     width: 100%;
+}
+
+#info:hover svg,
+#download:hover svg {
+    fill: #fff;
 }
 
 .editor {
@@ -81,18 +87,43 @@ button {
     border: none;
     margin: 0;
     cursor: pointer;
-    color: #272a2e;
+    color: #ccc;
     padding: 4px 8px;
     text-transform: uppercase;
     font-size: 10px;
     border-radius: 3px;
-    background-color: #ccc;
+    background-color: transparent;
+    font-weight: 600;
 }
 
 button:disabled,
 button[disabled] {
     cursor: default;
     opacity: .25;
+    pointer-events: none;
+}
+
+button {
+    padding-left: 2px;
+    padding-right: 2px;
+    position: relative;
+}
+
+button::after {
+    background-color: #ccc;
+    bottom: 1px;
+    content: "";
+    height: 1px;
+    left: 0;
+    opacity: 1;
+    position: absolute;
+    transition: all 250ms;
+    width: 0;
+}
+
+button:hover::after {
+    opacity: 1;
+    width: 100%
 }
 
 #message {
@@ -101,8 +132,12 @@ button[disabled] {
 }
 
 #save {
+    color: #e86c8a;
+    margin-left: 20px;
+}
+
+button#save::after {
     background-color: #e86c8a;
-    margin-left: 12px;
 }
 
 .CodeMirror {
