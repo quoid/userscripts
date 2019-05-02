@@ -55,6 +55,6 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2019 Justin Wasack. All rights reserved.</string>
 	<key>NSHumanReadableDescription</key>
-	<string>This is a Safari Extension. You should tell us what your extension does here.</string>
+	<string>Save and run javascript for the web pages you visit</string>
 </dict>
 </plist>
