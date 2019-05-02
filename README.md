@@ -6,7 +6,7 @@ A simple, open-source, userscript editor for Safari.
 
 ## Installation
 
-With the changes to Safari 12 and  .safariextz-style extensions, the only way to install this extension is through the [Safari Extension Gallery](https://safari-extensions.apple.com) (this link will be updated once the extension is live on the gallery).
+Once the extension is accepted into the app store, a link will appear here. For now, clone the project and build with Xcode.
 
 ## Usage
 
@@ -16,8 +16,11 @@ Here are some usage notes:
 
 - `cmd + s` to save changes to the editor
 - hinting is automatic, you can use the shortcut `ctrl + spacebar` to toggle hinting manually
-- your code is saved into `localStorage` of the extension, if you clear the `localStorage` of your browser, you will remove your saved code
-- you can click the download icon to save your script file locally
+- your code is saved into `~/Library/Containers/com.k21p.macos.Userscripts-Extension/Data/Documents/data.json`
+    - the json object has two properties
+        - `code` is the what you have saved fromt he editor
+        - `lastEdited` is the time of the last save
+- you can click the download icon to save your script file locally, without needing to navigate to this folder
 
 ## Why?
 
