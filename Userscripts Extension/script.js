@@ -19,7 +19,9 @@ function handleMessage(event) {
         injectCode(unescape(event.message.code));
     }
     if (event.name === "DOWNLOAD_SCRIPT") {
-        downloadScript(unescape(event.message.code))
+        if (window.top === window) {
+            downloadScript(unescape(event.message.code))
+        }
     }
 }
 
@@ -28,3 +30,4 @@ if (window.top === window) {
 }
 
 safari.self.addEventListener("message", handleMessage);
+console.log("remove this");
