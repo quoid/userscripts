@@ -29,7 +29,7 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         let bundleURL = Bundle.main.resourceURL!.absoluteURL
         let html = bundleURL.appendingPathComponent("editor.html")
         webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
-        loadSavedData()
+        //loadSavedData()
     }
     
     override func viewWillAppear() {

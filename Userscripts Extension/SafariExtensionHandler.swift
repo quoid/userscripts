@@ -13,6 +13,9 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     
     override func messageReceived(withName messageName: String, from page: SFSafariPage, userInfo: [String : Any]?) {
         if messageName == "REQUEST_SAVED_DATA" {
+            if EditorData.code.isEmpty {
+                loadSavedData()
+            }
             page.dispatchMessageToScript(withName: "SEND_SAVED_DATA", userInfo: ["code": EditorData.code])
         }
     }
