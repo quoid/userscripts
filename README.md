@@ -16,7 +16,7 @@ Here are some usage notes:
 
 - `cmd + s` to save changes to the editor
 - hinting is automatic, you can use the shortcut `ctrl + spacebar` to toggle hinting manually
-- your code is saved into `~/Library/Containers/com.k21p.macos.Userscripts-Extension/Data/Documents/data.json`
+- your code is saved into `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/data.json`
     - the json object has two properties
         - `code` is the what you have saved fromt he editor
         - `lastEdited` is the time of the last save
