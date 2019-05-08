@@ -33,21 +33,21 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
     
     override func viewWillAppear() {
         super.viewWillAppear()
-        webView.evaluateJavaScript("loadCode('\(EditorData.code)');", completionHandler: nil)
-        webView.evaluateJavaScript("setSaveDate('\(EditorData.lastEdited)');", completionHandler: nil)
+        webView.evaluateJavaScript("___userscripts.loadCode('\(EditorData.code)');", completionHandler: nil)
+        webView.evaluateJavaScript("___userscripts.setSaveDate('\(EditorData.lastEdited)');", completionHandler: nil)
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "saveCode" {
             saveData(code: message.body as! String)
-            webView.evaluateJavaScript("setSaveDate('\(EditorData.lastEdited)');", completionHandler: nil)
+            webView.evaluateJavaScript("___userscripts.setSaveDate('\(EditorData.lastEdited)');", completionHandler: nil)
         }
         
         if message.name == "webViewOnLoad" {
-            webView.evaluateJavaScript("loadCode('\(EditorData.code)');", completionHandler: nil)
-            webView.evaluateJavaScript("setEditorMessage('Last edited on \(EditorData.lastEdited)');", completionHandler: nil)
+            webView.evaluateJavaScript("___userscripts.loadCode('\(EditorData.code)');", completionHandler: nil)
+            webView.evaluateJavaScript("___userscripts.setEditorMessage('Last edited on \(EditorData.lastEdited)');", completionHandler: nil)
             let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-            webView.evaluateJavaScript("setVersion(' v\(appVersion)');", completionHandler: nil)
+            webView.evaluateJavaScript("___userscripts.setVersion(' v\(appVersion)');", completionHandler: nil)
         }
         
         if message.name == "getInfo" {
