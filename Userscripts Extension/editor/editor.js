@@ -39,8 +39,9 @@ var ___userscripts = {
         this.disableButtons();
     },
     setSaveDate: function(dateString) {
+        var t = this;
         setTimeout(function() {
-            this.setEditorMessage("Last edited on " + dateString);
+            t.setEditorMessage("Last edited on " + dateString);
         }, 1500);
     },
     loadCode: function(c) {
