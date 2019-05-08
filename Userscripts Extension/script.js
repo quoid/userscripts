@@ -30,4 +30,3 @@ if (window.top === window) {
 }
 
 safari.self.addEventListener("message", handleMessage);
-console.log("remove this");
