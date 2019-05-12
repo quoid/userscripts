@@ -28,6 +28,9 @@ With the depreciation of `.safariextz` style extension in Safari 12, I wanted a 
 
 There are other userscripts editors/managers for other browsers, and even good ones for Safari, but I wanted something very simple and *open-source*.
 
+## Privacy Policy
+Userscripts does not collect any data from its users nor monitor activities or actions you perform within the application and extension. This means everything that you do with the application and extension is private to you and is never shared with the developers or third parties. Since there is no data collection, there is no data retention of any kind.
+
 ## License 
 
 [GNU General Public License v3.0](/LICENSE)
