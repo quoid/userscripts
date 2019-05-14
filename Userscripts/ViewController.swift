@@ -23,9 +23,7 @@ class ViewController: NSViewController {
         SFSafariApplication.showPreferencesForExtension(withIdentifier: "com.userscripts.macos.Userscripts-Extension") { error in
             if let _ = error {
                 // Insert code to inform the user that something went wrong.
-
             }
         }
     }
-
 }
