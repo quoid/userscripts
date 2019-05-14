@@ -6,7 +6,7 @@ A simple, open-source, userscript editor for Safari.
 
 ## Installation
 
-Once the extension is accepted into the app store, a link will appear here. For now, clone the project and build with Xcode.
+Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id1463298887) or clone the project and build with Xcode.
 
 ## Usage
 
