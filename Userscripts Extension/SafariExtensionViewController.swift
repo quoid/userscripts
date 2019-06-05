@@ -46,7 +46,9 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         
         if message.name == "webViewOnLoad" {
             webView.evaluateJavaScript("___userscripts.loadCode('\(EditorData.code)');", completionHandler: nil)
-            webView.evaluateJavaScript("___userscripts.setEditorMessage('Last edited on \(EditorData.lastEdited)');", completionHandler: nil)
+            if !EditorData.lastEdited.isEmpty {
+                webView.evaluateJavaScript("___userscripts.setEditorMessage('Last edited on \(EditorData.lastEdited)');", completionHandler: nil)
+            }
             let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
             webView.evaluateJavaScript("___userscripts.setVersion(' v\(appVersion)');", completionHandler: nil)
         }
