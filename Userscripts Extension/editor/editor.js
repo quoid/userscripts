@@ -40,12 +40,14 @@ var ___userscripts = {
         this.disableButtons();
     },
     save: function() {
-        var code = this.editor.getValue();
-        window.webkit.messageHandlers.saveCode.postMessage(escape(code));
-        this.savedCode = code;
-        this.sessionCode = "";
-        this.setEditorMessage("All changes saved");
-        this.disableButtons();
+        if (!this.saveButton.disabled) {
+            var code = this.editor.getValue();
+            window.webkit.messageHandlers.saveCode.postMessage(escape(code));
+            this.savedCode = code;
+            this.sessionCode = "";
+            this.setEditorMessage("All changes saved");
+            this.disableButtons();
+        }
     },
     setSaveDate: function(dateString) {
         var t = this;
