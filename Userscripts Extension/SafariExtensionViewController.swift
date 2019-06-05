@@ -27,6 +27,7 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         webView.configuration.userContentController.add(self, name: "getInfo")
         webView.configuration.userContentController.add(self, name: "downloadScript")
         webView.configuration.userContentController.add(self, name: "setCursor")
+        webView.configuration.userContentController.add(self, name: "setStatus")
         let bundleURL = Bundle.main.resourceURL!.absoluteURL
         let html = bundleURL.appendingPathComponent("editor.html")
         webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
@@ -49,6 +50,10 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
             if !EditorData.lastEdited.isEmpty {
                 webView.evaluateJavaScript("___userscripts.setEditorMessage('Last edited on \(EditorData.lastEdited)');", completionHandler: nil)
             }
+            let status = UserDefaults.standard.string(forKey: "ToggleStatus")
+            if status == "off" {
+                webView.evaluateJavaScript("___userscripts.toggleOff();", completionHandler: nil)
+            }
             let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
             webView.evaluateJavaScript("___userscripts.setVersion(' v\(appVersion)');", completionHandler: nil)
         }
@@ -61,6 +66,11 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         if message.name == "downloadScript" {
             downloadScript()
             dismissPopover()
+        }
+        
+        if message.name == "setStatus" {
+            let st = message.body as! String
+            setToggleStatus(status: st)
         }
         
         //hack to get popover webview to set proper cursors

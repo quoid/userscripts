@@ -19,6 +19,11 @@
         <div id="wrapper">
             <div class="header">
                 <div class="title">Userscripts<span id="version"> vX</span></div>
+                <div id="toggle">
+                    <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 0c-.863 0-1.561.693-1.561 1.55v7.748c0 .856.698 1.55 1.561 1.55s1.561-.694 1.561-1.55V1.55C11.561.693 10.863 0 10 0zM4.415 2.01a1.169 1.169 0 0 0-.61.266A9.884 9.884 0 0 0 0 10.073C0 15.542 4.49 20 10 20s10-4.458 10-9.927a9.884 9.884 0 0 0-3.805-7.797 1.175 1.175 0 0 0-1.646.182 1.155 1.155 0 0 0 .183 1.634 7.573 7.573 0 0 1 2.927 5.98c0 4.214-3.415 7.604-7.659 7.604s-7.659-3.39-7.659-7.603a7.573 7.573 0 0 1 2.927-5.981c.427-.318.583-.878.381-1.368a1.172 1.172 0 0 0-1.234-.714z" fill-rule="nonzero"/>
+                    </svg>
+                </div>
                 <div id="download">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/><path d="M0 0h24v24H0z" fill="none"/>
@@ -36,6 +41,7 @@
             </div>
             <div class="buttons">
                 <div id="message">Ready for code...</div>
+                <div class="disabled-message">Code injection disabled, click power button to enable...</div>
                 <button id="discard" disabled="true">Discard</button>
                 <button id="save" disabled="true">Save</button>
             </div>

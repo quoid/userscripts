@@ -7,6 +7,7 @@ var ___userscripts = {
     saveButton: document.getElementById("save"),
     discardButton: document.getElementById("discard"),
     downloadButton: document.getElementById("download"),
+    toggleButton: document.getElementById("toggle"),
     setEditorMessage: function(m) {
         document.getElementById("message").innerHTML = m;
     },
@@ -64,6 +65,21 @@ var ___userscripts = {
             this.loaded = true;
         }
     },
+    toggle: function() {
+        if (document.body.classList.contains("disabled")) {
+            this.toggleOn();
+        } else {
+            this.toggleOff();
+        }
+    },
+    toggleOff: function() {
+        document.body.classList.add("disabled");
+        window.webkit.messageHandlers.setStatus.postMessage("off");
+    },
+    toggleOn: function() {
+        document.body.classList.remove("disabled");
+        window.webkit.messageHandlers.setStatus.postMessage("on");
+    },
     webViewOnLoad: function() {
         if (this.loaded === false) {
             window.webkit.messageHandlers.webViewOnLoad.postMessage(this.loaded);
@@ -109,5 +125,6 @@ ___userscripts.infoButton.addEventListener("click", function(){___userscripts.ge
 ___userscripts.saveButton.addEventListener("click", function(){___userscripts.save();});
 ___userscripts.discardButton.addEventListener("click", function(){___userscripts.discard();});
 ___userscripts.downloadButton.addEventListener("click", function(){___userscripts.downloadScript();});
+___userscripts.toggleButton.addEventListener("click", function(){___userscripts.toggle();});
 document.addEventListener("mouseover", function(e){___userscripts.mouseOverListen(e);});
 window.onload = ___userscripts.webViewOnLoad();

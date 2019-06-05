@@ -94,3 +94,6 @@ func loadSavedData() {
     }
 }
 
+func setToggleStatus(status: String) {
+    UserDefaults.standard.set(status, forKey: "ToggleStatus")
+}

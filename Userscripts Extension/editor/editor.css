@@ -47,27 +47,45 @@ body {
 }
 
 #info, 
-#download {
+#download,
+#toggle {
     cursor: pointer;
     height: 18px;
     width: 18px;
 }
 
-#download {
+#download,
+#toggle {
     margin-right: 24px;
 }
 
 #info svg,
-#download svg {
+#download svg,
+#toggle svg {
     fill: #888;
     height: 100%;
     transition: fill 250ms;
-    width: 100%;
+    width: auto;
 }
 
 #info:hover svg,
-#download:hover svg {
+#download:hover svg,
+.disabled #toggle:hover svg {
     fill: #fff;
+}
+
+#toggle {
+    align-items: center;
+    display: flex;
+}
+
+#toggle svg {
+    fill: #4ed164;
+    height: 15px;
+}
+
+.disabled #toggle svg {
+    fill: #888;
 }
 
 .editor {
@@ -130,6 +148,21 @@ button:hover::after {
     font-size: 11px;
     margin-right: auto;
 }
+
+.disabled-message {
+    display: none;
+    font-size: 11px;
+    margin-right: auto;
+}
+
+.disabled .disabled-message {
+    display: block;
+}
+
+.disabled #message {
+    display: none;
+}
+
 
 #save {
     color: #e86c8a;
