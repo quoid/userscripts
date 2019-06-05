@@ -26,6 +26,7 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         webView.configuration.userContentController.add(self, name: "saveCode")
         webView.configuration.userContentController.add(self, name: "getInfo")
         webView.configuration.userContentController.add(self, name: "downloadScript")
+        webView.configuration.userContentController.add(self, name: "setCursor")
         let bundleURL = Bundle.main.resourceURL!.absoluteURL
         let html = bundleURL.appendingPathComponent("editor.html")
         webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
@@ -58,6 +59,20 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         if message.name == "downloadScript" {
             downloadScript()
             dismissPopover()
+        }
+        
+        //hack to get popover webview to set proper cursors
+        if message.name == "setCursor" {
+            let cursor = message.body as! String
+            if (cursor == "auto" || cursor == "default") {
+                NSCursor.arrow.set()
+            }
+            if (cursor == "pointer") {
+                NSCursor.pointingHand.set()
+            }
+            if (cursor == "text") {
+                NSCursor.iBeam.set()
+            }
         }
     }
     

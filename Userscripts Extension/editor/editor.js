@@ -2,6 +2,7 @@ var ___userscripts = {
     loaded: false,
     savedCode: "",
     sessionCode: "",
+    currentCursor: "auto",
     infoButton: document.getElementById("info"),
     saveButton: document.getElementById("save"),
     discardButton: document.getElementById("discard"),
@@ -25,6 +26,14 @@ var ___userscripts = {
     },
     downloadScript: function() {
         window.webkit.messageHandlers.downloadScript.postMessage("user wants to download script");
+    },
+    mouseOverListen: function(e) {
+        var sourceElement = e.srcElement;
+        var cursorValue = getComputedStyle(sourceElement).cursor;
+        if (cursorValue != this.currentCursor) {
+            this.currentCursor = cursorValue;          
+            window.webkit.messageHandlers.setCursor.postMessage(cursorValue);
+        }
     },
     discard: function() {
         this.editor.setValue(this.savedCode);
@@ -98,4 +107,5 @@ ___userscripts.infoButton.addEventListener("click", function(){___userscripts.ge
 ___userscripts.saveButton.addEventListener("click", function(){___userscripts.save();});
 ___userscripts.discardButton.addEventListener("click", function(){___userscripts.discard();});
 ___userscripts.downloadButton.addEventListener("click", function(){___userscripts.downloadScript();});
+document.addEventListener("mouseover", function(e){___userscripts.mouseOverListen(e);});
 window.onload = ___userscripts.webViewOnLoad();
