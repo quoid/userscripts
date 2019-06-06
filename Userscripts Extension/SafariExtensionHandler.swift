@@ -16,7 +16,7 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
             if EditorData.code.isEmpty {
                 loadSavedData()
             }
-            if UserDefaults.standard.string(forKey: "ToggleStatus") == "on" {
+            if UserDefaults.standard.string(forKey: "ToggleStatus") != "off" {
                 page.dispatchMessageToScript(withName: "SEND_SAVED_DATA", userInfo: ["code": EditorData.code])
             }
         }
