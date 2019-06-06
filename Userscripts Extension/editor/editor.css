@@ -81,7 +81,6 @@ body {
 
 #toggle svg {
     fill: #4ed164;
-    height: 15px;
 }
 
 .disabled #toggle svg {
