@@ -33,12 +33,6 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
     }
     
-    override func viewWillAppear() {
-        super.viewWillAppear()
-        webView.evaluateJavaScript("___userscripts.loadCode('\(EditorData.code)');", completionHandler: nil)
-        webView.evaluateJavaScript("___userscripts.setSaveDate('\(EditorData.lastEdited)');", completionHandler: nil)
-    }
-    
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "saveCode" {
             saveData(code: message.body as! String)
