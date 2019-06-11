@@ -89,13 +89,24 @@ var ___userscripts = {
         mode:  "javascript",
         smartIndent: true,
         tabSize: 2,
+        indentUnit: 2,
         lineWrapping: true,
         lineNumbers: true,
         autoCloseBrackets: true,
         styleActiveLine: true,
         matchBrackets: true,
         hintOptions: {useGlobalScope: true},
-        extraKeys: {"Ctrl-Space": "autocomplete", "Cmd-S": function() {___userscripts.save();}, "Cmd-/": "toggleComment"}
+        extraKeys: {
+            "Ctrl-Space": "autocomplete", 
+            "Cmd-S": function() {
+                ___userscripts.save();
+            }, 
+            "Cmd-/": "toggleComment",
+            Tab: function(cm) {
+                var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                cm.replaceSelection(spaces);
+            }
+        }
     })
 };
 
