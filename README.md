@@ -21,6 +21,7 @@ Here are some usage notes:
         - `code` is the what you have saved from the editor
         - `lastEdited` is the time of the last save
 - you can click the download icon to save your script file locally, without needing to navigate to this folder
+- you can toggle script injection on and off by clicking the "power" icon
 
 ## Why?
 
