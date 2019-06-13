@@ -2,7 +2,7 @@
 
 A simple, open-source, userscript editor for Safari.
 
-![Userscripts for Safari](/etc/screenshot-large.png)
+![Userscripts for Safari](/etc/screenshot.png)
 
 ## Installation
 
