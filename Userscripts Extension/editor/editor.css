@@ -3,7 +3,7 @@
     --color-primary: #e86c8a;
     --color-green: #77e26a;
     --color-font-primary:  #eeeff1;
-    --color-font-secondary: #cfd0d2;
+    --color-font-secondary: #87888a;
     --font-family-primary: -apple-system, Helvetica, Arial, Verdana, sans-serif;
     --font-family-editor: Monaco, monospace;
     --transition: 250ms linear;
@@ -13,7 +13,7 @@
     --cm-atom: var(--color-green);
     --cm-comment: #68727e;
     --cm-def: #efc371;
-    --cm-default: var(--color-font-secondary);
+    --cm-default: #cfd0d2;
     --cm-keyword: #96c3ed;
     --cm-number: var(--cm-atom);
     --cm-operator: #8c99a7;
@@ -60,7 +60,6 @@ body {
 }
 
 .title {
-    color: var(--cm-comment);
     flex: 100%;
 }
 
@@ -83,7 +82,7 @@ body {
 }
 
 svg {
-    fill: var(--cm-comment);
+    fill: var(--color-font-secondary);
     height: 100%;
     transition: fill var(--transition);
     width: auto;
@@ -127,7 +126,7 @@ button {
     background-color: transparent;
     border: none;
     border-radius: 3px;
-    color: var(--color-font-secondary);
+    color: var(--color-font-primary);
     font-weight: 700;
     margin: 0;
     padding: 7.5px 0;
@@ -176,13 +175,13 @@ button[disabled] {
 }
 
 .CodeMirror-linenumber {
-    color: var(--cm-default);
+    color: var(--color-font-primary);
     font-size: 11px;
-    opacity: var(--disabled-opacity);
+    opacity: 0.25;
 }
 
 .CodeMirror-activeline .CodeMirror-linenumber {
-    opacity: 0.65;
+    opacity: 0.50;
 }
 
 .CodeMirror-cursor {
