@@ -17,20 +17,22 @@
     </head>
     <body>
         <div id="wrapper">
-            <div class="header">
-                <div class="title">Userscripts<span id="version"> vX</span></div>
-                <div id="download" title="Download Script">
+            <div class="top-bar">
+                <div class="title">
+                    <span>Userscripts&nbsp;</span><span id="version">vX</span>
+                </div>
+                <div id="download" class="icon" title="Download Script">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/><path d="M0 0h24v24H0z" fill="none"/>
                     </svg>
                 </div>
-                <div id="info" title="Get Info">
+                <div id="info" class="icon" title="Get info">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path d="M0 0h24v24H0z" fill="none"/>
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                     </svg>
                 </div>
-                <div id="toggle" title="Enable/Disabled">
+                <div id="toggle" class="icon" title="Toggle injection">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="none" d="M0 0h24v24H0z"/>
                         <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
@@ -40,11 +42,11 @@
             <div class="editor">
                 <textarea id="code" placeholder="//Code input here gets injected into every website you visit..."></textarea>
             </div>
-            <div class="buttons">
+            <div class="bottom-bar">
                 <div id="message">Ready for code...</div>
-                <div class="disabled-message">Code injection disabled, click power button to enable...</div>
-                <button id="discard" disabled="true">Discard</button>
-                <button id="save" disabled="true">Save</button>
+                <div class="disabled-message">Code injection disabled, click the power button to enable...</div>
+                <button id="discard">Discard</button>
+                <button id="save">Save</button>
             </div>
         </div>
         <script src="editor/editor.js"></script>
