@@ -50,7 +50,6 @@ func downloadScript() {
             }
         }
     }
-    
 }
 
 func saveData(code: String) {
