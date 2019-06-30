@@ -1,7 +1,5 @@
 function injectCode(code) {
-    var script = document.createElement("script");
-    script.text = code;
-    document.head.appendChild(script);
+    return Function(code)();
 }
 
 function downloadScript(code) {
