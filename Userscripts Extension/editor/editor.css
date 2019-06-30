@@ -9,7 +9,7 @@
     --transition: 250ms linear;
     --disabled-opacity: 0.35;
     --cm-activeline-bg: rgba(0, 0, 0, 0.30);
-    --cm-selected-bg: rgba(150, 195, 237, 0.15); /* using --cm-keyword */
+    --cm-selected-bg: rgba(150, 195, 237, 0.15); /* #96c3ed / 25% */
     --cm-atom: var(--color-green);
     --cm-comment: #68727e;
     --cm-def: #efc371;
@@ -187,6 +187,22 @@ button[disabled] {
 
 .CodeMirror-cursor {
     border-left: 2px solid var(--cm-cursor);
+}
+
+.CodeMirror-hints {
+    background-color: rgba(27, 29, 32, 0.90);
+    border-color: rgb(27, 29, 32); /* #1b1d20 */
+    font-family: var(--font-family-editor);
+    font-size: 11px;
+}
+
+.CodeMirror-hint {
+    color: var(--color-font-secondary);
+}
+
+li.CodeMirror-hint-active {
+    background-color: var(--color-primary);
+    color: var(--color-font-primary);
 }
 
 .cm-s-default .CodeMirror-selected {
