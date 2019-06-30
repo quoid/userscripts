@@ -36,9 +36,7 @@ func getCurrentDateTime() -> String {
 func openExtensionHomepage() {
     let url = URL(string: "https://github.com/quoid/userscripts")!
     SFSafariApplication.getActiveWindow { (activeWindow) in
-        activeWindow?.openTab(with: url, makeActiveIfPossible: true, completionHandler: {_ in
-            //print("loaded \(url)")
-        })
+        activeWindow?.openTab(with: url, makeActiveIfPossible: true, completionHandler: nil)
     }
 }
 
