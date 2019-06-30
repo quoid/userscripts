@@ -21,6 +21,7 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        webView.allowsLinkPreview = false
         webView.configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
         webView.configuration.userContentController.add(self, name: "webViewOnLoad")
         webView.configuration.userContentController.add(self, name: "saveCode")
