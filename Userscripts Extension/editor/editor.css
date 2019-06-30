@@ -189,7 +189,7 @@ button[disabled] {
 }
 
 .CodeMirror-hints {
-    background-color: rgba(27, 29, 32, 0.90);
+    background-color: rgba(27, 29, 32, 0.95);
     border-color: rgb(27, 29, 32); /* #1b1d20 */
     font-family: var(--font-family-editor);
     font-size: 11px;
