@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.0 (2019-07-02)
+- Fixed an issue that prevented script injection on websites with strict CSP
+- Disabled 3D touch within the editor, which was causing cursor issues
+- Styling updates
+
 ## v1.1.0 (2019-06-13)
 - Added the ability for users to toggle the extension on/off
 - Updated the popover dimensions
