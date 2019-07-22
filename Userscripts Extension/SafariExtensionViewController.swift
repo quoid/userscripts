@@ -9,15 +9,22 @@
 import SafariServices
 import WebKit
 
-class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMessageHandler {
+class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMessageHandler, WKUIDelegate {
     
-    @IBOutlet var webView: WKWebView!
+    var webView: WKWebView!
     
     static let shared: SafariExtensionViewController = {
         let shared = SafariExtensionViewController()
         shared.preferredContentSize = NSSize(width:616, height:616)
         return shared
     }()
+    
+    override func loadView() {
+        let webConfiguration = WKWebViewConfiguration()
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        webView.uiDelegate = self
+        view = webView
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
