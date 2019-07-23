@@ -9,7 +9,7 @@
 import SafariServices
 import WebKit
 
-class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMessageHandler, WKUIDelegate {
+class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMessageHandler {
     
     var webView: WKWebView!
     
@@ -19,26 +19,28 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         return shared
     }()
     
-    override func loadView() {
-        let webConfiguration = WKWebViewConfiguration()
-        webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        webView.uiDelegate = self
-        view = webView
+    func initWebView() {
+        let parentHeight = SafariExtensionViewController.shared.preferredContentSize.height
+        let parentWidth = SafariExtensionViewController.shared.preferredContentSize.width
+        let webViewConfig = WKWebViewConfiguration()
+        let bundleURL = Bundle.main.resourceURL!.absoluteURL
+        let html = bundleURL.appendingPathComponent("editor.html")
+        webViewConfig.preferences.setValue(true, forKey: "developerExtrasEnabled")
+        webViewConfig.userContentController.add(self, name: "webViewOnLoad")
+        webViewConfig.userContentController.add(self, name: "saveCode")
+        webViewConfig.userContentController.add(self, name: "getInfo")
+        webViewConfig.userContentController.add(self, name: "downloadScript")
+        webViewConfig.userContentController.add(self, name: "setCursor")
+        webViewConfig.userContentController.add(self, name: "setStatus")
+        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: parentWidth, height: parentHeight), configuration: webViewConfig)
+        webView.allowsLinkPreview = false
+        webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
+        self.view.addSubview(webView)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        webView.allowsLinkPreview = false
-        webView.configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
-        webView.configuration.userContentController.add(self, name: "webViewOnLoad")
-        webView.configuration.userContentController.add(self, name: "saveCode")
-        webView.configuration.userContentController.add(self, name: "getInfo")
-        webView.configuration.userContentController.add(self, name: "downloadScript")
-        webView.configuration.userContentController.add(self, name: "setCursor")
-        webView.configuration.userContentController.add(self, name: "setStatus")
-        let bundleURL = Bundle.main.resourceURL!.absoluteURL
-        let html = bundleURL.appendingPathComponent("editor.html")
-        webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
+        initWebView()
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
