@@ -8,28 +8,28 @@
     --font-family-editor: Monaco, monospace;
     --transition: 250ms linear;
     --disabled-opacity: 0.35;
-    --cm-activeline-bg: rgba(0, 0, 0, 0.30);
-    --cm-selected-bg: rgba(150, 195, 237, 0.15); /* #96c3ed / 25% */
-    --cm-atom: var(--color-green);
-    --cm-comment: #68727e;
-    --cm-def: #efc371;
-    --cm-default: #cfd0d2;
-    --cm-keyword: #96c3ed;
-    --cm-number: var(--cm-atom);
-    --cm-operator: #8c99a7;
-    --cm-property: var(--color-primary);
-    --cm-string: #f5eea2;
-    --cm-string-2: #cdabff;
-    --cm-error: #ff0000;
-    --cm-cursor: var(--color-font-primary);
-    --cm-matchingbracket: var(--cm-atom);
-    --cm-nonmatchingbracket: var(--cm-error);
+    --editor-activeline-bg: rgba(0, 0, 0, 0.30);
+    --editor-selected-bg: rgba(150, 195, 237, 0.15); /* #96c3ed / 25% */
+    --editor-atom: var(--color-green);
+    --editor-comment: #68727e;
+    --editor-def: #efc371;
+    --editor-default: #cfd0d2;
+    --editor-keyword: #96c3ed;
+    --editor-number: var(--editor-atom);
+    --editor-operator: #8c99a7;
+    --editor-property: var(--color-primary);
+    --editor-string: #f5eea2;
+    --editor-string-2: #cdabff;
+    --editor-error: #ff0000;
+    --editor-cursor: var(--color-font-primary);
+    --editor-matchingbracket: var(--editor-atom);
+    --editor-nonmatchingbracket: var(--editor-error);
 }
 
 
 *,
-*:before,
-*:after  {
+*::before,
+*::after  {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -57,6 +57,7 @@ body {
     align-items: center;
     display: flex;
     padding: 7px 16px;
+    -webkit-user-select: none;
 }
 
 .title {
@@ -103,6 +104,7 @@ body:not(.disabled) #toggle svg {
     display: flex;
     justify-content: flex-end;
     padding: 2px 16px;
+    -webkit-user-select: none;
 }
 
 #message {
@@ -143,6 +145,7 @@ button:not([disabled]) {
 
 button[disabled] {
     opacity: var(--disabled-opacity);
+    pointer-events: none;
 }
 
 #save {
@@ -171,7 +174,7 @@ button[disabled] {
 
 .CodeMirror-activeline-background,
 .CodeMirror-activeline-gutter {
-    background-color: var(--cm-activeline-bg);
+    background-color: var(--editor-activeline-bg);
 }
 
 .CodeMirror-linenumber {
@@ -185,7 +188,7 @@ button[disabled] {
 }
 
 .CodeMirror-cursor {
-    border-left: 2px solid var(--cm-cursor);
+    border-left: 2px solid var(--editor-cursor);
 }
 
 .CodeMirror-hints {
@@ -205,29 +208,29 @@ li.CodeMirror-hint-active {
 }
 
 .cm-s-default .CodeMirror-selected {
-    background-color: var(--cm-selected-bg);
+    background-color: var(--editor-selected-bg);
 }
 
 div.CodeMirror span.CodeMirror-matchingbracket {
-    color: var(--cm-default);
-    border-bottom: 2px solid var(--cm-matchingbracket);
+    color: var(--editor-default);
+    border-bottom: 2px solid var(--editor-matchingbracket);
 }
 
 div.CodeMirror span.CodeMirror-nonmatchingbracket {
-    color: var(--cm-nonmatchingbracket);
+    color: var(--editor-nonmatchingbracket);
 }
 
 .CodeMirror .CodeMirror-placeholder,
 .cm-s-default .cm-comment {
-    color: var(--cm-comment);
+    color: var(--editor-comment);
 }
 
 .cm-s-default .cm-keyword {
-    color: var(--cm-keyword);
+    color: var(--editor-keyword);
 }
 
 .cm-s-default .cm-def {
-    color: var(--cm-def);
+    color: var(--editor-def);
 }
 
 .cm-s-default .cm-variable,
@@ -236,30 +239,30 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .cm-s-default .cm-operator {
-    color: var(--cm-operator);
+    color: var(--editor-operator);
 }
 
 .cm-s-default .cm-property {
-    color: var(--cm-property);
+    color: var(--editor-property);
 }
 
 .cm-s-default .cm-string {
-    color: var(--cm-string);
+    color: var(--editor-string);
 }
 
 .cm-s-default .cm-string-2 {
-    color: var(--cm-string-2);
+    color: var(--editor-string-2);
 }
 
 .cm-s-default .cm-number {
-    color: var(--cm-number);
+    color: var(--editor-number);
 }
 
 .cm-s-default .cm-atom {
-    color: var(--cm-atom);
+    color: var(--editor-atom);
 }
 
 .cm-s-default .cm-error {
-    border-bottom: 2px solid var(--cm-error);
-    color: var(--cm-default);
+    border-bottom: 2px solid var(--editor-error);
+    color: var(--editor-default);
 }
