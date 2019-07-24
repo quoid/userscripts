@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.0 (pending)
+- Refactored WKWebView implementation to better support Catalina
+- View styling changes to prevent initial "white flash" before WKWebView loads
+- Minor CSS style updates
+
 ## v1.2.0 (2019-07-02)
 - Fixed an issue that prevented script injection on websites with strict CSP
 - Disabled 3D touch within the editor, which was causing cursor issues
