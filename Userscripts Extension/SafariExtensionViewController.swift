@@ -9,7 +9,7 @@
 import SafariServices
 import WebKit
 
-class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMessageHandler {
+class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMessageHandler, WKNavigationDelegate {
     
     var webView: WKWebView!
     
@@ -33,13 +33,29 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         webViewConfig.userContentController.add(self, name: "setCursor")
         webViewConfig.userContentController.add(self, name: "setStatus")
         webView = WKWebView(frame: CGRect(x: 0, y: 0, width: parentWidth, height: parentHeight), configuration: webViewConfig)
+        webView.navigationDelegate = self
         webView.allowsLinkPreview = false
         webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
+        //webView.isHidden = true
+        webView.alphaValue = 0.0;
         self.view.addSubview(webView)
+    }
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NSAnimationContext.runAnimationGroup({_ in
+                NSAnimationContext.current.duration = 0.3
+                webView.animator().alphaValue = 1.0
+            }, completionHandler: {
+                print("Animation Complete")
+            })
+        }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let backgroundColor = NSColor.init(red: (39/255.0), green: (42/255.0), blue: (46/255.0), alpha: 1.0)
+        view.setValue(backgroundColor, forKey: "backgroundColor")
         initWebView()
     }
     
