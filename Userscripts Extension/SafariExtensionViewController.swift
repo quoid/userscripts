@@ -36,20 +36,15 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         webView.navigationDelegate = self
         webView.allowsLinkPreview = false
         webView.loadFileURL(html, allowingReadAccessTo:bundleURL)
-        //webView.isHidden = true
         webView.alphaValue = 0.0;
         self.view.addSubview(webView)
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            NSAnimationContext.runAnimationGroup({_ in
-                NSAnimationContext.current.duration = 0.3
-                webView.animator().alphaValue = 1.0
-            }, completionHandler: {
-                print("Animation Complete")
-            })
-        }
+        NSAnimationContext.runAnimationGroup({_ in
+            NSAnimationContext.current.duration = 0.35
+            webView.animator().alphaValue = 1.0
+        })
     }
     
     override func viewDidLoad() {
