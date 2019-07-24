@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.3.0 (pending)
+## v1.3.0 (2019-07-24)
 - Refactored WKWebView implementation to better support Catalina
 - View styling changes to prevent initial "white flash" before WKWebView loads
 - Minor CSS style updates
