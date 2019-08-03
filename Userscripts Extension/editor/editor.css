@@ -26,34 +26,38 @@
     --editor-nonmatchingbracket: var(--editor-error);
 }
 
-
 *,
 *::before,
 *::after  {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
 
-html, body {
-    height: 100%;
+html {
+    height: 100vh;
+    overflow: hidden;
 }
 
 body {
     background-color: var(--color-main-bg);
     color: var(--color-font-secondary);
+    display: flex;
+    flex-direction: column;
     font: 400 11px/16px var(--font-family-primary);
+    height: 100%;
     margin: 0;
+    max-height: 100%;
     -webkit-font-smoothing: antialiased;
 }
 
-#wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+/* prevent overscroll */
+body {
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
 }
 
-.top-bar {
+header {
     align-items: center;
     display: flex;
     padding: 7px 16px;
@@ -61,7 +65,7 @@ body {
 }
 
 .title {
-    flex: 100%;
+    flex: 1;
 }
 
 .title span:not(#version) {
@@ -97,9 +101,13 @@ body:not(.disabled) #toggle svg {
     fill: var(--color-green);
 }
 
-.disabled #toggle svg {}
+main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
 
-.bottom-bar {
+footer {
     align-items: center;
     display: flex;
     justify-content: flex-end;
@@ -107,21 +115,8 @@ body:not(.disabled) #toggle svg {
     -webkit-user-select: none;
 }
 
-#message {
+#status {
     margin-right: auto;
-}
-
-.disabled-message {
-    display: none;
-    margin-right: auto;
-}
-
-.disabled .disabled-message {
-    display: block;
-}
-
-.disabled #message {
-    display: none;
 }
 
 button {
@@ -129,6 +124,7 @@ button {
     border: none;
     border-radius: 3px;
     color: var(--color-font-primary);
+    cursor: pointer;
     font-weight: 700;
     margin: 0;
     padding: 7.5px 0;
@@ -137,10 +133,6 @@ button {
 
 button:hover {
     text-decoration: underline;
-}
-
-button:not([disabled]) {
-    cursor: pointer;
 }
 
 button[disabled] {
@@ -152,12 +144,6 @@ button[disabled] {
     color: var(--color-primary);
     margin-left: 24px;
     padding-right: 0px;
-}
-
-.editor {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
 }
 
 .CodeMirror {
@@ -193,7 +179,7 @@ button[disabled] {
 
 .CodeMirror-hints {
     background-color: rgba(27, 29, 32, 0.95);
-    border-color: rgb(27, 29, 32); /* #1b1d20 */
+    border-color: rgb(27, 29, 32);
     font-family: var(--font-family-editor);
     font-size: 11px;
 }
