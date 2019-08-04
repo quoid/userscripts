@@ -13,9 +13,10 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     
     override func messageReceived(withName messageName: String, from page: SFSafariPage, userInfo: [String : Any]?) {
         if messageName == "REQUEST_SAVED_CODE" {
-            if getSavedCode() != nil && UserDefaults.standard.bool(forKey: "toggleOff") == false {
+            print(UserDefaults.standard.bool(forKey: "toggleOff") != true)
+            if getSavedCode() != nil && UserDefaults.standard.bool(forKey: "toggleOff") != true {
                 let code = getSavedCode()!.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
-                page.dispatchMessageToScript(withName: "SEND_SAVED_DATA", userInfo: ["code": code])
+                page.dispatchMessageToScript(withName: "SEND_SAVED_CODE", userInfo: ["code": code])
             }
         }
     }
