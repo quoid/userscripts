@@ -14,7 +14,7 @@ var ___userscripts = {
     getLanguageCode: function(langCode) {
         langCode = langCode.includes("-") ? langCode.split("-")[0] : langCode;
         langCode = !(langCode in ___strings) ? "en" : langCode;
-        return langCode;
+        return "en";
     },
     toLocalizedString: function(str) {
         var langCode = document.body.getAttribute("lang");
