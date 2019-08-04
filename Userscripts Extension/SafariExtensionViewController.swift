@@ -159,9 +159,11 @@ func getSavedCode() -> String? {
 }
 
 func openExtensionHomepage() {
-    let url = URL(string: "https://github.com/quoid/userscripts")!
+    guard let url = URL(string: "https://github.com/quoid/userscripts") else { return }
     SFSafariApplication.getActiveWindow { (window) in
-        window?.openTab(with: url, makeActiveIfPossible: true, completionHandler: nil)
+        window?.getActiveTab { (tab) in
+            tab?.navigate(to: url)
+        }
     }
 }
 
