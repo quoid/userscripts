@@ -121,6 +121,7 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
         }
         if message.name == "getInfo" {
             openExtensionHomepage()
+            dismissPopover()
         }
         if message.name == "downloadScript" {
             downloadScript()
@@ -161,8 +162,8 @@ func getSavedCode() -> String? {
 func openExtensionHomepage() {
     guard let url = URL(string: "https://github.com/quoid/userscripts") else { return }
     SFSafariApplication.getActiveWindow { (window) in
-        window?.getActiveTab { (tab) in
-            tab?.navigate(to: url)
+        window?.openTab(with: url, makeActiveIfPossible: true) { (tab) in
+            //although it is stated in the documentation that the completion handler is optional, that is untrue
         }
     }
 }
