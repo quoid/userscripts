@@ -17,7 +17,7 @@ Here are some usage notes:
 - `cmd + s` to save changes to the editor
 - hinting is automatic, you can use the shortcut `ctrl + spacebar` to toggle hinting manually
 - your code is saved into `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/userscript.js`
-    - this file can be edited with any code editor
+    - this file can be edited with any code editor, however if the browser/extension is currently running, those changes won't be reflect in the include editor unless you reload the popover (right click `->` reload) - the changes **will** be injected whether or not you reload
 - you can click the download icon to save your script file locally, without needing to navigate to this folder
 - you can toggle script injection on and off by clicking the "power" icon
 
