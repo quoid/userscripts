@@ -16,10 +16,8 @@ Here are some usage notes:
 
 - `cmd + s` to save changes to the editor
 - hinting is automatic, you can use the shortcut `ctrl + spacebar` to toggle hinting manually
-- your code is saved into `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/data.json`
-    - the json object has two properties
-        - `code` is the what you have saved from the editor
-        - `lastEdited` is the time of the last save
+- your code is saved into `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/userscript.js`
+    - this file can be edited with any code editor
 - you can click the download icon to save your script file locally, without needing to navigate to this folder
 - you can toggle script injection on and off by clicking the "power" icon
 

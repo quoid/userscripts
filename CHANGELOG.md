@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.0 (pending)
+- A lot of code cleanup and refactoring
+- Improved the popover loading experience
+- Javascript is now saved to a .js file, rather than .json
+
 ## v1.3.0 (2019-07-24)
 - Refactored WKWebView implementation to better support Catalina
 - View styling changes to prevent initial "white flash" before WKWebView loads
