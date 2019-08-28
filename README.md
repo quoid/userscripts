@@ -19,6 +19,7 @@ Here are some usage notes:
 - your code is saved into `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/userscript.js`
     - this file can be edited with any code editor, however if the browser/extension is currently running, those changes won't be reflect in the include editor unless you reload the popover (right click `->` reload) - the changes **will** be injected whether or not you reload
 - you can click the download icon to save your script file locally, without needing to navigate to this folder
+    - *note*, you will not be able to download the script on a blank tab
 - you can toggle script injection on and off by clicking the "power" icon
 
 ## Why?

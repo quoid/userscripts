@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.4.0 (pending)
+## v1.4.0 (2019-08-28)
 - A lot of code cleanup and refactoring
 - Improved the popover loading experience
 - Javascript is now saved to a .js file, rather than .json
