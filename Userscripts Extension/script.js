@@ -5,7 +5,7 @@ function injectCode(code) {
 function downloadScript(code) {
     var el = document.createElement("a");
     el.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(code));
-    el.setAttribute("download", "script.js");
+    el.setAttribute("download", "userscript.js");
     el.style.display = "none";
     document.body.appendChild(el);
     el.click();
@@ -13,18 +13,18 @@ function downloadScript(code) {
 }
 
 function handleMessage(event) {
-    if (event.name === "SEND_SAVED_DATA") {
+    if (event.name === "SEND_SAVED_CODE") {
         injectCode(unescape(event.message.code));
     }
     if (event.name === "DOWNLOAD_SCRIPT") {
         if (window.top === window) {
-            downloadScript(unescape(event.message.code))
+            downloadScript(event.message.code)
         }
     }
 }
 
 if (window.top === window) {
-    safari.extension.dispatchMessage("REQUEST_SAVED_DATA");
+    safari.extension.dispatchMessage("REQUEST_SAVED_CODE");
 }
 
 safari.self.addEventListener("message", handleMessage);

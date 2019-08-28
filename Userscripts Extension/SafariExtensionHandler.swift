@@ -12,12 +12,10 @@ import WebKit
 class SafariExtensionHandler: SFSafariExtensionHandler {
     
     override func messageReceived(withName messageName: String, from page: SFSafariPage, userInfo: [String : Any]?) {
-        if messageName == "REQUEST_SAVED_DATA" {
-            if EditorData.code.isEmpty {
-                loadSavedData()
-            }
-            if UserDefaults.standard.string(forKey: "ToggleStatus") != "off" {
-                page.dispatchMessageToScript(withName: "SEND_SAVED_DATA", userInfo: ["code": EditorData.code])
+        if messageName == "REQUEST_SAVED_CODE" {
+            if getSavedCode() != nil && UserDefaults.standard.bool(forKey: "toggleOff") != true {
+                let code = getSavedCode()!.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+                page.dispatchMessageToScript(withName: "SEND_SAVED_CODE", userInfo: ["code": code])
             }
         }
     }

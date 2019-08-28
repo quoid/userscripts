@@ -21,7 +21,6 @@
 		4A57BA12227235CE008A9763 /* ToolbarItemIcon.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */; };
 		4A5E7C02227381780024DEB3 /* editor in Resources */ = {isa = PBXBuildFile; fileRef = 4A5E7C01227381780024DEB3 /* editor */; };
 		4AB7601A2273863E004431B7 /* editor.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AB760192273863E004431B7 /* editor.html */; };
-		4AB7601C227393EF004431B7 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB7601B227393EF004431B7 /* Functions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,7 +67,6 @@
 		4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts Extension.entitlements"; sourceTree = "<group>"; };
 		4A5E7C01227381780024DEB3 /* editor */ = {isa = PBXFileReference; lastKnownFileType = folder; path = editor; sourceTree = "<group>"; };
 		4AB760192273863E004431B7 /* editor.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = editor.html; sourceTree = "<group>"; };
-		4AB7601B227393EF004431B7 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,7 +135,6 @@
 				4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */,
 				4A57BA09227235CE008A9763 /* SafariExtensionViewController.swift */,
 				4A57BA0B227235CE008A9763 /* SafariExtensionViewController.xib */,
-				4AB7601B227393EF004431B7 /* Functions.swift */,
 				4A5E7C01227381780024DEB3 /* editor */,
 				4AB760192273863E004431B7 /* editor.html */,
 				4A57BA0E227235CE008A9763 /* Info.plist */,
@@ -270,7 +267,6 @@
 			files = (
 				4A57BA0A227235CE008A9763 /* SafariExtensionViewController.swift in Sources */,
 				4A57BA08227235CE008A9763 /* SafariExtensionHandler.swift in Sources */,
-				4AB7601C227393EF004431B7 /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
