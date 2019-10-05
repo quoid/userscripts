@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Enable code folding in editor
+
 ## v1.4.0 (2019-08-28)
 - A lot of code cleanup and refactoring
 - Improved the popover loading experience
