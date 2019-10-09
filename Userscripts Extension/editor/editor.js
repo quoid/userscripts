@@ -103,7 +103,7 @@ var ___userscripts = {
     },
     editorOnKeydown: function(cm, e) {
         var currentLinePosition = cm.getCursor()["ch"];
-        if (!cm.state.completionActive && e.metaKey === false && e.keyCode >= 65 && e.keyCode <= 90 && currentLinePosition != 0) {
+        if (!cm.state.completionActive && e.metaKey === false && e.keyCode >= 65 && e.keyCode <= 90 && currentLinePosition != 0 && !(e.keyCode == 81 && e.ctrlKey)) {
             cm.showHint({completeSingle: false});
         }
     },
