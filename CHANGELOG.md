@@ -1,7 +1,8 @@
 # Changelog
 
-## v1.5.0 (pending)
+## v1.5.0 (2019-10-14)
 - Enable code folding in editor
+- Minor styling changes
 
 ## v1.4.0 (2019-08-28)
 - A lot of code cleanup and refactoring
