@@ -21,6 +21,7 @@ Here are some usage notes:
 - you can click the download icon to save your script file locally, without needing to navigate to this folder
     - *note*, you will not be able to download the script on a blank tab
 - you can toggle script injection on and off by clicking the "power" icon
+- the code folding key command is `ctrl+q`
 
 ## Why?
 
