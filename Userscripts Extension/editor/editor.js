@@ -103,7 +103,7 @@ var ___userscripts = {
     },
     editorOnKeydown: function(cm, e) {
         var currentLinePosition = cm.getCursor()["ch"];
-        if (!cm.state.completionActive && e.metaKey === false && e.keyCode >= 65 && e.keyCode <= 90 && currentLinePosition != 0) {
+        if (!cm.state.completionActive && e.metaKey === false && e.keyCode >= 65 && e.keyCode <= 90 && currentLinePosition != 0 && !(e.keyCode == 81 && e.ctrlKey)) {
             cm.showHint({completeSingle: false});
         }
     },
@@ -111,11 +111,14 @@ var ___userscripts = {
         this.editor = CodeMirror.fromTextArea(this.editorElement, {
             autoCloseBrackets: true,
             extraKeys: {
-                "Ctrl-Space": "autocomplete", 
+                "Ctrl-Space": "autocomplete",
                 "Cmd-S": function() {
                     ___userscripts.saveTry();
-                }, 
+                },
                 "Cmd-/": "toggleComment",
+                "Ctrl-Q": function(cm) {
+                    cm.foldCode(cm.getCursor());
+                },
                 Tab: function(cm) {
                     var s = Array(cm.getOption("indentUnit") + 1).join(" ");
                     cm.replaceSelection(s);
@@ -131,7 +134,9 @@ var ___userscripts = {
             mode:  "javascript",
             smartIndent: true,
             styleActiveLine: true,
-            tabSize: 2
+            tabSize: 2,
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
         });
         
         //add event listeners for the editor

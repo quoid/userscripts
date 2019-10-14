@@ -15,7 +15,7 @@ class SafariExtensionViewController: SFSafariExtensionViewController, WKScriptMe
     
     static let shared: SafariExtensionViewController = {
         let shared = SafariExtensionViewController()
-        shared.preferredContentSize = NSSize(width:616, height:616)
+        shared.preferredContentSize = NSSize(width:624, height:624)
         return shared
     }()
     
