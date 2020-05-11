@@ -1,0 +1,61 @@
+{% from "icon.html" import icon %}
+{% from "toggle.html" import toggle %}
+<div id="settings">
+    <div class="modal">
+        <div class="modal-section">
+            <div class="title">
+                <div>Editor Settings</div>
+                {{ icon("close", "settingsHide") }}
+            </div>
+            <div class="row">
+                <div>Auto Hint</div>
+                {{ toggle("true", "autoShowHints") }}
+            </div>
+            <div class="row">
+                <div>Hide Descriptions</div>
+                {{ toggle("false", "hideDescriptions") }}
+            </div>
+            <!-- <div class="row">
+                <div>Javascript Lint</div>
+                {#{ toggle("true", "lint") }#}
+            </div> -->
+            <div class="row">
+                <div>Show Invisibles</div>
+                {{ toggle("true", "showInvisibles") }}
+            </div>
+            <div class="row">
+                <div>Verbose Logging</div>
+                {{ toggle("false", "verbose") }}
+            </div>
+            <div class="row">
+                <div>Tab Size</div>
+                <select id="tabSize">
+                    <option value="2">2</option>
+                    <option value="4" selected>4</option>
+                </select>
+            </div>
+            <div class="row">
+                <div>Save Location</div>
+                <div>
+                    <div class="truncate link" id="saveLocation">init</div>
+                </div>
+            </div>
+            <div id="blacklist" class="row">
+                <div id="blacklistStatus">
+                    Global Blacklist
+                    <img inline src="./img/loader.svg">
+                    <div data-localize="blacklistSaved">init</div>
+                </div>
+                <textarea
+                    placeholder="init"
+                    data-localize="blacklist"
+                    spellcheck="false"
+                ></textarea>
+            </div>
+        </div>
+        <div class="modal-section">
+            <div class="title">Information</div>
+            <p data-localize="settingsText">init</p>
+        </div>
+    </div>
+</div>

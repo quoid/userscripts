@@ -1,0 +1,68 @@
+.toggle {
+    --switch-timing: 150ms 75ms;
+    cursor: pointer;
+    display: block;
+    height: 16px;
+    min-width: 28px;
+    position: relative;
+    user-select: none;
+    width: 28px;
+}
+
+.toggle input[type=checkbox] {
+    display: block;
+    height: 0;
+    visibility: hidden;
+    width: 0;
+}
+
+.toggle span {
+    background-color: #777;
+    border-radius: 10px;
+    display: block;
+    height: 100%;
+    transition: background-color var(--switch-timing);
+    width: 100%;
+}
+
+.toggle span::before {
+    background-color: white;
+    border-radius: 50%;
+    content: "";
+    height: 12px;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    transition: all var(--switch-timing);
+    width: 12px;
+}
+
+.toggle input:checked + span {
+    background-color: var(--link-color);
+}
+
+.toggle input:checked + span::before {
+    left: calc(26px - 12px);
+}
+
+.toggle svg {
+    display: none;
+    height: 16px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 16px;
+}
+
+.toggle input:disabled + span + svg {
+    display: block;
+}
+
+.toggle input:disabled + span {
+    opacity: 0;
+}
+
+/* disable pointer events for the sake of event listeners */
+.toggle span {
+    pointer-events: none;
+}

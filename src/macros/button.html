@@ -1,0 +1,9 @@
+{% macro button(id, text, disabled) %}
+{% if disabled %}
+<button type="button" id="{{ id }}" disabled>
+{% else %}
+<button type="button" id="{{ id }}">
+{% endif %}
+    {{ text }}
+</button>
+{% endmacro %}
