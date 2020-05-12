@@ -1,5 +1,3 @@
-// https://github.com/bitwarden/web/blob/master/src/locales/en/messages.json
-// https://github.com/GoogleChromeLabs/text-app/blob/master/_locales/en/messages.json
 const ___m = {
     en: {
         blacklist: {
