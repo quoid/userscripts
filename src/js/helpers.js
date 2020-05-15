@@ -19,9 +19,8 @@ const ___h = {
         return false;
     },
     userscriptDefault: function(description, name, type) {
-        if (type === "css") {
-            return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n==/UserStyle== */`;
-        } else if (type === "js") {
+        //return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n==/UserStyle== */`;
+        if (type === "css" || type === "js") {
             return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// ==/UserScript==`;
         }
     }
