@@ -8,6 +8,14 @@ const ___m = {
             message: "Changes saved",
             description: "Indicates that the blacklist has been saved"
         },
+        buttonDiscard: {
+            message: "Discard",
+            description: "The label on the discard button that indicates removing all changes"
+        },
+        buttonSave: {
+            message: "Save",
+            description: "The label on the save button"
+        },
         delete: {
             message: "Are you sure you want to delete this?",
             description: "Message when user attempts to delete something"
@@ -40,7 +48,7 @@ const ___m = {
             message: "Last modified:"
         },
         newScript: {
-            message: "This is your new userscript, write code in the editor",
+            message: "This is your new userscript, start writing code",
             description: "The default description that is shown for a newly created script"
         },
         newScriptButton: {
@@ -51,8 +59,11 @@ const ___m = {
             message: "Ready for code!",
             description: "The status that is displayed in the editor for a newly created script"
         },
+        noScriptSelected: {
+            message: "No Userscript Selected"
+        },
         saveFailAlert: {
-            message: "Script validation failed, script could not be saved",
+            message: "Save validation failed, userscript could not be saved",
             description: "Save fail message that displays in alert box"
         },
         saveFailStatus: {
@@ -64,11 +75,41 @@ const ___m = {
             description: "Indicates that the save procedure has begun"
         },
         saveSuccess: {
-            message: "Script successfully saved",
+            message: "Userscript successfully saved",
             description: "Indicates that the save was successful"
         },
+        settingAutoHint: {
+            message: "Auto Hint",
+            description: "Term to denote that the editor automatically shows code hints"
+        },
+        settingBlacklist: {
+            message: "Global Blacklist"
+        },
+        settingHideDescriptions: {
+            message: "Hide Descriptions",
+        },
+        settingShowInvisibles: {
+            message: "Show Invisibles",
+        },
+        settingSaveLocation: {
+            message: "Save Location"
+        },
+        settingTabSize: {
+            message: "Tab Size"
+        },
+        settingVerboseLog: {
+            message: "Verbose Logging"
+        },
         settingsText: {
-            message: "You can report bugs, see what's currently in development and get more information about this extension by visiting <a>the homepage.</a><br><br>If you enjoy using this extension, please consider <a>donating or sponsoring this project</a>"
+            message: "You can report bugs, see what's currently in development and get more information about this extension by visiting <a>the homepage.</a><br><br>If you enjoy using this extension, please consider <a>donating or sponsoring this project.</a>"
+        },
+        settingsTitle01: {
+            message: "Editor Settings",
+            description: "The title of the settings modal's first section"
+        },
+        settingsTitle02: {
+            message: "Information",
+            description: "The title of the settings modal's second section"
         },
         showSettingsButton: {
             message: "Open settings",
@@ -82,5 +123,105 @@ const ___m = {
             message: "Version"
         }
     },
-    sv: {}
+    sv: {
+        blacklist: {
+            message: "Kommaseparerade domäner"
+        },
+        blacklistSaved: {
+            message: "Ändringar sparade"
+        },
+        buttonDiscard: {
+            message: "localize",
+        },
+        buttonSave: {
+            message: "localize",
+        },
+        delete: {
+            message: "Är du säker på att du vill radera? Detta går inte att ångra"
+        },
+        deleteFailAlert: {
+            message: "Ett fel inträffade och objektet raderades inte. Prova att navigera till objektet på din hårddisk och radera manuellt"
+        },
+        deleteFailStatus: {
+            message: "Userscript raderades inte"
+        },
+        deleteScriptButton: {
+            message: "Radera userscript"
+        },
+        docsLink: {
+            message: "Öppna Manualen"
+        },
+        downloadScriptButton: {
+            message: "Ladda ner userscript"
+        },
+        filter: {
+            message: "Sök och filtrera här..."
+        },
+        lastModified: {
+            message: "Senast ändrad"
+        },
+        newScript: {
+            message: "Detta är ditt nya userscript, skriv kod här"
+        },
+        newScriptButton: {
+            message: "Skapa nytt userscript"
+        },
+        newScriptStatus: {
+            message: "Redo för kod"
+        },
+        noScriptSelected: {
+            message: "localize"
+        },
+        saveFailAlert: {
+            message: "Ett fel inträffade, ditt userscript sparades inte"
+        },
+        saveFailStatus: {
+            message: "Objektet sparades inte"
+        },
+        saveStart: {
+            message: "Sparar userscript..."
+        },
+        saveSuccess: {
+            message: "Userscript sparades"
+        },
+        settingAutoHint: {
+            message: "localize",
+        },
+        settingBlacklist: {
+            message: "localize"
+        },
+        settingHideDescriptions: {
+            message: "localize",
+        },
+        settingShowInvisibles: {
+            message: "localize",
+        },
+        settingSaveLocation: {
+            message: "localize"
+        },
+        settingTabSize: {
+            message: "localize"
+        },
+        settingVerboseLog: {
+            message: "localize"
+        },
+        settingsText: {
+            message: "Du kan rapportera buggar, se vad som är under utveckling och få mer information om detta insticksprogram genom att besöka <a>vår hemsida.</a><br><br>Om du har nytta av och uppskattar detta insticksprogram, så skulle vi vara väldigt tacksamma för<a>en donation eller att du sponsrar detta projekt.</a>"
+        },
+        settingsTitle01: {
+            message: "localize",
+        },
+        settingsTitle02: {
+            message: "localize",
+        },
+        showSettingsButton: {
+            message: "Öppna inställningar"
+        },
+        unsavedChanges: {
+            message: "Du har osparade ändringar som försvinner om du fortsätter. Vill du fortsätta?"
+        },
+        version: {
+            message: "Version"
+        }
+    }
 };

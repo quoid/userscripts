@@ -233,6 +233,7 @@ const ___a = {
         let langCode = this.settings.languageCode;
         langCode = langCode.includes("-") ? langCode.split("-")[0] : langCode;
         langCode = !(langCode in ___m) ? "en" : langCode;
+        langCode = "en"; // only support en for now
         this.language = langCode;
         document.documentElement.setAttribute("lang", langCode);
         // apply settings to elements
@@ -301,7 +302,7 @@ const ___a = {
                     el.setAttribute("title", msg);
                 }
                 if (el.firstChild) {
-                    if (el.firstChild.nodeValue === "init") {
+                    if (el.firstChild.nodeValue.trim() === "init") {
                         el.innerHTML = msg;
                     }
                 }

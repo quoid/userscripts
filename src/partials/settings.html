@@ -4,15 +4,15 @@
     <div class="modal">
         <div class="modal-section">
             <div class="title">
-                <div>Editor Settings</div>
+                <div data-localize="settingsTitle01">init</div>
                 {{ icon("close", "settingsHide") }}
             </div>
             <div class="row">
-                <div>Auto Hint</div>
+                <div data-localize="settingAutoHint">init</div>
                 {{ toggle("true", "autoShowHints") }}
             </div>
             <div class="row">
-                <div>Hide Descriptions</div>
+                <div data-localize="settingHideDescriptions">init</div>
                 {{ toggle("false", "hideDescriptions") }}
             </div>
             <!-- <div class="row">
@@ -20,29 +20,29 @@
                 {#{ toggle("true", "lint") }#}
             </div> -->
             <div class="row">
-                <div>Show Invisibles</div>
+                <div data-localize="settingShowInvisibles">init</div>
                 {{ toggle("true", "showInvisibles") }}
             </div>
             <div class="row">
-                <div>Verbose Logging</div>
+                <div data-localize="settingVerboseLog">init</div>
                 {{ toggle("false", "verbose") }}
             </div>
             <div class="row">
-                <div>Tab Size</div>
+                <div data-localize="settingTabSize">init</div>
                 <select id="tabSize">
                     <option value="2">2</option>
                     <option value="4" selected>4</option>
                 </select>
             </div>
             <div class="row">
-                <div>Save Location</div>
+                <div data-localize="settingSaveLocation">init</div>
                 <div>
                     <div class="truncate link" id="saveLocation">init</div>
                 </div>
             </div>
             <div id="blacklist" class="row">
                 <div id="blacklistStatus">
-                    Global Blacklist
+                    <span data-localize="settingBlacklist">init</span>
                     <img inline src="./img/loader.svg">
                     <div data-localize="blacklistSaved">init</div>
                 </div>
@@ -54,7 +54,7 @@
             </div>
         </div>
         <div class="modal-section">
-            <div class="title">Information</div>
+            <div class="title" data-localize="settingsTitle02">init</div>
             <p data-localize="settingsText">init</p>
         </div>
     </div>

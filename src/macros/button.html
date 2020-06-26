@@ -1,9 +1,14 @@
-{% macro button(id, text, disabled) %}
-{% if disabled %}
-<button type="button" id="{{ id }}" disabled>
-{% else %}
-<button type="button" id="{{ id }}">
-{% endif %}
+{% macro button(id, text, disabled, localizeId) %}
+<button
+    type="button"
+    id="{{ id }}"
+    {% if localizeId %}
+    data-localize="{{ localizeId }}"
+    {% endif %}
+    {% if disabled %}
+    disabled
+    {% endif %}
+>
     {{ text }}
 </button>
 {% endmacro %}
