@@ -1,8 +1,9 @@
 #editor {
     background-color: var(--bg-main);
     display: flex;
-    flex: 1;
+    flex-grow: 1;
     flex-direction: column;
+    overflow: hidden;
     position: relative;
 }
 
