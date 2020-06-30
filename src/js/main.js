@@ -297,11 +297,9 @@ const ___a = {
                 const msg = ___m[this.language][id]["message"];
                 if (el.hasAttribute("placeholder")) {
                     el.setAttribute("placeholder", msg);
-                }
-                if (el.hasAttribute("title")) {
+                } else if (el.hasAttribute("title")) {
                     el.setAttribute("title", msg);
-                }
-                if (el.firstChild) {
+                } else if (el.firstChild) {
                     if (el.firstChild.nodeValue.trim() === "init") {
                         el.innerHTML = msg;
                     }
