@@ -21,7 +21,7 @@ const ___h = {
     userscriptDefault: function(description, name, type) {
         //return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n==/UserStyle== */`;
         if (type === "css" || type === "js") {
-            return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// ==/UserScript==`;
+            return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// @match       *://*.*\n// ==/UserScript==`;
         }
     }
 }
