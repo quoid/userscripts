@@ -25,7 +25,7 @@ If you don't feel like reading, visit [this folder](/etc/videos/) to watch some 
 1. **Create New Userscript Button** - Click this button to create a new userscript. You will be able to choose what type of userscript you would like to create (css or js)
 1. **Userscript Filter** - You can use this to filter through your existing userscript. **Note**, this element filters by userscript title, not desription. It supports the following flags to help you filter more efficiently: `!js`, `!css`, `!disabled`, `!enabled`
 1. **Userscript Toggle** - Toggling this element with enable/disable it's injection into webpages
-1. **Editor** - The editor; the place you write the code for the userscripts, [more on this below]()
+1. **Editor** - The editor; the place where you write the code for the userscripts
 1. **Download Button** - Click this to download a copy of your userscript
 1. **Delete Button** - Click this to delete the userscript; *note:* deleted userscripts get put into your trash bin
 1. **Settings Button** - Click this to open the settings modal
