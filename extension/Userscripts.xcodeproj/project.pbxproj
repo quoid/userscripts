@@ -404,7 +404,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -425,7 +425,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -449,7 +449,7 @@
 				CODE_SIGN_ENTITLEMENTS = Userscripts/Userscripts.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				INFOPLIST_FILE = Userscripts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -471,7 +471,7 @@
 				CODE_SIGN_ENTITLEMENTS = Userscripts/Userscripts.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				INFOPLIST_FILE = Userscripts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
