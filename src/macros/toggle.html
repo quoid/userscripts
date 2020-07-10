@@ -1,0 +1,12 @@
+{% macro toggle(checked, id) %}
+<label class="toggle">
+    <input
+        {% if id %}id="{{ id }}"{% endif %}
+        class="cb"
+        type="checkbox"
+        {% if checked %}checked{% endif %}
+    >
+    <span></span>
+    <img inline src="./img/loader.svg">
+</label>
+{% endmacro %}

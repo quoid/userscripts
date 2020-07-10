@@ -1,0 +1,63 @@
+/*
+https://raw.githubusercontent.com/csstools/sanitize.css/master/sanitize.css
+https://necolas.github.io/normalize.css/8.0.1/normalize.css
+*/
+
+*,
+*::before,
+*::after  {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+    margin: 0;
+}
+
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+    -webkit-appearance: button;
+}
+
+input[type="search"] {
+    -webkit-appearance: textfield;
+}
+
+::-webkit-input-placeholder {
+    color: inherit;
+    opacity: 0.54;
+}
+
+::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    font: inherit;
+}
+
+::-webkit-search-decoration,
+::-webkit-search-cancel-button,
+::-webkit-search-results-button,
+::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+}

@@ -1,0 +1,119 @@
+html {
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--fc1);
+    display: flex;
+    flex-direction: column;
+    font-family: var(--ff);
+    font-size: 14px;
+    font-weight: 400;
+    height: 100%;
+    line-height: 21px;
+    position: relative;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+#wrapper {
+    display: flex;
+    flex: 1;
+}
+
+a {
+    color: var(--link-color);
+    font-weight: 400;
+}
+
+#appLoader {
+    align-items: center;
+    background-color: var(--bg-main);
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    visibility: visible;
+    width: 100%;
+}
+
+#appLoader img {
+    height: 24px;
+}
+
+body:not(.init) #appLoader {
+    opacity: 0;
+    transition: visibility 250ms linear 0s, opacity 250ms;
+    visibility: hidden;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+noscript {
+    background-color: var(--color-red);
+    display: block;
+    font-size: 16px;
+    line-height: 16px;
+    padding: 8px;
+    text-align: center;
+    width: 100%;
+}
+
+#notify {
+    background-color: var(--color-yellow);
+    color: var(--bg-sidebar);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 16px;
+    padding: 4px;
+    text-align: center;
+}
+
+body:not(.notify) #notify {
+    display: none;
+}
+
+#progress {
+    display: none;
+    background-color: var(--border-dark);
+    height: 3px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+#progress::before {
+    animation: fill 3.5s infinite;
+    background-color: var(--link-color);
+    content: "";
+    height: 3px;
+    left: 0;
+    margin-left: 0;
+    position: absolute;
+    top: 0;
+    width: 0;
+}
+
+@keyframes fill {
+    0% {width: 0; margin-left: 0;}
+    50% {width: 100%;}
+    55% {margin-left: 100%;}
+    95% {margin-left: 0;}
+    100% {width: 0;}
+}
+
+.link {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: underline;
+}

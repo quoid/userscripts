@@ -1,0 +1,24 @@
+.tag {
+    background-color: transparent;
+    border: 1px solid #777;
+    border-radius: 3px;
+    color: #777;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.35px;
+    line-height: 12px;
+    min-width: 28px;
+    padding: 1px 4px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.tag.css {
+    color: #60f36c;
+    border-color: #60f36c;
+}
+
+.tag.js {
+    color: #e4f360;
+    border-color: #e4f360;
+}

@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.0 (TBD)
+- Complete overhaul/rewrite of the extension
+- UI now lives in a page rather than popover
+- Enables multiple, domain specific, scripts
+- A lot more features of which will not be listed in the changelog
+
 ## v1.5.0 (2019-10-14)
 - Enable code folding in editor
 - Minor styling changes

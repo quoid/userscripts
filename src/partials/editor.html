@@ -1,0 +1,23 @@
+{% from "icon.html" import icon %}
+{% from "button.html" import button %}
+{% from "loader.html" import loader %}
+{% from "tag.html" import tag %}
+<div id="editor">
+    <div class="editor-header">
+        {{ tag("css") }}
+        {{ tag("js") }}
+        <div class="title truncate">init</div>
+        {{ icon("download", "downloadScript", "downloadScriptButton") }}
+        {{ icon("trash", "deleteScript", "deleteScriptButton") }}
+    </div>
+    <div id="code">
+        <textarea></textarea>
+    </div>
+    <div class="editor-footer">
+        <div id="status">init</div>
+        {{ button("discard", "init", true, "buttonDiscard") }}
+        {{ button("save", "init", true, "buttonSave") }}
+    </div>
+    <div class="empty" data-localize="noScriptSelected">init</div>
+    {{ loader("loader-editor") }}
+</div>
