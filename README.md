@@ -12,7 +12,7 @@ Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id146329
 
 ## Usage
 
-**Version 2 and above required Safari 13+**
+**Version 2 and above requires Safari 13+**
 
 As of Version 2.0.0, this extension now supports multiple, domain specific, userscripts as well as supporting 2 different "userscript" types. It supports traditional javascript userscripts as well and css "userscripts" (or more commonly referred to as, userstyles).
 
