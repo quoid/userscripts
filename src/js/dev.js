@@ -195,7 +195,7 @@ const ___settings = {
     showInvisibles: "true",
     tabSize: "4",
     verbose: "true",
-    version: "2.0.0"
+    version: "2.0.1"
 };
 
 const ___parse = {
