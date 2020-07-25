@@ -528,6 +528,15 @@ func updateScriptsData() -> [[String: Any]]? {
             // can force unwrap b/c already checked match is not nil
             matched = metadata["match"]!
         }
+        // check for legacy include & exclude
+        if metadata["include"] != nil {
+            // can force unwrap b/c already checked match is not nil
+            matched.append(contentsOf: metadata["include"]!)
+        }
+        if metadata["exclude"] != nil {
+            // can force unwrap b/c already checked match is not nil
+            excluded.append(contentsOf: metadata["exclude"]!)
+        }
         if !updateExcludesAndMatches(filename, excluded, matched) {
             err("error updating matches in func updateScriptsData")
         }
@@ -677,8 +686,13 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     }
     
     // update new excludes and matches
-    let excludes = metadata["exclude-match"] ?? []
-    let matches = metadata["match"] ?? []
+    var excludes = metadata["exclude-match"] ?? []
+    var matches = metadata["match"] ?? []
+    // check for legacy include & exclude
+    let includeLegacy = metadata["include"] ?? []
+    let excludeLegacy = metadata["exclude"] ?? []
+    matches.append(contentsOf: includeLegacy)
+    excludes.append(contentsOf: excludeLegacy)
     if !updateExcludesAndMatches(newFilename, excludes, matches) {
         err("failed to update manifest record for new filename when attempting to save script file")
     }
