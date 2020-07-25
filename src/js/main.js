@@ -976,5 +976,12 @@ window.onresize = function() {
 };
 
 window.onload = function() {
-    safari.extension.dispatchMessage("REQ_INIT_DATA");
+    try {
+        safari.extension.dispatchMessage("REQ_INIT_DATA");
+    } catch(e) {
+        const el = document.getElementById("notify");
+        el.innerText = "Safari object inaccessible, make sure Safari is version 13+";
+        el.style.display = "block";
+        console.error(e);
+    }
 };

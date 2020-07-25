@@ -20,6 +20,7 @@
 
 /* z-indexes */
 noscript { z-index: 99; }
+#notify { z-index: 99;}
 #appLoader { z-index: 98; }
 #settings { z-index: 97; }
 #progress {z-index: 96; }
