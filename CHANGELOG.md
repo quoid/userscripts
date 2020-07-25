@@ -1,6 +1,10 @@
 # Changelog
 
-## v2.0.0 (TBD)
+## v2.0.1 (TBD)
+- @include/@exclude are now aliases for @match/@exlcude-match
+- Display an error when browser is not supported
+
+## v2.0.0 (2020-07-10)
 - Complete overhaul/rewrite of the extension
 - UI now lives in a page rather than popover
 - Enables multiple, domain specific, scripts

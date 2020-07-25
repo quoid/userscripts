@@ -41,10 +41,14 @@ If you don't feel like reading, visit [this folder](/etc/videos/) to watch some 
 
 Version 2.0.0 introduces the common practice of using userscript metadata to drive certain functionality. The currently supported fields will be listed below. There *are* plans to support more fields in future updates.
 
-- `@name` **(required)** - This will be the name that displays in the sidebar and be used as the filename. You can not use the same name for multiple scripts of the same type.
-- `@description` **(optional)** - Use this to describe what your userscript does. This will be displayed in the sidebar. There is a setting to hide userscript descriptions.
-- `@match` **(optional)** - Domain match patterns; you can use several instances of this metafield if you'd like multiple domain matches. If you omit this metafield, the userscript will never run. View [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
-- `@exclude-match` **(optional)** - Domain patterns where you do *not* want the script to run
+- `@name` - This will be the name that displays in the sidebar and be used as the filename - you can not use the same name for multiple scripts of the same type
+- `@description`- Use this to describe what your userscript does - this will be displayed in the sidebar - there is a setting to hide userscript descriptions
+- `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
+- `@exclude-match` - Domain patterns where you do *not* want the script to run
+- `@include` - An alias for `@match` - functions exactly like `@match`
+- `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
+
+**All userscripts need at least 1 `@match` or `@include` to run!**
 
 CSS Userscripts/styles can use the javascript metadata format or the Userstyle format. Both formats shown below are valid for **css** type.
 
