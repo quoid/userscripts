@@ -90,6 +90,7 @@ Currently there is only one keyboard shortcut - `cmd+s` to save changes. *Note:*
 Your previous userscript file *should* still exist after update. You can access its folder by clicking the link in the extension's settings modal option labelled "Save Location" or by visiting `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/`.
 
 **How can I help development**
+
 Any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offer coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
 
 If you are willing to beta test new versions of the extension, [you can sign up here](https://forms.gle/QB46uYQHVyCxULue9).
