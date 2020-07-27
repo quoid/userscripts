@@ -41,10 +41,14 @@ If you don't feel like reading, visit [this folder](/etc/videos/) to watch some 
 
 Version 2.0.0 introduces the common practice of using userscript metadata to drive certain functionality. The currently supported fields will be listed below. There *are* plans to support more fields in future updates.
 
-- `@name` **(required)** - This will be the name that displays in the sidebar and be used as the filename. You can not use the same name for multiple scripts of the same type.
-- `@description` **(optional)** - Use this to describe what your userscript does. This will be displayed in the sidebar. There is a setting to hide userscript descriptions.
-- `@match` **(optional)** - Domain match patterns; you can use several instances of this metafield if you'd like multiple domain matches. If you omit this metafield, the userscript will never run. View [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
-- `@exclude-match` **(optional)** - Domain patterns where you do *not* want the script to run
+- `@name` - This will be the name that displays in the sidebar and be used as the filename - you can not use the same name for multiple scripts of the same type
+- `@description`- Use this to describe what your userscript does - this will be displayed in the sidebar - there is a setting to hide userscript descriptions
+- `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
+- `@exclude-match` - Domain patterns where you do *not* want the script to run
+- `@include` - An alias for `@match` - functions exactly like `@match`
+- `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
+
+**All userscripts need at least 1 `@match` or `@include` to run!**
 
 CSS Userscripts/styles can use the javascript metadata format or the Userstyle format. Both formats shown below are valid for **css** type.
 
@@ -84,6 +88,12 @@ Currently there is only one keyboard shortcut - `cmd+s` to save changes. *Note:*
 **I updated from Version 1.5.0, where did my previous userscript go?**
 
 Your previous userscript file *should* still exist after update. You can access its folder by clicking the link in the extension's settings modal option labelled "Save Location" or by visiting `~/Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/`.
+
+**How can I help development**
+
+Any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offer coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
+
+If you are willing to beta test new versions of the extension, [you can sign up here](https://forms.gle/QB46uYQHVyCxULue9).
 
 ## Feedback & Support
 If you need help doing something with this extension or you have an idea for an enhancement, please open an issue. Be sure to search current and closed issues before opening a new one.
