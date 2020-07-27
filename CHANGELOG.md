@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.0.1 (TBD)
+## v2.0.1 (2020-07-27)
 - @include/@exclude are now aliases for @match/@exlcude-match
 - Display an error when browser is not supported
 
