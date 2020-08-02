@@ -1,11 +1,3 @@
-//
-//  Functions.swift
-//  Userscripts Extension
-//
-//  Created by Justin Wasack on 2/9/20.
-//  Copyright © 2020 Justin Wasack. All rights reserved.
-//
-
 import Foundation
 import SafariServices
 import os

@@ -1,11 +1,3 @@
-//
-//  ViewController.swift
-//  Userscripts
-//
-//  Created by Justin Wasack on 4/25/19.
-//  Copyright © 2019 Justin Wasack. All rights reserved.
-//
-
 import Cocoa
 import SafariServices.SFSafariApplication
 

@@ -1,13 +1,4 @@
-//
-//  SafariExtensionHandler.swift
-//  Userscripts Extension
-//
-//  Created by Justin Wasack on 4/25/19.
-//  Copyright © 2019 Justin Wasack. All rights reserved.
-//
-
 import SafariServices
-import WebKit
 
 class SafariExtensionHandler: SFSafariExtensionHandler {
     
