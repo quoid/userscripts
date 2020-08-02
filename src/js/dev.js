@@ -191,7 +191,7 @@ const ___settings = {
     hideDescriptions: "false",
     languageCode: "en-GB",
     lint: "false",
-    saveLocation: "/Users/UserName/Library/Folder/SubFolder/",
+    saveLocation: "/Users/UserName/Library/Containers/ParentFolder/SubFolder/",
     showInvisibles: "true",
     tabSize: "4",
     verbose: "true",

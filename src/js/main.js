@@ -4,6 +4,7 @@
 const ___a = {
     blacklistInput: document.querySelector("#blacklist textarea"),
     blacklistStatus: document.getElementById("blacklistStatus"),
+    changeSaveLocationButton: document.getElementById("changeSaveLocation"),
     language: "en",
     linkDocs: "https://github.com/quoid/userscripts#readme",
     linkDonate: "https://github.com/quoid/userscripts",
@@ -64,6 +65,15 @@ const ___a = {
                 ___a.blacklistStatus.classList.remove("saved");
                 ___a.blacklistStatus.classList.add("saving");
             }
+        }
+    },
+    changeSaveLocation: function() {
+        const message = ___a.getString("changeSaveLocationMessage");
+        if (confirm(message)) {
+            window.open("sserscriptsurlscheme:changesavelocation")
+            safari.extension.dispatchMessage("REQ_CHANGE_SAVE_LOCATION");
+        } else {
+            return;
         }
     },
     changeSetting: function(el, val) { // arg1 dom element // arg2 str
@@ -270,6 +280,9 @@ const ___a = {
         // blacklist input functionality
         this.blacklistInput.addEventListener("blur", this.blacklistUpdate);
         this.blacklistInput.addEventListener("keydown", this.blacklistUpdate);
+
+        // changeSaveLocation button functionality
+        this.changeSaveLocationButton.addEventListener("click", this.changeSaveLocation);
 
         // disable the default cmd+S browser key command
         document.addEventListener("keydown", function(e) {
