@@ -1,31 +1,43 @@
 import Foundation
 import SafariServices
-import os
-
-struct Log {
-    static var bundle = Bundle.main.bundleIdentifier!
-    static var general = OSLog(subsystem: Log.bundle, category: "general")
-}
-
-func err(_ message: String) {
-    os_log("%{public}@", log: Log.general, type: .error, "Error: \(message)")
-}
 
 // helpers
-func getDocumentsDirectory() -> URL {
-    let fm = FileManager.default
-    let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
-    let documentsDirectory = paths[0]
-    return documentsDirectory
-}
-
-func getSaveLocation() -> String? {
-    let defaults = UserDefaults.standard
-    if let saveLocation = defaults.string(forKey: "saveLocation") {
-        return saveLocation
+func getSaveLocation() ->  URL? {
+    let standardDefaults = UserDefaults.standard
+    let keyName = "userSaveLocation"
+    // if shared bookmark exists
+    if let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName) {
+        guard let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false) else {
+            err("could not read sharedBookmark in getSaveLocation")
+            return nil
+        }
+        // check if userSaveLocation exists
+        if let userSaveLocationData = standardDefaults.data(forKey: keyName) {
+            // get url from saveLocationData, it will be security scoped
+            guard let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true) else {
+                return nil
+            }
+            // check if sharedBookmark and userSaveLocation
+            // if equal, user at some point changed the save location, but it hasn't changed since
+            if sharedBookmark == userSaveLocation {
+                print("bookmarks equal")
+                return userSaveLocation
+            }
+        }
+        // user has changed the default location but not present in standard defaults
+        // create bookmark in standard defaults
+        if saveBookmark(url: sharedBookmark, isShared: false, keyName: keyName, isSecure: true) {
+            return sharedBookmark
+        } else {
+            err("could not save sharedBookmark to STANDARD defaults")
+            return nil
+        }
+    } else if let defaultSaveLocation = standardDefaults.url(forKey: "saveLocation") {
+        return defaultSaveLocation
+    } else {
+        err("something went wrong when getting save location")
+        return nil
     }
-    err("failed to get save location")
-    return nil
 }
 
 func patternMatch(_ string: String,_ pattern: String) -> Bool {
@@ -52,6 +64,24 @@ func isSanitzed(_ str: String) -> Bool {
     return str.removingPercentEncoding != str
 }
 
+func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
+    SFSafariApplication.getAllWindows { (windows) in
+        for window in windows {
+            window.getAllTabs{ (tabs) in
+                for tab in tabs {
+                    tab.getPagesWithCompletionHandler { (pages) in
+                        if pages != nil {
+                            for page in pages! {
+                                page.dispatchMessageToScript(withName: withName, userInfo: userInfo)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 // parser
 func parse(content: String) -> [String: Any]? {
     // returns structured datat from content of script file
@@ -64,7 +94,7 @@ func parse(content: String) -> [String: Any]? {
     guard
         let match = regex.firstMatch(in: content, options: [], range: range)
     else {
-        print("metablock missing or improperly formatted, failed to parse")
+        err("metablock missing or improperly formatted, failed to parse")
         return nil
     }
     
@@ -107,7 +137,7 @@ func parse(content: String) -> [String: Any]? {
     }
     // return nil/fail if @name key is missing or @name has no value
     if metadata["name"] == nil {
-        print("@name metadata key missing or without value, failed to parse")
+        err("@name metadata key missing or without value, failed to parse")
         return nil
     }
     // get the code
@@ -126,12 +156,12 @@ func getSettings() -> [String: String]? {
     let defaults = UserDefaults.standard
     var settings: [String: String] = [:]
     let fm = FileManager.default
-    let saveLoc = getDocumentsDirectory().appendingPathComponent("scripts")
+    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
     let defaultSettings: [String: String] = [
         "autoShowHints": "true",
         "hideDescriptions": "false",
         "lint": "false",
-        "saveLocation": saveLoc.path,
+        "saveLocation": defaultSaveLocation.path,
         "showInvisibles": "true",
         "tabSize": "4",
         "verbose": "false"
@@ -147,15 +177,19 @@ func getSettings() -> [String: String]? {
         // add key & value from UserDefaults to setting dict
         settings[key] = defaults.string(forKey: key)
     }
-    // check that saveLocation folder exists, if not, create it
-    if !fm.fileExists(atPath: saveLoc.path) {
+    // check that defaultSaveLocation folder exists, if not, create it
+    if !fm.fileExists(atPath: defaultSaveLocation.path) {
         do {
-            try fm.createDirectory(at: saveLoc, withIntermediateDirectories: false)
+            try fm.createDirectory(at: defaultSaveLocation, withIntermediateDirectories: false)
         } catch {
             // could not create the save location directory, show error
             err("failed to create save location folder when getting settings")
             return nil
         }
+    }
+    // check if the user changed the defaultSaveLocation if so return that path instead
+    if let actualSaveLocation = getSaveLocation() {
+        settings["saveLocation"] = actualSaveLocation.path
     }
     return settings
 }
@@ -476,11 +510,15 @@ func getFileContents(_ url: URL) -> Any? {
 
 func updateScriptsData() -> [[String: Any]]? {
     // returns description, disabled, filename, name, type
-    guard let saveLocation = getSaveLocation() else {
+    guard let url = getSaveLocation() else {
         err("failed to get save location in func updateScriptsData")
         return nil
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true)
+    guard url.startAccessingSecurityScopedResource() else {
+        err("could not access security scope url in updateScriptsData")
+        return nil
+    }
+    defer { url.stopAccessingSecurityScopedResource() }
     var allScriptsData: [[String: Any]] = []
     guard
         let dataArray = getFileContents(url) as? [[String: Any]],
@@ -543,7 +581,7 @@ func loadScriptData(_ filename: String) -> [String: String]? {
         err("failed to get save location in func loadScriptData")
         return nil
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true).appendingPathComponent(filename)
+    let url = saveLocation.appendingPathComponent(filename)
     var scriptData:[String: String] = [:]
     guard
         let fileContents = getFileContents(url) as? [String: Any],
@@ -607,12 +645,15 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     
     // get the scripts save locations
     let fm = FileManager.default
-    guard let saveLocation = getSaveLocation() else {
+    guard let url = getSaveLocation() else {
         err("failed to get save location when attempting to save script file")
         return nil
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true)
-    
+    guard url.startAccessingSecurityScopedResource() else {
+        err("could not access security scope url in updateScriptsData")
+        return nil
+    }
+    defer { url.stopAccessingSecurityScopedResource() }
     // get script data and parse script content
     guard
         let content = scriptData["content"],
@@ -719,7 +760,7 @@ func deleteScript(_ filename: String) -> Bool {
         err("failed to remove script from manifest or get save location")
         return false
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true).appendingPathComponent(filename)
+    let url = saveLocation.appendingPathComponent(filename)
     do {
         try FileManager.default.trashItem(at: url, resultingItemURL: nil)
     } catch {
@@ -791,8 +832,7 @@ func getCode(_ url: String) -> [String: [String: String]]? {
                         err("could not get save location from settings when attempting to get code for injected script")
                         continue
                     }
-                    let saveLocationUrl = URL(fileURLWithPath: saveLocation, isDirectory: false)
-                    let url = saveLocationUrl.appendingPathComponent(filename)
+                    let url = saveLocation.appendingPathComponent(filename)
                     guard
                         let contents = getFileContents(url) as? [String: Any],
                         let code = contents["code"] as? String

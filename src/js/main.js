@@ -70,7 +70,7 @@ const ___a = {
     changeSaveLocation: function() {
         const message = ___a.getString("changeSaveLocationMessage");
         if (confirm(message)) {
-            window.open("sserscriptsurlscheme:changesavelocation")
+            window.open("userscriptsurlscheme:changesavelocation");
             safari.extension.dispatchMessage("REQ_CHANGE_SAVE_LOCATION");
         } else {
             return;
@@ -107,6 +107,7 @@ const ___a = {
         const data = e.message.data;
         const error = e.message.error;
         const name = e.name;
+        ___a.log(`Incoming message with name - ${name}`);
         if (name === "RESP_ALL_SCRIPTS") {
             if (error) {
                 console.error(error);
@@ -138,6 +139,14 @@ const ___a = {
                 return;
             }
             ___a.init(data);
+        }
+        if (name === "RESP_CHANGE_SAVE_LOCATION") {
+            const bundlePageURI = data;
+            const currentURL = window.location.href;
+            console.log(bundlePageURI, currentURL);
+            if (currentURL.startsWith(bundlePageURI)) {
+                window.close();
+            }
         }
         if (name === "RESP_DISABLE_SCRIPT"|| name === "RESP_ENABLE_SCRIPT") {
             var id;
@@ -174,7 +183,7 @@ const ___a = {
                 ___a.log(`Enabled ${id}`);
             }
         }
-        if (name === "RESP_SAVE_LOCATION_CHANGE") {
+        if (name === "RESP_OPEN_SAVE_LOCATION") {
             if (error) {
                 console.error(error);
                 return;
@@ -275,7 +284,7 @@ const ___a = {
         });
         saveLocation.addEventListener("click", function(e) {
             e.preventDefault();
-            safari.extension.dispatchMessage("REQ_SAVE_LOCATION_CHANGE");
+            safari.extension.dispatchMessage("REQ_OPEN_SAVE_LOCATION");
         });
         // blacklist input functionality
         this.blacklistInput.addEventListener("blur", this.blacklistUpdate);

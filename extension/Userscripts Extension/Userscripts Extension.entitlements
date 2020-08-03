@@ -4,5 +4,11 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.userscripts.macos</string>
+	</array>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
 </dict>
 </plist>

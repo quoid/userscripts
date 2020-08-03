@@ -21,7 +21,7 @@ const ___m = {
             description: "The button that will allow users to change the location of where their scripts are loaded from and saved"
         },
         changeSaveLocationMessage: {
-            message: "Changing the save location requires all instances of the extension to be closed and the container application to be opened. This will be automatically attempted.\n\nDo you wish to continue?",
+            message: "Changing the save location requires all instances of the extension to be closed and the host application to be opened. This will be automatically attempted.\n\nDo you wish to continue?",
             description: "Alerts the user to the implications of changing the save location"
         },
         delete: {
