@@ -211,6 +211,7 @@ const ___a = {
                 ___e.setStatus(___e.oldStatus, 3000);
                 document.body.classList.remove("saving");
                 ___e.editor.setOption("readOnly", false);
+                ___e.editor.focus();
                 return;
             }
             ___e.save(data);
@@ -657,6 +658,7 @@ const ___e = {
         ___s.sortScripts();
         ___a.setQueryString("script", id);
         document.body.classList.remove("saving");
+        ___e.editor.focus();
     },
     setMode: function(mode) { // arg1 str
         // sets the editor mode and body class for styling purposes

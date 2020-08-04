@@ -160,7 +160,7 @@ const ___safari = {
                     const responseObject = ___safari.validateScript(data);
                     const key = Object.keys(responseObject)[0];
                     resp[key] = responseObject[key];
-                    //resp["error"] = "can't save file";
+                    // resp["error"] = "can't save file";
                     ___safari.dispatchMessageToScript("RESP_SCRIPT_SAVE", resp);
                     break;
                 case "REQ_SETTING_CHANGE":
