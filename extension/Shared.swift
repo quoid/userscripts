@@ -4,11 +4,12 @@ import os
 struct SharedDefaults {
     static let suiteName = "group.com.userscripts.macos"
     static let keyName = "hostSelectedSaveLocation"
+    static var saved = false
 }
 
 func err(_ message: String) {
     let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "general")
-    print("Error: \(message)")
+    //print("Error: \(message)")
     os_log("%{public}@", log: log, type: .error, "Error: \(message)")
 }
 
@@ -52,6 +53,7 @@ func readBookmark(data: Data, isSecure: Bool) -> URL? {
         if bookmarkIsStale {
             NSLog("Stale bookmark, renewing it \(url)")
             if saveBookmark(url: url, isShared: true, keyName: SharedDefaults.keyName, isSecure: false) {
+                SharedDefaults.saved = true
                 NSLog("Successfully renewed stale bookmark - \(url)")
             } else {
                 NSLog("Could not renew stale bookmark - \(url)")
@@ -62,4 +64,11 @@ func readBookmark(data: Data, isSecure: Bool) -> URL? {
         err("Error: \(error)")
         return nil
     }
+}
+
+func directoryExists(path: String) -> Bool {
+    var isDirectory = ObjCBool(true)
+    let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+    let inTrash = path.contains(".Trash") ? false : true
+    return exists && inTrash && isDirectory.boolValue
 }

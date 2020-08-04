@@ -2,40 +2,64 @@ import Foundation
 import SafariServices
 
 // helpers
-func getSaveLocation() ->  URL? {
+func getSaveLocation() -> URL? {
     let standardDefaults = UserDefaults.standard
-    let keyName = "userSaveLocation"
-    // if shared bookmark exists
-    if let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName) {
-        guard let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false) else {
-            err("could not read sharedBookmark in getSaveLocation")
-            return nil
-        }
-        // check if userSaveLocation exists
-        if let userSaveLocationData = standardDefaults.data(forKey: keyName) {
-            // get url from saveLocationData, it will be security scoped
-            guard let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true) else {
-                return nil
-            }
-            // check if sharedBookmark and userSaveLocation
-            // if equal, user at some point changed the save location, but it hasn't changed since
-            if sharedBookmark == userSaveLocation {
-                print("bookmarks equal")
-                return userSaveLocation
-            }
-        }
-        // user has changed the default location but not present in standard defaults
-        // create bookmark in standard defaults
-        if saveBookmark(url: sharedBookmark, isShared: false, keyName: keyName, isSecure: true) {
-            return sharedBookmark
-        } else {
-            err("could not save sharedBookmark to STANDARD defaults")
-            return nil
-        }
-    } else if let defaultSaveLocation = standardDefaults.url(forKey: "saveLocation") {
+    let userSaveLocationKey = "userSaveLocation"
+    // get the default save location
+    guard let defaultSaveLocation = standardDefaults.url(forKey: "saveLocation") else {
+        err("could not get the default saveLocation in getSaveLocation")
+        return nil
+    }
+    // check if sharedBookmark data exists
+    // check if can get bookmark URL (won't be able to if directory permanently deleted)
+    // check if bookmark directory is in trash
+    guard
+        let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+        let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
+        directoryExists(path: sharedBookmark.path)
+    else {
+        // sharedBookmark removed, or in trash, use default location and ensure shared will not be used
+        UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
+        SharedDefaults.saved = false
+        NSLog("removed sharedbookmark because it was either permanently deleted or exists in trash")
         return defaultSaveLocation
+    }
+
+    // at this point, it's known sharedbookmark exists
+    // check local bookmark exists
+    // check can read url from bookmark
+    // check local bookmark url == shared bookmark url
+    // do not need to check if directoryExists for local bookmark (if local bookmark exists)
+    // can not think of instance where shared bookmark exists, and local does not
+    // could be an instance where shared does not exist, yet local does (user deleted/trashed directory before local updated)
+    // for that we return the default save directory above
+    if
+        let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
+        let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
+        sharedBookmark == userSaveLocation
+    {
+        print("local bookmark same as shared, return local")
+        return userSaveLocation
+    }
+    
+    // at this point one of the following conditions met
+    // local bookmark data doesn't exist
+    // for some reason can't get url from local bookmark data
+    // local bookmark url != shared bookmark url (user updated update location)
+    // create new local bookmark
+    if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
+        // return newly created local bookmark url
+        guard
+            let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
+            let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
+        else {
+            err("reading after saveBookmark failed in getSaveLocation")
+            return nil
+        }
+        print("return newly created local bookmark")
+        return localBookmarkUrl
     } else {
-        err("something went wrong when getting save location")
+        err("could not save local version of shared bookmark")
         return nil
     }
 }
@@ -63,6 +87,12 @@ func santize(_ str: String) -> String? {
 func isSanitzed(_ str: String) -> Bool {
     return str.removingPercentEncoding != str
 }
+
+//func fileExists(path: String) -> Bool {
+//    var isDirectory = ObjCBool(true)
+//    let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+//    return exists && isDirectory.boolValue
+//}
 
 func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
     SFSafariApplication.getAllWindows { (windows) in
@@ -514,9 +544,11 @@ func updateScriptsData() -> [[String: Any]]? {
         err("failed to get save location in func updateScriptsData")
         return nil
     }
-    guard url.startAccessingSecurityScopedResource() else {
-        err("could not access security scope url in updateScriptsData")
-        return nil
+    if SharedDefaults.saved {
+        guard url.startAccessingSecurityScopedResource() else {
+            err("could not access security scope url in updateScriptsData")
+            return nil
+        }
     }
     defer { url.stopAccessingSecurityScopedResource() }
     var allScriptsData: [[String: Any]] = []
@@ -582,6 +614,13 @@ func loadScriptData(_ filename: String) -> [String: String]? {
         return nil
     }
     let url = saveLocation.appendingPathComponent(filename)
+    if SharedDefaults.saved {
+        guard url.startAccessingSecurityScopedResource() else {
+            err("could not access security scope url in loadScriptData")
+            return nil
+        }
+    }
+    defer { url.stopAccessingSecurityScopedResource() }
     var scriptData:[String: String] = [:]
     guard
         let fileContents = getFileContents(url) as? [String: Any],
@@ -649,9 +688,11 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
         err("failed to get save location when attempting to save script file")
         return nil
     }
-    guard url.startAccessingSecurityScopedResource() else {
-        err("could not access security scope url in updateScriptsData")
-        return nil
+    if SharedDefaults.saved {
+        guard url.startAccessingSecurityScopedResource() else {
+            err("could not access security scope url in saveScriptFile")
+            return nil
+        }
     }
     defer { url.stopAccessingSecurityScopedResource() }
     // get script data and parse script content
@@ -761,6 +802,13 @@ func deleteScript(_ filename: String) -> Bool {
         return false
     }
     let url = saveLocation.appendingPathComponent(filename)
+    if SharedDefaults.saved {
+        guard url.startAccessingSecurityScopedResource() else {
+            err("could not access security scope url in deleteScript")
+            return false
+        }
+    }
+    defer { url.stopAccessingSecurityScopedResource() }
     do {
         try FileManager.default.trashItem(at: url, resultingItemURL: nil)
     } catch {
@@ -833,6 +881,13 @@ func getCode(_ url: String) -> [String: [String: String]]? {
                         continue
                     }
                     let url = saveLocation.appendingPathComponent(filename)
+                    if SharedDefaults.saved {
+                        guard url.startAccessingSecurityScopedResource() else {
+                            err("could not access security scope url in getCode")
+                            return nil
+                        }
+                    }
+                    defer { url.stopAccessingSecurityScopedResource() }
                     guard
                         let contents = getFileContents(url) as? [String: Any],
                         let code = contents["code"] as? String

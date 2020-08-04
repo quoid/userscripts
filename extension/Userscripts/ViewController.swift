@@ -11,21 +11,27 @@ class ViewController: NSViewController {
         super.viewDidLoad()
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
         self.appNameLabel.stringValue = "Userscripts - Version \(appVersion)";
+        // seems like a lot of work to id path for another target's documents directory
+        let hostID = Bundle.main.bundleIdentifier!
+        let extensionID = "com.userscripts.macos.Userscripts-Extension"
+        let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
+        let location = documentsDirectory.replacingOccurrences(of: hostID, with: extensionID)
         // check if bookmark data exists
-        if let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName) {
-            guard let url = readBookmark(data: sharedBookmark, isSecure: false) else {
-                err("Failed to set app label to saved bookmark")
-                return
-            }
-            self.saveLocationLabel.stringValue = url.absoluteString
-        } else {
-            // seems like a lot of work to id path for another target's documents directory
-            let hostID = Bundle.main.bundleIdentifier!
-            let extensionID = "com.userscripts.macos.Userscripts-Extension"
-            let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
-            let location = documentsDirectory.replacingOccurrences(of: hostID, with: extensionID)
+        guard
+            let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+            let url = readBookmark(data: sharedBookmark, isSecure: false),
+            directoryExists(path: url.path)
+        else {
+            // sharedBookmark removed, or in trash
+            // renamed directories retain association
+            // moved directories retain association
+            UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
+            SharedDefaults.saved = false
+            NSLog("removed sharedbookmark because it was either permanently deleted or exists in trash")
             self.saveLocationLabel.stringValue = location
+            return
         }
+        self.saveLocationLabel.stringValue = url.absoluteString
     }
     
     @IBAction func changeSaveLocation(_ sender: NSButton) {
@@ -49,6 +55,7 @@ class ViewController: NSViewController {
                         err("couldn't save new location from host app")
                         return
                     }
+                    SharedDefaults.saved = true
                     self.saveLocationLabel.stringValue = url.absoluteString
                 }
             }
