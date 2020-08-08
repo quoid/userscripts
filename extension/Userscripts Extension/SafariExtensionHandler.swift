@@ -25,9 +25,7 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         } else if messageName == "REQ_CHANGE_SAVE_LOCATION" {
             respName = "RESP_CHANGE_SAVE_LOCATION"
             SFSafariExtension.getBaseURI(completionHandler: { baseURI in
-                guard let bundlePageURI = baseURI?.absoluteString else { return }
-                respData["data"] = bundlePageURI
-                sendMessageToAllPages(withName: respName, userInfo: respData)
+                closeExtensionHTMLPages()
             })
         } else {
             if messageName == "REQ_ALL_SCRIPTS" {

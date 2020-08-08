@@ -20,19 +20,14 @@ func getSaveLocation() -> URL? {
     else {
         // sharedBookmark removed, or in trash, use default location and ensure shared will not be used
         UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-        SharedDefaults.saved = false
         NSLog("removed sharedbookmark because it was either permanently deleted or exists in trash")
         return defaultSaveLocation
     }
 
     // at this point, it's known sharedbookmark exists
-    // check local bookmark exists
-    // check can read url from bookmark
-    // check local bookmark url == shared bookmark url
-    // do not need to check if directoryExists for local bookmark (if local bookmark exists)
-    // can not think of instance where shared bookmark exists, and local does not
-    // could be an instance where shared does not exist, yet local does (user deleted/trashed directory before local updated)
-    // for that we return the default save directory above
+    // check local bookmark exists, can read url from bookmark, if bookmark url == shared bookmark url
+    // no need to check if directoryExists for local bookmark (if local bookmark is exists)
+    // can not think of instance where shared bookmark directory exists, yet local bookmark directory does not
     if
         let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
         let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
@@ -56,7 +51,6 @@ func getSaveLocation() -> URL? {
             err("reading after saveBookmark failed in getSaveLocation")
             return nil
         }
-        print("return newly created local bookmark")
         return localBookmarkUrl
     } else {
         err("could not save local version of shared bookmark")
@@ -88,11 +82,36 @@ func isSanitzed(_ str: String) -> Bool {
     return str.removingPercentEncoding != str
 }
 
-//func fileExists(path: String) -> Bool {
-//    var isDirectory = ObjCBool(true)
-//    let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
-//    return exists && isDirectory.boolValue
-//}
+func closeExtensionHTMLPages() {
+    // this function attempts to close all instances of the extension's app page
+    // unfortunately there is no good api for managing extension bundled html pages
+    // this hack looks at all pages, sees if they are "active", if not, closes them
+    // what "active" means in terms of the api is unclear
+    // every page that is open and not a top sites page, favorites page or an extension bundled html page will return true
+    // this enables differentiation of bundled html pages in a way
+    SFSafariApplication.getAllWindows { (windows) in
+        for window in windows {
+            window.getAllTabs{ (tabs) in
+                for tab in tabs {
+                    tab.getPagesWithCompletionHandler { (pages) in
+                        if pages != nil {
+                            for page in pages! {
+                                page.getPropertiesWithCompletionHandler({ props in
+                                    let isActive = props?.isActive ?? false
+                                    if !isActive {
+                                        page.getContainingTab(completionHandler: { tab in
+                                            tab.close()
+                                        })
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
     SFSafariApplication.getAllWindows { (windows) in
@@ -489,6 +508,16 @@ func getFileContents(_ url: URL) -> Any? {
     var urls:[URL] = []
     // this array will be returned if successful, if url arg issingle file, return only first index
     var fileContents: [[String: Any]] = []
+    // get the saveLocation to access security scope if needed
+    guard let securityScope = getSaveLocation() else {
+        err("failed to get savelocation for security scope in getFileContents")
+        return nil
+    }
+    // secrutiy scope
+    let didStartAccessing = securityScope.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { securityScope.stopAccessingSecurityScopedResource() }
+    }
     // check that url is a valid path to a directory or single file
     guard fm.fileExists(atPath: url.path) else {
         err("could not get file contents, no directory or file exists at path, \(url.path)")
@@ -544,13 +573,6 @@ func updateScriptsData() -> [[String: Any]]? {
         err("failed to get save location in func updateScriptsData")
         return nil
     }
-    if SharedDefaults.saved {
-        guard url.startAccessingSecurityScopedResource() else {
-            err("could not access security scope url in updateScriptsData")
-            return nil
-        }
-    }
-    defer { url.stopAccessingSecurityScopedResource() }
     var allScriptsData: [[String: Any]] = []
     guard
         let dataArray = getFileContents(url) as? [[String: Any]],
@@ -614,13 +636,6 @@ func loadScriptData(_ filename: String) -> [String: String]? {
         return nil
     }
     let url = saveLocation.appendingPathComponent(filename)
-    if SharedDefaults.saved {
-        guard url.startAccessingSecurityScopedResource() else {
-            err("could not access security scope url in loadScriptData")
-            return nil
-        }
-    }
-    defer { url.stopAccessingSecurityScopedResource() }
     var scriptData:[String: String] = [:]
     guard
         let fileContents = getFileContents(url) as? [String: Any],
@@ -688,13 +703,11 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
         err("failed to get save location when attempting to save script file")
         return nil
     }
-    if SharedDefaults.saved {
-        guard url.startAccessingSecurityScopedResource() else {
-            err("could not access security scope url in saveScriptFile")
-            return nil
-        }
+    // secrutiy scope
+    let didStartAccessing = url.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { url.stopAccessingSecurityScopedResource() }
     }
-    defer { url.stopAccessingSecurityScopedResource() }
     // get script data and parse script content
     guard
         let content = scriptData["content"],
@@ -801,14 +814,12 @@ func deleteScript(_ filename: String) -> Bool {
         err("failed to remove script from manifest or get save location")
         return false
     }
-    let url = saveLocation.appendingPathComponent(filename)
-    if SharedDefaults.saved {
-        guard url.startAccessingSecurityScopedResource() else {
-            err("could not access security scope url in deleteScript")
-            return false
-        }
+    // secrutiy scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
     }
-    defer { url.stopAccessingSecurityScopedResource() }
+    let url = saveLocation.appendingPathComponent(filename)
     do {
         try FileManager.default.trashItem(at: url, resultingItemURL: nil)
     } catch {
@@ -881,13 +892,6 @@ func getCode(_ url: String) -> [String: [String: String]]? {
                         continue
                     }
                     let url = saveLocation.appendingPathComponent(filename)
-                    if SharedDefaults.saved {
-                        guard url.startAccessingSecurityScopedResource() else {
-                            err("could not access security scope url in getCode")
-                            return nil
-                        }
-                    }
-                    defer { url.stopAccessingSecurityScopedResource() }
                     guard
                         let contents = getFileContents(url) as? [String: Any],
                         let code = contents["code"] as? String

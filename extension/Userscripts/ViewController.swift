@@ -26,8 +26,7 @@ class ViewController: NSViewController {
             // renamed directories retain association
             // moved directories retain association
             UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-            SharedDefaults.saved = false
-            NSLog("removed sharedbookmark because it was either permanently deleted or exists in trash")
+            NSLog("removed sharedbookmark because it is non-existent, permanently deleted or exists in trash")
             self.saveLocationLabel.stringValue = location
             return
         }
@@ -55,7 +54,6 @@ class ViewController: NSViewController {
                         err("couldn't save new location from host app")
                         return
                     }
-                    SharedDefaults.saved = true
                     self.saveLocationLabel.stringValue = url.absoluteString
                 }
             }

@@ -4,12 +4,10 @@ import os
 struct SharedDefaults {
     static let suiteName = "group.com.userscripts.macos"
     static let keyName = "hostSelectedSaveLocation"
-    static var saved = false
 }
 
 func err(_ message: String) {
     let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "general")
-    //print("Error: \(message)")
     os_log("%{public}@", log: log, type: .error, "Error: \(message)")
 }
 
@@ -35,7 +33,7 @@ func saveBookmark(url: URL, isShared: Bool, keyName: String, isSecure: Bool) -> 
         }
         return true
     } catch let error {
-        err("Error: \(error)")
+        err("\(error)")
         return false
     }
 }
@@ -53,7 +51,6 @@ func readBookmark(data: Data, isSecure: Bool) -> URL? {
         if bookmarkIsStale {
             NSLog("Stale bookmark, renewing it \(url)")
             if saveBookmark(url: url, isShared: true, keyName: SharedDefaults.keyName, isSecure: false) {
-                SharedDefaults.saved = true
                 NSLog("Successfully renewed stale bookmark - \(url)")
             } else {
                 NSLog("Could not renew stale bookmark - \(url)")
