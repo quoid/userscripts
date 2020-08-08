@@ -140,14 +140,6 @@ const ___a = {
             }
             ___a.init(data);
         }
-        if (name === "RESP_CHANGE_SAVE_LOCATION") {
-            const bundlePageURI = data;
-            const currentURL = window.location.href;
-            console.log(bundlePageURI, currentURL);
-            if (currentURL.startsWith(bundlePageURI)) {
-                window.close();
-            }
-        }
         if (name === "RESP_DISABLE_SCRIPT"|| name === "RESP_ENABLE_SCRIPT") {
             var id;
             if (error) {
