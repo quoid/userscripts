@@ -738,7 +738,7 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     // script validated
     let newFileUrl = url.appendingPathComponent(newFilename)
     do {
-        if oldFilename.lowercased() != newFilename.lowercased() {
+        if oldFilename != newFilename {
             // if user changed the filename, remove file with old filename
             let oldFileUrl = url.appendingPathComponent(oldFilename)
             // however, when creating a new script, if user changes the temp given name by app...
@@ -766,7 +766,7 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     }
     
     // remove manifest records for old filename
-    if oldFilename.lowercased() != newFilename.lowercased() {
+    if oldFilename != newFilename {
         if !updateExcludesAndMatches(oldFilename, [], []) {
             err("failed to remove old filename from manifest when attempting to save script file")
         }
