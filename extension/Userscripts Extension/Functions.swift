@@ -438,6 +438,90 @@ func updateExcludesAndMatches(_ filename: String,_ exclude: [String],_ match: [S
     return true
 }
 
+func purgeManifest() -> Bool {
+    var allSaveLocationFilenames:[String] = []
+    // get the manifest's current key values
+    guard
+        let blacklist = getManifestKey("blacklist") as? [String],
+        var disabled = getManifestKey("disabled") as? [String],
+        var manifestExclude = getManifestKey("exclude") as? [String: [String]],
+        var manifestMatch = getManifestKey("match") as? [String: [String]]
+    else {
+        err("failed to get manifest keys when attempting to purge manifest")
+        return false
+    }
+    guard let saveLocation = getSaveLocation() else {
+        err("failed to get save location when attempting to purge manifest")
+        return false
+    }
+    // secrutiy scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    guard
+        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
+    else {
+        err("failed to get all file urls when attempting to purge manifest")
+        return false
+    }
+    for fileUrl in allFilesUrls {
+        // skip file if it is not of the proper type
+        let filename = fileUrl.lastPathComponent
+        if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
+            continue
+        }
+        // if file is of the proper extension, add it to the allSaveLocationFilenames array
+        allSaveLocationFilenames.append(filename)
+    }
+    // iterate through manifest matches
+    // if no filename exists for value, remove it from manifest
+    for (pattern, scriptNames) in manifestMatch {
+        for scriptName in scriptNames {
+            if !allSaveLocationFilenames.contains(scriptName) {
+                // get the index of element and then remove from array
+                if let index = manifestMatch[pattern]?.firstIndex(of: scriptName) {
+                    manifestMatch[pattern]?.remove(at: index)
+                }
+            }
+        }
+        // if there are no more script names in pattern, remove pattern from manifest
+        if let length = manifestMatch[pattern]?.count {
+            if length < 1, let ind = manifestMatch.index(forKey: pattern) {
+                manifestMatch.remove(at: ind)
+            }
+        }
+    }
+    for (pattern, scriptNames) in manifestExclude {
+        for scriptName in scriptNames {
+            if !allSaveLocationFilenames.contains(scriptName) {
+                if let index = manifestExclude[pattern]?.firstIndex(of: scriptName) {
+                    manifestExclude[pattern]?.remove(at: index)
+                }
+            }
+        }
+        if let length = manifestExclude[pattern]?.count {
+            if length < 1, let ind = manifestExclude.index(forKey: pattern) {
+                manifestExclude.remove(at: ind)
+            }
+        }
+    }
+    for scriptName in disabled {
+        if !allSaveLocationFilenames.contains(scriptName) {
+            if let index = disabled.firstIndex(of: scriptName) {
+                disabled.remove(at: index)
+            }
+        }
+    }
+    // update manifest
+    let manifest = Manifest(blacklist: blacklist, disabled: disabled, exclude: manifestExclude, match: manifestMatch)
+    if !updateManifest(with: manifest) {
+        err("failed to purge manifest")
+        return false
+    }
+    return true
+}
+
 func toggleScript(_ type: String,_ scriptName: String) -> Bool {
     // get manifest data
     guard
