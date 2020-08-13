@@ -32,7 +32,7 @@
 		<array>
 			<dict>
 				<key>Script</key>
-				<string>script.js</string>
+				<string>UserscriptsSafari.js</string>
 			</dict>
 		</array>
 		<key>SFSafariToolbarItem</key>

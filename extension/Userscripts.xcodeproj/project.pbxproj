@@ -15,7 +15,7 @@
 		4A57BA00227235CE008A9763 /* Userscripts Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A57BA04227235CE008A9763 /* Cocoa.framework */; };
 		4A57BA08227235CE008A9763 /* SafariExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */; };
-		4A57BA10227235CE008A9763 /* script.js in Resources */ = {isa = PBXBuildFile; fileRef = 4A57BA0F227235CE008A9763 /* script.js */; };
+		4A57BA10227235CE008A9763 /* UserscriptsSafari.js in Resources */ = {isa = PBXBuildFile; fileRef = 4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */; };
 		4A57BA12227235CE008A9763 /* ToolbarItemIcon.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */; };
 		4AB37AD923DA73E500413E1E /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AB37AD823DA73E500413E1E /* index.html */; };
 		4AE1EA8B24D73AB600D70037 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE1EA8A24D73AB600D70037 /* Shared.swift */; };
@@ -59,7 +59,7 @@
 		4A57BA04227235CE008A9763 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A57BA0F227235CE008A9763 /* script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = script.js; sourceTree = "<group>"; };
+		4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = UserscriptsSafari.js; sourceTree = "<group>"; };
 		4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ToolbarItemIcon.pdf; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts Extension.entitlements"; sourceTree = "<group>"; };
 		4AB37AD823DA73E500413E1E /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
@@ -135,7 +135,7 @@
 				4AED8EC723F0FE8A0059259E /* Functions.swift */,
 				4AB37AD823DA73E500413E1E /* index.html */,
 				4A57BA0E227235CE008A9763 /* Info.plist */,
-				4A57BA0F227235CE008A9763 /* script.js */,
+				4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */,
 				4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */,
 			);
 			path = "Userscripts Extension";
@@ -239,7 +239,7 @@
 			files = (
 				4A57BA12227235CE008A9763 /* ToolbarItemIcon.pdf in Resources */,
 				4AB37AD923DA73E500413E1E /* index.html in Resources */,
-				4A57BA10227235CE008A9763 /* script.js in Resources */,
+				4A57BA10227235CE008A9763 /* UserscriptsSafari.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
