@@ -640,6 +640,7 @@ const ___e = {
         activeDesc.innerText = desc;
         active.setAttribute("data-mod", scriptData["lastModifiedMS"]);
         active.setAttribute("data-id", id);
+        active.setAttribute("title", name + "\n" + desc);
         active.classList.remove("temp");
         let status = ___a.getString("saveSuccess");
         document.getElementById("status").innerText = status;
