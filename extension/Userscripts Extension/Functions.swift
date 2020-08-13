@@ -258,6 +258,11 @@ func getInitData() -> [String: Any]? {
         err("could not get settings for init data func")
         return nil
     }
+    // if purge manifest fails, it's doesn't break functionality
+    // note the failure but continue operations
+    if !purgeManifest() {
+        err("purge manifest failed while getting init data")
+    }
     // create new dict to return
     var returnData:[String: Any] = initData
     // get language code
@@ -482,6 +487,7 @@ func purgeManifest() -> Bool {
                 // get the index of element and then remove from array
                 if let index = manifestMatch[pattern]?.firstIndex(of: scriptName) {
                     manifestMatch[pattern]?.remove(at: index)
+                    NSLog("Could not find \(scriptName) in save location, removed from match pattern - \(pattern)")
                 }
             }
         }
@@ -489,6 +495,7 @@ func purgeManifest() -> Bool {
         if let length = manifestMatch[pattern]?.count {
             if length < 1, let ind = manifestMatch.index(forKey: pattern) {
                 manifestMatch.remove(at: ind)
+                NSLog("No more scripts for \(pattern) match pattern, removed from manifest")
             }
         }
     }
@@ -497,12 +504,14 @@ func purgeManifest() -> Bool {
             if !allSaveLocationFilenames.contains(scriptName) {
                 if let index = manifestExclude[pattern]?.firstIndex(of: scriptName) {
                     manifestExclude[pattern]?.remove(at: index)
+                    NSLog("Could not find \(scriptName) in save location, removed from exclude-match pattern - \(pattern)")
                 }
             }
         }
         if let length = manifestExclude[pattern]?.count {
             if length < 1, let ind = manifestExclude.index(forKey: pattern) {
                 manifestExclude.remove(at: ind)
+                NSLog("No more scripts for \(pattern) exclude-match pattern, removed from manifest")
             }
         }
     }
@@ -510,6 +519,7 @@ func purgeManifest() -> Bool {
         if !allSaveLocationFilenames.contains(scriptName) {
             if let index = disabled.firstIndex(of: scriptName) {
                 disabled.remove(at: index)
+                NSLog("Could not find \(scriptName) in save location, removed from disabled")
             }
         }
     }
