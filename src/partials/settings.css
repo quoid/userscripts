@@ -9,7 +9,7 @@
     position: absolute;
     top: 0;
     /* this is the "transition out" */
-    transition: visibility 375ms linear 0ms, opacity 150ms linear 0;
+    transition: visibility 375ms linear 0s, opacity 150ms linear 0s;
     visibility: hidden;
     width: 100%;
 }
@@ -68,7 +68,7 @@
 body.settings #settings {
     opacity: 1;
     /* this is the "transition in" */
-    transition: visibility 0s linear 0ms, opacity 150ms linear 0;
+    transition: visibility 0s linear 0s, opacity 150ms linear 0s;
     visibility: visible;
 }
 
