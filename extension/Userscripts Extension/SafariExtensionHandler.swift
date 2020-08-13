@@ -74,7 +74,12 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                     respData["error"] = "failed to get save location in func openSaveLocation"
                     return
                 }
-                NSWorkspace.shared.activateFileViewerSelecting([url])
+                // secrutiy scope
+                let didStartAccessing = url.startAccessingSecurityScopedResource()
+                defer {
+                    if didStartAccessing { url.stopAccessingSecurityScopedResource() }
+                }
+                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
             }
             if messageName == "REQ_SCRIPT_DELETE" {
                 respName = "RESP_SCRIPT_DELETE"
