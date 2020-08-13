@@ -133,7 +133,7 @@ func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
 
 // parser
 func parse(content: String) -> [String: Any]? {
-    // returns structured datat from content of script file
+    // returns structured data from content of script file
     // will fail to parse if metablock or required @name key missing
     let pattern = #"\B(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
     // force try b/c pattern is known to be valid regex
