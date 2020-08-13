@@ -645,7 +645,7 @@ func getFileContents(_ url: URL) -> Any? {
             var parsed = parse(content: content),
             let type = filename.split(separator: ".").last
         else {
-            err("ignoring \(filename), metadata missing from file contents")
+            NSLog("ignoring \(filename), metadata missing from file contents")
             continue
         }
         parsed["lastModified"] = dateFormatter.string(from: dateMod)
