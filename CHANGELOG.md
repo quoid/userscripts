@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.0 (TBD)
+- allow users to choose the desired save/load location for their userscripts - #32
+- refocus editor after saving - #60
+- fixed a bug that was causing duplicate entries in the manifest - #62
+- regularly purge manifest of stale entries - #57
+- open save/load location properly when clicking link in settings modal
+- misc styling/code changes
+
 ## v2.0.1 (2020-07-27)
 - @include/@exclude are now aliases for @match/@exlcude-match
 - Display an error when browser is not supported
