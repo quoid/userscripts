@@ -1,13 +1,4 @@
-//
-//  SafariExtensionHandler.swift
-//  Userscripts Extension
-//
-//  Created by Justin Wasack on 4/25/19.
-//  Copyright © 2019 Justin Wasack. All rights reserved.
-//
-
 import SafariServices
-import WebKit
 
 class SafariExtensionHandler: SFSafariExtensionHandler {
     
@@ -31,6 +22,11 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 respData["data"] = code
                 page.dispatchMessageToScript(withName: respName, userInfo: respData)
             }
+        } else if messageName == "REQ_CHANGE_SAVE_LOCATION" {
+            respName = "RESP_CHANGE_SAVE_LOCATION"
+            SFSafariExtension.getBaseURI(completionHandler: { baseURI in
+                closeExtensionHTMLPages()
+            })
         } else {
             if messageName == "REQ_ALL_SCRIPTS" {
                 respName = "RESP_ALL_SCRIPTS"
@@ -72,14 +68,18 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                     respData["error"] = "failed to get init data"
                 }
             }
-            if messageName == "REQ_SAVE_LOCATION_CHANGE" {
-                respName = "RESP_SAVE_LOCATION_CHANGE"
-                guard let saveLocation = getSaveLocation() else {
+            if messageName == "REQ_OPEN_SAVE_LOCATION" {
+                respName = "RESP_OPEN_SAVE_LOCATION"
+                guard let url = getSaveLocation() else {
                     respData["error"] = "failed to get save location in func openSaveLocation"
                     return
                 }
-                let url = URL(fileURLWithPath: saveLocation, isDirectory: true)
-                NSWorkspace.shared.activateFileViewerSelecting([url])
+                // secrutiy scope
+                let didStartAccessing = url.startAccessingSecurityScopedResource()
+                defer {
+                    if didStartAccessing { url.stopAccessingSecurityScopedResource() }
+                }
+                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
             }
             if messageName == "REQ_SCRIPT_DELETE" {
                 respName = "RESP_SCRIPT_DELETE"
@@ -127,7 +127,7 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         SFSafariExtension.getBaseURI { baseURI in
             guard let baseURI = baseURI else { return }
             window.openTab(with: baseURI.appendingPathComponent("index.html"), makeActiveIfPossible: true) { (tab) in
-                print(baseURI)
+                //print(baseURI)
             }
         }
     }

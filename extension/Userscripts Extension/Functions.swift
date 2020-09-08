@@ -1,39 +1,61 @@
-//
-//  Functions.swift
-//  Userscripts Extension
-//
-//  Created by Justin Wasack on 2/9/20.
-//  Copyright © 2020 Justin Wasack. All rights reserved.
-//
-
 import Foundation
 import SafariServices
-import os
-
-struct Log {
-    static var bundle = Bundle.main.bundleIdentifier!
-    static var general = OSLog(subsystem: Log.bundle, category: "general")
-}
-
-func err(_ message: String) {
-    os_log("%{public}@", log: Log.general, type: .error, "Error: \(message)")
-}
 
 // helpers
-func getDocumentsDirectory() -> URL {
-    let fm = FileManager.default
-    let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
-    let documentsDirectory = paths[0]
-    return documentsDirectory
-}
-
-func getSaveLocation() -> String? {
-    let defaults = UserDefaults.standard
-    if let saveLocation = defaults.string(forKey: "saveLocation") {
-        return saveLocation
+func getSaveLocation() -> URL? {
+    let standardDefaults = UserDefaults.standard
+    let userSaveLocationKey = "userSaveLocation"
+    // get the default save location
+    guard let defaultSaveLocation = standardDefaults.url(forKey: "saveLocation") else {
+        err("could not get the default saveLocation in getSaveLocation")
+        return nil
     }
-    err("failed to get save location")
-    return nil
+    // check if sharedBookmark data exists
+    // check if can get bookmark URL (won't be able to if directory permanently deleted)
+    // check if bookmark directory is in trash
+    guard
+        let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+        let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
+        directoryExists(path: sharedBookmark.path)
+    else {
+        // sharedBookmark removed, or in trash, use default location and ensure shared will not be used
+        UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
+        NSLog("removed sharedbookmark because it was either permanently deleted or exists in trash")
+        return defaultSaveLocation
+    }
+
+    // at this point, it's known sharedbookmark exists
+    // check local bookmark exists, can read url from bookmark, if bookmark url == shared bookmark url
+    // no need to check if directoryExists for local bookmark (if local bookmark is exists)
+    // can not think of instance where shared bookmark directory exists, yet local bookmark directory does not
+    if
+        let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
+        let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
+        sharedBookmark == userSaveLocation
+    {
+        print("local bookmark same as shared, return local")
+        return userSaveLocation
+    }
+    
+    // at this point one of the following conditions met
+    // local bookmark data doesn't exist
+    // for some reason can't get url from local bookmark data
+    // local bookmark url != shared bookmark url (user updated update location)
+    // create new local bookmark
+    if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
+        // return newly created local bookmark url
+        guard
+            let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
+            let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
+        else {
+            err("reading after saveBookmark failed in getSaveLocation")
+            return nil
+        }
+        return localBookmarkUrl
+    } else {
+        err("could not save local version of shared bookmark")
+        return nil
+    }
 }
 
 func patternMatch(_ string: String,_ pattern: String) -> Bool {
@@ -60,9 +82,58 @@ func isSanitzed(_ str: String) -> Bool {
     return str.removingPercentEncoding != str
 }
 
+func closeExtensionHTMLPages() {
+    // this function attempts to close all instances of the extension's app page
+    // unfortunately there is no good api for managing extension bundled html pages
+    // this hack looks at all pages, sees if they are "active", if not, closes them
+    // what "active" means in terms of the api is unclear
+    // every page that is open and not a top sites page, favorites page or an extension bundled html page will return true
+    // this enables differentiation of bundled html pages in a way
+    SFSafariApplication.getAllWindows { (windows) in
+        for window in windows {
+            window.getAllTabs{ (tabs) in
+                for tab in tabs {
+                    tab.getPagesWithCompletionHandler { (pages) in
+                        if pages != nil {
+                            for page in pages! {
+                                page.getPropertiesWithCompletionHandler({ props in
+                                    let isActive = props?.isActive ?? false
+                                    if !isActive {
+                                        page.getContainingTab(completionHandler: { tab in
+                                            tab.close()
+                                        })
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
+    SFSafariApplication.getAllWindows { (windows) in
+        for window in windows {
+            window.getAllTabs{ (tabs) in
+                for tab in tabs {
+                    tab.getPagesWithCompletionHandler { (pages) in
+                        if pages != nil {
+                            for page in pages! {
+                                page.dispatchMessageToScript(withName: withName, userInfo: userInfo)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 // parser
 func parse(content: String) -> [String: Any]? {
-    // returns structured datat from content of script file
+    // returns structured data from content of script file
     // will fail to parse if metablock or required @name key missing
     let pattern = #"\B(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
     // force try b/c pattern is known to be valid regex
@@ -72,7 +143,7 @@ func parse(content: String) -> [String: Any]? {
     guard
         let match = regex.firstMatch(in: content, options: [], range: range)
     else {
-        print("metablock missing or improperly formatted, failed to parse")
+        err("metablock missing or improperly formatted, failed to parse")
         return nil
     }
     
@@ -115,7 +186,7 @@ func parse(content: String) -> [String: Any]? {
     }
     // return nil/fail if @name key is missing or @name has no value
     if metadata["name"] == nil {
-        print("@name metadata key missing or without value, failed to parse")
+        err("@name metadata key missing or without value, failed to parse")
         return nil
     }
     // get the code
@@ -134,12 +205,12 @@ func getSettings() -> [String: String]? {
     let defaults = UserDefaults.standard
     var settings: [String: String] = [:]
     let fm = FileManager.default
-    let saveLoc = getDocumentsDirectory().appendingPathComponent("scripts")
+    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
     let defaultSettings: [String: String] = [
         "autoShowHints": "true",
         "hideDescriptions": "false",
         "lint": "false",
-        "saveLocation": saveLoc.path,
+        "saveLocation": defaultSaveLocation.path,
         "showInvisibles": "true",
         "tabSize": "4",
         "verbose": "false"
@@ -155,15 +226,19 @@ func getSettings() -> [String: String]? {
         // add key & value from UserDefaults to setting dict
         settings[key] = defaults.string(forKey: key)
     }
-    // check that saveLocation folder exists, if not, create it
-    if !fm.fileExists(atPath: saveLoc.path) {
+    // check that defaultSaveLocation folder exists, if not, create it
+    if !fm.fileExists(atPath: defaultSaveLocation.path) {
         do {
-            try fm.createDirectory(at: saveLoc, withIntermediateDirectories: false)
+            try fm.createDirectory(at: defaultSaveLocation, withIntermediateDirectories: false)
         } catch {
             // could not create the save location directory, show error
             err("failed to create save location folder when getting settings")
             return nil
         }
+    }
+    // check if the user changed the defaultSaveLocation if so return that path instead
+    if let actualSaveLocation = getSaveLocation() {
+        settings["saveLocation"] = actualSaveLocation.path
     }
     return settings
 }
@@ -182,6 +257,11 @@ func getInitData() -> [String: Any]? {
     guard let initData = getSettings() else {
         err("could not get settings for init data func")
         return nil
+    }
+    // if purge manifest fails, it's doesn't break functionality
+    // note the failure but continue operations
+    if !purgeManifest() {
+        err("purge manifest failed while getting init data")
     }
     // create new dict to return
     var returnData:[String: Any] = initData
@@ -363,6 +443,95 @@ func updateExcludesAndMatches(_ filename: String,_ exclude: [String],_ match: [S
     return true
 }
 
+func purgeManifest() -> Bool {
+    var allSaveLocationFilenames:[String] = []
+    // get the manifest's current key values
+    guard
+        let blacklist = getManifestKey("blacklist") as? [String],
+        var disabled = getManifestKey("disabled") as? [String],
+        var manifestExclude = getManifestKey("exclude") as? [String: [String]],
+        var manifestMatch = getManifestKey("match") as? [String: [String]]
+    else {
+        err("failed to get manifest keys when attempting to purge manifest")
+        return false
+    }
+    guard let saveLocation = getSaveLocation() else {
+        err("failed to get save location when attempting to purge manifest")
+        return false
+    }
+    // secrutiy scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    guard
+        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
+    else {
+        err("failed to get all file urls when attempting to purge manifest")
+        return false
+    }
+    for fileUrl in allFilesUrls {
+        // skip file if it is not of the proper type
+        let filename = fileUrl.lastPathComponent
+        if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
+            continue
+        }
+        // if file is of the proper extension, add it to the allSaveLocationFilenames array
+        allSaveLocationFilenames.append(filename)
+    }
+    // iterate through manifest matches
+    // if no filename exists for value, remove it from manifest
+    for (pattern, scriptNames) in manifestMatch {
+        for scriptName in scriptNames {
+            if !allSaveLocationFilenames.contains(scriptName) {
+                // get the index of element and then remove from array
+                if let index = manifestMatch[pattern]?.firstIndex(of: scriptName) {
+                    manifestMatch[pattern]?.remove(at: index)
+                    NSLog("Could not find \(scriptName) in save location, removed from match pattern - \(pattern)")
+                }
+            }
+        }
+        // if there are no more script names in pattern, remove pattern from manifest
+        if let length = manifestMatch[pattern]?.count {
+            if length < 1, let ind = manifestMatch.index(forKey: pattern) {
+                manifestMatch.remove(at: ind)
+                NSLog("No more scripts for \(pattern) match pattern, removed from manifest")
+            }
+        }
+    }
+    for (pattern, scriptNames) in manifestExclude {
+        for scriptName in scriptNames {
+            if !allSaveLocationFilenames.contains(scriptName) {
+                if let index = manifestExclude[pattern]?.firstIndex(of: scriptName) {
+                    manifestExclude[pattern]?.remove(at: index)
+                    NSLog("Could not find \(scriptName) in save location, removed from exclude-match pattern - \(pattern)")
+                }
+            }
+        }
+        if let length = manifestExclude[pattern]?.count {
+            if length < 1, let ind = manifestExclude.index(forKey: pattern) {
+                manifestExclude.remove(at: ind)
+                NSLog("No more scripts for \(pattern) exclude-match pattern, removed from manifest")
+            }
+        }
+    }
+    for scriptName in disabled {
+        if !allSaveLocationFilenames.contains(scriptName) {
+            if let index = disabled.firstIndex(of: scriptName) {
+                disabled.remove(at: index)
+                NSLog("Could not find \(scriptName) in save location, removed from disabled")
+            }
+        }
+    }
+    // update manifest
+    let manifest = Manifest(blacklist: blacklist, disabled: disabled, exclude: manifestExclude, match: manifestMatch)
+    if !updateManifest(with: manifest) {
+        err("failed to purge manifest")
+        return false
+    }
+    return true
+}
+
 func toggleScript(_ type: String,_ scriptName: String) -> Bool {
     // get manifest data
     guard
@@ -433,6 +602,16 @@ func getFileContents(_ url: URL) -> Any? {
     var urls:[URL] = []
     // this array will be returned if successful, if url arg issingle file, return only first index
     var fileContents: [[String: Any]] = []
+    // get the saveLocation to access security scope if needed
+    guard let securityScope = getSaveLocation() else {
+        err("failed to get savelocation for security scope in getFileContents")
+        return nil
+    }
+    // secrutiy scope
+    let didStartAccessing = securityScope.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { securityScope.stopAccessingSecurityScopedResource() }
+    }
     // check that url is a valid path to a directory or single file
     guard fm.fileExists(atPath: url.path) else {
         err("could not get file contents, no directory or file exists at path, \(url.path)")
@@ -466,7 +645,7 @@ func getFileContents(_ url: URL) -> Any? {
             var parsed = parse(content: content),
             let type = filename.split(separator: ".").last
         else {
-            err("ignoring \(filename), metadata missing from file contents")
+            NSLog("ignoring \(filename), metadata missing from file contents")
             continue
         }
         parsed["lastModified"] = dateFormatter.string(from: dateMod)
@@ -484,11 +663,10 @@ func getFileContents(_ url: URL) -> Any? {
 
 func updateScriptsData() -> [[String: Any]]? {
     // returns description, disabled, filename, name, type
-    guard let saveLocation = getSaveLocation() else {
+    guard let url = getSaveLocation() else {
         err("failed to get save location in func updateScriptsData")
         return nil
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true)
     var allScriptsData: [[String: Any]] = []
     guard
         let dataArray = getFileContents(url) as? [[String: Any]],
@@ -551,7 +729,7 @@ func loadScriptData(_ filename: String) -> [String: String]? {
         err("failed to get save location in func loadScriptData")
         return nil
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true).appendingPathComponent(filename)
+    let url = saveLocation.appendingPathComponent(filename)
     var scriptData:[String: String] = [:]
     guard
         let fileContents = getFileContents(url) as? [String: Any],
@@ -615,12 +793,15 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     
     // get the scripts save locations
     let fm = FileManager.default
-    guard let saveLocation = getSaveLocation() else {
+    guard let url = getSaveLocation() else {
         err("failed to get save location when attempting to save script file")
         return nil
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true)
-    
+    // secrutiy scope
+    let didStartAccessing = url.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { url.stopAccessingSecurityScopedResource() }
+    }
     // get script data and parse script content
     guard
         let content = scriptData["content"],
@@ -651,7 +832,7 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     // script validated
     let newFileUrl = url.appendingPathComponent(newFilename)
     do {
-        if oldFilename.lowercased() != newFilename.lowercased() {
+        if oldFilename != newFilename {
             // if user changed the filename, remove file with old filename
             let oldFileUrl = url.appendingPathComponent(oldFilename)
             // however, when creating a new script, if user changes the temp given name by app...
@@ -679,7 +860,7 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     }
     
     // remove manifest records for old filename
-    if oldFilename.lowercased() != newFilename.lowercased() {
+    if oldFilename != newFilename {
         if !updateExcludesAndMatches(oldFilename, [], []) {
             err("failed to remove old filename from manifest when attempting to save script file")
         }
@@ -727,7 +908,12 @@ func deleteScript(_ filename: String) -> Bool {
         err("failed to remove script from manifest or get save location")
         return false
     }
-    let url = URL(fileURLWithPath: saveLocation, isDirectory: true).appendingPathComponent(filename)
+    // secrutiy scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    let url = saveLocation.appendingPathComponent(filename)
     do {
         try FileManager.default.trashItem(at: url, resultingItemURL: nil)
     } catch {
@@ -799,8 +985,7 @@ func getCode(_ url: String) -> [String: [String: String]]? {
                         err("could not get save location from settings when attempting to get code for injected script")
                         continue
                     }
-                    let saveLocationUrl = URL(fileURLWithPath: saveLocation, isDirectory: false)
-                    let url = saveLocationUrl.appendingPathComponent(filename)
+                    let url = saveLocation.appendingPathComponent(filename)
                     guard
                         let contents = getFileContents(url) as? [String: Any],
                         let code = contents["code"] as? String

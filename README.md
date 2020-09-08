@@ -69,6 +69,23 @@ CSS Userscripts/styles can use the javascript metadata format or the Userstyle f
 @match          *://*.github.com/*
 ==/UserStyle== */
 ```
+
+## Userscript Save Location
+
+As of v2.1.0, the user can choose where their userscripts are saved to and loaded from. There's no api that allows this change to happen from the extension, so users must perform location changes from the host application.
+
+In order to change the location, you must either launch `Userscripts.app` as you would any other application, or open the settings modal within the browser extension and click the "settings" icon within the "Save location" row.
+
+Once the host app is open, you will see a button called "Change save location". Click this and select the directory where you'd like to save to/load from.
+
+**Save Location Notes**
+
+- Close all instances of the extension UI (browser app) before you change the save location. The extension will attempt to do this automatically, but it could fail (if it does, please bug report)
+
+- Currently, when changing the save location, the app does not copy over userscripts from the previous save/load directory
+
+- After a new save location is selected, if you rename or move that selected folder, the extension will continue to load/save to that location - the only way to remove the “link” is by trashing the folder or selecting a new save location
+
 ## Notes & FAQs
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
@@ -91,9 +108,9 @@ Your previous userscript file *should* still exist after update. You can access 
 
 **How can I help development**
 
-Any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offer coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
+One of the best ways you can help development is to **[sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9)**. You will be able to test new features before they are released and help guide development by providing essential feedback.
 
-If you are willing to beta test new versions of the extension, [you can sign up here](https://forms.gle/QB46uYQHVyCxULue9).
+Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offer coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
 
 ## Feedback & Support
 If you need help doing something with this extension or you have an idea for an enhancement, please open an issue. Be sure to search current and closed issues before opening a new one.

@@ -4,6 +4,7 @@
 const ___a = {
     blacklistInput: document.querySelector("#blacklist textarea"),
     blacklistStatus: document.getElementById("blacklistStatus"),
+    changeSaveLocationButton: document.getElementById("changeSaveLocation"),
     language: "en",
     linkDocs: "https://github.com/quoid/userscripts#readme",
     linkDonate: "https://github.com/quoid/userscripts",
@@ -66,6 +67,15 @@ const ___a = {
             }
         }
     },
+    changeSaveLocation: function() {
+        const message = ___a.getString("changeSaveLocationMessage");
+        if (confirm(message)) {
+            window.open("userscriptsurlscheme:changesavelocation");
+            safari.extension.dispatchMessage("REQ_CHANGE_SAVE_LOCATION");
+        } else {
+            return;
+        }
+    },
     changeSetting: function(el, val) { // arg1 dom element // arg2 str
         val = JSON.parse(val);
         if (___h.hasClass(el, "cb")) {
@@ -97,6 +107,7 @@ const ___a = {
         const data = e.message.data;
         const error = e.message.error;
         const name = e.name;
+        ___a.log(`Incoming message with name - ${name}`);
         if (name === "RESP_ALL_SCRIPTS") {
             if (error) {
                 console.error(error);
@@ -164,7 +175,7 @@ const ___a = {
                 ___a.log(`Enabled ${id}`);
             }
         }
-        if (name === "RESP_SAVE_LOCATION_CHANGE") {
+        if (name === "RESP_OPEN_SAVE_LOCATION") {
             if (error) {
                 console.error(error);
                 return;
@@ -192,6 +203,7 @@ const ___a = {
                 ___e.setStatus(___e.oldStatus, 3000);
                 document.body.classList.remove("saving");
                 ___e.editor.setOption("readOnly", false);
+                ___e.editor.focus();
                 return;
             }
             ___e.save(data);
@@ -265,11 +277,14 @@ const ___a = {
         });
         saveLocation.addEventListener("click", function(e) {
             e.preventDefault();
-            safari.extension.dispatchMessage("REQ_SAVE_LOCATION_CHANGE");
+            safari.extension.dispatchMessage("REQ_OPEN_SAVE_LOCATION");
         });
         // blacklist input functionality
         this.blacklistInput.addEventListener("blur", this.blacklistUpdate);
         this.blacklistInput.addEventListener("keydown", this.blacklistUpdate);
+
+        // changeSaveLocation button functionality
+        this.changeSaveLocationButton.addEventListener("click", this.changeSaveLocation);
 
         // disable the default cmd+S browser key command
         document.addEventListener("keydown", function(e) {
@@ -625,6 +640,7 @@ const ___e = {
         activeDesc.innerText = desc;
         active.setAttribute("data-mod", scriptData["lastModifiedMS"]);
         active.setAttribute("data-id", id);
+        active.setAttribute("title", name + "\n" + desc);
         active.classList.remove("temp");
         let status = ___a.getString("saveSuccess");
         document.getElementById("status").innerText = status;
@@ -635,6 +651,7 @@ const ___e = {
         ___s.sortScripts();
         ___a.setQueryString("script", id);
         document.body.classList.remove("saving");
+        ___e.editor.focus();
     },
     setMode: function(mode) { // arg1 str
         // sets the editor mode and body class for styling purposes

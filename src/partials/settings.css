@@ -9,7 +9,7 @@
     position: absolute;
     top: 0;
     /* this is the "transition out" */
-    transition: visibility 375ms linear 0ms, opacity 150ms linear 0;
+    transition: visibility 375ms linear 0s, opacity 150ms linear 0s;
     visibility: hidden;
     width: 100%;
 }
@@ -52,18 +52,11 @@
 }
 
 .modal .row > div {
-    flex: 1;
+    flex-grow: 1;
 }
 
 .modal p {
     margin: 0 16px 24px 16px;
-}
-
-#saveLocation {
-    display: block;
-    font-size: 13px;
-    max-width: 240px;
-    text-align: right;
 }
 
 /* target the last title element (for info) and custom style */
@@ -75,7 +68,7 @@
 body.settings #settings {
     opacity: 1;
     /* this is the "transition in" */
-    transition: visibility 0s linear 0ms, opacity 150ms linear 0;
+    transition: visibility 0s linear 0s, opacity 150ms linear 0s;
     visibility: visible;
 }
 
@@ -135,4 +128,32 @@ textarea {
 textarea:focus {
     opacity: 1;
     outline: none;
+}
+
+.modal .row > div[data-localize="settingSaveLocation"] {
+    flex-grow: 0;
+}
+
+.saveLocationContainer {
+    display: flex;
+}
+
+#saveLocation {
+    display: block;
+    font-size: 13px;
+    max-width: 280px;
+    margin-left: auto;
+    text-align: right;
+}
+
+#changeSaveLocation {
+    flex-grow: 0;
+    height: 16px;
+    margin-left: 8px;
+    width: 16px;
+}
+
+#changeSaveLocation svg {
+    height: 100%;
+    width: auto;
 }

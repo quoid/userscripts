@@ -160,7 +160,7 @@ const ___safari = {
                     const responseObject = ___safari.validateScript(data);
                     const key = Object.keys(responseObject)[0];
                     resp[key] = responseObject[key];
-                    //resp["error"] = "can't save file";
+                    // resp["error"] = "can't save file";
                     ___safari.dispatchMessageToScript("RESP_SCRIPT_SAVE", resp);
                     break;
                 case "REQ_SETTING_CHANGE":
@@ -191,11 +191,11 @@ const ___settings = {
     hideDescriptions: "false",
     languageCode: "en-GB",
     lint: "false",
-    saveLocation: "/Users/UserName/Library/Folder/SubFolder/",
+    saveLocation: "/Users/UserName/Library/Containers/ParentFolder/SubFolder/",
     showInvisibles: "true",
     tabSize: "4",
     verbose: "true",
-    version: "2.0.1"
+    version: "2.1.0"
 };
 
 const ___parse = {
