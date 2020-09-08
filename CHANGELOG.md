@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.0 (TBD)
+## v2.1.0 (2020-09-08)
 - allow users to choose the desired save/load location for their userscripts - #32
 - refocus editor after saving - #60
 - fixed a bug that was causing duplicate entries in the manifest - #62
