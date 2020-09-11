@@ -31,6 +31,13 @@ function css() {
     // if NODE_ENV === production, no sourcemaps and minify the css
     const path = `${sourcePath}/stylesheets/_main.css`;
 
+    // autoprefix more browsers for demo page
+    var browsers = ["safari 13"];
+    if (process.env.NODE_ENV === "demo") {
+        console.log("its a demo");
+        browsers = ["last 4 version"];
+    }
+
     if (
         process.env.NODE_ENV != "production"
         || process.env.NODE_ENV != "demo"
@@ -39,7 +46,7 @@ function css() {
             .pipe(sourcemaps.init())
             .pipe(postcss([
                 atImport(),
-                autoprefixer({overrideBrowserslist: ["safari 13"]})
+                autoprefixer({overrideBrowserslist: browsers})
             ]))
             .pipe(sourcemaps.write())
             .pipe(dest(outputPath));
@@ -47,7 +54,7 @@ function css() {
         return src(path)
             .pipe(postcss([
                 atImport(),
-                autoprefixer({overrideBrowserslist: ["defaults"]})
+                autoprefixer({overrideBrowserslist: browsers})
             ]))
             .pipe(dest(outputPath));
     }
