@@ -107,7 +107,7 @@
 #scripts {
     border-top: 1px solid var(--border-dark);
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
     position: relative;
 }
 

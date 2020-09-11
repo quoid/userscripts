@@ -22,7 +22,7 @@
     letter-spacing: var(--ls2);
     max-height: 80%;
     opacity: 0;
-    overflow-y: scroll;
+    overflow-y: auto;
     transform: translateY(50px);
     transition: opacity 150ms linear 75ms, transform 150ms ease-in-out 75ms;
     width: 440px;
