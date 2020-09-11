@@ -119,6 +119,7 @@
     background-color: var(--bg-sidebar);
     border-bottom: 1px solid var(--border-dark);
     cursor: pointer;
+    display: none;
     padding: 24px 24px 23px 24px;
 }
 
@@ -215,23 +216,39 @@ body.saving #sidebar .script {
     display: block;
 }
 
-#scripts.show-css .script:not([data-type="css"]),
-#scripts.show-js .script:not([data-type="js"]),
-#scripts.show-disabled .script:not(.disabled),
-#scripts.show-enabled .script:not(.enabled) {
+/* show css scripts */
+#scripts.show-css .script[data-type="css"],
+/* show js scripts */
+#scripts.show-js .script[data-type="js"],
+/* show disabled scripts */
+#scripts.show-disabled .script.disabled,
+/* show enabled scripts */
+#scripts.show-enabled .script.enabled {
+    display: block;
+}
+
+/* show disabled css scripts */
+#scripts.show-css.show-disabled .script:not([data-type="css"].disabled),
+/* show enabled css scripts */
+#scripts.show-css.show-enabled .script:not([data-type="css"].enabled),
+/* show disabled js scripts */
+#scripts.show-js.show-disabled .script:not([data-type="js"].disabled),
+/* show enabled js scripts */
+#scripts.show-js.show-enabled .script:not([data-type="js"].enabled) {
     display: none;
 }
 
-#scripts.show-css.show-js .script[data-type="css"],
-#scripts.show-css.show-js .script[data-type="js"],
-#scripts.show-enabled.show-disabled .script.disabled,
-#scripts.show-enabled.show-disabled .script.enabled,
-#scripts.show-enabled.show-disabled.show-css .script.disabled,
-#scripts.show-enabled.show-disabled.show-css .script.enabled,
-#scripts.show-enabled.show-disabled.show-css .script[data-type="css"]
-#scripts.show-enabled.show-disabled.show-js .script.disabled,
-#scripts.show-enabled.show-disabled.show-js .script.enabled,
-#scripts.show-enabled.show-disabled.show-js .script[data-type="js"] {
+/* override above rules to show more scripts */
+/* ex. line 245 overrides lines (231/235), etc... */
+
+/* show all disabled */
+#scripts.show-css.show-js.show-disabled .script.disabled,
+/* show all enabled */
+#scripts.show-css.show-js.show-enabled .script.enabled,
+/* show all css */
+#scripts.show-disabled.show-enabled.show-css .script[data-type="css"],
+/* show all js */
+#scripts.show-disabled.show-enabled.show-js .script[data-type="js"] {
     display: block;
 }
 
