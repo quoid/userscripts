@@ -135,7 +135,7 @@ func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
 func parse(content: String) -> [String: Any]? {
     // returns structured data from content of script file
     // will fail to parse if metablock or required @name key missing
-    let pattern = #"\B(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
+    let pattern = #"(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
     // force try b/c pattern is known to be valid regex
     let regex = try! NSRegularExpression(pattern: pattern, options: [])
     let range = NSRange(location: 0, length: content.utf16.count)
