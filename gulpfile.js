@@ -131,8 +131,7 @@ function complete() {
     // on the intial clean we want to remove EVERYTHING
     // on the build complete, we want to leave the index.html
     let paths = [
-        `${outputPath}/**/*`,
-        //`!${outputPath}/index.html`
+        outputPath
     ];
     if (process.env.NODE_ENV === "production") {
         paths = [
