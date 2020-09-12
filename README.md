@@ -18,7 +18,7 @@ As of Version 2.0.0, this extension now supports multiple, domain specific, user
 
 Click the extension's toolbar button to open the extension UI.
 
-If you don't feel like reading, visit [this folder](/etc/videos/) to watch some short and poorly made video tutorials.
+**If you don't feel like reading, view [this markdown file](/etc/gifs.md) to watch some short agif tutorials.**
 
 **UI Overview**
 ![Userscripts Safari](/etc/ui-overview-01.png)
@@ -71,6 +71,8 @@ CSS Userscripts/styles can use the javascript metadata format or the Userstyle f
 ```
 
 ## Userscript Save Location
+
+See how it is done [here](/etc/gifs.md#change-save-location).
 
 As of v2.1.0, the user can choose where their userscripts are saved to and loaded from. There's no api that allows this change to happen from the extension, so users must perform location changes from the host application.
 
