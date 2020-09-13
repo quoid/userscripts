@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.1 (TBD)
+- fixed an issue that caused extension to crash when text preceded opening userscript tag - #69 #68 #58
+- update style overflows - #71
+
 ## v2.1.0 (2020-09-08)
 - allow users to choose the desired save/load location for their userscripts - #32
 - refocus editor after saving - #60
