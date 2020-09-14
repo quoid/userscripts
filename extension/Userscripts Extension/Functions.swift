@@ -135,7 +135,7 @@ func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
 func parse(content: String) -> [String: Any]? {
     // returns structured data from content of script file
     // will fail to parse if metablock or required @name key missing
-    let pattern = #"\B(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
+    let pattern = #"(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
     // force try b/c pattern is known to be valid regex
     let regex = try! NSRegularExpression(pattern: pattern, options: [])
     let range = NSRange(location: 0, length: content.utf16.count)
@@ -147,9 +147,13 @@ func parse(content: String) -> [String: Any]? {
         return nil
     }
     
-    // check whether metablock for UserScript or UserStyle format, change group numbers as needed
+    // at this point the text content has passed initial validation, it contains valid userscript metadata
+    // the userscript metadata can be in UserScript or UserStyle format, need to check for this and adjust group numbers
+    // rather than being too strict, text content can precede the opening userscript tag, however it will be ignored
+    // adjust start index of script content while assigning group numbers to account for any text content preceding opening tag
+    let contentStartIndex = content.index(content.startIndex, offsetBy: match.range.lowerBound)
     var g1, g2, g3:Int
-    if (content.starts(with: "//")) {
+    if (content[contentStartIndex..<content.endIndex].starts(with: "//")) {
         g1 = 1; g2 = 2; g3 = 3
     } else {
         g1 = 4; g2 = 5; g3 = 6

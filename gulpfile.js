@@ -31,6 +31,12 @@ function css() {
     // if NODE_ENV === production, no sourcemaps and minify the css
     const path = `${sourcePath}/stylesheets/_main.css`;
 
+    // autoprefix more browsers for demo page
+    var browsers = ["safari 13"];
+    if (process.env.NODE_ENV === "demo") {
+        browsers = ["last 4 version"];
+    }
+
     if (
         process.env.NODE_ENV != "production"
         || process.env.NODE_ENV != "demo"
@@ -39,7 +45,7 @@ function css() {
             .pipe(sourcemaps.init())
             .pipe(postcss([
                 atImport(),
-                autoprefixer({overrideBrowserslist: ["safari 13"]})
+                autoprefixer({overrideBrowserslist: browsers})
             ]))
             .pipe(sourcemaps.write())
             .pipe(dest(outputPath));
@@ -47,7 +53,7 @@ function css() {
         return src(path)
             .pipe(postcss([
                 atImport(),
-                autoprefixer({overrideBrowserslist: ["defaults"]})
+                autoprefixer({overrideBrowserslist: browsers})
             ]))
             .pipe(dest(outputPath));
     }
@@ -113,14 +119,19 @@ function html() {
         .pipe(connect.reload());
 }
 
+function move() {
+    // only for demo
+    return src("./demo/index.html")
+        .pipe(dest("./"))
+}
+
 function complete() {
     // delete all the files at the output path except the index.html file
     // this is a separate function than the clean function above because
     // on the intial clean we want to remove EVERYTHING
     // on the build complete, we want to leave the index.html
     let paths = [
-        `${outputPath}/**/*`,
-        `!${outputPath}/index.html`
+        outputPath
     ];
     if (process.env.NODE_ENV === "production") {
         paths = [
@@ -154,5 +165,5 @@ function watcher(cb) {
 
 exports.build = series(clean, css, js, lib, html, complete);
 exports.clean = clean;
-exports.demo = series(clean, css, js, lib, html, complete);
+exports.demo = series(clean, css, js, lib, html, move, complete);
 exports.server = series(clean, css, js, lib, html, parallel(server, watcher));

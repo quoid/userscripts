@@ -811,7 +811,6 @@ const ___s = {
         // with each subsequent valid flag, respective show class added
         // this is "additive flag filtering"
         // when no flags are detected, the .show-all class is added back
-
         const container = document.getElementById("scripts");
         if (flags.some(v => validFlags.includes(v))) {
             container.classList.remove("show-all");
@@ -845,6 +844,7 @@ const ___s = {
                 container.classList.add("show-all");
             }
         } else {
+            container.className = "";
             container.classList.add("show-all");
         }
         // update script count
@@ -952,9 +952,14 @@ const ___s = {
         }
     },
     updateScriptCount: function() {
-        const s = ".script:not(#placeholder):not([style='display: none;'])";
-        const count = document.querySelectorAll(s).length;
+        const scripts = document.querySelectorAll(".script:not(#placeholder)");
+        var count = 0;
         const el = document.getElementById("scriptCount");
+        for (let i = 0; i < scripts.length; i++) {
+            if (window.getComputedStyle(scripts[i], null).getPropertyValue("display") != "none") {
+                count++;
+            }
+        }
         el.innerText = count;
     },
     updateScripts: function(arr) { // arg1 arr

@@ -1,6 +1,6 @@
 # Userscripts Safari
 
-An open-source userscript editor for Safari.
+An open-source userscript editor for Safari - https://quoid.github.io/userscripts/index.html
 
 ![Userscripts Safari](/etc/screenshot.png)
 
@@ -18,7 +18,7 @@ As of Version 2.0.0, this extension now supports multiple, domain specific, user
 
 Click the extension's toolbar button to open the extension UI.
 
-If you don't feel like reading, visit [this folder](/etc/videos/) to watch some short and poorly made video tutorials.
+**If you don't feel like reading, view [this markdown file](/etc/gifs.md) to watch some short agif tutorials.**
 
 **UI Overview**
 ![Userscripts Safari](/etc/ui-overview-01.png)
@@ -72,6 +72,8 @@ CSS Userscripts/styles can use the javascript metadata format or the Userstyle f
 
 ## Userscript Save Location
 
+See how it is done [here](/etc/gifs.md#change-save-location).
+
 As of v2.1.0, the user can choose where their userscripts are saved to and loaded from. There's no api that allows this change to happen from the extension, so users must perform location changes from the host application.
 
 In order to change the location, you must either launch `Userscripts.app` as you would any other application, or open the settings modal within the browser extension and click the "settings" icon within the "Save location" row.
@@ -109,6 +111,8 @@ Your previous userscript file *should* still exist after update. You can access 
 **How can I help development**
 
 One of the best ways you can help development is to **[sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9)**. You will be able to test new features before they are released and help guide development by providing essential feedback.
+
+Another great way you can help out is by **[leaving a review for the app on the App Store](https://itunes.apple.com/us/app/userscripts/id1463298887)**.
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offer coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
 
