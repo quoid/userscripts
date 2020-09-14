@@ -2,6 +2,7 @@
 
 ## v2.1.1 (2020-09-14)
 - fixed an issue that caused extension to crash when text preceded opening userscript tag - #69 #68 #58
+- improve sidebar tag filtering
 - update style overflows - #71
 
 ## v2.1.0 (2020-09-08)
