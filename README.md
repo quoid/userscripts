@@ -112,6 +112,8 @@ Your previous userscript file *should* still exist after update. You can access 
 
 One of the best ways you can help development is to **[sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9)**. You will be able to test new features before they are released and help guide development by providing essential feedback.
 
+Another great way you can help out is by **[leaving a review for the app on the App Store](https://itunes.apple.com/us/app/userscripts/id1463298887)**.
+
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offer coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
 
 ## Feedback & Support

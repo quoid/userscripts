@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.1 (TBD)
+## v2.1.1 (2020-09-14)
 - fixed an issue that caused extension to crash when text preceded opening userscript tag - #69 #68 #58
 - update style overflows - #71
 
