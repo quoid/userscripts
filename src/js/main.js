@@ -562,6 +562,8 @@ const ___e = {
             // enable the save button for temp scripts
             this.buttonSave.removeAttribute("disabled");
         } else {
+            // ensure discard and save button are disabled after loading
+            this.toggleButtonState("disable");
             status = ___a.getString("lastModified") + " " + lastModified;
         }
         this.setStatus(status);
