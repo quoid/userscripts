@@ -106,7 +106,7 @@
 
 #scripts {
     border-top: 1px solid var(--border-dark);
-    flex: 1;
+    flex-basis: calc(100vh - 162px); /* .sidebar-header @ 106px and .sidebar-footer @ 56px */
     overflow-y: auto;
     position: relative;
 }
@@ -141,7 +141,7 @@
 }
 
 .script-header .title {
-    flex: 1;
+    flex-grow: 1;
     font: var(--fs3);
     letter-spacing: var(--ls3);
     padding-right: 8px;

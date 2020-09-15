@@ -20,7 +20,7 @@ body {
 
 #wrapper {
     display: flex;
-    flex: 1;
+    overflow: hidden;
 }
 
 a {
@@ -58,6 +58,7 @@ body:not(.init) #appLoader {
     white-space: nowrap;
 }
 
+.warn,
 #notify,
 noscript {
     background-color: var(--color-red);
@@ -69,36 +70,6 @@ noscript {
 
 #notify {
     display: none;
-}
-
-#progress {
-    display: none;
-    background-color: var(--border-dark);
-    height: 3px;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-}
-
-#progress::before {
-    animation: fill 3.5s infinite;
-    background-color: var(--link-color);
-    content: "";
-    height: 3px;
-    left: 0;
-    margin-left: 0;
-    position: absolute;
-    top: 0;
-    width: 0;
-}
-
-@keyframes fill {
-    0% {width: 0; margin-left: 0;}
-    50% {width: 100%;}
-    55% {margin-left: 100%;}
-    95% {margin-left: 0;}
-    100% {width: 0;}
 }
 
 .link {
