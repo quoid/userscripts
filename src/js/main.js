@@ -731,7 +731,7 @@ const ___s = {
         el.classList.add("temp");
         loc.insertAdjacentElement("afterend", el);
         this.updateScriptCount();
-        el.scrollIntoViewIfNeeded();
+        el.scrollIntoView();
         ___a.log(`Created temporary script, ${filename}`, "darkorchid");
         ___e.loadScript(loadData);
     },
@@ -907,7 +907,7 @@ const ___s = {
             document.querySelector(".active").classList.remove("active");
         }
         el.classList.add("active");
-        el.scrollIntoViewIfNeeded();
+        el.scrollIntoView();
     },
     scriptToggle: function(e) {
         // prevent default checkbox behaviour, checking happens programatically
@@ -948,7 +948,7 @@ const ___s = {
         });
         // scroll to activ script
         if (document.querySelector(".active")) {
-            document.querySelector(".active").scrollIntoViewIfNeeded();
+            document.querySelector(".active").scrollIntoView();
         }
     },
     updateScriptCount: function() {
