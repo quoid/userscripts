@@ -698,6 +698,11 @@ const ___s = {
     buttonSettingsHide: document.getElementById("settingsHide"),
     filterBar: document.querySelector("#filter input"),
     scriptsContainer: document.getElementById("scripts"),
+    scrollOptions: { // options description: https://stackoverflow.com/a/48635751
+        behavior: "auto",
+        block: "nearest",
+        inline: "start"
+    },
     settingsOverlay: document.getElementById("settings"),
     createNewScript: function(type) {
         // check if editor has unsaved changed OR there's an unsaved temp script
@@ -733,7 +738,7 @@ const ___s = {
         el.classList.add("temp");
         loc.insertAdjacentElement("afterend", el);
         this.updateScriptCount();
-        el.scrollIntoView();
+        el.scrollIntoView(this.scrollOptions);
         ___a.log(`Created temporary script, ${filename}`, "darkorchid");
         ___e.loadScript(loadData);
     },
@@ -909,7 +914,7 @@ const ___s = {
             document.querySelector(".active").classList.remove("active");
         }
         el.classList.add("active");
-        el.scrollIntoView();
+        el.scrollIntoView(this.scrollOptions);
     },
     scriptToggle: function(e) {
         // prevent default checkbox behaviour, checking happens programatically
@@ -950,7 +955,7 @@ const ___s = {
         });
         // scroll to activ script
         if (document.querySelector(".active")) {
-            document.querySelector(".active").scrollIntoView();
+            document.querySelector(".active").scrollIntoView(this.scrollOptions);
         }
     },
     updateScriptCount: function() {
