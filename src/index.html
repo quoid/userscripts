@@ -18,8 +18,10 @@
     </head>
     <body class="init scripts-loading editor-loading">
         <noscript>Please enable Javascript to use this app</noscript>
+        {% if demo %}
+        <div class="warn">App optimized for Safari - other browser support limited</div>
+        {% endif %}
         <div id="notify"></div>
-        <div id="progress"></div>
         <div id="wrapper">
             {% include "sidebar.html" %}
             {% include "editor.html" %}
