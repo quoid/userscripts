@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.1.2 (TBD)
+- fixed a bug that caused discard & save buttons to remain active after loading a new script
+- update styling code
+- improve web demo experience
+
 ## v2.1.1 (2020-09-14)
 - fixed an issue that caused extension to crash when text preceded opening userscript tag - #69 #68 #58
 - improve sidebar tag filtering
