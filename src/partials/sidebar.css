@@ -228,13 +228,25 @@ body.saving #sidebar .script {
 }
 
 /* show disabled css scripts */
-#scripts.show-css.show-disabled .script:not([data-type="css"].disabled),
+/* #scripts.show-css.show-disabled .script:not([data-type="css"].disabled), */
+#scripts.show-css.show-disabled .script[data-type="css"].enabled,
+#scripts.show-css.show-disabled .script[data-type="js"].enabled,
+#scripts.show-css.show-disabled .script[data-type="js"].disabled,
 /* show enabled css scripts */
-#scripts.show-css.show-enabled .script:not([data-type="css"].enabled),
+/* #scripts.show-css.show-enabled .script:not([data-type="css"].enabled), */
+#scripts.show-css.show-enabled .script[data-type="css"].disabled,
+#scripts.show-css.show-enabled .script[data-type="js"].disabled,
+#scripts.show-css.show-enabled .script[data-type="js"].enabled,
 /* show disabled js scripts */
-#scripts.show-js.show-disabled .script:not([data-type="js"].disabled),
+/* #scripts.show-js.show-disabled .script:not([data-type="js"].disabled), */
+#scripts.show-js.show-disabled .script[data-type="js"].enabled,
+#scripts.show-js.show-disabled .script[data-type="css"].enabled,
+#scripts.show-js.show-disabled .script[data-type="css"].disabled,
 /* show enabled js scripts */
-#scripts.show-js.show-enabled .script:not([data-type="js"].enabled) {
+/* #scripts.show-js.show-enabled .script:not([data-type="js"].enabled), */
+#scripts.show-js.show-enabled .script[data-type="js"].disabled,
+#scripts.show-js.show-enabled .script[data-type="css"].disabled,
+#scripts.show-js.show-enabled .script[data-type="css"].enabled {
     display: none;
 }
 
