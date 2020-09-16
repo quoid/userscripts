@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.2 (TBD)
+## v2.1.2 (2020-09-16)
 - fixed a bug that caused discard & save buttons to remain active after loading a new script
 - update styling code
 - improve web demo experience
