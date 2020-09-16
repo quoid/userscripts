@@ -9,8 +9,10 @@
 
 #code {
     display: flex;
-    flex: 1;
+    flex-basis: calc(100% - 112px); /* .editor-header @ 56px .editor-footer @ 56px */
+    flex-grow: 1;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .editor-header {

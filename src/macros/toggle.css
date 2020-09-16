@@ -11,9 +11,8 @@
 
 .toggle input[type=checkbox] {
     display: block;
-    height: 0;
+    position: absolute;
     visibility: hidden;
-    width: 0;
 }
 
 .toggle span {
