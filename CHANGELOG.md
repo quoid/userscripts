@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.3 (TBD)
+- fix strict csp fallback method bug caused by safari 14 update #75
+
 ## v2.1.2 (2020-09-16)
 - fixed a bug that caused discard & save buttons to remain active after loading a new script
 - update styling code
