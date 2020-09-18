@@ -12,7 +12,7 @@ if (window.top === window) {
         const src = e.sourceFile.toUpperCase();
         const ext = safari.extension.baseURI.toUpperCase();
         // ensure that violation came from the extension
-        if (ext.startsWith(src)) {
+        if ((ext.startsWith(src) || src.startsWith(ext))) {
             // determine what kind of violation
             if (e.effectiveDirective === "script-src" && evalJS != 1) {
                 inject("eval");
