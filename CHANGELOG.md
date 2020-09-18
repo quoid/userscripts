@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.3 (TBD)
+## v2.1.3 (2020-09-17)
 - fix strict csp fallback method bug caused by safari 14 update #75
 
 ## v2.1.2 (2020-09-16)
