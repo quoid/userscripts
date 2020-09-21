@@ -33,7 +33,6 @@ func getSaveLocation() -> URL? {
         let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
         sharedBookmark == userSaveLocation
     {
-        print("local bookmark same as shared, return local")
         return userSaveLocation
     }
     
