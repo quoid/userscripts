@@ -86,6 +86,10 @@ const ___m = {
             message: "Userscript successfully saved",
             description: "Indicates that the save was successful"
         },
+        searchScriptButton: {
+            message: "Editor search",
+            description: "The button to search contents of editor"
+        },
         settingAutoHint: {
             message: "Auto Hint",
             description: "Term to denote that the editor automatically shows code hints"
