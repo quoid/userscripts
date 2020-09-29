@@ -24,6 +24,7 @@ function injectCSS(filename, code) {
 }
 
 function injectJS(filename, code, scope) {
+    code = code + "\n//# sourceURL=" + filename.replace(/\s/g, "-");
     if (scope != "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
