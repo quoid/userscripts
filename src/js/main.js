@@ -505,13 +505,13 @@ const ___e = {
                 "Ctrl-Q": function(cm) {
                     cm.foldCode(cm.getCursor());
                 },
-                "Cmd-F": function() {
-                    ___e.searchScript();
+                "Cmd-F": function(cm) {
+                    ___e.searchScript(cm);
                 },
                 Tab: function(cm) {
                     var s = Array(cm.getOption("indentUnit") + 1).join(" ");
                     cm.replaceSelection(s);
-                },
+                }
             }
         });
         this.editor.on("change", this.onChange);
@@ -662,10 +662,17 @@ const ___e = {
         ___e.editor.focus();
     },
     searchScript: function() {
-        if (___h.hasClass(document.body, "editor-js", "editor-css")) {
-            ___e.editor.execCommand("findPersistent");
+        if (!___h.hasClass(document.querySelector(".CodeMirror"), "dialog-opened")) {
+            if (___h.hasClass(document.body, "editor-js", "editor-css")) {
+                ___e.editor.execCommand("findPersistent");
+            }
+        } else {
+            console.log("hihish");
+            const el = document.querySelector(".CodeMirror-dialog.CodeMirror-dialog-top");
+            const input = el.querySelector("input");
+            input.focus();
+            input.dispatchEvent(new KeyboardEvent("keydown",  {key: "Escape",keyCode: 27}));
         }
-        return false;
     },
     setMode: function(mode) { // arg1 str
         // sets the editor mode and body class for styling purposes
