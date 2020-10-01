@@ -113,7 +113,7 @@ const ___m = {
             message: "Verbose Logging"
         },
         settingsText: {
-            message: "You can report bugs, see what's currently in development and get more information about this extension by visiting <a>the homepage.</a><br><br>If you enjoy using this extension, please consider <a>donating or sponsoring this project.</a>"
+            message: "You can report bugs, see what's currently in development and get more information about this extension by visiting <a>the homepage.</a><br><br>If you enjoy using this extension, please consider <a>donating or sponsoring</a> and leaving a review on the app store."
         },
         settingsTitle01: {
             message: "Editor Settings",
