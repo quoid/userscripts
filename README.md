@@ -49,12 +49,12 @@ Version 2.0.0 introduces the common practice of using userscript metadata to dri
 - `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
 - `@inject-into` - allows the user to choose which context to inject the script into
     - allows the user to choose which context to inject the script into
-        - values: auto, content, page (default)
-        - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
+    - values: auto, content, page (default)
+    - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
 - `@run-at`
-        - allows the user to choose the injection timing
-        - document-start, document-end (default), document-idle
-        - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#run-at)
+    - allows the user to choose the injection timing
+    - document-start, document-end (default), document-idle
+    - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#run-at)
 - `@weight`
     - allows the user to further adjust script injection timing
     - can be used to ensure one script injects before another
