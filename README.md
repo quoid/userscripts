@@ -47,6 +47,19 @@ Version 2.0.0 introduces the common practice of using userscript metadata to dri
 - `@exclude-match` - Domain patterns where you do *not* want the script to run
 - `@include` - An alias for `@match` - functions exactly like `@match`
 - `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
+- `@inject-into` - allows the user to choose which context to inject the script into
+    - allows the user to choose which context to inject the script into
+        - values: auto, content, page (default)
+        - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
+- `@run-at`
+        - allows the user to choose the injection timing
+        - document-start, document-end (default), document-idle
+        - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#run-at)
+- `@weight`
+    - allows the user to further adjust script injection timing
+    - can be used to ensure one script injects before another
+    - ONLY accepts integers (floats, strings and everything else will be ignored)
+    - min value = 1, max value = 999, higher numbers (“heavier”) execute earlier
 
 **All userscripts need at least 1 `@match` or `@include` to run!**
 

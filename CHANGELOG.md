@@ -1,5 +1,24 @@
 # Changelog
 
+## v2.2.0 (TBD)
+- In editor search
+    - click on the search icon or hit cmd+f to bring up the search bar
+    - look here for more info: https://codemirror.net/demo/search.html
+- New metadata keys
+    - @inject-into
+        - allows the user to choose which context to inject the script into
+        - values: auto, content, page (default)
+        - works like violentmonkey - https://violentmonkey.github.io/api/metadata-block/#inject-into
+    - @run-at
+        - allows the user to choose the injection timing
+        - document-start, document-end (default), document-idle
+        - works like violentmonkey - https://violentmonkey.github.io/api/metadata-block/#run-at
+    - @weight
+        - allows the user to further adjust script injection timing
+        - can be used to ensure one script injects before another
+        - ONLY accepts integers (floats, strings and everything else will be ignored)
+        - min value = 1, max value = 999, higher numbers (“heavier”) execute earlier
+
 ## v2.1.3 (2020-09-17)
 - fix strict csp fallback method bug caused by safari 14 update #75
 
