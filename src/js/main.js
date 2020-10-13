@@ -287,8 +287,9 @@ const ___a = {
         this.changeSaveLocationButton.addEventListener("click", this.changeSaveLocation);
 
         // disable the default cmd+S browser key command
+        // disable the default cmd+F browser key command if in editor
         document.addEventListener("keydown", function(e) {
-            if (e.metaKey && e.keyCode === 83) { e.preventDefault(); }
+            if (e.metaKey && e.key === "s") { e.preventDefault(); }
         });
         // add classes from settings
         if (this.settings.hideDescriptions) {
@@ -409,6 +410,7 @@ const ___e = {
     buttonDiscard: document.getElementById("discard"),
     buttonDownload: document.getElementById("downloadScript"),
     buttonSave: document.getElementById("save"),
+    buttonSearch: document.getElementById("searchScript"),
     editor: null,
     editorElement: document.querySelector("#code textarea"),
     oldStatus: null,
@@ -503,6 +505,9 @@ const ___e = {
                 "Ctrl-Q": function(cm) {
                     cm.foldCode(cm.getCursor());
                 },
+                "Cmd-F": function(cm) {
+                    ___e.searchScript(cm);
+                },
                 Tab: function(cm) {
                     var s = Array(cm.getOption("indentUnit") + 1).join(" ");
                     cm.replaceSelection(s);
@@ -531,6 +536,7 @@ const ___e = {
         this.buttonDiscard.addEventListener("click", this.discard);
         this.buttonDownload.addEventListener("click", this.downloadScript);
         this.buttonSave.addEventListener("click", this.saveTry);
+        this.buttonSearch.addEventListener("click", this.searchScript);
         document.body.classList.remove("editor-loading");
         ___a.log("Editor initiliazation complete", "seagreen");
     },
@@ -654,6 +660,19 @@ const ___e = {
         ___a.setQueryString("script", id);
         document.body.classList.remove("saving");
         ___e.editor.focus();
+    },
+    searchScript: function() {
+        if (!___h.hasClass(document.querySelector(".CodeMirror"), "dialog-opened")) {
+            if (___h.hasClass(document.body, "editor-js", "editor-css")) {
+                ___e.editor.execCommand("findPersistent");
+            }
+        } else {
+            console.log("hihish");
+            const el = document.querySelector(".CodeMirror-dialog.CodeMirror-dialog-top");
+            const input = el.querySelector("input");
+            input.focus();
+            input.dispatchEvent(new KeyboardEvent("keydown",  {key: "Escape",keyCode: 27}));
+        }
     },
     setMode: function(mode) { // arg1 str
         // sets the editor mode and body class for styling purposes

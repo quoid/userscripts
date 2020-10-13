@@ -221,3 +221,23 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .CodeMirror-lint-message-error::before {
     border-color: var(--editor-error);
 }
+
+.CodeMirror-dialog {
+    background-color: var(--bg-sidebar);
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 8px 16px 0 rgba(5, 6, 7, 0.25);
+    left: unset;
+    right: 24px;
+    padding: 4px 16px;
+    top: 8px;
+    width: 200px;
+}
+
+.CodeMirror-search-label,
+.CodeMirror-search-hint {
+    display: none;
+}
+
+.CodeMirror-dialog input {
+    width: 100% !important;
+}

@@ -33,7 +33,6 @@ func getSaveLocation() -> URL? {
         let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
         sharedBookmark == userSaveLocation
     {
-        print("local bookmark same as shared, return local")
         return userSaveLocation
     }
     
@@ -80,6 +79,20 @@ func santize(_ str: String) -> String? {
 
 func isSanitzed(_ str: String) -> Bool {
     return str.removingPercentEncoding != str
+}
+
+func normalizeWeight(weight: String) -> String {
+    if let w = Int(weight) {
+        if w > 999 {
+            return "999"
+        } else if w < 1 {
+            return "1"
+        } else {
+            return weight
+        }
+    } else {
+        return "1"
+    }
 }
 
 func closeExtensionHTMLPages() {
@@ -928,15 +941,40 @@ func deleteScript(_ filename: String) -> Bool {
 }
 
 // script injection
-func getCode(_ url: String) -> [String: [String: String]]? {
-    // return dict structure = ["css": ["file.css": "/*code*/"], "js": ["file.js: "//code", "file2.js", "//code2"]]
-    var toLoadCSS:[String: String] = [:]
-    var toLoadJS:[String: String] = [:]
-    var toLoadAll:[String: [String: String]] = ["css":[:],"js":[:]]
+func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
+    // the returned dict
+    var allFiles = [String: [String: [String: Any]]]()
+
+    // dictionary to hold the indiv. css files that will be loaded
+    // ["file.css": ["code": "/* code here */", "weight": "1"]]
+    var cssFiles:[String:[String:String]] = [:]
+
+    // there has to be a better way to do this
+
+    // dictionary to hold the indiv. js files that will be loaded
+    // ["scope": ["timing": ["file.js": ["code": "// code", "weight": "1"]]]]
+    var jsFiles:[String: [String: [String: [String: String]]]] = [:]
+    jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    
+    var auto_docStart:[String: [String: String]] = [:]
+    var auto_docEnd:[String: [String: String]] = [:]
+    var auto_docIdle:[String: [String: String]] = [:]
+    var content_docStart:[String: [String: String]] = [:]
+    var content_docEnd:[String: [String: String]] = [:]
+    var content_docIdle:[String: [String: String]] = [:]
+    var page_docStart:[String: [String: String]] = [:]
+    var page_docEnd:[String: [String: String]] = [:]
+    var page_docIdle:[String: [String: String]] = [:]
+    
     // domains where loading is excluded for file
     var excludedFilenames:[String] = []
-    // when code is loaded from a file, it's filename will be populated in below array, to avoid duplication
+    
+    // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
     var matchedFilenames:[String] = []
+    
+    // get the manifest data
     guard
         let blacklist = getManifestKey("blacklist") as? [String],
         let disabled = getManifestKey("disabled") as? [String],
@@ -946,20 +984,28 @@ func getCode(_ url: String) -> [String: [String: String]]? {
         err("could not read manifest when attempting to get code for injected script")
         return nil
     }
+    
     // url matches a pattern in blacklist, return empty dict
     for pattern in blacklist {
         if patternMatch(url, pattern) {
-            return toLoadAll
+            return allFiles
         }
     }
-    // url does not match any blacklist pattern
-    let excludePatterns = manifestExcludePatterns.keys // all exclude patterns from manifest
-    let matchPatterns = manifestMatchPatterns.keys // all match patterns from manifest
+    
+    // AT THIS POINT IT IS KNOWN THAT THE URL IS NOT IN THE BLACKLIST, PROCEED
+    
+    // all exclude patterns from manifest
+    let excludePatterns = manifestExcludePatterns.keys
+    
+    // all match patterns from manifest
+    let matchPatterns = manifestMatchPatterns.keys
+    
     // add disabled script filenames to excludePatterns
     excludedFilenames.append(contentsOf: disabled)
-    // loop through exclude patterns and see if any match page url
+    
+    // loop through exclude patterns and see if any match against page url
     for pattern in excludePatterns {
-        // if pattern matches page url, add filenames from it to excludes array, code from those filenames won't be loaded
+        // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
         if patternMatch(url, pattern) {
             guard let filenames = manifestExcludePatterns[pattern] else {
                 err("error parsing manifestExcludePatterns when attempting to get code for injected script")
@@ -972,49 +1018,97 @@ func getCode(_ url: String) -> [String: [String: String]]? {
             }
         }
     }
-    // loop through all patterns from manifest matches to see if they match against the current page url (func arg)
+    
+    // loop through all match patterns from manifest to see if they match against the current page url (func arg)
     for pattern in matchPatterns {
-        // if page url matches any of the patterns from the manifest match patterns
+        // if pattern matches against page url
         if patternMatch(url, pattern) {
-            // the filenames listed for the pattern that match the page url
+            // the filenames listed for the pattern that match page url
             guard let filenames = manifestMatchPatterns[pattern] else {
                 err("error parsing manifestMatchPatterns when attempting to get code for injected script")
                 continue
             }
             // loop through matched filenames and get corresponding code from file
             for filename in filenames {
-                // don't load if filename if in excludes or filename already exists in matchedFilenames array (to avoid duplication)
+                // don't load if filename is in excludes or filename already exists in matchedFilenames array (to avoid duplication)
                 if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
-                    guard let saveLocation = getSaveLocation() else {
-                        err("could not get save location from settings when attempting to get code for injected script")
-                        continue
-                    }
-                    let url = saveLocation.appendingPathComponent(filename)
+                    // if guards fail, log error continue to next file
                     guard
-                        let contents = getFileContents(url) as? [String: Any],
-                        let code = contents["code"] as? String
+                        // NOTE: getFileContents returns parsed script metadata
+                        let saveLocation = getSaveLocation(),
+                        let contents = getFileContents(saveLocation.appendingPathComponent(filename)) as? [String: Any],
+                        let code = contents["code"] as? String,
+                        let type = filename.split(separator: ".").last
                     else {
-                        err("could not read contents from disk when attempting to get code for injected script")
+                        err("error reading getting file data in getCode func")
                         continue
                     }
-                    guard let type = filename.split(separator: ".").last else {
-                        err("could not get file extension when attempting to get code for injected script")
-                        continue
-                    }
-                    // add the file's content to it's respective dictionary
+                    
+                    // can force unwrap b/c getFileContents ensures metadata exists
+                    let metadata = contents["metadata"] as! [String: [String]]
+                    
+                    // normalize weight
+                    var weight = metadata["weight"]?[0] ?? "1"
+                    weight = normalizeWeight(weight: weight)
+                    
                     if type == "css" {
-                        toLoadCSS[filename] = code
+                        cssFiles[filename] = ["code": code, "weight": weight]
                     } else if type == "js" {
-                        toLoadJS[filename] = code
+                        var injectInto = metadata["inject-into"]?[0] ?? "page"
+                        var runAt = metadata["run-at"]?[0] ?? "document-end"
+                        
+                        // ensure values are acceptable
+                        let injectVals = ["auto", "content", "page"]
+                        let runAtVals = ["document-start", "document-end", "document-idle"]
+                        if !injectVals.contains(injectInto) {
+                            injectInto = "page"
+                        }
+                        if !runAtVals.contains(runAt) {
+                            runAt = "document-end"
+                        }
+                        
+                        let data = ["code": code, "weight": weight]
+                        // add file data to appropiate dict
+                        if injectInto == "auto" && runAt == "document-start" {
+                            auto_docStart[filename] = data
+                        } else if injectInto == "auto" && runAt == "document-end" {
+                            auto_docEnd[filename] = data
+                        } else if injectInto == "auto" && runAt == "document-idle" {
+                            auto_docIdle[filename] = data
+                        } else if injectInto == "content" && runAt == "document-start" {
+                            content_docStart[filename] = data
+                        } else if injectInto == "content" && runAt == "document-end" {
+                            content_docEnd[filename] = data
+                        } else if injectInto == "content" && runAt == "document-idle" {
+                            content_docIdle[filename] = data
+                        } else if injectInto == "page" && runAt == "document-start" {
+                            page_docStart[filename] = data
+                        } else if injectInto == "page" && runAt == "document-end" {
+                            page_docEnd[filename] = data
+                        } else if injectInto == "page" && runAt == "document-idle" {
+                            page_docIdle[filename] = data
+                        }
                     }
-                    // add filename to array
-                    matchedFilenames.append(filename)
                 }
+                matchedFilenames.append(filename)
             }
-            // add individual dictionary to single dictionary
-            toLoadAll["css"] = toLoadCSS
-            toLoadAll["js"] = toLoadJS
         }
     }
-    return toLoadAll
+    
+    // construct the js specific dictionaries
+    jsFiles["auto"]!["document-start"] = auto_docStart
+    jsFiles["auto"]!["document-end"] = auto_docEnd
+    jsFiles["auto"]!["document-idle"] = auto_docIdle
+    jsFiles["content"]!["document-start"] = content_docStart
+    jsFiles["content"]!["document-end"] = content_docEnd
+    jsFiles["content"]!["document-idle"] = content_docIdle
+    jsFiles["page"]!["document-start"] = page_docStart
+    jsFiles["page"]!["document-end"] = page_docEnd
+    jsFiles["page"]!["document-idle"] = page_docIdle
+    
+    // construct the returned dictionary
+    allFiles["css"] = cssFiles
+    allFiles["js"] = jsFiles
+    
+    return allFiles
 }

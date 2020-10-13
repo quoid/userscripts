@@ -86,6 +86,10 @@ const ___m = {
             message: "Userscript successfully saved",
             description: "Indicates that the save was successful"
         },
+        searchScriptButton: {
+            message: "Editor search",
+            description: "The button to search contents of editor"
+        },
         settingAutoHint: {
             message: "Auto Hint",
             description: "Term to denote that the editor automatically shows code hints"
@@ -109,7 +113,7 @@ const ___m = {
             message: "Verbose Logging"
         },
         settingsText: {
-            message: "You can report bugs, see what's currently in development and get more information about this extension by visiting <a>the homepage.</a><br><br>If you enjoy using this extension, please consider <a>donating or sponsoring this project.</a>"
+            message: "You can report bugs, see what's currently in development and get more information about this extension by visiting <a>the homepage.</a><br><br>If you enjoy using this extension, please consider <a>donating or sponsoring</a> and leaving a review on the app store."
         },
         settingsTitle01: {
             message: "Editor Settings",

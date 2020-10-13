@@ -25,6 +25,7 @@ noscript { z-index: 99; }
 #settings { z-index: 97; }
 #progress {z-index: 96; }
 .dropdown ul { z-index: 96; }
-.loader { z-index: 95; }
-#editor .empty { z-index: 95; }
-.CodeMirror-lint-tooltip { z-index: 94; }
+.loader { z-index: 90; }
+.CodeMirror-dialog { z-index: 89; }
+#editor .empty { z-index: 85; }
+.CodeMirror-lint-tooltip { z-index: 80; }
