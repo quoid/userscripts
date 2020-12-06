@@ -1,4 +1,6 @@
 # Changelog
+## v2.2.1 (2020-12-06)
+- Build for Apple silicon
 
 ## v2.2.0 (2020-10-12)
 - In editor search
