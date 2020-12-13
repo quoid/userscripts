@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        ".htmlhintrc": "json"
+    },
+    "eslint.validate": [
+        "svelte"
+    ],
+    "svelte.plugin.svelte.compilerWarnings": {
+        "a11y-missing-attribute": "error"
+    },
+    "svelte.plugin.svelte.rename.enable": false
+}
