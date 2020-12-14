@@ -186,9 +186,7 @@ const _swift = {
         switch (name) {
             case "REQ_INIT_DATA": {
                 responseName = "RESP_INIT_DATA";
-                responseData = {
-                    settings: defaultSettings
-                };
+                responseData = defaultSettings;
                 // responseError = "failed to retrieve init data, manifest was unreachable";
                 break;
             }

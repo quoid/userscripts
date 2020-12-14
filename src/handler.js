@@ -29,8 +29,8 @@ export function setupMessageHandler() {
 function handleMessage(e) {
     // environment checks
     const name = !ext ? e.detail.name : e.name;
-    const data = !ext ? e.detail.data : e.data;
-    const error = !ext ? e.detail.error : e.error;
+    const data = !ext ? e.detail.data : e.message.data;
+    const error = !ext ? e.detail.error : e.message.error;
 
     // if error is present, log to browser console for all messages
     // unique error handling contained in switch statement
@@ -42,7 +42,7 @@ function handleMessage(e) {
         case "RESP_INIT_DATA": {
             // update state if unable to get init data
             if (error) return state.add("init-error");
-            settings.set(data.settings);
+            settings.set(data);
             state.add("items-loading");
             state.remove("init");
             safari.extension.dispatchMessage("REQ_ALL_FILES_DATA");
@@ -101,6 +101,10 @@ function handleMessage(e) {
             // if settings failed to save, an error will be logged to console
             // locally the setting change will take effect
             // on refresh the setting will revert back to previous value
+            break;
+        }
+        case "RESP_LOG_ERROR": {
+            console.error(`Error logged from Swift side: ${data}`);
             break;
         }
         default: {
