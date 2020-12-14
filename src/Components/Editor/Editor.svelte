@@ -55,7 +55,7 @@
             newContent: codemirror.getValue(),
             script: activeItem
         };
-        safari.extension.dispatchMessage("REQ_SCRIPT_SAVE", data);
+        safari.extension.dispatchMessage("REQ_FILE_SAVE", data);
     }
 
     const discard = () => codemirror.discardChanges();
