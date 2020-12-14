@@ -6,13 +6,13 @@ import {parse} from "./utils";
 const delay = 500;
 
 const defaultSettings = {
-    autoHint: true,
+    autoHint: "true",
     blacklist: ["domain123", "domainXYZ"],
-    descriptions: true,
-    lint: false,
-    log: true,
+    descriptions: "true",
+    lint: "false",
+    log: "true",
     saveLocation: "/Users/UserName/Library/Containers/ParentFolder/SubFolder/",
-    showInvisibles: true,
+    showInvisibles: "true",
     sortOrder: "lastModifiedDesc",
     tabSize: "4",
     version: "3.0.0"
@@ -93,7 +93,7 @@ const _swift = {
         }, delay);
     },
     getAllFilesData() {
-        let scripts = [];
+        let f = [];
         files.forEach(file => {
             const content = file.content;
             const parsed = parse(content);
@@ -109,9 +109,9 @@ const _swift = {
                 name: metadata.name[0],
                 type: file.filename.substring(file.filename.lastIndexOf(".") + 1)
             };
-            scripts.push(scriptData);
+            f.push(scriptData);
         });
-        return scripts;
+        return f;
     },
     save(content, lastMod, newName, oldName) {
         const ind = files.findIndex(f => f.filename === oldName);
@@ -213,7 +213,7 @@ const _swift = {
                 responseError = "disable script failed, manifest unreachable";
                 break;
             }
-            case "REQ_SCRIPT_SAVE": {
+            case "REQ_FILE_SAVE": {
                 const saved = _swift.validateScript(data);
                 if (saved.error) {
                     responseData = data;
@@ -222,7 +222,7 @@ const _swift = {
                     responseData = saved;
                 }
                 // responseError = "err";
-                responseName = "RESP_SCRIPT_SAVE";
+                responseName = "RESP_FILE_SAVE";
                 break;
             }
             case "REQ_FILE_TRASH": {

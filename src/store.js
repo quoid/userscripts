@@ -36,7 +36,19 @@ function settingsStore() {
     const updateSingleSetting = (key, value) => {
         update(settings => {
             settings[key] = value;
-            safari.extension.dispatchMessage("REQ_UPDATE_SETTINGS", settings);
+            // settings are saved as strings on the swift side
+            // convert all booleans to strings before dispatching
+            const settingsClone = {...settings};
+            for (const [key, value] of Object.entries(settingsClone)) {
+                if (typeof value === "boolean") {
+                    settingsClone[key] = value.toString();
+                }
+            }
+            // remove settings in clone that aren't save in user defaults
+            delete settingsClone.blacklist;
+            delete settingsClone.version;
+            // dispatch message to swift side with update settings to be saved
+            safari.extension.dispatchMessage("REQ_UPDATE_SETTINGS", settingsClone);
             return settings;
         });
     };

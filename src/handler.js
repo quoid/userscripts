@@ -42,6 +42,13 @@ function handleMessage(e) {
         case "RESP_INIT_DATA": {
             // update state if unable to get init data
             if (error) return state.add("init-error");
+            // all settings are saved as string on the swift side
+            // convert booleans to actual types when received
+            for (const [key, value] of Object.entries(data)) {
+                if (value === "true" || value === "false") {
+                    data[key] = JSON.parse(value);
+                }
+            }
             settings.set(data);
             state.add("items-loading");
             state.remove("init");
@@ -54,7 +61,7 @@ function handleMessage(e) {
             state.remove("items-loading");
             break;
         }
-        case "RESP_SCRIPT_SAVE": {
+        case "RESP_FILE_SAVE": {
             if (!error) {
                 // save old filename to var
                 const oldFilename = data.oldFilename;
