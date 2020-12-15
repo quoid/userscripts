@@ -75,7 +75,7 @@ export function parse(str) {
     const metadata = {};
     const metaArray = metas.split("\n");
     metaArray.forEach(function(m) {
-        var parts = m.trim().match(/@([\w-]+)\s+(.+)/);
+        var parts = m.trim().match(/@([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)/);
         if (parts) {
             metadata[parts[1]] = metadata[parts[1]] || [];
             metadata[parts[1]].push(parts[2]);
