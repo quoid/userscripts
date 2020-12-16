@@ -210,7 +210,7 @@ const _swift = {
             case "REQ_TOGGLE_FILE": {
                 responseName = "RESP_TOGGLE_FILE";
                 responseData = data;
-                responseError = "disable script failed, manifest unreachable";
+                // responseError = "disable script failed, manifest unreachable";
                 break;
             }
             case "REQ_FILE_SAVE": {
