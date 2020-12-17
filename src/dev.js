@@ -120,8 +120,8 @@ const _swift = {
         const lastModified = Date.now();
         let canUpdate = false;
 
-        // script failed to parse or missing required metadata (name)
-        if (!parsed || !parsed.metadata.name) {
+        // script failed to parse
+        if (!parsed) {
             return {error: "save failed, file has invalid metadata"};
         }
 
