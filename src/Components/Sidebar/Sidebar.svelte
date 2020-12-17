@@ -209,7 +209,7 @@
         {#if $state.includes("items-loading")}
             <Loader/>
         {/if}
-        {#each list as item (item.name)}
+        {#each list as item (item.filename)}
             <svelte:component
                 this={Item}
                 data={item}
