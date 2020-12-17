@@ -52,8 +52,8 @@
         state.add("saving");
         // send the current script data & and new script content
         const data = {
-            newContent: codemirror.getValue(),
-            script: activeItem
+            current: activeItem,
+            new: codemirror.getValue()
         };
         safari.extension.dispatchMessage("REQ_FILE_SAVE", data);
     }

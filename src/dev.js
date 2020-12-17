@@ -113,11 +113,69 @@ const _swift = {
         });
         return f;
     },
-    save(content, lastMod, newName, oldName) {
+    save(data) {
+        const newContent = data.new;
+        const oldFilename = data.current.filename;
+        const parsed = parse(newContent);
+        const lastModified = Date.now();
+        let canUpdate = false;
+
+        // script failed to parse or missing required metadata (name)
+        if (!parsed || !parsed.metadata.name) {
+            return {error: "save failed, file has invalid metadata"};
+        }
+
+        const name = parsed.metadata.name[0];
+        const newFilename = `${name}.${data.current.type}`;
+
+        // filename length too long
+        if (newFilename.length > 255) {
+            return {error: "save failed, filename too long!"};
+        }
+
+        // check if file can be remotely updated
+        if (parsed.metadata.version && parsed.metadata.updateURL) {
+            canUpdate = true;
+        }
+
+        let success = {
+            canUpdate: canUpdate,
+            content: newContent,
+            disabled: data.current.disabled,
+            filename: newFilename,
+            lastModified: lastModified,
+            name: name,
+            oldFilename: oldFilename,
+            type: data.current.type,
+            visible: data.current.visible
+        };
+
+        // add description if in file metadata
+        if (parsed.metadata.description) {
+            success.description = parsed.metadata.description[0];
+        }
+
+        // overwriting
+        if (newFilename.toLowerCase() === oldFilename.toLowerCase()) {
+            _swift.saveJS(newContent, lastModified, newFilename, oldFilename);
+            return success;
+        }
+
+        // not overwriting, check if filename for that type is taken
+        if (files.find(a => a.filename.toLowerCase() === newFilename.toLowerCase())) {
+            return {error: "save failed, name already taken!"};
+        }
+
+        // not overwriting but all validation passed
+        _swift.saveJS(newContent, lastModified, newFilename, oldFilename);
+        return success;
+
+    },
+    saveJS(content, lastMod, newFilename, oldName) {
         const ind = files.findIndex(f => f.filename === oldName);
         const s = {
             content: content,
-            filename: newName,
+            filename: newFilename,
             lastModified: lastMod
         };
         if (ind != -1) {
@@ -127,58 +185,6 @@ const _swift = {
             // add to beginning of array
             files.unshift(s);
         }
-    },
-    validateScript(data) {
-        const newContent = data.newContent;
-        const oldFilename = data.script.filename;
-        const parsed = parse(newContent);
-        const lastModified = Date.now();
-        const error = {error: "script validation failed"};
-        let canUpdate = false;
-
-        // script failed to parse or missing required metadata (name)
-        if (!parsed || !parsed.metadata.name) {
-            return error;
-        }
-
-        const name = parsed.metadata.name[0];
-        const newFilename = `${name}.${data.script.type}`;
-
-        if (parsed.metadata.version && parsed.metadata.updateURL) {
-            canUpdate = true;
-        }
-
-        let success = {
-            canUpdate: canUpdate,
-            content: newContent,
-            description: parsed.metadata.description[0],
-            disabled: data.script.disabled,
-            filename: newFilename,
-            lastModified: lastModified,
-            name: name,
-            oldFilename: oldFilename,
-            type: data.script.type,
-            visible: data.script.visible
-        };
-
-        if (newFilename.toLowerCase() === oldFilename.toLowerCase()) {
-            _swift.save(newContent, lastModified, newFilename, oldFilename);
-            return success;
-        }
-
-        // not overwriting, check if filename for that type is taken
-        if (files.find(a => a.filename.toLowerCase() === newFilename.toLowerCase())) {
-            return error;
-        }
-
-        // filename length too long
-        if (newFilename.length > 255) {
-            return error;
-        }
-
-        _swift.save(newContent, lastModified, newFilename, oldFilename);
-        return success;
-
     },
     messageReceived(name, data) {
         // emulates receiving a message from the js front end
@@ -214,9 +220,9 @@ const _swift = {
                 break;
             }
             case "REQ_FILE_SAVE": {
-                const saved = _swift.validateScript(data);
+                const saved = _swift.save(data);
                 if (saved.error) {
-                    responseData = data;
+                    //responseData = data;
                     responseError = saved.error;
                 } else {
                     responseData = saved;
