@@ -141,20 +141,15 @@ const _swift = {
         let success = {
             canUpdate: canUpdate,
             content: newContent,
-            disabled: data.current.disabled,
             filename: newFilename,
             lastModified: lastModified,
             name: name,
-            oldFilename: oldFilename,
-            type: data.current.type,
-            visible: data.current.visible
         };
 
         // add description if in file metadata
         if (parsed.metadata.description) {
             success.description = parsed.metadata.description[0];
         }
-
         // overwriting
         if (newFilename.toLowerCase() === oldFilename.toLowerCase()) {
             _swift.saveJS(newContent, lastModified, newFilename, oldFilename);

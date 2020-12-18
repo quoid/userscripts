@@ -63,16 +63,17 @@ function handleMessage(e) {
         }
         case "RESP_FILE_SAVE": {
             if (!error) {
-                // save old filename to var
-                const oldFilename = data.oldFilename;
-                // remove old filename from script data object
-                delete data.oldFilename;
                 // overwrite item in items store
                 items.update(i => {
-                    const index = i.findIndex(a => a.filename === oldFilename);
-                    // make active
-                    data.active = true;
+                    const index = i.findIndex(a => a.active);
+                    const disabled = i[index].disabled != undefined ? i[index].disabled : false;
+                    const type = i[index].type;
+                    const visible = i[index].visible != undefined ? i[index].visible : true;
                     i[index] = data;
+                    i[index].active = true;
+                    i[index].disabled = disabled;
+                    i[index].type = type;
+                    i[index].visible = visible;
                     return i;
                 });
                 // set the newly saved file contents in codemirror instance
