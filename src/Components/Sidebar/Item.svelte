@@ -17,7 +17,6 @@
         el.querySelector("input").disabled = true;
         // send filename and target file state (disabled or enabled)
         const obj = {filename: data.filename, state: data.disabled ? "enable" : "disable"};
-        console.log(data.disabled);
         safari.extension.dispatchMessage("REQ_TOGGLE_FILE", obj);
     }
 </script>
