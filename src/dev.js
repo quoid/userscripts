@@ -204,13 +204,12 @@ const _swift = {
             }
             case "REQ_UPDATE_BLACKLIST": {
                 responseName = "RESP_UPDATE_BLACKLIST";
-                responseData = data;
                 // responseError = "blacklist update failed, manifest unreachable";
                 break;
             }
             case "REQ_TOGGLE_FILE": {
                 responseName = "RESP_TOGGLE_FILE";
-                responseData = data;
+                responseData = {filename: data.filename};
                 // responseError = "disable script failed, manifest unreachable";
                 break;
             }
