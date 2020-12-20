@@ -16,7 +16,7 @@
         // disable the checkbox to prevent multiple toggle messages from being sent
         el.querySelector("input").disabled = true;
         // send filename and target file state (disabled or enabled)
-        const obj = {filename: data.filename, state: data.disabled ? "enable" : "disable"};
+        const obj = {filename: data.filename, action: data.disabled ? "enable" : "disable"};
         safari.extension.dispatchMessage("REQ_TOGGLE_FILE", obj);
     }
 </script>
