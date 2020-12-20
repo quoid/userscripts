@@ -108,11 +108,14 @@ function handleMessage(e) {
         case "RESP_UPDATE_SETTINGS": {
             // if settings failed to save, an error will be logged to console
             // locally the setting change will take effect
-            // on refresh the setting will revert back to previous value
+            // on refresh the settings will revert back to previous state
+            break;
+        }
+        case "RESP_UPDATE_BLACKLIST": {
             break;
         }
         case "RESP_LOG_ERROR": {
-            console.error(`Error logged from Swift side: ${data}`);
+            log.add(`Swift error: ${data}`, "error", true);
             break;
         }
         default: {
