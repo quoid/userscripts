@@ -38,7 +38,7 @@ function settingsStore() {
             settings[key] = value;
             // blacklist not stored in normal setting object in manifest, so handle differently
             if (key === "blacklist") {
-                safari.extension.dispatchMessage("REQ_UPDATE_BLACKLIST", value);
+                safari.extension.dispatchMessage("REQ_UPDATE_BLACKLIST", {patterns: value});
                 return settings;
             }
             // settings are saved as strings on the swift side
