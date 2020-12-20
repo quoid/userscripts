@@ -36,6 +36,11 @@ function settingsStore() {
     const updateSingleSetting = (key, value) => {
         update(settings => {
             settings[key] = value;
+            // blacklist not stored in normal setting object in manifest, so handle differently
+            if (key === "blacklist") {
+                safari.extension.dispatchMessage("REQ_UPDATE_BLACKLIST", value);
+                return settings;
+            }
             // settings are saved as strings on the swift side
             // convert all booleans to strings before dispatching
             const settingsClone = {...settings};
