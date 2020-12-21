@@ -233,6 +233,7 @@ const _swift = {
                 break;
             }
             case "REQ_OPEN_SAVE_LOCATION": {
+                responseName = "RESP_OPEN_SAVE_LOCATION";
                 alert("When not in development mode, clicking this link open's the save location in Finder");
                 break;
             }
