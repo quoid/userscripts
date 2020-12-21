@@ -105,17 +105,10 @@ function handleMessage(e) {
             document.querySelector(`[data-filename="${data.filename}"] input`).disabled = false;
             break;
         }
-        case "RESP_UPDATE_SETTINGS": {
-            // if settings failed to save, an error will be logged to console
-            // locally the setting change will take effect
-            // on refresh the settings will revert back to previous state
-            break;
-        }
+        case "RESP_OPEN_SAVE_LOCATION":
+        case "RESP_UPDATE_SETTINGS":
         case "RESP_UPDATE_BLACKLIST": {
-            break;
-        }
-        case "RESP_LOG_ERROR": {
-            log.add(`Swift error: ${data}`, "error", true);
+            // in the event of a failure from one of the above, log error if needed and nothing else
             break;
         }
         default: {
