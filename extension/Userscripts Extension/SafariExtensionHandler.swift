@@ -10,7 +10,7 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         var responseName:String = ""
         var responseData:Any = ""
         var responseError = ""
-        
+        var dispatch = true;
         switch messageName {
         case "REQ_INIT_DATA":
             responseName = "RESP_INIT_DATA"
@@ -89,11 +89,14 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 responseError = "failed to get save location"
             }
         case "REQ_OPEN_DOCUMENTS_DIRECTORY":
+            dispatch = false
             return openDocumentsDirectory()
         case "REQ_CHANGE_SAVE_LOCATION":
-            return closeExtensionHTMLPages()
+            dispatch = false
+            closeExtensionHTMLPages()
         case "REQ_USERSCRIPTS":
             responseName = "RESP_USERSCRIPTS"
+            dispatch = false
             page.getPropertiesWithCompletionHandler { props in
                 guard
                     let url = props?.url,
@@ -104,13 +107,15 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 }
                 responseData = code
                 page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
-                return
             }
+        
         default:
+            dispatch = false
             err("message from js has no handler")
-            return
         }
-        page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+        if dispatch {
+            page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+        }
     }
     
     override func toolbarItemClicked(in window: SFSafariWindow) {
