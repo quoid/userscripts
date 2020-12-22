@@ -673,7 +673,6 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     else {
         return nil
     }
-    print(parsed)
     return parsed
 }
 
@@ -693,7 +692,6 @@ func getNestedFiles() {
             urls.append(url)
         }
     }
-    print(urls)
 }
 
 func saveFile(_ data: [String: Any]) -> [String: Any] {
