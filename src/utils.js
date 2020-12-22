@@ -8,8 +8,8 @@ export function formatDate(ms) {
     return `${mo} ${dd}, ${yr} at ${hr}:${mn}`;
 }
 
-export function uniqueId(len = 8) {
-    return Math.random().toString(36).substr(2, len);
+export function uniqueId() {
+    return Math.random().toString(36).substr(2, 8);
 }
 
 export function sortBy(array, order) {

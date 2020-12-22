@@ -39,7 +39,7 @@
         // remove any temp scripts
         if (temp) items.update(i => i.filter(a => !a.temp));
 
-        const random = uniqueId(5);
+        const random = uniqueId();
         const namePrefix = type === "js" ? "NewScript-" : "NewStyle-";
         const name = namePrefix + random;
         const filename = name + "." + type;
