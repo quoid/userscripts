@@ -671,7 +671,6 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
         let content = try? String(contentsOf: url, encoding: .utf8),
         let parsed = parse(content)
     else {
-        err("could not get file contents, no file exists at path, \(url.path)")
         return nil
     }
     print(parsed)
@@ -943,7 +942,7 @@ func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
                         let code = contents["code"] as? String,
                         let type = filename.split(separator: ".").last
                     else {
-                        err("error reading getting file data in getCode func")
+                        err("could not get file contents for \(filename)")
                         continue
                     }
                     
