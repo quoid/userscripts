@@ -177,22 +177,28 @@ func parse(_ content: String) -> [String: Any]? {
         let metaArray = content[metas].split(separator: "\n")
         for meta in metaArray {
             let p = #"^(?:[ \t]*\/\/[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
+            // this pattern checks for specific keys that won't have values
+            let p2 = #"^(?:[ \t]*\/\/[ \t]*@)(noframes)[ \t]*$"#
             // the individual meta string, ie. // @name File Name
             let metaString = String(meta)
             // force try b/c pattern is known to be valid regex
             let re = try! NSRegularExpression(pattern: p, options: [])
+            let re2 = try! NSRegularExpression(pattern: p2, options: [])
             let range = NSRange(location: 0, length: metaString.utf16.count)
             // key lines not properly prefixed & without values will be skipped
             if let m = re.firstMatch(in: metaString, options: [], range: range) {
                 // force unwrap key & value since matches regex above
                 let key = metaString[Range(m.range(at: 1), in: metaString)!]
                 let value = metaString[Range(m.range(at: 2), in: metaString)!]
-                if metadata[String(key)] != nil {
-                    metadata[String(key)] = metadata[String(key)]
-                } else {
+                if metadata[String(key)] == nil {
+                    // if key does not exist in metadata dict, add it
                     metadata[String(key)] = []
                 }
                 metadata[String(key)]?.append(String(value))
+            } else if let m2 = re2.firstMatch(in: metaString, options: [], range: range) {
+                // force unwrap key since matches regex above
+                let key = metaString[Range(m2.range(at: 1), in: metaString)!]
+                metadata[String(key)] = []
             }
         }
     }
@@ -848,7 +854,7 @@ func trashFile(_ filename: String) -> Bool {
 }
 
 // injection
-func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
+func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]? {
     var allFiles = [String: [String: [String: Any]]]() // will be returned
     
     // there has to be a better way to do this
@@ -946,6 +952,12 @@ func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
                     
                     // can force unwrap b/c getFileContentsParsed ensures metadata exists
                     let metadata = contents["metadata"] as! [String: [String]]
+                    
+                    // if metadata has noframes option and the url is not the top window, don't load
+                    if (metadata["noframes"] != nil && !isTop) {
+                        continue
+                    }
+                    
                     // normalize weight
                     var weight = metadata["weight"]?[0] ?? "1"
                     weight = normalizeWeight(weight)
