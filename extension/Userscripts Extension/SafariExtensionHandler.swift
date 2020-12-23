@@ -48,7 +48,7 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
             if
                 let fileData = userInfo as? [String: String],
                 let filename = fileData["filename"],
-                let action = fileData["actionxxx"]
+                let action = fileData["action"]
             {
                 if !toggleFile(filename, action) {
                     responseError = "failed to toggle file"
@@ -88,20 +88,20 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         case "REQ_OPEN_DOCUMENTS_DIRECTORY":
             return openDocumentsDirectory()
         case "REQ_CHANGE_SAVE_LOCATION":
-            closeExtensionHTMLPages()
+            return closeExtensionHTMLPages()
         case "REQ_USERSCRIPTS":
-            page.getPropertiesWithCompletionHandler { props in
-                guard
-                    let url = props?.url,
-                    let code = getCode(url.absoluteString)
-                else {
-                    responseError = "failed to get injected code"
-                    return
-                }
-                responseData = code
-                page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+            responseName = "RESP_USERSCRIPTS"
+            if
+                let data = userInfo,
+                let url = data["url"] as? String,
+                let isTop = data["top"] as? Bool,
+                let id = data["id"] as? String,
+                let code = getCode(url, isTop)
+            {
+                responseData = ["code": code, "id": id]
+            } else {
+                responseError = "failed to get code"
             }
-            return
         default:
             err("message from js has no handler")
         }
