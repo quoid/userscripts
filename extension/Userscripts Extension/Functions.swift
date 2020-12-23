@@ -176,7 +176,7 @@ func parse(_ content: String) -> [String: Any]? {
         // split metadatas by new line
         let metaArray = content[metas].split(separator: "\n")
         for meta in metaArray {
-            let p = #"@([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
+            let p = #"^(?:[ \t]*\/\/[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
             // the individual meta string, ie. // @name File Name
             let metaString = String(meta)
             // force try b/c pattern is known to be valid regex
