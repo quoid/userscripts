@@ -70,6 +70,7 @@ function stateStore() {
         // list of acceptable states, mostly for state definition tracking
         const states = [
             "init", // the uninitialized app state (start screen)
+            "init-error", // unique error when initialization fails, shows error on load screen
             "settings", // when the settings modal is shown
             "items-loading", // when the sidebar items are loading
             "saving", // when a file in the editor is being saved
