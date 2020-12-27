@@ -35,6 +35,7 @@ function handleMessage(e) {
     // if error is present, log to browser console for all messages
     // unique error handling contained in switch statement
     if (error) {
+        console.error(error);
         log.add(error, "error", true);
     }
 
