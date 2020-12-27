@@ -5,14 +5,20 @@ import SafariServices
 func getSaveLocation() -> URL? {
     let standardDefaults = UserDefaults.standard
     let userSaveLocationKey = "userSaveLocation"
-    // get the default save location
-    guard let defaultSaveLocation = standardDefaults.url(forKey: "saveLocation") else {
-        err("could not get the default saveLocation in getSaveLocation")
-        return nil
+    var defaultSaveLocation:URL
+    
+    // get the default save location, if key doesn't exist write it to user defaults
+    if let dsl = standardDefaults.url(forKey: "saveLocation") {
+        defaultSaveLocation = dsl
+    } else {
+        NSLog("default save location not set, writing to user defaults")
+        let u = getDocumentsDirectory().appendingPathComponent("scripts")
+        UserDefaults.standard.set(u, forKey: "saveLocation")
+        defaultSaveLocation = u
     }
+
     // check if sharedBookmark data exists
-    // check if can get bookmark URL (won't be able to if directory permanently deleted)
-    // check if bookmark directory is in trash
+    // check if can get bookmark URL (won't be able to if directory permanently deleted or in trash)
     guard
         let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
         let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
@@ -235,11 +241,9 @@ let defaultSettings = [
     "languageCode": Locale.current.languageCode ?? "en",
     "lint": "false",
     "log": "false",
-    "saveLocation": getDocumentsDirectory().appendingPathComponent("scripts").path,
     "sortOrder": "lastModifiedDesc",
     "showInvisibles": "true",
-    "tabSize": "4",
-    "version": Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+    "tabSize": "4"
 ]
 
 func getManifestKeys() -> Manifest? {
@@ -507,34 +511,6 @@ func purgeManifest() -> Bool {
     return true
 }
 
-func getSettings() -> [String: String]? {
-    var update = false; // determines whether to rewrite manifest
-    guard
-        var manifestKeys = getManifestKeys(),
-        let saveLocation = getSaveLocation()
-    else {
-        err("failed to get manifest keys or save location when attempting to get settings")
-        return nil
-    }
-    // iterate over default settings and individually check if each present
-    for (key, value) in defaultSettings {
-        if manifestKeys.settings[key] == nil {
-            manifestKeys.settings[key] = value
-            update = true
-        }
-    }
-    // check if the user changed the defaultSaveLocation if so return/save that path instead
-    if manifestKeys.settings["saveLocation"] != saveLocation.path {
-        manifestKeys.settings["saveLocation"] = saveLocation.path
-        update = true
-    }
-    if update, updateManifest(with: manifestKeys) != true {
-        err("failed to update manifest while getting setting")
-        return nil
-    }
-    return manifestKeys.settings
-}
-
 func updateSettings(_ settings: [String: String]) -> Bool {
     guard var manifestKeys = getManifestKeys() else {
         err("failed to get manifest keys when attempting to update settings")
@@ -550,34 +526,63 @@ func updateSettings(_ settings: [String: String]) -> Bool {
 
 // init
 func getInitData() -> [String: Any]? {
-    // run init processes and return settings and blacklist
-    // this func also validates the manifest
-    // if getManifestKeys returns nil, manifest is missing or improperly formatted
-    // if that happens a new manifest will be created
-
-    // get blacklist patterns
-    var blackist = [String]()
-    if let manifestKeys = getManifestKeys() {
-        blackist = manifestKeys.blacklist
-    } else {
-        NSLog("manifest invalid, creating new")
-        // create a new manifest
-        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], settings: [:])
-        _ = updateManifest(with: manifest)
-    }
-
-    // this guard might be a bit redundant consider the check above
-    guard var data:[String: Any] = getSettings() else {
-        err("failed to get settings in getInitData")
+    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
+    var update = false // determines whether to rewrite manifest
+    guard let saveLocation = getSaveLocation() else {
+        err("failed to get save location when attempting to get init data")
         return nil
     }
-
-    // if purge manifest fails, it's doesn't break functionality
-    // note the failure but continue operations
+    
+    // check if default save location directory exists, if not create it
+    if !FileManager.default.fileExists(atPath: defaultSaveLocation.path) {
+        do {
+            try FileManager.default.createDirectory(at: defaultSaveLocation, withIntermediateDirectories: false)
+        } catch {
+            // could not create the save location directory, show error
+            err("failed to create save location directory while getting init data")
+            return nil
+        }
+    }
+    
+    // get manifest data
+    var manifestKeys = getManifestKeys()
+    // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
+    if manifestKeys == nil {
+        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], settings: [:])
+        if !updateManifest(with: manifestKeys!) { // force unwrap since it was assigned in above line
+            err("manifest had issues that could not be resolved while getting init data")
+            return nil
+        }
+    }
+    
+    // get settings from manifest
+    // can force unwrap all instances of manifestKeys since nil check is done above
+    
+    // iterate over default settings and individually check if each present
+    // missing keys will occur when new settings introduced
+    for (key, value) in defaultSettings {
+        if manifestKeys!.settings[key] == nil {
+            manifestKeys!.settings[key] = value
+            update = true
+        }
+    }
+    
+    // if flagged, update manifest
+    if update, updateManifest(with: manifestKeys!) != true {
+        err("failed to update manifest while getting init data")
+        return nil
+    }
+    
+    // purge manifest every init, if it fails, log error and continue since failed purges don't break functionality
     if !purgeManifest() {
         err("purge manifest failed while getting init data")
     }
-    data["blacklist"] = blackist
+    
+    var data:[String: Any] = manifestKeys!.settings
+    data["blacklist"] = manifestKeys!.blacklist
+    data["saveLocation"] = saveLocation.path
+    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    
     return data
 }
 
