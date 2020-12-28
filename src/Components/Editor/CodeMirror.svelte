@@ -102,7 +102,7 @@
         instance = CodeMirror.fromTextArea(textarea, {
             mode:  "javascript",
             autoCloseBrackets: true,
-            continueComments: true,
+            continueComments: false,
             foldGutter: true,
             lineNumbers: true,
             lineWrapping: true,
