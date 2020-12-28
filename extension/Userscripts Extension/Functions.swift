@@ -198,9 +198,9 @@ func parse(_ content: String) -> [String: Any]? {
         // split metadatas by new line
         let metaArray = content[metas].split(separator: "\n")
         for meta in metaArray {
-            let p = #"^(?:[ \t]*(\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
+            let p = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
             // this pattern checks for specific keys that won't have values
-            let p2 = #"^(?:[ \t]*(\/\/)?[ \t]*@)(noframes)[ \t]*$"#
+            let p2 = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$"#
             // the individual meta string, ie. // @name File Name
             let metaString = String(meta)
             // force try b/c pattern is known to be valid regex
