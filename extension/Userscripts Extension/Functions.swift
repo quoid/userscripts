@@ -892,6 +892,8 @@ func trashFile(_ filename: String) -> Bool {
     guard
         toggleFile(filename, "enable"),
         updateExcludesAndMatches(filename, [], []),
+        let type = URL(string: filename)?.path,
+        getRequiredCode(filename, [], type),
         let saveLocation = getSaveLocation()
     else {
         err("failed to remove script from manifest or get save location")
