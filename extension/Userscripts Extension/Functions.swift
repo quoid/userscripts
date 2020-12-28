@@ -687,24 +687,6 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     return parsed
 }
 
-func getNestedFiles() {
-    guard
-        let saveLocation = getSaveLocation(),
-        let enumerator = FileManager.default.enumerator(atPath: saveLocation.path)
-    else {
-        err("FAIL")
-        return
-    }
-    var urls = [URL]()
-    while let filename = enumerator.nextObject() as? String {
-        let url = URL(fileURLWithPath: filename, relativeTo: saveLocation).absoluteURL
-        //let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
-        if (url.path.hasSuffix(".css") || url.path.hasSuffix(".js")) {
-            urls.append(url)
-        }
-    }
-}
-
 func saveFile(_ data: [String: Any]) -> [String: Any] {
     // lots of unique guard statements to try to better track down failures when they occur
     guard let saveLocation = getSaveLocation() else {
