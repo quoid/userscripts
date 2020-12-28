@@ -63,6 +63,10 @@ func getSaveLocation() -> URL? {
     }
 }
 
+func getRequireLocation() -> URL {
+    return getDocumentsDirectory().appendingPathComponent("require")
+}
+
 func closeExtensionHTMLPages() {
     // this function attempts to close all instances of the extension's app page
     // unfortunately there is no good api for managing extension bundled html pages
@@ -111,6 +115,18 @@ func santize(_ str: String) -> String? {
 
 func isSanitzed(_ str: String) -> Bool {
     return str.removingPercentEncoding != str
+}
+
+func unsanitize(_ str: String) -> String {
+    var s = str
+    // un-santized name
+    if s.hasPrefix("%2") && !s.hasPrefix("%2F") {
+        s = "." + s.dropFirst(2)
+    }
+    if isSanitzed(s) {
+        s = s.removingPercentEncoding ?? s
+    }
+    return s
 }
 
 func patternMatch(_ string: String,_ pattern: String) -> Bool {
@@ -229,9 +245,10 @@ struct Manifest: Codable {
     var disabled:[String]
     var exclude: [String: [String]]
     var match: [String: [String]]
+    var require: [String: [String]]
     var settings: [String: String]
     private enum CodingKeys : String, CodingKey {
-        case blacklist, disabled, exclude = "exclude-match", match, settings
+        case blacklist, disabled, exclude = "exclude-match", match, require, settings
     }
 }
 
@@ -250,7 +267,7 @@ func getManifestKeys() -> Manifest? {
     let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
     // if manifest doesn't exist, create new one
     if !FileManager.default.fileExists(atPath: url.path) {
-        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], settings: [:])
+        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], require: [:], settings: [:])
         _ = updateManifest(with: manifest)
     }
     guard
@@ -524,9 +541,48 @@ func updateSettings(_ settings: [String: String]) -> Bool {
     return true
 }
 
+func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
+    guard var manifestKeys = getManifestKeys() else {
+        return false
+    }
+    
+    // file has no required resources but the key is in manifest
+    if resources.count < 1 && manifestKeys.require[filename] != nil, let index = manifestKeys.require.index(forKey: filename) {
+        manifestKeys.require.remove(at: index)
+        NSLog("No more required resources for \(filename), removed from manifest")
+        if updateManifest(with: manifestKeys) {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    // file has required resources
+    // santize all resource names
+    var r = [String]()
+    for resource in resources {
+        if let santizedResourceName = santize(resource) {
+            r.append(santizedResourceName)
+        } else {
+            return false
+        }
+    }
+    
+    // only write if current manifest differs from resources
+    if r.count > 0 && r != manifestKeys.require[filename] {
+        manifestKeys.require[filename] = r
+        if !updateManifest(with: manifestKeys) {
+            return false
+        }
+    }
+    
+    return true
+}
+
 // init
 func getInitData() -> [String: Any]? {
     let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
+    let requireLocation = getRequireLocation()
     var update = false // determines whether to rewrite manifest
     guard let saveLocation = getSaveLocation() else {
         err("failed to get save location when attempting to get init data")
@@ -544,11 +600,22 @@ func getInitData() -> [String: Any]? {
         }
     }
     
+    // check if default save location directory exists, if not create it
+    if !FileManager.default.fileExists(atPath: requireLocation.path) {
+        do {
+            try FileManager.default.createDirectory(at: requireLocation, withIntermediateDirectories: false)
+        } catch {
+            // could not create the save location directory, show error
+            err("failed to create save location directory while getting init data")
+            return nil
+        }
+    }
+    
     // get manifest data
     var manifestKeys = getManifestKeys()
     // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
     if manifestKeys == nil {
-        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], settings: [:])
+        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], require: [:], settings: [:])
         if !updateManifest(with: manifestKeys!) { // force unwrap since it was assigned in above line
             err("manifest had issues that could not be resolved while getting init data")
             return nil
@@ -661,6 +728,13 @@ func getAllFilesData() -> [[String: Any]]? {
         if !updateExcludesAndMatches(filename, excluded, matched) {
             err("error updating excludes & matches while getting all files data")
         }
+        
+        // check for require keys, run even if metadata["require"] is nil to remove stale required resources
+        let required = metadata["require"] ?? []
+        if !getRequiredCode(filename, required, "\(type)") {
+            err("error updating required resources while getting all files data")
+        }
+        
         files.append(fileData)
     }
     return files
@@ -709,7 +783,7 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     else {
         return ["error": "failed to parse argument in save function"]
     }
-
+    
     // construct new file name
     let newFilename = "\(name).\(type)"
     
@@ -746,7 +820,13 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     }
     
     // file passed validation
-    
+
+    // check for require keys
+    let required = metadata["require"] ?? []
+    if !getRequiredCode(newFilename, required, type) {
+        return ["error": "failed to get required resources"]
+    }
+
     // attempt to save to disk
     let newFileUrl = saveLocation.appendingPathComponent(newFilename)
     do {
@@ -789,12 +869,7 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     _ = updateExcludesAndMatches(newFilename, excludes, matches)
     
     // un-santized name
-    if name.hasPrefix("%2") && !name.hasPrefix("%2F") {
-        name = "." + name.dropFirst(2)
-    }
-    if isSanitzed(name) {
-        name = name.removingPercentEncoding!
-    }
+    name = unsanitize(name)
     
     var response = [String: Any]()
     response["canUpdate"] = false
@@ -837,6 +912,87 @@ func trashFile(_ filename: String) -> Bool {
             return false
         }
     }
+    return true
+}
+
+func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
+    let directory = getRequireLocation().appendingPathComponent(filename)
+    
+    // if file requires no resource but directory exists, trash it
+    if resources.count < 1 && FileManager.default.fileExists(atPath: directory.path) {
+        do {
+            try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
+        } catch {
+            // failing to trash item won't break functonality, so log error and move on
+            err(error.localizedDescription)
+            return true
+        }
+    }
+    
+    for resourceURLString in resources {
+        // skip invalid urls or urls pointing to files of different types
+        if let url = URL(string: resourceURLString), url.path.hasSuffix(fileType) {
+            guard let resourceFilename = santize(resourceURLString) else {
+                return false
+            }
+            let fileURL = directory.appendingPathComponent(resourceFilename)
+            var contents = ""
+            // only attempt to get resource if it does not yet exist
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                continue
+            }
+            
+            // get remote file contents, synchronously
+            let semaphore = DispatchSemaphore(value: 0)
+            var task: URLSessionDataTask?
+            task = URLSession.shared.dataTask(with: url) { data, response, error in
+                if let r = response as? HTTPURLResponse, data != nil, error == nil {
+                    if r.statusCode == 200 {
+                        contents = String(data: data!, encoding: .utf8) ?? ""
+                    }
+                }
+                semaphore.signal()
+            }
+            task?.resume()
+            // wait 10 seconds before timing out
+            if semaphore.wait(timeout: .now() + 10) == .timedOut {
+                task?.cancel()
+            }
+            
+            // if we made it to this point and contents is still an empty string, something went wrong with the request
+            if contents.count < 1 {
+                continue
+            }
+            
+            // check if file specific folder exists at requires directory
+            if !FileManager.default.fileExists(atPath: directory.path) {
+                guard ((try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)) != nil) else {
+                    return false
+                }
+            }
+            
+            guard ((try? contents.write(to: fileURL, atomically: false, encoding: .utf8)) != nil) else {
+                return false
+            }
+        }
+    }
+    
+    // remove unused files, if any exist
+    var all = [String]()
+    if let allResourceFilenamesSaved = try? FileManager.default.contentsOfDirectory(atPath: directory.path) {
+        for savedResourceFilename in allResourceFilenamesSaved {
+            if !resources.contains(unsanitize(savedResourceFilename)) {
+                try? FileManager.default.trashItem(at: directory.appendingPathComponent(savedResourceFilename), resultingItemURL: nil)
+            } else {
+                all.append(savedResourceFilename)
+            }
+        }
+    }
+
+    if !updateManifestRequires(filename, all) {
+        return false
+    }
+    
     return true
 }
 
@@ -930,7 +1086,7 @@ func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]?
                         // NOTE: getFileContents returns parsed script metadata
                         let saveLocation = getSaveLocation(),
                         let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
-                        let code = contents["code"] as? String,
+                        var code = contents["code"] as? String,
                         let type = filename.split(separator: ".").last
                     else {
                         err("could not get file contents for \(filename)")
@@ -948,6 +1104,20 @@ func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]?
                     // normalize weight
                     var weight = metadata["weight"]?[0] ?? "1"
                     weight = normalizeWeight(weight)
+                    
+                    // attempt to get require resource from disk
+                    // if required resource is inaccessible, silently fail and continue
+                    if let required = metadata["require"] {
+                        for require in required {
+                            let sanitizedName = santize(require) ?? ""
+                            let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
+                            if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
+                                code = "\(requiredContent)\n\(code)"
+                            } else {
+                                err("could not get required resource from disk \(requiredFileURL)")
+                            }
+                        }
+                    }
                     
                     if type == "css" {
                         cssFiles[filename] = ["code": code, "weight": weight]
