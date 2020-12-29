@@ -121,11 +121,8 @@ function parseCode(data, fallback = false) {
 }
 
 function cspFallback(e) {
-    console.log(e);
     const src = e.sourceFile.toUpperCase();
     const ext = safari.extension.baseURI.toUpperCase();
-    console.log(`src is ${src}`);
-    console.log(`ext is ${ext}`);
     // ensure that violation came from the extension
     if ((ext.startsWith(src) || src.startsWith(ext))) {
         // get all "auto" code
@@ -141,7 +138,6 @@ function cspFallback(e) {
 function handleMessage(e) {
     // the only message currently sent to the content script
     if (e.name === "RESP_USERSCRIPTS") {
-        console.log(`Got message at ${url}, the content id is ${id} and the id we got is ${e.message.data.id} - will run? ${id === e.message.data.id}`);
         if (e.message.error) {
             return console.error(e.message.error);
         }
