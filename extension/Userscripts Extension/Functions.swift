@@ -892,7 +892,7 @@ func trashFile(_ filename: String) -> Bool {
     guard
         toggleFile(filename, "enable"),
         updateExcludesAndMatches(filename, [], []),
-        let type = URL(string: filename)?.pathExtension,
+        let type = filename.components(separatedBy: ".").last,
         getRequiredCode(filename, [], type),
         let saveLocation = getSaveLocation()
     else {
