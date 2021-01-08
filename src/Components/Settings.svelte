@@ -57,7 +57,6 @@
         color: var(--text-color-secondary);
         display: flex;
         font: var(--text-medium);
-        font-weight: 300;
         height: 100%;
         letter-spacing: var(--letter-spacing-medium);
         justify-content: center;
@@ -220,7 +219,7 @@
                 <div>General Settings</div>
             </div>
             <div class="modal__row">
-                <div>Log All Activity</div>
+                <div>Log Activity</div>
                 <Toggle
                     checked={$settings.log}
                     on:click={() => update("log", !$settings.log)}
@@ -255,7 +254,7 @@
         </div>
         <div class="modal__section">
             <div class="modal__title modal__title--borderless">Information</div>
-            <p>You can report bugs, see what's currently in development and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts">supporting the project</a>.
+            <p>Version {$settings.version}<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support-development">supporting the project</a>.
         </div>
     </div>
 </div>
