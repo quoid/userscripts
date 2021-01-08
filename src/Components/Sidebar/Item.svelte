@@ -26,7 +26,7 @@
         background-color: var(--color-bg-secondary);
         border-bottom: 1px solid var(--color-black);
         cursor: pointer;
-        padding: 1.5rem 1.5rem calc(1.5rem - 1px);
+        padding: 1rem 1rem calc(1rem - 1px);
     }
 
     .item:hover {
@@ -51,9 +51,8 @@
 
     .item__description {
         color: var(--text-color-secondary);
-        font: var(--text-medium);
-        font-weight: 300;
-        letter-spacing: var(--letter-spacing-medium);
+        font: var(--text-small);
+        letter-spacing: var(--letter-spacing-small);
     }
 
     :global(.sidebar--compact) .item__description {

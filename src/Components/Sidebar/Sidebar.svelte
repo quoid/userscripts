@@ -1,5 +1,6 @@
 <script>
     import {tick} from "svelte";
+    import {fade} from "svelte/transition";
     import {items, log, settings, state} from "../../store.js";
     import {getRemoteFile, newScriptDefault, uniqueId, validateURL} from "../../utils.js";
     import Dropdown from "../Shared/Dropdown.svelte";
@@ -133,6 +134,14 @@
         if (confirm(m)) return true;
         return false;
     }
+
+    let sidebarTimeout = null;
+    let showCount = true;
+    function sidebarScroll() {
+        if (sidebarTimeout) clearTimeout(sidebarTimeout);
+        showCount = false;
+        sidebarTimeout = setTimeout(() => showCount = true, 750);
+    }
 </script>
 
 <style>
@@ -143,23 +152,38 @@
         flex-direction: column;
         flex: 0 0 23rem;
         max-width: 23rem;
-    }
-
-    .sidebar__header,
-    .sidebar__footer {
-        align-items: center;
-        display: flex;
-        flex-shrink: 0;
-        padding: 1rem;
+        position: relative;
     }
 
     .sidebar__header {
+        align-items: center;
+        display: flex;
+        flex-shrink: 0;
         flex-wrap: wrap;
+        padding: 1rem;
     }
 
     .sidebar__filter {
         flex-grow: 1;
-        margin-right: 0.5rem;
+    }
+
+    :global(.sidebar__filter + button) {
+        margin: 0 0.5rem;
+    }
+
+    .sidebar__count {
+        background: rgba(47, 51, 55, 0.65);
+        border-radius: var(--border-radius);
+        bottom: 0.25rem;
+        color: var(--text-color-secondary);
+        flex-basis: 100%;
+        font: var(--text-small);
+        left: 0.25rem;
+        margin-top: 0.5rem;
+        padding: 0.25rem;
+        position: absolute;
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
     }
 
     .sidebar__body {
@@ -169,24 +193,24 @@
         overflow-y: auto;
         position: relative;
     }
-
-    .sidebar__status {
-        color: var(--text-color-secondary);
-        flex: 1 0 0;
-        font: var(--text-small);
-    }
 </style>
 
 <div class="sidebar {!$settings.descriptions ? "sidebar--compact" : ""}">
     <div class="sidebar__header">
         <div class="sidebar__filter"><Filter/></div>
+        <IconButton
+            icon={iconSettings}
+            on:click={() => state.add("settings")}
+            title={"Open settings"}
+            {disabled}
+        />
         <Dropdown icon={iconPlus} title={"New item"} {disabled}>
             <li on:click={() => newItem("css")}>New CSS</li>
             <li on:click={() => newItem("js")}>New Javascript</li>
             <li on:click={newRemote}>New Remote</li>
         </Dropdown>
     </div>
-    <div class="sidebar__body">
+    <div class="sidebar__body" on:scroll={sidebarScroll}>
         {#if $state.includes("items-loading")}
             <Loader/>
         {/if}
@@ -198,19 +222,7 @@
             />
         {/each}
     </div>
-    <div class="sidebar__footer">
-        <div class="sidebar__status">
-            <div>{list.length} Items</div>
-            <div>
-                Version {$settings.version} -
-                <a href="https://github.com/quoid/userscripts#readme">View docs</a>
-            </div>
-        </div>
-        <IconButton
-            icon={iconSettings}
-            on:click={() => state.add("settings")}
-            title={"Open settings"}
-            {disabled}
-        />
-    </div>
+    {#if showCount}
+        <div transition:fade="{{duration: 150}}" class="sidebar__count">{list.length} Items</div>
+    {/if}
 </div>
