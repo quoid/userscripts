@@ -9,7 +9,6 @@
     import Item from "./Item.svelte";
     import {cmChanged, cmGetInstance, cmSetSavedCode, cmSetSessionCode} from "../Editor/CodeMirror.svelte";
     import {sortBy} from "../../utils.js";
-    import logo from "../../img/logo.svg";
     import iconPlus from "../../img/icon-plus.svg";
     import iconSettings from "../../img/icon-settings.svg";
 
@@ -158,23 +157,9 @@
         flex-wrap: wrap;
     }
 
-    .sidebar__logo {
-        display: flex;
-        flex-grow: 1;
-    }
-
-    .sidebar__logo :global(svg) {
-        height: 1.313rem;
-        pointer-events: none;
-    }
-
-    .sidebar__logo + div {
-        margin-right: 1rem;
-    }
-
     .sidebar__filter {
-        flex-basis: 100%;
-        margin-top: 1rem;
+        flex-grow: 1;
+        margin-right: 0.5rem;
     }
 
     .sidebar__body {
@@ -194,16 +179,12 @@
 
 <div class="sidebar {!$settings.descriptions ? "sidebar--compact" : ""}">
     <div class="sidebar__header">
-        <div class="sidebar__logo">
-            {@html logo}
-        </div>
-        <!-- <IconButton icon="sync" {disabled}/> -->
+        <div class="sidebar__filter"><Filter/></div>
         <Dropdown icon={iconPlus} title={"New item"} {disabled}>
             <li on:click={() => newItem("css")}>New CSS</li>
             <li on:click={() => newItem("js")}>New Javascript</li>
             <li on:click={newRemote}>New Remote</li>
         </Dropdown>
-        <div class="sidebar__filter"><Filter/></div>
     </div>
     <div class="sidebar__body">
         {#if $state.includes("items-loading")}
