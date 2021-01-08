@@ -170,6 +170,8 @@
     }
 
     .sidebar__count {
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
         background: rgba(47, 51, 55, 0.65);
         border-radius: var(--border-radius);
         bottom: 0.25rem;
@@ -180,8 +182,7 @@
         margin-top: 0.5rem;
         padding: 0.25rem;
         position: absolute;
-        backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
+        z-index: 2;
     }
 
     .sidebar__body {
