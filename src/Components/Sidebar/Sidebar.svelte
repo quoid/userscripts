@@ -16,8 +16,6 @@
     // disable buttons accordingly
     $: disabled = !$state.includes("ready");
 
-    $: console.log($items);
-
     $: list = sortBy($items, $settings.sortOrder).filter(a => a.visible != false);
 
     // uncomment this to always scroll to an active item
