@@ -179,7 +179,6 @@
         flex-basis: 100%;
         font: var(--text-small);
         left: 0.25rem;
-        margin-top: 0.5rem;
         padding: 0.25rem;
         position: absolute;
         z-index: 2;
