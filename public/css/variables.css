@@ -16,7 +16,7 @@
     --letter-spacing-small: -0.008rem;
     --opacity-disabled: 0.3;
     --text-color-primary: rgb(255, 255, 255);
-    --text-color-secondary: rgba(255, 255, 255, 0.75);
+    --text-color-secondary: rgba(255, 255, 255, 0.65);
     --text-color-disabled: rgba(255, 255, 255, 0.4);
     --font-family: system-ui, -apple-system, "Helvetica Neue", "Helvetica", sans-serif;
     --text-default: 1rem/1.5rem var(--font-family);
