@@ -248,11 +248,11 @@
 
     .editor__footer {
         background: rgba(50, 54, 57, 0.65);
-        border-top-left-radius: var(--border-radius);
-        bottom: 0;
-        padding: 1rem;
+        border-radius: var(--border-radius);
+        bottom: 0.25rem;
+        padding: 0.5rem 1rem;
         position: absolute;
-        right: 0;
+        right: 0.25rem;
         z-index: 2;
         backdrop-filter: blur(3px);
         -webkit-backdrop-filter: blur(3px);
