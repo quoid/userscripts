@@ -71,12 +71,19 @@
         opacity: 1;
     }
 
+    ul :global(li.separator) {
+        background-color: black;
+        height: 1px;
+        margin: 0.25rem 0.5rem;
+        padding: 0;
+    }
+
     ul :global(li.selected) {
         color: var(--text-color-disabled);
         pointer-events: none;
     }
 
-    ul :global(li:hover) {
+    ul :global(li:hover:not(.separator)) {
         background-color: var(--color-blue);
         color: var(--color-black);
     }
