@@ -14,7 +14,7 @@ Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id146329
 
 **UI Overview**
 
-![Userscripts Safari](/etc/overview01.png)
+![Userscripts Safari](/etc/ui01.png)
 
 1. **Extension button** - click this button to open the extension interface
 1. **Filter bar** - use this input to filter items in the sidebar, by *name*
@@ -40,7 +40,7 @@ Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id146329
         - `Command + S` is the keyboard shortcut for the action
 
 
-![Userscripts Safari](/etc/overview02.png)
+![Userscripts Safari](/etc/ui02.png)
 
 #### Settings
 
