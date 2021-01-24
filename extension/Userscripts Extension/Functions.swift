@@ -5,14 +5,20 @@ import SafariServices
 func getSaveLocation() -> URL? {
     let standardDefaults = UserDefaults.standard
     let userSaveLocationKey = "userSaveLocation"
-    // get the default save location
-    guard let defaultSaveLocation = standardDefaults.url(forKey: "saveLocation") else {
-        err("could not get the default saveLocation in getSaveLocation")
-        return nil
+    var defaultSaveLocation:URL
+    
+    // get the default save location, if key doesn't exist write it to user defaults
+    if let dsl = standardDefaults.url(forKey: "saveLocation") {
+        defaultSaveLocation = dsl
+    } else {
+        NSLog("default save location not set, writing to user defaults")
+        let u = getDocumentsDirectory().appendingPathComponent("scripts")
+        UserDefaults.standard.set(u, forKey: "saveLocation")
+        defaultSaveLocation = u
     }
+
     // check if sharedBookmark data exists
-    // check if can get bookmark URL (won't be able to if directory permanently deleted)
-    // check if bookmark directory is in trash
+    // check if can get bookmark URL (won't be able to if directory permanently deleted or in trash)
     guard
         let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
         let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
@@ -57,42 +63,8 @@ func getSaveLocation() -> URL? {
     }
 }
 
-func patternMatch(_ string: String,_ pattern: String) -> Bool {
-    let predicate = NSPredicate(format: "self LIKE %@", pattern)
-    return !NSArray(object: string).filtered(using: predicate).isEmpty
-}
-
-func dateToMilliseconds(_ date: Date) -> Int {
-    let since1970 = date.timeIntervalSince1970
-    return Int(since1970 * 1000)
-}
-
-func santize(_ str: String) -> String? {
-    // removes dubious characters from strings (filenames)
-    var santized = str
-    if santized.first == "." {
-        santized = "%2" + str.dropFirst()
-    }
-    let allowedCharacterSet = (CharacterSet(charactersIn: "/:\\").inverted)
-    return santized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
-}
-
-func isSanitzed(_ str: String) -> Bool {
-    return str.removingPercentEncoding != str
-}
-
-func normalizeWeight(weight: String) -> String {
-    if let w = Int(weight) {
-        if w > 999 {
-            return "999"
-        } else if w < 1 {
-            return "1"
-        } else {
-            return weight
-        }
-    } else {
-        return "1"
-    }
+func getRequireLocation() -> URL {
+    return getDocumentsDirectory().appendingPathComponent("require")
 }
 
 func closeExtensionHTMLPages() {
@@ -126,44 +98,89 @@ func closeExtensionHTMLPages() {
     }
 }
 
-func sendMessageToAllPages(withName: String, userInfo: [String: Any]?) {
-    SFSafariApplication.getAllWindows { (windows) in
-        for window in windows {
-            window.getAllTabs{ (tabs) in
-                for tab in tabs {
-                    tab.getPagesWithCompletionHandler { (pages) in
-                        if pages != nil {
-                            for page in pages! {
-                                page.dispatchMessageToScript(withName: withName, userInfo: userInfo)
-                            }
-                        }
-                    }
-                }
-            }
+func dateToMilliseconds(_ date: Date) -> Int {
+    let since1970 = date.timeIntervalSince1970
+    return Int(since1970 * 1000)
+}
+
+func santize(_ str: String) -> String? {
+    // removes dubious characters from strings (filenames)
+    var santized = str
+    if santized.first == "." {
+        santized = "%2" + str.dropFirst()
+    }
+    let allowedCharacterSet = (CharacterSet(charactersIn: "/:\\").inverted)
+    return santized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
+}
+
+func isSanitzed(_ str: String) -> Bool {
+    return str.removingPercentEncoding != str
+}
+
+func unsanitize(_ str: String) -> String {
+    var s = str
+    // un-santized name
+    if s.hasPrefix("%2") && !s.hasPrefix("%2F") {
+        s = "." + s.dropFirst(2)
+    }
+    if isSanitzed(s) {
+        s = s.removingPercentEncoding ?? s
+    }
+    return s
+}
+
+func patternMatch(_ string: String,_ pattern: String) -> Bool {
+    let predicate = NSPredicate(format: "self LIKE %@", pattern)
+    return !NSArray(object: string).filtered(using: predicate).isEmpty
+}
+
+func normalizeWeight(_ weight: String) -> String {
+    if let w = Int(weight) {
+        if w > 999 {
+            return "999"
+        } else if w < 1 {
+            return "1"
+        } else {
+            return weight
         }
+    } else {
+        return "1"
     }
 }
 
-// parser
-func parse(content: String) -> [String: Any]? {
-    // returns structured data from content of script file
+func openSaveLocation() -> Bool {
+    guard let saveLocation = getSaveLocation() else {
+        return false
+    }
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: saveLocation.path)
+    return true
+}
+
+func openDocumentsDirectory() {
+    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: getDocumentsDirectory().path)
+}
+
+// parse
+func parse(_ content: String) -> [String: Any]? {
+    // returns structured data from content of file
     // will fail to parse if metablock or required @name key missing
     let pattern = #"(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
     // force try b/c pattern is known to be valid regex
     let regex = try! NSRegularExpression(pattern: pattern, options: [])
     let range = NSRange(location: 0, length: content.utf16.count)
     // return nil/fail if metablock missing
-    guard
-        let match = regex.firstMatch(in: content, options: [], range: range)
-    else {
-        err("metablock missing or improperly formatted, failed to parse")
+    guard let match = regex.firstMatch(in: content, options: [], range: range) else {
         return nil
     }
     
-    // at this point the text content has passed initial validation, it contains valid userscript metadata
-    // the userscript metadata can be in UserScript or UserStyle format, need to check for this and adjust group numbers
+    // at this point the text content has passed initial validation, it contains valid metadata
+    // the metadata can be in userscript or userstyle format, need to check for this and adjust group numbers
     // rather than being too strict, text content can precede the opening userscript tag, however it will be ignored
-    // adjust start index of script content while assigning group numbers to account for any text content preceding opening tag
+    // adjust start index of file content while assigning group numbers to account for any text content preceding opening tag
     let contentStartIndex = content.index(content.startIndex, offsetBy: match.range.lowerBound)
     var g1, g2, g3:Int
     if (content[contentStartIndex..<content.endIndex].starts(with: "//")) {
@@ -176,34 +193,39 @@ func parse(content: String) -> [String: Any]? {
     let metablock = content[Range(match.range(at: g1), in: content)!]
     // create var to store separated metadata keys/values
     var metadata = [:] as [String: [String]]
-    // iterate through the possible metadata keys in script file
+    // iterate through the possible metadata keys in file
     if let metas = Range(match.range(at: g2), in: content) {
         // split metadatas by new line
         let metaArray = content[metas].split(separator: "\n")
         for meta in metaArray {
-            let p = #"@([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
-            // the individual meta string, ie. // @name Script Name
+            let p = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
+            // this pattern checks for specific keys that won't have values
+            let p2 = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$"#
+            // the individual meta string, ie. // @name File Name
             let metaString = String(meta)
             // force try b/c pattern is known to be valid regex
             let re = try! NSRegularExpression(pattern: p, options: [])
+            let re2 = try! NSRegularExpression(pattern: p2, options: [])
             let range = NSRange(location: 0, length: metaString.utf16.count)
             // key lines not properly prefixed & without values will be skipped
             if let m = re.firstMatch(in: metaString, options: [], range: range) {
                 // force unwrap key & value since matches regex above
                 let key = metaString[Range(m.range(at: 1), in: metaString)!]
                 let value = metaString[Range(m.range(at: 2), in: metaString)!]
-                if metadata[String(key)] != nil {
-                    metadata[String(key)] = metadata[String(key)]
-                } else {
+                if metadata[String(key)] == nil {
+                    // if key does not exist in metadata dict, add it
                     metadata[String(key)] = []
                 }
                 metadata[String(key)]?.append(String(value))
+            } else if let m2 = re2.firstMatch(in: metaString, options: [], range: range) {
+                // force unwrap key since matches regex above
+                let key = metaString[Range(m2.range(at: 1), in: metaString)!]
+                metadata[String(key)] = []
             }
         }
     }
     // return nil/fail if @name key is missing or @name has no value
     if metadata["name"] == nil {
-        err("@name metadata key missing or without value, failed to parse")
         return nil
     }
     // get the code
@@ -217,99 +239,48 @@ func parse(content: String) -> [String: Any]? {
     ]
 }
 
-// settings
-func getSettings() -> [String: String]? {
-    let defaults = UserDefaults.standard
-    var settings: [String: String] = [:]
-    let fm = FileManager.default
-    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
-    let defaultSettings: [String: String] = [
-        "autoShowHints": "true",
-        "hideDescriptions": "false",
-        "lint": "false",
-        "saveLocation": defaultSaveLocation.path,
-        "showInvisibles": "true",
-        "tabSize": "4",
-        "verbose": "false"
-    ]
-    // iterate over default settings and individually check if each present
-    // if not, save the default value in UserDefaults
-    // add setting from UserDefaults to settings dict to be returned
-    for (key, value) in defaultSettings {
-        if defaults.object(forKey: key) == nil {
-            // setting not present, save default value to UserDefaults
-            defaults.set(value, forKey: key)
-        }
-        // add key & value from UserDefaults to setting dict
-        settings[key] = defaults.string(forKey: key)
-    }
-    // check that defaultSaveLocation folder exists, if not, create it
-    if !fm.fileExists(atPath: defaultSaveLocation.path) {
-        do {
-            try fm.createDirectory(at: defaultSaveLocation, withIntermediateDirectories: false)
-        } catch {
-            // could not create the save location directory, show error
-            err("failed to create save location folder when getting settings")
-            return nil
-        }
-    }
-    // check if the user changed the defaultSaveLocation if so return that path instead
-    if let actualSaveLocation = getSaveLocation() {
-        settings["saveLocation"] = actualSaveLocation.path
-    }
-    return settings
-}
-
-func updateSetting(_ key: String,_ value: String) -> Bool {
-    // if the key does not exist
-    if UserDefaults.standard.string(forKey: key) == nil {
-        err("\(key) does not exist, failed to update setting")
-        return false
-    }
-    UserDefaults.standard.set(value, forKey: key)
-    return true
-}
-
-func getInitData() -> [String: Any]? {
-    guard let initData = getSettings() else {
-        err("could not get settings for init data func")
-        return nil
-    }
-    // if purge manifest fails, it's doesn't break functionality
-    // note the failure but continue operations
-    if !purgeManifest() {
-        err("purge manifest failed while getting init data")
-    }
-    // create new dict to return
-    var returnData:[String: Any] = initData
-    // get language code
-    let language = Locale.current.languageCode ?? "en"
-    returnData["languageCode"] = language
-    // check manifest is valid by getting any key, get blacklist
-    var blacklist:[String] = []
-    if let bl = getManifestKey("blacklist") as? [String] {
-        blacklist = bl
-    } else {
-        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:])
-        if updateManifest(with: manifest) != true {
-            err("failed fix manifest issue when getting init data")
-            return nil
-        }
-    }
-    returnData["blacklist"] = blacklist
-    returnData["version"] = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-    return returnData
-}
-
 // manifest
 struct Manifest: Codable {
     var blacklist:[String]
     var disabled:[String]
-    var exclude: [String:[String]]
-    var match: [String:[String]]
+    var exclude: [String: [String]]
+    var match: [String: [String]]
+    var require: [String: [String]]
+    var settings: [String: String]
     private enum CodingKeys : String, CodingKey {
-        case blacklist, disabled, exclude = "exclude-match", match
+        case blacklist, disabled, exclude = "exclude-match", match, require, settings
     }
+}
+
+let defaultSettings = [
+    "autoHint": "true",
+    "descriptions": "true",
+    "languageCode": Locale.current.languageCode ?? "en",
+    "lint": "false",
+    "log": "false",
+    "sortOrder": "lastModifiedDesc",
+    "showInvisibles": "true",
+    "tabSize": "4"
+]
+
+func getManifestKeys() -> Manifest? {
+    let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
+    // if manifest doesn't exist, create new one
+    if !FileManager.default.fileExists(atPath: url.path) {
+        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], require: [:], settings: [:])
+        _ = updateManifest(with: manifest)
+    }
+    guard
+        let content = try? String(contentsOf: url, encoding: .utf8),
+        let data = content.data(using: .utf8),
+        let decoded = try? JSONDecoder().decode(Manifest.self, from: Data(data))
+    else {
+        // manifest missing, improperly formatted or key missing
+        err("failed to read manifest")
+        return nil
+    }
+
+    return decoded
 }
 
 func updateManifest(with data: Manifest) -> Bool {
@@ -328,131 +299,132 @@ func updateManifest(with data: Manifest) -> Bool {
     }
 }
 
-func getManifestKey(_ key: String) -> Any? {
-    // gets the value of a key stored in the manifest file
-    // can also be used to validate the manifest file
-    // will return nil if:
-    // manifest missing, json improperly formatted or manifest missing keys
-    let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
-    guard
-        let content = try? String(contentsOf: url, encoding: .utf8),
-        let data = content.data(using: .utf8),
-        let decoded = try? JSONDecoder().decode(Manifest.self, from: Data(data))
-    else {
-        // manifest missing, improperly formatted or required key missing
-        err("failed to read manifest")
-        return nil
+func updateBlacklist(_ patterns: [String]) -> Bool {
+    guard var manifestKeys = getManifestKeys() else {
+        err("failed to get manifest keys when attempting to update blacklist")
+        return false
     }
-    if key == "blacklist" {
-        return decoded.blacklist
-    } else if key == "disabled" {
-        return decoded.disabled
-    } else if (key == "exclude" || key == "exclude-match") {
-        return decoded.exclude
-    } else if key == "match" {
-        return decoded.match
-    } else {
-        err("key not present in manifest - \(key)")
-        return nil
+    manifestKeys.blacklist = patterns
+    if updateManifest(with: manifestKeys) == true {
+        return true
     }
+    return false
 }
 
-func updateExcludesAndMatches(_ filename: String,_ exclude: [String],_ match: [String]) -> Bool {
-    // arguments = the script's filename, script's exclude-match patterns, script's match patterns
+func toggleFile(_ filename: String,_ action: String) -> Bool {
+    guard var manifestKeys = getManifestKeys() else {
+        err("failed to get manifest keys when attempting to toggle file")
+        return false
+    }
+    // if file is already disabled or enabled
+    if (action == "disable" && manifestKeys.disabled.contains(filename)) ||  (action == "enable" && !manifestKeys.disabled.contains(filename)) {
+        return true
+    }
+    
+    // add filename to disabled array
+    if (action == "disable") {
+        manifestKeys.disabled.append(filename)
+    }
+    
+    // remove filename from disabled array
+    if (action == "enable") {
+        guard let index = manifestKeys.disabled.firstIndex(of: filename) else {
+            err("failed to get file index when attempting to enable file")
+            return false
+        }
+        manifestKeys.disabled.remove(at: index)
+    }
+    
+    // update manifest
+    if updateManifest(with: manifestKeys) != true {
+        err("failed to \(action) file with name, \(filename)")
+        return false
+    }
+    
+    return true
+}
 
-    // get the manifest's current key values
-    guard
-        let blacklist = getManifestKey("blacklist") as? [String],
-        let disabled = getManifestKey("disabled") as? [String],
-        var manifestExclude = getManifestKey("exclude") as? [String: [String]],
-        var manifestMatch = getManifestKey("match") as? [String: [String]]
-    else {
+func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ matchPatterns: [String]) -> Bool {
+    guard var manifestKeys = getManifestKeys() else {
         err("failed to get manifest keys when attempting to update excludes and matches")
         return false
     }
     
-    // will hold the exclude/match patterns in script's metadata
-    var patternsInScript: [String] = []
+    // will hold the exclude/match patterns in file's metadata
+    var patternsInFile = [String]()
+    // will hold the exclude/match patterns in manifest that have file name as value
+    var patternsInManifestForFile = [String]()
     
-    // will hold the exclude/match patterns in manifest that have script name as value
-    var patternsInManifestForScript: [String] = []
-    
-    func updatePatternDict(_ manifestDict: [String: [String]]) -> [String: [String]] {
-        // func arguments should be current exclude-match or match dictionary from manifest
-        // returns updated dictionary to be saved to manifest
-        
+    func updatePatternDict(_ manifestExcludesOrMatches: [String: [String]]) -> [String: [String]] {
         // clear at every func run
-        patternsInManifestForScript.removeAll()
-        
+        patternsInManifestForFile.removeAll()
         // new var from func argument, so it can be manipulated
-        var returnDict = manifestDict
-        
+        var returnDictionary = manifestExcludesOrMatches
         // exclude-match & match keys (url patterns) from manifest
-        let keys = returnDict.keys
+        let keys = returnDictionary.keys
         
-        // determine what patterns already have this script as a value
+        // determine what patterns already have this filename as a value
         for key in keys {
             // key is an array of filenames
-            guard let filenames = returnDict[key] else {
+            guard let filenames = returnDictionary[key] else {
                 err("failed to get values for manifest key, \(key)")
                 continue
             }
-            // name is a single filename
             for name in filenames {
-                // if name is same as script filename, script already added for this pattern
-                // add it to patternsInManifestForScript for later comparison
+                // name is a single filename
+                
+                // if name is same as filename, file already added for this pattern
+                // add it to patternsInManifestForFile for later comparison
                 if name == filename {
-                    patternsInManifestForScript.append(key)
+                    patternsInManifestForFile.append(key)
                 }
             }
         }
         
-        // patterns in script metadata and patterns in manifest that have script filename as a value
-        // script filename already present in manifest for these patterns, do nothing with these
-        // let common = scriptMatchPatterns.filter{ existsInManifest.contains($0) }
+        // patterns in file metadata and patterns in manifest that have filename as a value
+        // filename already present in manifest for these patterns, do nothing with these
+        // let common = patternsInFile.filter{patternsInManifestForFile.contains($0)}
         
-        // patterns in script metadata, but don't have the script filename as a value within the manifest
-        // these are the manifest patterns that the script filename needs to be added to
-        let addScriptTo = patternsInScript.filter{ !patternsInManifestForScript.contains($0) }
+        // patterns in file metadata, but don't have the filename as a value within the manifest
+        // these are the manifest patterns that the filename needs to be added to
+        let addFilenameTo = patternsInFile.filter{!patternsInManifestForFile.contains($0)}
         
-        // the patterns that have the script filename as a value, but not present in script metadata
-        // ie. these are the manifest patterns we need to remove the script filename from
-        let removeScriptFrom = patternsInManifestForScript.filter{ !patternsInScript.contains($0) }
+        // the patterns that have the filename as a value, but not present in file metadata
+        // ie. these are the manifest patterns we need to remove the filename from
+        let removeFilenameFrom = patternsInManifestForFile.filter{!patternsInFile.contains($0)}
         
-        // check if script filename needs to be appended or new key/val needs to be created
-        for pattern in addScriptTo {
-            if returnDict[pattern] != nil {
-                returnDict[pattern]?.append(filename)
+        // check if filename needs to be added or new key/val needs to be created
+        for pattern in addFilenameTo {
+            if returnDictionary[pattern] != nil {
+                returnDictionary[pattern]?.append(filename)
             } else {
-                 returnDict[pattern] = [filename]
+                returnDictionary[pattern] = [filename]
             }
         }
         
-        for pattern in removeScriptFrom {
-            // get the index of the script filename within the array
-            let ind = returnDict[pattern]?.firstIndex(of: filename)
-            // remove script filename from array by index
-            returnDict[pattern]?.remove(at: ind!)
-            // if script filename was the last item in array, remove the url pattern from dictionary
-            if returnDict[pattern]!.count < 1 {
-                returnDict.removeValue(forKey: pattern)
+        for pattern in removeFilenameFrom {
+            // get the index of the filename within the array
+            let ind = returnDictionary[pattern]?.firstIndex(of: filename)
+            // remove filename from array by index
+            returnDictionary[pattern]?.remove(at: ind!)
+            // if filename was the last item in array, remove the url pattern from dictionary
+            if returnDictionary[pattern]!.count < 1 {
+                returnDictionary.removeValue(forKey: pattern)
             }
         }
-        
         // clear after every func run
-        patternsInScript.removeAll()
-        return returnDict
+        patternsInFile.removeAll()
+        return returnDictionary
     }
     
     // get updated data for exclude-match and match
-    patternsInScript = exclude
-    manifestExclude = updatePatternDict(manifestExclude)
-    patternsInScript = match
-    manifestMatch = updatePatternDict(manifestMatch)
+    patternsInFile = excludePatterns
+    manifestKeys.exclude = updatePatternDict(manifestKeys.exclude)
+    patternsInFile = matchPatterns
+    manifestKeys.match = updatePatternDict(manifestKeys.match)
     
     // save updated data to manifest
-    let manifest = Manifest(blacklist: blacklist, disabled: disabled, exclude: manifestExclude, match: manifestMatch)
-    if updateManifest(with: manifest) != true {
+    if updateManifest(with: manifestKeys) != true {
         err("failed to update manifest when attempting to update excludes and matches")
         return false
     }
@@ -461,22 +433,16 @@ func updateExcludesAndMatches(_ filename: String,_ exclude: [String],_ match: [S
 }
 
 func purgeManifest() -> Bool {
-    var allSaveLocationFilenames:[String] = []
-    // get the manifest's current key values
+    var allSaveLocationFilenames = [String]() // stores the filtered filenames from the save location
+    var update = false // determines whether to rewrite manifest
     guard
-        let blacklist = getManifestKey("blacklist") as? [String],
-        var disabled = getManifestKey("disabled") as? [String],
-        var manifestExclude = getManifestKey("exclude") as? [String: [String]],
-        var manifestMatch = getManifestKey("match") as? [String: [String]]
+        var manifestKeys = getManifestKeys(),
+        let saveLocation = getSaveLocation()
     else {
-        err("failed to get manifest keys when attempting to purge manifest")
+        err("failed to get manifest keys or save location when attempting to purge manifest")
         return false
     }
-    guard let saveLocation = getSaveLocation() else {
-        err("failed to get save location when attempting to purge manifest")
-        return false
-    }
-    // secrutiy scope
+    // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
         if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
@@ -487,169 +453,230 @@ func purgeManifest() -> Bool {
         err("failed to get all file urls when attempting to purge manifest")
         return false
     }
+    
+    // populate allSaveLocationFilenames array with files of the correct type in save location
     for fileUrl in allFilesUrls {
-        // skip file if it is not of the proper type
         let filename = fileUrl.lastPathComponent
         if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
             continue
         }
-        // if file is of the proper extension, add it to the allSaveLocationFilenames array
         allSaveLocationFilenames.append(filename)
     }
+    
     // iterate through manifest matches
-    // if no filename exists for value, remove it from manifest
-    for (pattern, scriptNames) in manifestMatch {
-        for scriptName in scriptNames {
-            if !allSaveLocationFilenames.contains(scriptName) {
-                // get the index of element and then remove from array
-                if let index = manifestMatch[pattern]?.firstIndex(of: scriptName) {
-                    manifestMatch[pattern]?.remove(at: index)
-                    NSLog("Could not find \(scriptName) in save location, removed from match pattern - \(pattern)")
+    // if no file exists for value, remove it from manifest
+    for (pattern, filenames) in manifestKeys.match {
+        for filename in filenames {
+            if !allSaveLocationFilenames.contains(filename) {
+                if let index = manifestKeys.match[pattern]?.firstIndex(of: filename) {
+                    manifestKeys.match[pattern]?.remove(at: index)
+                    update = true
+                    NSLog("Could not find \(filename) in save location, removed from match pattern - \(pattern)")
                 }
             }
         }
-        // if there are no more script names in pattern, remove pattern from manifest
-        if let length = manifestMatch[pattern]?.count {
-            if length < 1, let ind = manifestMatch.index(forKey: pattern) {
-                manifestMatch.remove(at: ind)
-                NSLog("No more scripts for \(pattern) match pattern, removed from manifest")
+        // if there are no more filenames in pattern, remove pattern from manifest
+        if let length = manifestKeys.match[pattern]?.count {
+            if length < 1, let ind = manifestKeys.match.index(forKey: pattern) {
+                manifestKeys.match.remove(at: ind)
+                NSLog("No more files for \(pattern) match pattern, removed from manifest")
             }
         }
     }
-    for (pattern, scriptNames) in manifestExclude {
-        for scriptName in scriptNames {
-            if !allSaveLocationFilenames.contains(scriptName) {
-                if let index = manifestExclude[pattern]?.firstIndex(of: scriptName) {
-                    manifestExclude[pattern]?.remove(at: index)
-                    NSLog("Could not find \(scriptName) in save location, removed from exclude-match pattern - \(pattern)")
+    // iterate through manifest excludes
+    for (pattern, filenames) in manifestKeys.exclude {
+        for filename in filenames {
+            if !allSaveLocationFilenames.contains(filename) {
+                if let index = manifestKeys.exclude[pattern]?.firstIndex(of: filename) {
+                    manifestKeys.exclude[pattern]?.remove(at: index)
+                    update = true
+                    NSLog("Could not find \(filename) in save location, removed from exclude-match pattern - \(pattern)")
+                }
+            }
+            // if there are no more filenames in pattern, remove pattern from manifest
+            if let length = manifestKeys.exclude[pattern]?.count {
+                if length < 1, let ind = manifestKeys.exclude.index(forKey: pattern) {
+                    manifestKeys.exclude.remove(at: ind)
+                    NSLog("No more files for \(pattern) exclude-match pattern, removed from manifest")
                 }
             }
         }
-        if let length = manifestExclude[pattern]?.count {
-            if length < 1, let ind = manifestExclude.index(forKey: pattern) {
-                manifestExclude.remove(at: ind)
-                NSLog("No more scripts for \(pattern) exclude-match pattern, removed from manifest")
+    }
+    // iterate through manifest disabled
+    for filename in manifestKeys.disabled {
+        if !allSaveLocationFilenames.contains(filename) {
+            if let index = manifestKeys.disabled.firstIndex(of: filename) {
+                manifestKeys.disabled.remove(at: index)
+                update = true
+                NSLog("Could not find \(filename) in save location, removed from disabled")
             }
         }
     }
-    for scriptName in disabled {
-        if !allSaveLocationFilenames.contains(scriptName) {
-            if let index = disabled.firstIndex(of: scriptName) {
-                disabled.remove(at: index)
-                NSLog("Could not find \(scriptName) in save location, removed from disabled")
-            }
+    // remove obsolete settings
+    for setting in manifestKeys.settings {
+        if !defaultSettings.keys.contains(setting.key) {
+            manifestKeys.settings.removeValue(forKey: setting.key)
+            update = true
+            NSLog("Removed obsolete setting - \(setting.key)")
         }
     }
     // update manifest
-    let manifest = Manifest(blacklist: blacklist, disabled: disabled, exclude: manifestExclude, match: manifestMatch)
-    if !updateManifest(with: manifest) {
+    if update, updateManifest(with: manifestKeys) != true {
         err("failed to purge manifest")
         return false
     }
     return true
 }
 
-func toggleScript(_ type: String,_ scriptName: String) -> Bool {
-    // get manifest data
-    guard
-        let blacklist = getManifestKey("blacklist") as? [String],
-        var disabled = getManifestKey("disabled") as? [String],
-        let excluded = getManifestKey("exclude") as? [String: [String]],
-        let match = getManifestKey("match") as? [String: [String]]
-    else {
-        err("failed to get manifest keys when attempting to toggle script")
+func updateSettings(_ settings: [String: String]) -> Bool {
+    guard var manifestKeys = getManifestKeys() else {
+        err("failed to get manifest keys when attempting to update settings")
+        return false
+    }
+    manifestKeys.settings = settings
+    if updateManifest(with: manifestKeys) != true {
+        err("failed to update settings")
+        return false
+    }
+    return true
+}
+
+func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
+    guard var manifestKeys = getManifestKeys() else {
         return false
     }
     
-    // if script is already disabled/enabled
-    if (type == "disable" && disabled.contains(scriptName))
-        ||  (type == "enable" && !disabled.contains(scriptName))
-    {
-        return true
-    }
-    
-    // add script name to disabled array
-    if (type == "disable") {
-        disabled.append(scriptName)
-    }
-    
-    // remove script name from disabled array
-    if (type == "enable") {
-        guard let index = disabled.firstIndex(of: scriptName) else {
-            err("failed to get script index when attempting to enable script")
+    // file has no required resources but the key is in manifest
+    if resources.count < 1 && manifestKeys.require[filename] != nil, let index = manifestKeys.require.index(forKey: filename) {
+        manifestKeys.require.remove(at: index)
+        NSLog("No more required resources for \(filename), removed from manifest")
+        if updateManifest(with: manifestKeys) {
+            return true
+        } else {
             return false
         }
-        disabled.remove(at: index)
     }
     
-    let manifest = Manifest(blacklist: blacklist, disabled: disabled, exclude: excluded, match: match)
-    if updateManifest(with: manifest) == true {
-        return true
+    // file has required resources
+    // santize all resource names
+    var r = [String]()
+    for resource in resources {
+        if let santizedResourceName = santize(resource) {
+            r.append(santizedResourceName)
+        } else {
+            return false
+        }
     }
     
-    err("failed to \(type) script with filename, \(scriptName)")
-    return false
+    // only write if current manifest differs from resources
+    if r.count > 0 && r != manifestKeys.require[filename] {
+        manifestKeys.require[filename] = r
+        if !updateManifest(with: manifestKeys) {
+            return false
+        }
+    }
+    
+    return true
 }
 
-func updateBlacklist(_ patterns: [String]) -> Bool {
-    guard
-        let disabled = getManifestKey("disabled") as? [String],
-        let excluded = getManifestKey("exclude") as? [String: [String]],
-        let match = getManifestKey("match") as? [String: [String]]
-    else {
-        err("failed to get manifest keys when attempting to update blacklist")
-        return false
-    }
-    let manifest = Manifest(blacklist: patterns, disabled: disabled, exclude: excluded, match: match)
-    if updateManifest(with: manifest) == true {
-        return true
-    }
-    return false
-}
-
-// scripts loading
-func getFileContents(_ url: URL) -> Any? {
-    // function argument takes a url for a single file or directory of files
-    // returns the contents of single file or all files within directory
-    let fm = FileManager.default
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .medium
-    dateFormatter.timeStyle = .short
-    // this array holds all urls of files that will have their contents read
-    var urls:[URL] = []
-    // this array will be returned if successful, if url arg issingle file, return only first index
-    var fileContents: [[String: Any]] = []
-    // get the saveLocation to access security scope if needed
-    guard let securityScope = getSaveLocation() else {
-        err("failed to get savelocation for security scope in getFileContents")
+// init
+func getInitData() -> [String: Any]? {
+    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
+    let requireLocation = getRequireLocation()
+    var update = false // determines whether to rewrite manifest
+    guard let saveLocation = getSaveLocation() else {
+        err("failed to get save location when attempting to get init data")
         return nil
     }
-    // secrutiy scope
-    let didStartAccessing = securityScope.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { securityScope.stopAccessingSecurityScopedResource() }
-    }
-    // check that url is a valid path to a directory or single file
-    guard fm.fileExists(atPath: url.path) else {
-        err("could not get file contents, no directory or file exists at path, \(url.path)")
-        return nil
-    }
-    // check if url is to a directory or single file
-    let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
-    if isDirectory {
-        // get all file urls within directory
-        guard let dirUrls = try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: [])  else {
-            err("couldn't read directory contents")
+    
+    // check if default save location directory exists, if not create it
+    if !FileManager.default.fileExists(atPath: defaultSaveLocation.path) {
+        do {
+            try FileManager.default.createDirectory(at: defaultSaveLocation, withIntermediateDirectories: false)
+        } catch {
+            // could not create the save location directory, show error
+            err("failed to create save location directory while getting init data")
             return nil
         }
-        // set urls array to dirUrls array
-        urls = dirUrls
-    } else {
-        // url is a single, add the file url to the urls array
-        urls.append(url)
     }
-    // loop through all urls in the urls array
+    
+    // check if default save location directory exists, if not create it
+    if !FileManager.default.fileExists(atPath: requireLocation.path) {
+        do {
+            try FileManager.default.createDirectory(at: requireLocation, withIntermediateDirectories: false)
+        } catch {
+            // could not create the save location directory, show error
+            err("failed to create save location directory while getting init data")
+            return nil
+        }
+    }
+    
+    // get manifest data
+    var manifestKeys = getManifestKeys()
+    // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
+    if manifestKeys == nil {
+        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], require: [:], settings: [:])
+        if !updateManifest(with: manifestKeys!) { // force unwrap since it was assigned in above line
+            err("manifest had issues that could not be resolved while getting init data")
+            return nil
+        }
+    }
+    
+    // get settings from manifest
+    // can force unwrap all instances of manifestKeys since nil check is done above
+    
+    // iterate over default settings and individually check if each present
+    // missing keys will occur when new settings introduced
+    for (key, value) in defaultSettings {
+        if manifestKeys!.settings[key] == nil {
+            manifestKeys!.settings[key] = value
+            update = true
+        }
+    }
+    
+    // if flagged, update manifest
+    if update, updateManifest(with: manifestKeys!) != true {
+        err("failed to update manifest while getting init data")
+        return nil
+    }
+    
+    // purge manifest every init, if it fails, log error and continue since failed purges don't break functionality
+    if !purgeManifest() {
+        err("purge manifest failed while getting init data")
+    }
+    
+    var data:[String: Any] = manifestKeys!.settings
+    data["blacklist"] = manifestKeys!.blacklist
+    data["saveLocation"] = saveLocation.path
+    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    
+    return data
+}
+
+// files
+func getAllFilesData() -> [[String: Any]]? {
+    var files = [[String: Any]]() // this will be returned
+    let fm = FileManager.default
+    guard let saveLocation = getSaveLocation() else {
+        err("failed to get save location when attempting to get all files data")
+        return nil
+    }
+    guard  let manifestKeys = getManifestKeys() else {
+        err("failed to get manifest keys when attempting to get all files data")
+        return nil
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    // get all file urls within directory
+    guard let urls = try? fm.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])  else {
+        err("couldn't read directory contents")
+        return nil
+    }
     for url in urls {
+        var fileData = [String: Any]()
         // only read contents for css & js files
         let filename = url.lastPathComponent
         if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
@@ -659,231 +686,179 @@ func getFileContents(_ url: URL) -> Any? {
         guard
             let content = try? String(contentsOf: url, encoding: .utf8),
             let dateMod = try? fm.attributesOfItem(atPath: url.path)[.modificationDate] as? Date,
-            var parsed = parse(content: content),
+            let parsed = parse(content),
+            let metadata = parsed["metadata"] as? [String: [String]],
             let type = filename.split(separator: ".").last
         else {
-            NSLog("ignoring \(filename), metadata missing from file contents")
+            NSLog("ignoring \(filename), file missing or metadata missing from file contents")
             continue
         }
-        parsed["lastModified"] = dateFormatter.string(from: dateMod)
-        parsed["lastModifiedMS"] = String(dateToMilliseconds(dateMod))
-        parsed["filename"] = filename
-        parsed["type"] = String(type)
-        fileContents.append(parsed)
-    }
-    if isDirectory {
-        return fileContents
-    } else {
-        return fileContents[0]
-    }
-}
-
-func updateScriptsData() -> [[String: Any]]? {
-    // returns description, disabled, filename, name, type
-    guard let url = getSaveLocation() else {
-        err("failed to get save location in func updateScriptsData")
-        return nil
-    }
-    var allScriptsData: [[String: Any]] = []
-    guard
-        let dataArray = getFileContents(url) as? [[String: Any]],
-        let disabledScripts = getManifestKey("disabled") as? [String]
-    else {
-        err("failed to get file contents or manifest in func updateScriptsData")
-        return nil
-    }
-    for data in dataArray {
-        var scriptData: [String: Any] = [:]
-        // can force unwrap because getFileContents adds filename
-        let filename = data["filename"] as! String
-        // can force unwrap b/c getFileContents ensure metadata exists
-        let metadata = data["metadata"] as! [String: [String]]
-        scriptData["disabled"] = false
-        scriptData["filename"] = filename
-        // can force unwrap b/c parser ensures name exists
-        scriptData["name"] = metadata["name"]![0]
-        scriptData["type"] = data["type"]
-        scriptData["lastModifiedMS"] = data["lastModifiedMS"]
-        // check if script has a description
-        if metadata["description"] != nil {
-            // can force unwrap b/c already checked description is not nil
-            scriptData["description"] = metadata["description"]![0]
+        fileData["canUpdate"] = false
+        fileData["content"] = content
+        fileData["disabled"] = false
+        fileData["filename"] = filename
+        fileData["lastModified"] = dateToMilliseconds(dateMod)
+        fileData["name"] =  metadata["name"]![0] // can force, parser ensures name exists
+        fileData["type"] = type
+        if metadata["version"] != nil && metadata["updateURL"] != nil {
+            fileData["canUpdate"] = true
         }
-        if disabledScripts.contains(filename) {
-            scriptData["disabled"] = true
+        if metadata["description"] != nil {
+            fileData["description"] = metadata["description"]![0] // can force
+        }
+        if manifestKeys.disabled.contains(filename) {
+            fileData["disabled"] = true
         }
         // update excludes & matches
-        var excluded:[String] = []
-        var matched:[String] = []
+        var excluded = [String]()
+        var matched = [String]()
         if metadata["exclude-match"] != nil {
-            // can force unwrap b/c already checked exclude-match is not nil
-            excluded = metadata["exclude-match"]!
+            excluded.append(contentsOf: metadata["exclude-match"]!)
         }
         if metadata["match"] != nil {
-            // can force unwrap b/c already checked match is not nil
-            matched = metadata["match"]!
+            matched.append(contentsOf: metadata["match"]!)
         }
         // check for legacy include & exclude
         if metadata["include"] != nil {
-            // can force unwrap b/c already checked match is not nil
             matched.append(contentsOf: metadata["include"]!)
         }
         if metadata["exclude"] != nil {
-            // can force unwrap b/c already checked match is not nil
             excluded.append(contentsOf: metadata["exclude"]!)
         }
         if !updateExcludesAndMatches(filename, excluded, matched) {
-            err("error updating matches in func updateScriptsData")
+            err("error updating excludes & matches while getting all files data")
         }
-        allScriptsData.append(scriptData)
+        
+        // check for require keys, run even if metadata["require"] is nil to remove stale required resources
+        let required = metadata["require"] ?? []
+        if !getRequiredCode(filename, required, "\(type)") {
+            err("error updating required resources while getting all files data")
+        }
+        
+        files.append(fileData)
     }
-    return allScriptsData
+    return files
 }
 
-func loadScriptData(_ filename: String) -> [String: String]? {
-    // returns content, filename, lastModified (string date), name, type
+func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     guard let saveLocation = getSaveLocation() else {
-        err("failed to get save location in func loadScriptData")
+        err("failed to get savelocation in getFileContents")
         return nil
     }
-    let url = saveLocation.appendingPathComponent(filename)
-    var scriptData:[String: String] = [:]
-    guard
-        let fileContents = getFileContents(url) as? [String: Any],
-        let content = fileContents["content"] as? String,
-        let lastModified = fileContents["lastModified"] as? String,
-        let metadata = fileContents["metadata"] as? [String: [String]],
-        let name = metadata["name"]?[0],
-        let type = fileContents["type"] as? String
-    else {
-        err("failed to get or properly parse file contents in func loadScriptData")
-        return nil
-    }
-    scriptData["content"] = content
-    scriptData["filename"] = filename
-    scriptData["lastModified"] = lastModified
-    scriptData["name"] = name
-    scriptData["type"] = type
-    return scriptData
-}
-
-// scripts saving
-func validateScript(_ oldName: String,_ newName: String,_ type: String,_ allUrls: [URL]) -> Bool {
-    // validates filenames for naming conflicts and length
-    
-    // will hold filenames for all scripts currently in saved location
-    var allFilenames:[String] = []
-    
-    // if the old filename and new filename are the same, it's ok to save (overwrite)
-    if oldName.lowercased() == newName.lowercased() {
-        return true
-    }
-    
-    // loop through all the file urls in the save location
-    for fileUrl in allUrls {
-        // skip file if it is not of the proper type
-        let filename = fileUrl.lastPathComponent
-        if (!filename.hasSuffix(type)) {
-            continue
-        }
-        // if file is of the proper type, add it to the allFilenames array
-        allFilenames.append(filename.lowercased())
-    }
-    
-    // if there is already a different file with the new filename, do not validate
-    if allFilenames.contains(newName.lowercased()) {
-        return false
-    }
-    
-    // if filename is longer than what is allow in macOS
-    if newName.count > 250 {
-        return false
-    }
-    return true
-}
-
-func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
-    // func arg should be dict containing script file contents, type and filename (id)
-    
-    // this will be returned
-    var response:[String: String] = [:]
-    
-    // get the scripts save locations
-    let fm = FileManager.default
-    guard let url = getSaveLocation() else {
-        err("failed to get save location when attempting to save script file")
-        return nil
-    }
-    // secrutiy scope
-    let didStartAccessing = url.startAccessingSecurityScopedResource()
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { url.stopAccessingSecurityScopedResource() }
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
     }
-    // get script data and parse script content
+    // check that url is a valid path to a directory or single file
     guard
-        let content = scriptData["content"],
-        let oldFilename = scriptData["id"],
-        let type = scriptData["type"],
-        let parsed = parse(content: content),
+        FileManager.default.fileExists(atPath: url.path),
+        let content = try? String(contentsOf: url, encoding: .utf8),
+        let parsed = parse(content)
+    else {
+        return nil
+    }
+    return parsed
+}
+
+func saveFile(_ data: [String: Any]) -> [String: Any] {
+    // lots of unique guard statements to try to better track down failures when they occur
+    guard let saveLocation = getSaveLocation() else {
+        return ["error": "failed to get save location when attempting to save"]
+    }
+    guard
+        let newContent = data["new"] as? String,
+        let current = data["current"] as? [String: Any],
+        let oldFilename = current["filename"] as? String,
+        let type = current["type"] as? String
+    else {
+        err("invalid save object")
+        return ["error": "invalid argument in save function"]
+    }
+    guard
+        let parsed = parse(newContent),
         let metadata = parsed["metadata"] as? [String: [String]],
         let n = metadata["name"]?[0],
         var name = santize(n)
     else {
-        err("failed to parse script file contents when attempting to save script file")
-        return nil
+        return ["error": "failed to parse argument in save function"]
     }
     
-    // construct new file name, get all the urls for script files for validateScript func
-    let newFilename:String = "\(name).\(type)"
+    // construct new file name
+    let newFilename = "\(name).\(type)"
+    
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
     guard
-        let allFilesUrls = try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: [])
+        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
     else {
-        err("failed to get all file urls when attempting to save script file")
-        return nil
-    }
-    if !validateScript(oldFilename, newFilename, type, allFilesUrls) {
-        err("\(oldFilename) failed script validation when attempting to save")
-        return nil
+        return ["error": "failed to read save urls in save function"]
     }
     
-    // script validated
-    let newFileUrl = url.appendingPathComponent(newFilename)
+    // validate file before save
+    var allFilenames:[String] = [] // stores the indv. filenames for later comparison
+    // old and new filenames are equal, overwriting and can skip
+    if oldFilename.lowercased() != newFilename.lowercased() {
+        // loop through all the file urls in the save location and save filename to var
+        for fileUrl in allFilesUrls {
+            // skip file if it is not of the proper type
+            let filename = fileUrl.lastPathComponent
+            if (!filename.hasSuffix(type)) {
+                continue
+            }
+            // if file is of the proper type, add it to the allFilenames array
+            allFilenames.append(filename.lowercased())
+        }
+    }
+    
+    if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
+        // filename taken or too long
+        return ["error": "filename validation failed in save function"]
+    }
+    
+    // file passed validation
+
+    // check for require keys
+    let required = metadata["require"] ?? []
+    if !getRequiredCode(newFilename, required, type) {
+        return ["error": "failed to get required resources"]
+    }
+
+    // attempt to save to disk
+    let newFileUrl = saveLocation.appendingPathComponent(newFilename)
     do {
-        if oldFilename != newFilename {
-            // if user changed the filename, remove file with old filename
-            let oldFileUrl = url.appendingPathComponent(oldFilename)
-            // however, when creating a new script, if user changes the temp given name by app...
-            // oldFilename (script ID from sidebar) and newFilename (@name in script contents) will differ
-            // the file with oldFilename will not be on the filesystem and can not be deleted
-            // for that edge case, using try? rather than try(!), should be improved at some point?
-            try? fm.trashItem(at: oldFileUrl, resultingItemURL: nil)
-        }
-        try content.write(to: newFileUrl, atomically: false, encoding: .utf8)
+        try newContent.write(to: newFileUrl, atomically: false, encoding: .utf8)
     } catch {
-        err("failed to save file")
-        return nil
+        return ["error": "failed to write file to disk"]
     }
     
-    // saved successfully
-    // set up date formatter for last modified date
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .medium
-    dateFormatter.timeStyle = .short
+    // saved to disk successfully
+    
+    // get the file last modified date
     guard
-        let dateMod = try? fm.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
+        let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
     else {
-        err("failed to get modified date when attempting to save script file")
-        return nil
+        return ["error": "failed to read modified date in save function"]
     }
     
-    // remove manifest records for old filename
+    // remove old file if it exists and manifest records for old file if they exist
     if oldFilename != newFilename {
-        if !updateExcludesAndMatches(oldFilename, [], []) {
-            err("failed to remove old filename from manifest when attempting to save script file")
-        }
+        // if user changed the filename, remove file with old filename
+        let oldFileUrl = saveLocation.appendingPathComponent(oldFilename)
+        // however, when creating a new file, if user changes the temp given name by app...
+        // oldFilename (the temp name in activeItem) and newFilename (@name in file contents) will differ
+        // the file with oldFilename will not be on the filesystem and can not be deleted
+        // for that edge case, using try? rather than try(!) to allow failures
+        try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
+        
+        // updateExcludesAndMatches for old file
+        _ = updateExcludesAndMatches(oldFilename, [], [])
     }
     
-    // update new excludes and matches
+    // update new excludes and matches for new file
     var excludes = metadata["exclude-match"] ?? []
     var matches = metadata["match"] ?? []
     // check for legacy include & exclude
@@ -891,82 +866,164 @@ func saveScriptFile(_ scriptData: [String: String]) -> [String: String]? {
     let excludeLegacy = metadata["exclude"] ?? []
     matches.append(contentsOf: includeLegacy)
     excludes.append(contentsOf: excludeLegacy)
-    if !updateExcludesAndMatches(newFilename, excludes, matches) {
-        err("failed to update manifest record for new filename when attempting to save script file")
-    }
+    _ = updateExcludesAndMatches(newFilename, excludes, matches)
     
-    // return un-santized name
-    if name.hasPrefix("%2") && !name.hasPrefix("%2F") {
-        name = "." + name.dropFirst(2)
-    }
-    if isSanitzed(name) {
-        name = name.removingPercentEncoding!
-    }
+    // un-santized name
+    name = unsanitize(name)
     
-    response["content"] = content
-    response["lastModified"] = dateFormatter.string(from: dateMod)
-    response["lastModifiedMS"] = String(dateToMilliseconds(dateMod))
-    response["id"] = newFilename
+    var response = [String: Any]()
+    response["canUpdate"] = false
+    response["content"] = newContent
+    response["filename"] = newFilename
+    response["lastModified"] = dateToMilliseconds(dateMod)
     response["name"] = name
+    
     if metadata["description"] != nil {
-        // can force unwrap b/c already checked description is not nil
         response["description"] = metadata["description"]![0]
+    }
+    if metadata["version"] != nil && metadata["updateURL"] != nil {
+        response["canUpdate"] = true
     }
     return response
 }
 
-func deleteScript(_ filename: String) -> Bool {
-    // remove script from manifest and then delete script file from save location
+func trashFile(_ filename: String) -> Bool {
+    // remove file from manifest
     guard
-        toggleScript("enable", filename),
+        toggleFile(filename, "enable"),
         updateExcludesAndMatches(filename, [], []),
+        let type = filename.components(separatedBy: ".").last,
+        getRequiredCode(filename, [], type),
         let saveLocation = getSaveLocation()
     else {
         err("failed to remove script from manifest or get save location")
         return false
     }
-    // secrutiy scope
+    // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
         if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
     }
     let url = saveLocation.appendingPathComponent(filename)
-    do {
-        try FileManager.default.trashItem(at: url, resultingItemURL: nil)
-    } catch {
-        err(error.localizedDescription)
-        return false
+    // if file is already removed from path, assume it was removed by user and return true
+    if (FileManager.default.fileExists(atPath: url.path)) {
+        do {
+            try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+        } catch {
+            err(error.localizedDescription)
+            return false
+        }
     }
     return true
 }
 
-// script injection
-func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
-    // the returned dict
-    var allFiles = [String: [String: [String: Any]]]()
+func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
+    let directory = getRequireLocation().appendingPathComponent(filename)
+    
+    // if file requires no resource but directory exists, trash it
+    if resources.count < 1 && FileManager.default.fileExists(atPath: directory.path) {
+        do {
+            try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
+        } catch {
+            // failing to trash item won't break functonality, so log error and move on
+            err(error.localizedDescription)
+            return true
+        }
+    }
+    
+    for resourceURLString in resources {
+        // skip invalid urls or urls pointing to files of different types
+        if let url = URL(string: resourceURLString), url.path.hasSuffix(fileType) {
+            guard let resourceFilename = santize(resourceURLString) else {
+                return false
+            }
+            let fileURL = directory.appendingPathComponent(resourceFilename)
+            var contents = ""
+            // only attempt to get resource if it does not yet exist
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                continue
+            }
+            
+            // get remote file contents, synchronously
+            let semaphore = DispatchSemaphore(value: 0)
+            var task: URLSessionDataTask?
+            task = URLSession.shared.dataTask(with: url) { data, response, error in
+                if let r = response as? HTTPURLResponse, data != nil, error == nil {
+                    if r.statusCode == 200 {
+                        contents = String(data: data!, encoding: .utf8) ?? ""
+                    }
+                }
+                semaphore.signal()
+            }
+            task?.resume()
+            // wait 10 seconds before timing out
+            if semaphore.wait(timeout: .now() + 10) == .timedOut {
+                task?.cancel()
+            }
+            
+            // if we made it to this point and contents is still an empty string, something went wrong with the request
+            if contents.count < 1 {
+                continue
+            }
+            
+            // check if file specific folder exists at requires directory
+            if !FileManager.default.fileExists(atPath: directory.path) {
+                guard ((try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)) != nil) else {
+                    return false
+                }
+            }
+            
+            guard ((try? contents.write(to: fileURL, atomically: false, encoding: .utf8)) != nil) else {
+                return false
+            }
+        }
+    }
+    
+    // remove unused files, if any exist
+    var all = [String]()
+    if let allResourceFilenamesSaved = try? FileManager.default.contentsOfDirectory(atPath: directory.path) {
+        for savedResourceFilename in allResourceFilenamesSaved {
+            if !resources.contains(unsanitize(savedResourceFilename)) {
+                try? FileManager.default.trashItem(at: directory.appendingPathComponent(savedResourceFilename), resultingItemURL: nil)
+            } else {
+                all.append(savedResourceFilename)
+            }
+        }
+    }
 
+    if !updateManifestRequires(filename, all) {
+        return false
+    }
+    
+    return true
+}
+
+// injection
+func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]? {
+    var allFiles = [String: [String: [String: Any]]]() // will be returned
+    
+    // there has to be a better way to do this
+    
     // dictionary to hold the indiv. css files that will be loaded
     // ["file.css": ["code": "/* code here */", "weight": "1"]]
-    var cssFiles:[String:[String:String]] = [:]
-
-    // there has to be a better way to do this
-
+    var cssFiles = [String:[String:String]]()
+    
     // dictionary to hold the indiv. js files that will be loaded
     // ["scope": ["timing": ["file.js": ["code": "// code", "weight": "1"]]]]
-    var jsFiles:[String: [String: [String: [String: String]]]] = [:]
+    var jsFiles = [String: [String: [String: [String: String]]]]()
     jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     
-    var auto_docStart:[String: [String: String]] = [:]
-    var auto_docEnd:[String: [String: String]] = [:]
-    var auto_docIdle:[String: [String: String]] = [:]
-    var content_docStart:[String: [String: String]] = [:]
-    var content_docEnd:[String: [String: String]] = [:]
-    var content_docIdle:[String: [String: String]] = [:]
-    var page_docStart:[String: [String: String]] = [:]
-    var page_docEnd:[String: [String: String]] = [:]
-    var page_docIdle:[String: [String: String]] = [:]
+    var auto_docStart = [String: [String: String]]()
+    var auto_docEnd = [String: [String: String]]()
+    var auto_docIdle = [String: [String: String]]()
+    var content_docStart = [String: [String: String]]()
+    var content_docEnd = [String: [String: String]]()
+    var content_docIdle = [String: [String: String]]()
+    var page_docStart = [String: [String: String]]()
+    var page_docEnd = [String: [String: String]]()
+    var page_docIdle = [String: [String: String]]()
     
     // domains where loading is excluded for file
     var excludedFilenames:[String] = []
@@ -975,40 +1032,35 @@ func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
     var matchedFilenames:[String] = []
     
     // get the manifest data
-    guard
-        let blacklist = getManifestKey("blacklist") as? [String],
-        let disabled = getManifestKey("disabled") as? [String],
-        let manifestExcludePatterns = getManifestKey("exclude-match") as? [String: [String]],
-        let manifestMatchPatterns = getManifestKey("match") as? [String: [String]]
-    else {
-        err("could not read manifest when attempting to get code for injected script")
+    guard let manifestKeys = getManifestKeys() else {
+        err("could not read manifest when attempting to get code for injection")
         return nil
     }
     
     // url matches a pattern in blacklist, return empty dict
-    for pattern in blacklist {
+    for pattern in manifestKeys.blacklist {
         if patternMatch(url, pattern) {
             return allFiles
         }
     }
     
     // AT THIS POINT IT IS KNOWN THAT THE URL IS NOT IN THE BLACKLIST, PROCEED
-    
+
     // all exclude patterns from manifest
-    let excludePatterns = manifestExcludePatterns.keys
+    let excludePatterns = manifestKeys.exclude.keys
     
     // all match patterns from manifest
-    let matchPatterns = manifestMatchPatterns.keys
+    let matchPatterns = manifestKeys.match.keys
     
     // add disabled script filenames to excludePatterns
-    excludedFilenames.append(contentsOf: disabled)
+    excludedFilenames.append(contentsOf: manifestKeys.disabled)
     
     // loop through exclude patterns and see if any match against page url
     for pattern in excludePatterns {
         // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
         if patternMatch(url, pattern) {
-            guard let filenames = manifestExcludePatterns[pattern] else {
-                err("error parsing manifestExcludePatterns when attempting to get code for injected script")
+            guard let filenames = manifestKeys.exclude[pattern] else {
+                err("error parsing manifest.keys when attempting to get code for injected script")
                 continue
             }
             for filename in filenames {
@@ -1021,11 +1073,10 @@ func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
     
     // loop through all match patterns from manifest to see if they match against the current page url (func arg)
     for pattern in matchPatterns {
-        // if pattern matches against page url
         if patternMatch(url, pattern) {
             // the filenames listed for the pattern that match page url
-            guard let filenames = manifestMatchPatterns[pattern] else {
-                err("error parsing manifestMatchPatterns when attempting to get code for injected script")
+            guard let filenames = manifestKeys.match[pattern] else {
+                err("error parsing manifestKets.match when attempting to get code for injected script")
                 continue
             }
             // loop through matched filenames and get corresponding code from file
@@ -1036,20 +1087,39 @@ func getCode(_ url: String) -> [String: [String: [String: Any]]]? {
                     guard
                         // NOTE: getFileContents returns parsed script metadata
                         let saveLocation = getSaveLocation(),
-                        let contents = getFileContents(saveLocation.appendingPathComponent(filename)) as? [String: Any],
-                        let code = contents["code"] as? String,
+                        let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
+                        var code = contents["code"] as? String,
                         let type = filename.split(separator: ".").last
                     else {
-                        err("error reading getting file data in getCode func")
+                        err("could not get file contents for \(filename)")
                         continue
                     }
                     
-                    // can force unwrap b/c getFileContents ensures metadata exists
+                    // can force unwrap b/c getFileContentsParsed ensures metadata exists
                     let metadata = contents["metadata"] as! [String: [String]]
+                    
+                    // if metadata has noframes option and the url is not the top window, don't load
+                    if (metadata["noframes"] != nil && !isTop) {
+                        continue
+                    }
                     
                     // normalize weight
                     var weight = metadata["weight"]?[0] ?? "1"
-                    weight = normalizeWeight(weight: weight)
+                    weight = normalizeWeight(weight)
+                    
+                    // attempt to get require resource from disk
+                    // if required resource is inaccessible, silently fail and continue
+                    if let required = metadata["require"] {
+                        for require in required {
+                            let sanitizedName = santize(require) ?? ""
+                            let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
+                            if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
+                                code = "\(requiredContent)\n\(code)"
+                            } else {
+                                err("could not get required resource from disk \(requiredFileURL)")
+                            }
+                        }
+                    }
                     
                     if type == "css" {
                         cssFiles[filename] = ["code": code, "weight": weight]

@@ -1,0 +1,18 @@
+{
+    "extends": "stylelint-config-standard",
+    "rules": {
+        "comment-empty-line-before": [
+            "always",
+            {
+                "ignore": ["after-comment", "stylelint-commands"]
+            }
+        ],
+        "indentation": 4,
+        "selector-pseudo-class-no-unknown": [
+            true,
+            {
+                "ignorePseudoClasses": ["global"]
+            }
+        ]
+    }
+}

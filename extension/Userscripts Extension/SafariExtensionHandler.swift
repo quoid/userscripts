@@ -7,118 +7,105 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     }
     
     override func messageReceived(withName messageName: String, from page: SFSafariPage, userInfo: [String : Any]?) {
-        var respData = ["requestOrigin": messageName] as [String : Any]
-        var respName:String = ""
-        if messageName == "REQ_USERSCRIPTS" {
-            respName = "RESP_USERSCRIPTS"
-            page.getPropertiesWithCompletionHandler { props in
-                guard
-                    let url = props?.url,
-                    let code = getCode(url.absoluteString)
-                else {
-                    respData["error"] = "failed to get injected code"
-                    return
-                }
-                respData["data"] = code
-                page.dispatchMessageToScript(withName: respName, userInfo: respData)
+        var responseName:String = ""
+        var responseData:Any = ""
+        var responseError = ""
+        switch messageName {
+        case "REQ_INIT_DATA":
+            responseName = "RESP_INIT_DATA"
+            if let initData = getInitData() {
+                responseData = initData
+            } else {
+                responseError = "failed to get settings"
             }
-        } else if messageName == "REQ_CHANGE_SAVE_LOCATION" {
-            respName = "RESP_CHANGE_SAVE_LOCATION"
-            SFSafariExtension.getBaseURI(completionHandler: { baseURI in
-                closeExtensionHTMLPages()
-            })
-        } else {
-            if messageName == "REQ_ALL_SCRIPTS" {
-                respName = "RESP_ALL_SCRIPTS"
-                if let scriptsData = updateScriptsData() {
-                    respData["data"] = scriptsData
+        case "REQ_ALL_FILES_DATA":
+            responseName = "RESP_ALL_FILES_DATA"
+            if let files = getAllFilesData() {
+                responseData = files
+            } else {
+                responseError = "failed to get files"
+            }
+        case "REQ_UPDATE_SETTINGS":
+            responseName = "RESP_UPDATE_SETTINGS"
+            if let settings = userInfo as? [String: String] {
+                if !updateSettings(settings) {
+                    responseError = "settings updated locally but failed to save"
+                }
+            } else {
+                responseError = "settings object is invalid"
+            }
+        case "REQ_UPDATE_BLACKLIST":
+            responseName = "RESP_UPDATE_BLACKLIST"
+            if let patternsDict = userInfo as? [String: [String]], let patterns = patternsDict["patterns"] {
+                if !updateBlacklist(patterns) {
+                    responseError = "failed to save blacklist"
+                }
+            } else {
+                responseError = "blacklist object is invalid"
+            }
+        case "REQ_TOGGLE_FILE":
+            responseName = "RESP_TOGGLE_FILE"
+            if
+                let fileData = userInfo as? [String: String],
+                let filename = fileData["filename"],
+                let action = fileData["action"]
+            {
+                if !toggleFile(filename, action) {
+                    responseError = "failed to toggle file"
+                }
+                responseData = ["filename": filename]
+            } else {
+                responseError = "invalid file object"
+            }
+        case "REQ_FILE_SAVE":
+            responseName = "RESP_FILE_SAVE"
+            if let data = userInfo {
+                let saved = saveFile(data)
+                if let e = saved["error"] as? String {
+                    responseError = e
                 } else {
-                    respData["error"] = "failed to get scripts"
+                    responseData = saved
                 }
+            } else {
+                responseError = "invalid save object"
             }
-            if messageName == "REQ_BLACKLIST_SAVE" {
-                respName = "RESP_BLACKLIST_SAVE"
-                if let blacklist = userInfo?["blacklist"] as? [String], updateBlacklist(blacklist) {
-                    respData["data"] = ["blacklist": blacklist]
-                } else {
-                    respData["error"] = "failed to update blacklist"
+        case "REQ_FILE_TRASH":
+            responseName = "RESP_FILE_TRASH"
+            if let data = userInfo as? [String: String], let filename = data["filename"] {
+                // do not need to return any data if save was successful
+                // if no error included with response, active file is deleted
+                if !trashFile(filename) {
+                    responseError = "failed to trash file"
                 }
+            } else {
+                responseError = "invalid file object for trashing"
             }
-            if messageName == "REQ_DISABLE_SCRIPT" {
-                respName = "RESP_DISABLE_SCRIPT"
-                if let id = userInfo?["id"] as? String, toggleScript("disable", id) {
-                    respData["data"] = ["id": id]
-                } else {
-                    respData["error"] = "failed to disable script"
-                }
+        case "REQ_OPEN_SAVE_LOCATION":
+            responseName = "RESP_OPEN_SAVE_LOCATION"
+            if !openSaveLocation() {
+                responseError = "failed to get save location"
             }
-            if messageName == "REQ_ENABLE_SCRIPT" {
-                respName = "RESP_ENABLE_SCRIPT"
-                if let id = userInfo?["id"] as? String, toggleScript("enable", id) {
-                    respData["data"] = ["id": id]
-                } else {
-                    respData["error"] = "failed to enable script"
-                }
+        case "REQ_OPEN_DOCUMENTS_DIRECTORY":
+            return openDocumentsDirectory()
+        case "REQ_CHANGE_SAVE_LOCATION":
+            return closeExtensionHTMLPages()
+        case "REQ_USERSCRIPTS":
+            responseName = "RESP_USERSCRIPTS"
+            if
+                let data = userInfo,
+                let url = data["url"] as? String,
+                let isTop = data["top"] as? Bool,
+                let id = data["id"] as? String,
+                let code = getCode(url, isTop)
+            {
+                responseData = ["code": code, "id": id]
+            } else {
+                responseError = "failed to get code"
             }
-            if messageName == "REQ_INIT_DATA" {
-                respName = "RESP_INIT_DATA"
-                if let initData = getInitData() {
-                    respData["data"] = initData
-                } else {
-                    respData["error"] = "failed to get init data"
-                }
-            }
-            if messageName == "REQ_OPEN_SAVE_LOCATION" {
-                respName = "RESP_OPEN_SAVE_LOCATION"
-                guard let url = getSaveLocation() else {
-                    respData["error"] = "failed to get save location in func openSaveLocation"
-                    return
-                }
-                // secrutiy scope
-                let didStartAccessing = url.startAccessingSecurityScopedResource()
-                defer {
-                    if didStartAccessing { url.stopAccessingSecurityScopedResource() }
-                }
-                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
-            }
-            if messageName == "REQ_SCRIPT_DELETE" {
-                respName = "RESP_SCRIPT_DELETE"
-                if let filename = userInfo?["id"] as? String, deleteScript(filename) {
-                    respData["data"] = ["id": filename]
-                } else {
-                    respData["error"] = "failed to delete script"
-                }
-            }
-            if messageName == "REQ_SCRIPT_SAVE" {
-                respName = "RESP_SCRIPT_SAVE"
-                if let scriptData = userInfo as? [String: String], let responseData = saveScriptFile(scriptData) {
-                    respData["data"] = responseData
-                } else {
-                    respData["error"] = "failed to save script"
-                }
-            }
-            if messageName == "REQ_SETTING_CHANGE" {
-                respName = "RESP_SETTING_CHANGE"
-                if
-                    let filename = userInfo?["id"] as? String,
-                    let val = userInfo?["value"] as? String,
-                    updateSetting(filename, val)
-                {
-                    respData["data"] = ["id": filename, "value": val]
-                } else {
-                    respData["error"] = "failed to change setting"
-                }
-            }
-            if messageName == "REQ_SINGLE_SCRIPT" {
-                respName = "RESP_SINGLE_SCRIPT"
-                if let filename = userInfo?["id"] as? String, let scriptData = loadScriptData(filename) {
-                    respData["data"] = scriptData
-                } else {
-                    respData["error"] = "failed to load script"
-                }
-            }
-            page.dispatchMessageToScript(withName: respName, userInfo: respData)
+        default:
+            err("message from js has no handler")
         }
+        page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
     }
     
     override func toolbarItemClicked(in window: SFSafariWindow) {
