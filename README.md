@@ -6,7 +6,7 @@ An open-source userscript editor for Safari.
 
 ## Installation
 
-Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id1463298887) or clone the project and build with Xcode.
+Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id1463298887) or clone the project and build with Xcode. Alternatively, you can download the most current version for the [releases page](https://github.com/quoid/userscripts/releases).
 
 ## UI Overview
 
@@ -116,11 +116,11 @@ Once the host app is open, you will see a button called "Change save location". 
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
 
-You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are porperly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open (by clicking the extension button in Safari.
+> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are porperly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open (by clicking the extension button in Safari.
 
 **What are the the keyboard shortcuts?**
 
-While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
+> While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
 
 ## Support Development
 Currently, there are a few you can support the development of this extension. The first way is simple; if you enjoy using the extension, consider [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887). Seeing the reviews motivates me to continue working on the development.
