@@ -123,7 +123,7 @@ Once the host app is open, you will see a button called "Change save location". 
 > While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
 
 ## Support Development
-Currently, there are a few you can support the development of this extension. The first way is simple; if you enjoy using the extension, consider [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887). Seeing the reviews motivates me to continue working on the development.
+Currently, there are a few ways you can support the development of this extension. The first way is simple; if you enjoy using the extension, consider [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887). Seeing the reviews motivates me to continue working on the development.
 
 Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it's hard for me to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming versions, but also give me the opportunity to elicit feedback from real users.
 
