@@ -41,6 +41,15 @@
         // start initialization process
         safari.extension.dispatchMessage("REQ_INIT_DATA");
     });
+
+    // currently inactive, but could be used to globally prevent auto text replacement in app
+    // eslint-disable-next-line no-unused-vars
+    function preventAutoTextReplacements(e) {
+        if (e.inputType === "insertReplacementText" && e.data === ". ") {
+            e.preventDefault();
+            e.target.value += " ";
+        }
+    }
 </script>
 
 <style>

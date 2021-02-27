@@ -147,6 +147,8 @@
         instance.on("blur", () => keysPressed = []);
 
         instance.on("change", onChange);
+
+        instance.on("beforeChange", preventAutoFullStops);
     }
 
     function activateSearch() {
@@ -196,6 +198,16 @@
         if ((inputAction === "undo" || inputAction === "redo") && !cmChanged()) {
             // back to the point where session and saved code are equal, and buttons enabled
             dispatch("message", {name: "disableButtons"});
+        }
+    }
+
+    function preventAutoFullStops(cm, changeObj) {
+        if (
+            changeObj.origin === "+input"
+            && changeObj.text.length === 1
+            && changeObj.text[0] === ". ")
+        {
+            changeObj.update(changeObj.from, changeObj.to, ["  "]);
         }
     }
 
