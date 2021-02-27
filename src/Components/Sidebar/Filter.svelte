@@ -80,6 +80,7 @@
         autocapitalize="off"
         autocomplete="off"
         spellcheck="false"
+        autocorrect="off"
         bind:value={query}
         {disabled}
     >

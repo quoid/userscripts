@@ -15,7 +15,7 @@ const defaultSettings = {
     showInvisibles: "true",
     sortOrder: "lastModifiedDesc",
     tabSize: "4",
-    version: "3.0.1"
+    version: "3.0.2"
 };
 
 // example file contents
