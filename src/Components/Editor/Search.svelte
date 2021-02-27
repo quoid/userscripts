@@ -141,7 +141,6 @@
         position: absolute;
         right: 0.5rem;
         top: 0;
-        width: 18rem;
         z-index: 4;
     }
 
