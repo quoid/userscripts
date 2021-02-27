@@ -122,6 +122,12 @@ Once the host app is open, you will see a button called "Change save location". 
 
 > While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
 
+**When I use `@require`, where are the required files stored?**
+
+> All required files are saved *as Javascript files* in the extension container folder in macOS 11.x. That folder is located in the default save location, at: `~/Library/Containers/Userscripts/Data/Documents/require/`.
+>
+> If you move files from the require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
+
 ## Support Development
 Currently, there are a few ways you can support the development of this extension. The first way is simple; if you enjoy using the extension, consider [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887). Seeing the reviews motivates me to continue working on the development.
 
