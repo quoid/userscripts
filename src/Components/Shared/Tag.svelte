@@ -8,7 +8,7 @@
         border: 1px solid var(--color-red);
         border-radius: var(--border-radius);
         color: var(--color-red);
-        font-size: 0.313rem;
+        font-size: 0.563rem;
         font-weight: 500;
         letter-spacing: 0.022rem;
         line-height: 0.75rem;
