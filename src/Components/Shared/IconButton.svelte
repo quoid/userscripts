@@ -3,6 +3,7 @@
     export let disabled = false;
     export let icon;
     export let title = undefined;
+    export let notification = false;
 </script>
 
 <style>
@@ -14,13 +15,21 @@
         display: flex;
         height: 1.5rem;
         justify-content: center;
-        opacity: 0.75;
         overflow: visible;
+        position: relative;
         width: 1.5rem;
     }
 
-    button:hover {
-        opacity: 1;
+    button.notification::after {
+        background-color: var(--color-red);
+        border: 2px solid var(--color-bg-secondary);
+        border-radius: 50%;
+        content: "";
+        height: 0.75rem;
+        right: 0;
+        position: absolute;
+        top: 0;
+        width: 0.75rem;
     }
 
     button:disabled {
@@ -31,12 +40,19 @@
     button :global(svg) {
         fill: var(--svg-fill);
         height: auto;
+        opacity: 0.75;
         pointer-events: none; /* prevent svg from triggering click events */
         width: 66.7%;
     }
 
+    button:hover :global(svg) {
+        opacity: 1;
+    }
 </style>
 
-<button on:click {disabled} style="--svg-fill: {color};" {title}>
+<button
+    class:notification={notification}
+    on:click {disabled} style="--svg-fill: {color};" {title}
+>
     {@html icon}
 </button>
