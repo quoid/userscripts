@@ -999,58 +999,28 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 }
 
 // injection
-func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]? {
-    var allFiles = [String: [String: [String: Any]]]() // will be returned
-    
-    // there has to be a better way to do this
-    
-    // dictionary to hold the indiv. css files that will be loaded
-    // ["file.css": ["code": "/* code here */", "weight": "1"]]
-    var cssFiles = [String:[String:String]]()
-    
-    // dictionary to hold the indiv. js files that will be loaded
-    // ["scope": ["timing": ["file.js": ["code": "// code", "weight": "1"]]]]
-    var jsFiles = [String: [String: [String: [String: String]]]]()
-    jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    
-    var auto_docStart = [String: [String: String]]()
-    var auto_docEnd = [String: [String: String]]()
-    var auto_docIdle = [String: [String: String]]()
-    var content_docStart = [String: [String: String]]()
-    var content_docEnd = [String: [String: String]]()
-    var content_docIdle = [String: [String: String]]()
-    var page_docStart = [String: [String: String]]()
-    var page_docEnd = [String: [String: String]]()
-    var page_docIdle = [String: [String: String]]()
-    
-    // domains where loading is excluded for file
-    var excludedFilenames:[String] = []
-    
-    // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
-    var matchedFilenames:[String] = []
-    
+func getMatchedFiles(_ url: String) -> [String]? {
     // get the manifest data
     guard let manifestKeys = getManifestKeys() else {
-        err("could not read manifest when attempting to get code for injection")
+        err("could not read manifest when attempting to get page script count")
         return nil
     }
-    
-    // url matches a pattern in blacklist, return empty dict
-    for pattern in manifestKeys.blacklist {
-        if patternMatch(url, pattern) {
-            return allFiles
-        }
-    }
-    
-    // AT THIS POINT IT IS KNOWN THAT THE URL IS NOT IN THE BLACKLIST, PROCEED
-
+    // domains where loading is excluded for file
+    var excludedFilenames:[String] = []
+    // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
+    var matchedFilenames:[String] = []
     // all exclude patterns from manifest
     let excludePatterns = manifestKeys.exclude.keys
-    
     // all match patterns from manifest
     let matchPatterns = manifestKeys.match.keys
+
+    // url matches a pattern in blacklist
+    // essentially all scripts are disabled, there are 0 active scripts for url
+    for pattern in manifestKeys.blacklist {
+        if patternMatch(url, pattern) {
+            return matchedFilenames
+        }
+    }
     
     // add disabled script filenames to excludePatterns
     excludedFilenames.append(contentsOf: manifestKeys.disabled)
@@ -1071,7 +1041,7 @@ func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]?
         }
     }
     
-    // loop through all match patterns from manifest to see if they match against the current page url (func arg)
+    // loop through all match patterns from manifest to see if they match against the current page url
     for pattern in matchPatterns {
         if patternMatch(url, pattern) {
             // the filenames listed for the pattern that match page url
@@ -1079,88 +1049,109 @@ func getCode(_ url: String, _ isTop: Bool) -> [String: [String: [String: Any]]]?
                 err("error parsing manifestKets.match when attempting to get code for injected script")
                 continue
             }
-            // loop through matched filenames and get corresponding code from file
+            // loop through matched filenames and populate matchedFilenames array
             for filename in filenames {
-                // don't load if filename is in excludes or filename already exists in matchedFilenames array (to avoid duplication)
+                // don't push to array if filename is in excludes or filename already exists in matchedFilenames array (to avoid duplication)
                 if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
-                    // if guards fail, log error continue to next file
-                    guard
-                        // NOTE: getFileContents returns parsed script metadata
-                        let saveLocation = getSaveLocation(),
-                        let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
-                        var code = contents["code"] as? String,
-                        let type = filename.split(separator: ".").last
-                    else {
-                        err("could not get file contents for \(filename)")
-                        continue
-                    }
-                    
-                    // can force unwrap b/c getFileContentsParsed ensures metadata exists
-                    let metadata = contents["metadata"] as! [String: [String]]
-                    
-                    // if metadata has noframes option and the url is not the top window, don't load
-                    if (metadata["noframes"] != nil && !isTop) {
-                        continue
-                    }
-                    
-                    // normalize weight
-                    var weight = metadata["weight"]?[0] ?? "1"
-                    weight = normalizeWeight(weight)
-                    
-                    // attempt to get require resource from disk
-                    // if required resource is inaccessible, silently fail and continue
-                    if let required = metadata["require"] {
-                        for require in required {
-                            let sanitizedName = santize(require) ?? ""
-                            let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
-                            if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
-                                code = "\(requiredContent)\n\(code)"
-                            } else {
-                                err("could not get required resource from disk \(requiredFileURL)")
-                            }
-                        }
-                    }
-                    
-                    if type == "css" {
-                        cssFiles[filename] = ["code": code, "weight": weight]
-                    } else if type == "js" {
-                        var injectInto = metadata["inject-into"]?[0] ?? "page"
-                        var runAt = metadata["run-at"]?[0] ?? "document-end"
-                        
-                        // ensure values are acceptable
-                        let injectVals = ["auto", "content", "page"]
-                        let runAtVals = ["document-start", "document-end", "document-idle"]
-                        if !injectVals.contains(injectInto) {
-                            injectInto = "page"
-                        }
-                        if !runAtVals.contains(runAt) {
-                            runAt = "document-end"
-                        }
-                        
-                        let data = ["code": code, "weight": weight]
-                        // add file data to appropiate dict
-                        if injectInto == "auto" && runAt == "document-start" {
-                            auto_docStart[filename] = data
-                        } else if injectInto == "auto" && runAt == "document-end" {
-                            auto_docEnd[filename] = data
-                        } else if injectInto == "auto" && runAt == "document-idle" {
-                            auto_docIdle[filename] = data
-                        } else if injectInto == "content" && runAt == "document-start" {
-                            content_docStart[filename] = data
-                        } else if injectInto == "content" && runAt == "document-end" {
-                            content_docEnd[filename] = data
-                        } else if injectInto == "content" && runAt == "document-idle" {
-                            content_docIdle[filename] = data
-                        } else if injectInto == "page" && runAt == "document-start" {
-                            page_docStart[filename] = data
-                        } else if injectInto == "page" && runAt == "document-end" {
-                            page_docEnd[filename] = data
-                        } else if injectInto == "page" && runAt == "document-idle" {
-                            page_docIdle[filename] = data
-                        }
-                    }
+                    matchedFilenames.append(filename)
                 }
-                matchedFilenames.append(filename)
+            }
+            
+        }
+    }
+    return matchedFilenames
+}
+
+func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
+    var allFiles = [String: [String: [String: Any]]]()
+    var cssFiles = [String:[String:String]]()
+    var jsFiles = [String: [String: [String: [String: String]]]]()
+    jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    var auto_docStart = [String: [String: String]]()
+    var auto_docEnd = [String: [String: String]]()
+    var auto_docIdle = [String: [String: String]]()
+    var content_docStart = [String: [String: String]]()
+    var content_docEnd = [String: [String: String]]()
+    var content_docIdle = [String: [String: String]]()
+    var page_docStart = [String: [String: String]]()
+    var page_docEnd = [String: [String: String]]()
+    var page_docIdle = [String: [String: String]]()
+    
+    for filename in filenames {
+        guard
+            let saveLocation = getSaveLocation(),
+            let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
+            var code = contents["code"] as? String,
+            let type = filename.split(separator: ".").last
+        else {
+            // if guard fails, log error continue to next file
+            err("could not get file contents for \(filename)")
+            continue
+        }
+        // can force unwrap b/c getFileContentsParsed ensures metadata exists
+        let metadata = contents["metadata"] as! [String: [String]]
+        
+        // if metadata has noframes option and the url is not the top window, don't load
+        if (metadata["noframes"] != nil && !isTop) {
+            continue
+        }
+        
+        // normalize weight
+        var weight = metadata["weight"]?[0] ?? "1"
+        weight = normalizeWeight(weight)
+        
+        // attempt to get require resource from disk
+        // if required resource is inaccessible, log error and continue
+        if let required = metadata["require"] {
+            for require in required {
+                let sanitizedName = santize(require) ?? ""
+                let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
+                if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
+                    code = "\(requiredContent)\n\(code)"
+                } else {
+                    err("could not get required resource from disk \(requiredFileURL)")
+                }
+            }
+        }
+
+        if type == "css" {
+            cssFiles[filename] = ["code": code, "weight": weight]
+        } else if type == "js" {
+            var injectInto = metadata["inject-into"]?[0] ?? "page"
+            var runAt = metadata["run-at"]?[0] ?? "document-end"
+            
+            let injectVals = ["auto", "content", "page"]
+            let runAtVals = ["document-start", "document-end", "document-idle"]
+            // if inject/runAt values are not valid, use default
+            if !injectVals.contains(injectInto) {
+                injectInto = "page"
+            }
+            if !runAtVals.contains(runAt) {
+                runAt = "document-end"
+            }
+            
+            let data = ["code": code, "weight": weight]
+            // add file data to appropiate dict
+            if injectInto == "auto" && runAt == "document-start" {
+                auto_docStart[filename] = data
+            } else if injectInto == "auto" && runAt == "document-end" {
+                auto_docEnd[filename] = data
+            } else if injectInto == "auto" && runAt == "document-idle" {
+                auto_docIdle[filename] = data
+            } else if injectInto == "content" && runAt == "document-start" {
+                content_docStart[filename] = data
+            } else if injectInto == "content" && runAt == "document-end" {
+                content_docEnd[filename] = data
+            } else if injectInto == "content" && runAt == "document-idle" {
+                content_docIdle[filename] = data
+            } else if injectInto == "page" && runAt == "document-start" {
+                page_docStart[filename] = data
+            } else if injectInto == "page" && runAt == "document-end" {
+                page_docEnd[filename] = data
+            } else if injectInto == "page" && runAt == "document-idle" {
+                page_docIdle[filename] = data
             }
         }
     }

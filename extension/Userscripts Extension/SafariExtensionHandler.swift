@@ -96,7 +96,8 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 let url = data["url"] as? String,
                 let isTop = data["top"] as? Bool,
                 let id = data["id"] as? String,
-                let code = getCode(url, isTop)
+                let matched = getMatchedFiles(url),
+                let code = getCode(matched, isTop)
             {
                 responseData = ["code": code, "id": id]
             } else {
@@ -121,6 +122,20 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     
     override func validateToolbarItem(in window: SFSafariWindow, validationHandler: @escaping ((Bool, String) -> Void)) {
         validationHandler(true, "")
+        window.getActiveTab { tab in
+            tab?.getActivePage { page in
+                page?.getPropertiesWithCompletionHandler { props in
+                    if let  url = props?.url {
+                        guard let matched = getMatchedFiles(url.absoluteString) else { return }
+                        if matched.count > 0 {
+                            window.getToolbarItem { toolbaritem in
+                                toolbaritem?.setBadgeText(String(matched.count))
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
