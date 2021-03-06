@@ -13,7 +13,7 @@ const defaultSettings = {
     log: "false",
     saveLocation: "/Users/UserName/Library/Containers/ParentFolder/SubFolder/",
     showInvisibles: "true",
-    showCount: "true",
+    showCount: "false",
     sortOrder: "lastModifiedDesc",
     tabSize: "4",
     version: "3.1.0"
