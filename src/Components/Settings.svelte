@@ -73,7 +73,7 @@
         box-shadow: var(--box-shadow);
         max-height: 90%;
         overflow-y: auto;
-        width: 40%;
+        width: 32rem;
     }
 
     .modal__title {
