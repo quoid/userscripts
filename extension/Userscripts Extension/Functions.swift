@@ -253,6 +253,7 @@ struct Manifest: Codable {
 }
 
 let defaultSettings = [
+    "active": "true",
     "autoHint": "true",
     "descriptions": "true",
     "languageCode": Locale.current.languageCode ?? "en",
@@ -1002,7 +1003,10 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 // injection
 func getMatchedFiles(_ url: String) -> [String]? {
     // get the manifest data
-    guard let manifestKeys = getManifestKeys() else {
+    guard
+        let manifestKeys = getManifestKeys(),
+        let active = manifestKeys.settings["active"]
+    else {
         err("could not read manifest when attempting to get page script count")
         return nil
     }
@@ -1015,6 +1019,11 @@ func getMatchedFiles(_ url: String) -> [String]? {
     // all match patterns from manifest
     let matchPatterns = manifestKeys.match.keys
 
+    // if injection is disabled, return empty array
+    if active != "true" {
+        return matchedFilenames
+    }
+    
     // url matches a pattern in blacklist
     // essentially all scripts are disabled, there are 0 active scripts for url
     for pattern in manifestKeys.blacklist {

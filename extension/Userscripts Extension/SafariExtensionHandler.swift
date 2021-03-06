@@ -129,9 +129,10 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                         guard
                             let matched = getMatchedFiles(url.absoluteString),
                             let manifestKeys = getManifestKeys(),
+                            let active = manifestKeys.settings["active"],
                             let showCount = manifestKeys.settings["showCount"]
                         else { return }
-                        if matched.count > 0 && showCount == "true" {
+                        if matched.count > 0 && active == "true" && showCount == "true" {
                             window.getToolbarItem { toolbaritem in
                                 toolbaritem?.setBadgeText(String(matched.count))
                             }

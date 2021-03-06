@@ -219,6 +219,13 @@
                 <div>General Settings</div>
             </div>
             <div class="modal__row">
+                <div>Enable Injection</div>
+                <Toggle
+                    checked={$settings.active}
+                    on:click={() => update("active", !$settings.active)}
+                />
+            </div>
+            <div class="modal__row">
                 <div>Show Toolbar Count</div>
                 <Toggle
                     checked={$settings.showCount}

@@ -6,6 +6,7 @@ import {parse} from "./utils";
 const delay = 500;
 
 const defaultSettings = {
+    active: "true",
     autoHint: "true",
     blacklist: ["domain123", "domainXYZ"],
     descriptions: "true",
