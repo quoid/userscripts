@@ -259,6 +259,7 @@ let defaultSettings = [
     "lint": "false",
     "log": "false",
     "sortOrder": "lastModifiedDesc",
+    "showCount": "false",
     "showInvisibles": "true",
     "tabSize": "4"
 ]

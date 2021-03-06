@@ -126,8 +126,12 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
             tab?.getActivePage { page in
                 page?.getPropertiesWithCompletionHandler { props in
                     if let  url = props?.url {
-                        guard let matched = getMatchedFiles(url.absoluteString) else { return }
-                        if matched.count > 0 {
+                        guard
+                            let matched = getMatchedFiles(url.absoluteString),
+                            let manifestKeys = getManifestKeys(),
+                            let showCount = manifestKeys.settings["showCount"]
+                        else { return }
+                        if matched.count > 0 && showCount == "true" {
                             window.getToolbarItem { toolbaritem in
                                 toolbaritem?.setBadgeText(String(matched.count))
                             }

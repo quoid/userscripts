@@ -226,6 +226,13 @@
                 />
             </div>
             <div class="modal__row">
+                <div>Show Toolbar Count</div>
+                <Toggle
+                    checked={$settings.showCount}
+                    on:click={() => update("showCount", !$settings.showCount)}
+                />
+            </div>
+            <div class="modal__row">
                 <div>Save Location</div>
                 <div
                     class="saveLocation truncate"
