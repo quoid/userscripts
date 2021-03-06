@@ -10,7 +10,7 @@ const defaultSettings = {
     blacklist: ["domain123", "domainXYZ"],
     descriptions: "true",
     lint: "false",
-    log: "true",
+    log: "false",
     saveLocation: "/Users/UserName/Library/Containers/ParentFolder/SubFolder/",
     showInvisibles: "true",
     showCount: "true",

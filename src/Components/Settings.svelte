@@ -219,13 +219,6 @@
                 <div>General Settings</div>
             </div>
             <div class="modal__row">
-                <div>Log Activity</div>
-                <Toggle
-                    checked={$settings.log}
-                    on:click={() => update("log", !$settings.log)}
-                />
-            </div>
-            <div class="modal__row">
                 <div>Show Toolbar Count</div>
                 <Toggle
                     checked={$settings.showCount}
