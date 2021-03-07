@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A52196F25F47AE10084FA51 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A52196D25F47AE10084FA51 /* PopoverView.swift */; };
+		4A52197025F47AE10084FA51 /* PopoverView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A52196E25F47AE10084FA51 /* PopoverView.xib */; };
 		4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F1227235CD008A9763 /* AppDelegate.swift */; };
 		4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F3227235CD008A9763 /* Main.storyboard */; };
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
@@ -47,6 +49,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4A52196D25F47AE10084FA51 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+		4A52196E25F47AE10084FA51 /* PopoverView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PopoverView.xib; sourceTree = "<group>"; };
 		4A57B9EC227235CD008A9763 /* Userscripts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Userscripts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57B9EF227235CD008A9763 /* Userscripts.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Userscripts.entitlements; sourceTree = "<group>"; };
 		4A57B9F1227235CD008A9763 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -136,6 +140,8 @@
 				4A57BA0E227235CE008A9763 /* Info.plist */,
 				4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */,
 				4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */,
+				4A52196D25F47AE10084FA51 /* PopoverView.swift */,
+				4A52196E25F47AE10084FA51 /* PopoverView.xib */,
 			);
 			path = "Userscripts Extension";
 			sourceTree = "<group>";
@@ -237,6 +243,7 @@
 			files = (
 				4A57BA12227235CE008A9763 /* ToolbarItemIcon.pdf in Resources */,
 				4AB37AD923DA73E500413E1E /* index.html in Resources */,
+				4A52197025F47AE10084FA51 /* PopoverView.xib in Resources */,
 				4A57BA10227235CE008A9763 /* UserscriptsSafari.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -260,6 +267,7 @@
 			files = (
 				4AE1EA8C24D73AB600D70037 /* Shared.swift in Sources */,
 				4A57BA08227235CE008A9763 /* SafariExtensionHandler.swift in Sources */,
+				4A52196F25F47AE10084FA51 /* PopoverView.swift in Sources */,
 				4AED8EC823F0FE8A0059259E /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

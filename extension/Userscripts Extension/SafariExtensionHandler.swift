@@ -112,12 +112,12 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     override func toolbarItemClicked(in window: SFSafariWindow) {
         // This method will be called when your toolbar item is clicked.
         NSLog("The extension's toolbar item was clicked")
-        SFSafariExtension.getBaseURI { baseURI in
-            guard let baseURI = baseURI else { return }
-            window.openTab(with: baseURI.appendingPathComponent("index.html"), makeActiveIfPossible: true) { (tab) in
-                //print(baseURI)
-            }
-        }
+//        SFSafariExtension.getBaseURI { baseURI in
+//            guard let baseURI = baseURI else { return }
+//            window.openTab(with: baseURI.appendingPathComponent("index.html"), makeActiveIfPossible: true) { (tab) in
+//                //print(baseURI)
+//            }
+//        }
     }
     
     override func validateToolbarItem(in window: SFSafariWindow, validationHandler: @escaping ((Bool, String) -> Void)) {
@@ -141,6 +141,10 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 }
             }
         }
+    }
+    
+    override func popoverViewController() -> SFSafariExtensionViewController {
+        return PopoverView.shared
     }
 
 }
