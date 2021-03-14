@@ -5,12 +5,13 @@ class ViewController: NSViewController {
 
     @IBOutlet var appNameLabel: NSTextField!
     @IBOutlet var saveLocationLabel: NSTextField!
+    let extensionBundleIdentifier = "com.userscripts.macos.Userscripts-Extension"
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        self.appNameLabel.stringValue = "Userscripts - Version \(appVersion)";
+        self.appNameLabel.stringValue = "Userscripts Safari Version \(appVersion) extension is currently off. You can turn it on in Safari Extensions preferences. You can enable it by clicking the button below"
         // seems like a lot of work to id path for another target's documents directory
         let hostID = Bundle.main.bundleIdentifier!
         let extensionID = "com.userscripts.macos.Userscripts-Extension"
@@ -31,6 +32,19 @@ class ViewController: NSViewController {
             return
         }
         self.saveLocationLabel.stringValue = url.absoluteString
+        // set extension state
+        SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionBundleIdentifier) { (state, error) in
+            guard let state = state, error == nil else {
+                // Insert code to inform the user that something went wrong.
+                return
+            }
+            
+            DispatchQueue.main.async {
+                if (state.isEnabled) {
+                    self.appNameLabel.stringValue = "Userscripts Safari extension is currently on."
+                }
+            }
+        }
     }
     
     @IBAction func changeSaveLocation(_ sender: NSButton) {
@@ -61,9 +75,13 @@ class ViewController: NSViewController {
     }
     
     @IBAction func openSafariExtensionPreferences(_ sender: AnyObject?) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: "com.userscripts.macos.Userscripts-Extension") { error in
-            if let _ = error {
+        SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
+            guard error == nil else {
                 // Insert code to inform the user that something went wrong.
+                return
+            }
+            DispatchQueue.main.async {
+                NSApplication.shared.terminate(nil)
             }
         }
     }

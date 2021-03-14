@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="16097.2"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -70,40 +70,40 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="Userscripts" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="489"/>
+                        <rect key="frame" x="0.0" y="0.0" width="528" height="400"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <stackView distribution="fill" orientation="vertical" alignment="centerX" spacing="16" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZLV-xE-AGT">
-                                <rect key="frame" x="0.0" y="34" width="480" height="410"/>
+                                <rect key="frame" x="0.0" y="64" width="528" height="312"/>
                                 <subviews>
                                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FWV-e2-WQh" userLabel="IconView">
-                                        <rect key="frame" x="176" y="138" width="128" height="272"/>
+                                        <rect key="frame" x="200" y="184" width="128" height="128"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="272" id="bpY-mu-O4Q"/>
+                                            <constraint firstAttribute="height" constant="128" id="jzM-Ee-YD0"/>
                                         </constraints>
                                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" image="AppIcon" id="Hhb-TZ-Dhg"/>
                                     </imageView>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EB0-ac-UZR">
-                                        <rect key="frame" x="206" y="106" width="68" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="App Name" id="S7v-7o-3vW">
+                                        <rect key="frame" x="62" y="104" width="404" height="16"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="400" id="Cip-ys-dZX"/>
+                                        </constraints>
+                                        <textFieldCell key="cell" alignment="center" title="App Name" id="S7v-7o-3vW">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GEt-Vr-hYM">
-                                        <rect key="frame" x="222" y="74" width="37" height="16"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" relation="lessThanOrEqual" constant="360" id="GW6-Hx-2H6"/>
-                                        </constraints>
-                                        <textFieldCell key="cell" lineBreakMode="truncatingMiddle" title="Label" id="tYG-cJ-b1A">
+                                        <rect key="frame" x="62" y="72" width="404" height="16"/>
+                                        <textFieldCell key="cell" lineBreakMode="truncatingMiddle" alignment="center" title="Label" id="tYG-cJ-b1A">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mS0-Dd-0vC">
-                                        <rect key="frame" x="153" y="30" width="175" height="32"/>
+                                        <rect key="frame" x="180" y="29" width="169" height="32"/>
                                         <buttonCell key="cell" type="push" title="Change Save Location" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Fin-R8-JNw">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -113,7 +113,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wa3-Ah-iiN">
-                                        <rect key="frame" x="99" y="-7" width="282" height="32"/>
+                                        <rect key="frame" x="126" y="-7" width="276" height="32"/>
                                         <buttonCell key="cell" type="push" title="Open in Safari Extensions Preferences…" alternateTitle="Install" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="BaK-nt-Vci">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -123,6 +123,13 @@
                                         </connections>
                                     </button>
                                 </subviews>
+                                <constraints>
+                                    <constraint firstItem="EB0-ac-UZR" firstAttribute="top" secondItem="FWV-e2-WQh" secondAttribute="bottom" constant="64" id="6EV-ZO-wZD"/>
+                                    <constraint firstItem="GEt-Vr-hYM" firstAttribute="leading" secondItem="ZLV-xE-AGT" secondAttribute="leading" constant="64" id="I62-L1-Xt3"/>
+                                    <constraint firstAttribute="trailing" secondItem="GEt-Vr-hYM" secondAttribute="trailing" constant="64" id="LCr-bk-pCV"/>
+                                    <constraint firstItem="EB0-ac-UZR" firstAttribute="leading" secondItem="ZLV-xE-AGT" secondAttribute="leading" constant="64" id="Yg8-Cl-eYN"/>
+                                    <constraint firstAttribute="trailing" secondItem="EB0-ac-UZR" secondAttribute="trailing" constant="64" id="l23-Sp-KsI"/>
+                                </constraints>
                                 <visibilityPriorities>
                                     <integer value="1000"/>
                                     <integer value="1000"/>
@@ -141,8 +148,8 @@
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="ZLV-xE-AGT" secondAttribute="trailing" id="7aD-Ze-9ed"/>
-                            <constraint firstItem="ZLV-xE-AGT" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="45" id="AJ3-sx-ZQx"/>
-                            <constraint firstAttribute="bottom" secondItem="ZLV-xE-AGT" secondAttribute="bottom" constant="34" id="KVY-ss-lTJ"/>
+                            <constraint firstItem="ZLV-xE-AGT" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="24" id="AJ3-sx-ZQx"/>
+                            <constraint firstAttribute="bottom" secondItem="ZLV-xE-AGT" secondAttribute="bottom" constant="64" id="KVY-ss-lTJ"/>
                             <constraint firstItem="ZLV-xE-AGT" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="mT6-ee-vkp"/>
                         </constraints>
                     </view>
@@ -153,7 +160,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="654.5"/>
+            <point key="canvasLocation" x="75" y="654"/>
         </scene>
     </scenes>
     <resources>
