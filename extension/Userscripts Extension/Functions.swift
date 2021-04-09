@@ -6,7 +6,7 @@ func getSaveLocation() -> URL? {
     let standardDefaults = UserDefaults.standard
     let userSaveLocationKey = "userSaveLocation"
     var defaultSaveLocation:URL
-    
+
     // get the default save location, if key doesn't exist write it to user defaults
     if let dsl = standardDefaults.url(forKey: "saveLocation") {
         defaultSaveLocation = dsl
@@ -41,7 +41,7 @@ func getSaveLocation() -> URL? {
     {
         return userSaveLocation
     }
-    
+
     // at this point one of the following conditions met
     // local bookmark data doesn't exist
     // for some reason can't get url from local bookmark data
@@ -176,7 +176,7 @@ func parse(_ content: String) -> [String: Any]? {
     guard let match = regex.firstMatch(in: content, options: [], range: range) else {
         return nil
     }
-    
+
     // at this point the text content has passed initial validation, it contains valid metadata
     // the metadata can be in userscript or userstyle format, need to check for this and adjust group numbers
     // rather than being too strict, text content can precede the opening userscript tag, however it will be ignored
@@ -188,7 +188,7 @@ func parse(_ content: String) -> [String: Any]? {
     } else {
         g1 = 4; g2 = 5; g3 = 6
     }
-    
+
     // can force unwrap metablock since nil check was done above
     let metablock = content[Range(match.range(at: g1), in: content)!]
     // create var to store separated metadata keys/values
@@ -254,6 +254,7 @@ struct Manifest: Codable {
 
 let defaultSettings = [
     "active": "true",
+    "autoCloseBrackets": "true",
     "autoHint": "true",
     "descriptions": "true",
     "languageCode": Locale.current.languageCode ?? "en",
@@ -322,12 +323,12 @@ func toggleFile(_ filename: String,_ action: String) -> Bool {
     if (action == "disable" && manifestKeys.disabled.contains(filename)) ||  (action == "enable" && !manifestKeys.disabled.contains(filename)) {
         return true
     }
-    
+
     // add filename to disabled array
     if (action == "disable") {
         manifestKeys.disabled.append(filename)
     }
-    
+
     // remove filename from disabled array
     if (action == "enable") {
         guard let index = manifestKeys.disabled.firstIndex(of: filename) else {
@@ -336,13 +337,13 @@ func toggleFile(_ filename: String,_ action: String) -> Bool {
         }
         manifestKeys.disabled.remove(at: index)
     }
-    
+
     // update manifest
     if updateManifest(with: manifestKeys) != true {
         err("failed to \(action) file with name, \(filename)")
         return false
     }
-    
+
     return true
 }
 
@@ -351,12 +352,12 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
         err("failed to get manifest keys when attempting to update excludes and matches")
         return false
     }
-    
+
     // will hold the exclude/match patterns in file's metadata
     var patternsInFile = [String]()
     // will hold the exclude/match patterns in manifest that have file name as value
     var patternsInManifestForFile = [String]()
-    
+
     func updatePatternDict(_ manifestExcludesOrMatches: [String: [String]]) -> [String: [String]] {
         // clear at every func run
         patternsInManifestForFile.removeAll()
@@ -364,7 +365,7 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
         var returnDictionary = manifestExcludesOrMatches
         // exclude-match & match keys (url patterns) from manifest
         let keys = returnDictionary.keys
-        
+
         // determine what patterns already have this filename as a value
         for key in keys {
             // key is an array of filenames
@@ -374,7 +375,7 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
             }
             for name in filenames {
                 // name is a single filename
-                
+
                 // if name is same as filename, file already added for this pattern
                 // add it to patternsInManifestForFile for later comparison
                 if name == filename {
@@ -382,19 +383,19 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
                 }
             }
         }
-        
+
         // patterns in file metadata and patterns in manifest that have filename as a value
         // filename already present in manifest for these patterns, do nothing with these
         // let common = patternsInFile.filter{patternsInManifestForFile.contains($0)}
-        
+
         // patterns in file metadata, but don't have the filename as a value within the manifest
         // these are the manifest patterns that the filename needs to be added to
         let addFilenameTo = patternsInFile.filter{!patternsInManifestForFile.contains($0)}
-        
+
         // the patterns that have the filename as a value, but not present in file metadata
         // ie. these are the manifest patterns we need to remove the filename from
         let removeFilenameFrom = patternsInManifestForFile.filter{!patternsInFile.contains($0)}
-        
+
         // check if filename needs to be added or new key/val needs to be created
         for pattern in addFilenameTo {
             if returnDictionary[pattern] != nil {
@@ -403,7 +404,7 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
                 returnDictionary[pattern] = [filename]
             }
         }
-        
+
         for pattern in removeFilenameFrom {
             // get the index of the filename within the array
             let ind = returnDictionary[pattern]?.firstIndex(of: filename)
@@ -418,19 +419,19 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
         patternsInFile.removeAll()
         return returnDictionary
     }
-    
+
     // get updated data for exclude-match and match
     patternsInFile = excludePatterns
     manifestKeys.exclude = updatePatternDict(manifestKeys.exclude)
     patternsInFile = matchPatterns
     manifestKeys.match = updatePatternDict(manifestKeys.match)
-    
+
     // save updated data to manifest
     if updateManifest(with: manifestKeys) != true {
         err("failed to update manifest when attempting to update excludes and matches")
         return false
     }
-    
+
     return true
 }
 
@@ -455,7 +456,7 @@ func purgeManifest() -> Bool {
         err("failed to get all file urls when attempting to purge manifest")
         return false
     }
-    
+
     // populate allSaveLocationFilenames array with files of the correct type in save location
     for fileUrl in allFilesUrls {
         let filename = fileUrl.lastPathComponent
@@ -464,7 +465,7 @@ func purgeManifest() -> Bool {
         }
         allSaveLocationFilenames.append(filename)
     }
-    
+
     // iterate through manifest matches
     // if no file exists for value, remove it from manifest
     for (pattern, filenames) in manifestKeys.match {
@@ -547,7 +548,7 @@ func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
     guard var manifestKeys = getManifestKeys() else {
         return false
     }
-    
+
     // file has no required resources but the key is in manifest
     if resources.count < 1 && manifestKeys.require[filename] != nil, let index = manifestKeys.require.index(forKey: filename) {
         manifestKeys.require.remove(at: index)
@@ -558,7 +559,7 @@ func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
             return false
         }
     }
-    
+
     // file has required resources
     // santize all resource names
     var r = [String]()
@@ -569,7 +570,7 @@ func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
             return false
         }
     }
-    
+
     // only write if current manifest differs from resources
     if r.count > 0 && r != manifestKeys.require[filename] {
         manifestKeys.require[filename] = r
@@ -577,7 +578,7 @@ func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
             return false
         }
     }
-    
+
     return true
 }
 
@@ -590,7 +591,7 @@ func getInitData() -> [String: Any]? {
         err("failed to get save location when attempting to get init data")
         return nil
     }
-    
+
     // check if default save location directory exists, if not create it
     if !FileManager.default.fileExists(atPath: defaultSaveLocation.path) {
         do {
@@ -601,7 +602,7 @@ func getInitData() -> [String: Any]? {
             return nil
         }
     }
-    
+
     // check if default save location directory exists, if not create it
     if !FileManager.default.fileExists(atPath: requireLocation.path) {
         do {
@@ -612,7 +613,7 @@ func getInitData() -> [String: Any]? {
             return nil
         }
     }
-    
+
     // get manifest data
     var manifestKeys = getManifestKeys()
     // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
@@ -623,10 +624,10 @@ func getInitData() -> [String: Any]? {
             return nil
         }
     }
-    
+
     // get settings from manifest
     // can force unwrap all instances of manifestKeys since nil check is done above
-    
+
     // iterate over default settings and individually check if each present
     // missing keys will occur when new settings introduced
     for (key, value) in defaultSettings {
@@ -635,23 +636,23 @@ func getInitData() -> [String: Any]? {
             update = true
         }
     }
-    
+
     // if flagged, update manifest
     if update, updateManifest(with: manifestKeys!) != true {
         err("failed to update manifest while getting init data")
         return nil
     }
-    
+
     // purge manifest every init, if it fails, log error and continue since failed purges don't break functionality
     if !purgeManifest() {
         err("purge manifest failed while getting init data")
     }
-    
+
     var data:[String: Any] = manifestKeys!.settings
     data["blacklist"] = manifestKeys!.blacklist
     data["saveLocation"] = saveLocation.path
     data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-    
+
     return data
 }
 
@@ -730,13 +731,13 @@ func getAllFilesData() -> [[String: Any]]? {
         if !updateExcludesAndMatches(filename, excluded, matched) {
             err("error updating excludes & matches while getting all files data")
         }
-        
+
         // check for require keys, run even if metadata["require"] is nil to remove stale required resources
         let required = metadata["require"] ?? []
         if !getRequiredCode(filename, required, "\(type)") {
             err("error updating required resources while getting all files data")
         }
-        
+
         files.append(fileData)
     }
     return files
@@ -785,10 +786,10 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     else {
         return ["error": "failed to parse argument in save function"]
     }
-    
+
     // construct new file name
     let newFilename = "\(name).\(type)"
-    
+
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
@@ -799,7 +800,7 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     else {
         return ["error": "failed to read save urls in save function"]
     }
-    
+
     // validate file before save
     var allFilenames:[String] = [] // stores the indv. filenames for later comparison
     // old and new filenames are equal, overwriting and can skip
@@ -815,12 +816,12 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
             allFilenames.append(filename.lowercased())
         }
     }
-    
+
     if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
         // filename taken or too long
         return ["error": "filename validation failed in save function"]
     }
-    
+
     // file passed validation
 
     // check for require keys
@@ -836,16 +837,16 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     } catch {
         return ["error": "failed to write file to disk"]
     }
-    
+
     // saved to disk successfully
-    
+
     // get the file last modified date
     guard
         let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
     else {
         return ["error": "failed to read modified date in save function"]
     }
-    
+
     // remove old file if it exists and manifest records for old file if they exist
     if oldFilename != newFilename {
         // if user changed the filename, remove file with old filename
@@ -855,11 +856,11 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
         // the file with oldFilename will not be on the filesystem and can not be deleted
         // for that edge case, using try? rather than try(!) to allow failures
         try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
-        
+
         // updateExcludesAndMatches for old file
         _ = updateExcludesAndMatches(oldFilename, [], [])
     }
-    
+
     // update new excludes and matches for new file
     var excludes = metadata["exclude-match"] ?? []
     var matches = metadata["match"] ?? []
@@ -869,17 +870,17 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
     matches.append(contentsOf: includeLegacy)
     excludes.append(contentsOf: excludeLegacy)
     _ = updateExcludesAndMatches(newFilename, excludes, matches)
-    
+
     // un-santized name
     name = unsanitize(name)
-    
+
     var response = [String: Any]()
     response["canUpdate"] = false
     response["content"] = newContent
     response["filename"] = newFilename
     response["lastModified"] = dateToMilliseconds(dateMod)
     response["name"] = name
-    
+
     if metadata["description"] != nil {
         response["description"] = metadata["description"]![0]
     }
@@ -921,7 +922,7 @@ func trashFile(_ filename: String) -> Bool {
 
 func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
     let directory = getRequireLocation().appendingPathComponent(filename)
-    
+
     // if file requires no resource but directory exists, trash it
     if resources.count < 1 && FileManager.default.fileExists(atPath: directory.path) {
         do {
@@ -932,7 +933,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
             return true
         }
     }
-    
+
     for resourceURLString in resources {
         // skip invalid urls or urls pointing to files of different types
         if let url = URL(string: resourceURLString), url.path.hasSuffix(fileType) {
@@ -945,7 +946,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 continue
             }
-            
+
             // get remote file contents, synchronously
             let semaphore = DispatchSemaphore(value: 0)
             var task: URLSessionDataTask?
@@ -962,25 +963,25 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
             if semaphore.wait(timeout: .now() + 10) == .timedOut {
                 task?.cancel()
             }
-            
+
             // if we made it to this point and contents is still an empty string, something went wrong with the request
             if contents.count < 1 {
                 continue
             }
-            
+
             // check if file specific folder exists at requires directory
             if !FileManager.default.fileExists(atPath: directory.path) {
                 guard ((try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)) != nil) else {
                     return false
                 }
             }
-            
+
             guard ((try? contents.write(to: fileURL, atomically: false, encoding: .utf8)) != nil) else {
                 return false
             }
         }
     }
-    
+
     // remove unused files, if any exist
     var all = [String]()
     if let allResourceFilenamesSaved = try? FileManager.default.contentsOfDirectory(atPath: directory.path) {
@@ -996,7 +997,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
     if !updateManifestRequires(filename, all) {
         return false
     }
-    
+
     return true
 }
 
@@ -1023,7 +1024,7 @@ func getMatchedFiles(_ url: String) -> [String]? {
     if active != "true" {
         return matchedFilenames
     }
-    
+
     // url matches a pattern in blacklist
     // essentially all scripts are disabled, there are 0 active scripts for url
     for pattern in manifestKeys.blacklist {
@@ -1031,10 +1032,10 @@ func getMatchedFiles(_ url: String) -> [String]? {
             return matchedFilenames
         }
     }
-    
+
     // add disabled script filenames to excludePatterns
     excludedFilenames.append(contentsOf: manifestKeys.disabled)
-    
+
     // loop through exclude patterns and see if any match against page url
     for pattern in excludePatterns {
         // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
@@ -1050,7 +1051,7 @@ func getMatchedFiles(_ url: String) -> [String]? {
             }
         }
     }
-    
+
     // loop through all match patterns from manifest to see if they match against the current page url
     for pattern in matchPatterns {
         if patternMatch(url, pattern) {
@@ -1066,7 +1067,7 @@ func getMatchedFiles(_ url: String) -> [String]? {
                     matchedFilenames.append(filename)
                 }
             }
-            
+
         }
     }
     return matchedFilenames
@@ -1088,7 +1089,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     var page_docStart = [String: [String: String]]()
     var page_docEnd = [String: [String: String]]()
     var page_docIdle = [String: [String: String]]()
-    
+
     for filename in filenames {
         guard
             let saveLocation = getSaveLocation(),
@@ -1102,16 +1103,16 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         }
         // can force unwrap b/c getFileContentsParsed ensures metadata exists
         let metadata = contents["metadata"] as! [String: [String]]
-        
+
         // if metadata has noframes option and the url is not the top window, don't load
         if (metadata["noframes"] != nil && !isTop) {
             continue
         }
-        
+
         // normalize weight
         var weight = metadata["weight"]?[0] ?? "1"
         weight = normalizeWeight(weight)
-        
+
         // attempt to get require resource from disk
         // if required resource is inaccessible, log error and continue
         if let required = metadata["require"] {
@@ -1131,7 +1132,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         } else if type == "js" {
             var injectInto = metadata["inject-into"]?[0] ?? "page"
             var runAt = metadata["run-at"]?[0] ?? "document-end"
-            
+
             let injectVals = ["auto", "content", "page"]
             let runAtVals = ["document-start", "document-end", "document-idle"]
             // if inject/runAt values are not valid, use default
@@ -1141,7 +1142,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             if !runAtVals.contains(runAt) {
                 runAt = "document-end"
             }
-            
+
             let data = ["code": code, "weight": weight]
             // add file data to appropiate dict
             if injectInto == "auto" && runAt == "document-start" {
@@ -1165,7 +1166,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             }
         }
     }
-    
+
     // construct the js specific dictionaries
     jsFiles["auto"]!["document-start"] = auto_docStart
     jsFiles["auto"]!["document-end"] = auto_docEnd
@@ -1176,11 +1177,11 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     jsFiles["page"]!["document-start"] = page_docStart
     jsFiles["page"]!["document-end"] = page_docEnd
     jsFiles["page"]!["document-idle"] = page_docIdle
-    
+
     // construct the returned dictionary
     allFiles["css"] = cssFiles
     allFiles["js"] = jsFiles
-    
+
     return allFiles
 }
 

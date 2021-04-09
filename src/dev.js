@@ -7,6 +7,7 @@ const delay = 500;
 
 const defaultSettings = {
     active: "true",
+    autoCloseBrackets: "true",
     autoHint: "true",
     blacklist: ["domain123", "domainXYZ"],
     descriptions: "true",
