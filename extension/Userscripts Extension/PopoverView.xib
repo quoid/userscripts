@@ -19,7 +19,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Sa8-tc-iJb">
-                    <rect key="frame" x="74" y="52" width="121" height="16"/>
+                    <rect key="frame" x="74" y="47" width="121" height="16"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" lineBreakMode="clipping" title="Userscripts Safari" id="cYL-mb-O4b">
                         <font key="font" textStyle="headline" name=".SFNS-Bold"/>
@@ -33,7 +33,7 @@
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSApplicationIcon" id="gfd-Dz-dse"/>
                 </imageView>
                 <button verticalHuggingPriority="750" id="oCL-Rm-ap1">
-                    <rect key="frame" x="75" y="29" width="118" height="16"/>
+                    <rect key="frame" x="75" y="24" width="118" height="16"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Enable Injection" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="Qbh-bC-vWk">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
