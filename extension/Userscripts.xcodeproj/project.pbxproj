@@ -136,12 +136,12 @@
 				4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */,
 				4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */,
 				4AED8EC723F0FE8A0059259E /* Functions.swift */,
+				4A52196D25F47AE10084FA51 /* PopoverView.swift */,
+				4A52196E25F47AE10084FA51 /* PopoverView.xib */,
 				4AB37AD823DA73E500413E1E /* index.html */,
 				4A57BA0E227235CE008A9763 /* Info.plist */,
 				4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */,
 				4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */,
-				4A52196D25F47AE10084FA51 /* PopoverView.swift */,
-				4A52196E25F47AE10084FA51 /* PopoverView.xib */,
 			);
 			path = "Userscripts Extension";
 			sourceTree = "<group>";
