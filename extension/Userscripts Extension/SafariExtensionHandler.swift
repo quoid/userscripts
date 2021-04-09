@@ -10,7 +10,13 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         var responseName:String = ""
         var responseData:Any = ""
         var responseError = ""
+        
         switch messageName {
+        case "RESP_PAGEFRAMES":
+            if let frames = userInfo?["data"] as? [[String: Any]]  {
+                updateBadgeCount(frames)
+            }
+            return
         case "REQ_INIT_DATA":
             responseName = "RESP_INIT_DATA"
             if let initData = getInitData() {
@@ -111,13 +117,6 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     
     override func toolbarItemClicked(in window: SFSafariWindow) {
         // This method will be called when your toolbar item is clicked.
-        NSLog("The extension's toolbar item was clicked")
-//        SFSafariExtension.getBaseURI { baseURI in
-//            guard let baseURI = baseURI else { return }
-//            window.openTab(with: baseURI.appendingPathComponent("index.html"), makeActiveIfPossible: true) { (tab) in
-//                //print(baseURI)
-//            }
-//        }
     }
     
     override func validateToolbarItem(in window: SFSafariWindow, validationHandler: @escaping ((Bool, String) -> Void)) {
@@ -125,18 +124,8 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         window.getActiveTab { tab in
             tab?.getActivePage { page in
                 page?.getPropertiesWithCompletionHandler { props in
-                    if let  url = props?.url {
-                        guard
-                            let matched = getMatchedFiles(url.absoluteString),
-                            let manifestKeys = getManifestKeys(),
-                            let active = manifestKeys.settings["active"],
-                            let showCount = manifestKeys.settings["showCount"]
-                        else { return }
-                        if matched.count > 0 && active == "true" && showCount == "true" {
-                            window.getToolbarItem { toolbaritem in
-                                toolbaritem?.setBadgeText(String(matched.count))
-                            }
-                        }
+                    if props?.url != nil {
+                        page?.dispatchMessageToScript(withName: "REQ_PAGEFRAMES", userInfo: [:])
                     }
                 }
             }

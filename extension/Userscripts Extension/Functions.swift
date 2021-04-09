@@ -1183,3 +1183,33 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     
     return allFiles
 }
+
+// popover
+func updateBadgeCount(_ frames: [[String : Any]]) {
+    guard
+        let manifestKeys = getManifestKeys(),
+        let active = manifestKeys.settings["active"],
+        let showCount = manifestKeys.settings["showCount"]
+    else {
+        err("failed on update badge count")
+        return
+    }
+    var urls = [String]()
+    var matched = [String]()
+    for frame in frames {
+        guard let url = frame["url"] as? String else { return }
+        urls.append(url)
+    }
+    for url in urls {
+        guard let m = getMatchedFiles(url) else { return }
+        // add values not already present in the matched array
+        matched.append(contentsOf: m.filter{!matched.contains($0)})
+    }
+    if matched.count > 0 && active == "true" && showCount == "true" {
+        SFSafariApplication.getActiveWindow { window in
+            window?.getToolbarItem { toolbarItem in
+                toolbarItem?.setBadgeText(String(matched.count))
+            }
+        }
+    }
+}
