@@ -102,10 +102,29 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
             } else {
                 responseError = "failed to get code"
             }
+        case "REQ_GET_REMOTE_FILE":
+            if
+                let data = userInfo,
+                let url = data["url"] as? String,
+                getRemoteFile(url, { code, error in
+                    page.dispatchMessageToScript(
+                        withName: "RESP_GET_REMOTE_FILE",
+                        userInfo: [ "data": [ "url": url, "code": code ], "error": error?.localizedDescription ?? "" ]
+                    )
+                })
+            {
+                // Started
+            } else {
+                responseName = "RESP_GET_REMOTE_FILE"
+                responseData = [ "url": userInfo?["url"] ]
+                responseError = "failed to download"
+            }
         default:
             err("message from js has no handler")
         }
-        page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+        if !responseName.isEmpty {
+            page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+        }
     }
     
     override func toolbarItemClicked(in window: SFSafariWindow) {
