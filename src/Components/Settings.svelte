@@ -73,7 +73,7 @@
         box-shadow: var(--box-shadow);
         max-height: 90%;
         overflow-y: auto;
-        width: 40%;
+        width: 32rem;
     }
 
     .modal__title {
@@ -91,15 +91,17 @@
         flex-grow: 1;
     }
 
-    .modal__title--borderless {
-        border: none;
-    }
-
     .modal__row {
         align-items: center;
         border-bottom: 1px solid var(--color-black);
         display: flex;
+        padding: 1rem 1rem 1rem 0;
+        margin-left: 1rem;
+    }
+
+    .modal__row:last-child {
         padding: 1rem;
+        margin-left: 0;
     }
 
     .modal__row--wrap {
@@ -108,6 +110,10 @@
 
     .modal__row div {
         flex-grow: 1;
+    }
+
+    .modal__row div.red {
+        color: var(--color-red);
     }
 
     .saveLocation {
@@ -154,8 +160,7 @@
     }
 
     p {
-        margin: 0 1rem;
-        padding-bottom: 1.5rem;
+        padding: 1rem;
     }
 </style>
 
@@ -176,6 +181,13 @@
                 <IconButton icon={iconClose} on:click={() => state.remove("settings")}/>
             </div>
             <div class="modal__row">
+                <div>Auto Close Brackets</div>
+                <Toggle
+                    checked={$settings.autoCloseBrackets}
+                    on:click={() => update("autoCloseBrackets", !$settings.autoCloseBrackets)}
+                />
+            </div>
+            <div class="modal__row">
                 <div>Auto Hint</div>
                 <Toggle
                     checked={$settings.autoHint}
@@ -190,17 +202,17 @@
                 />
             </div>
             <div class="modal__row">
-                <div>Show Invisibles</div>
-                <Toggle
-                    checked={$settings.showInvisibles}
-                    on:click={() => update("showInvisibles", !$settings.showInvisibles)}
-                />
-            </div>
-            <div class="modal__row">
                 <div>Javascript Linter</div>
                 <Toggle
                     checked={$settings.lint}
                     on:click={() => update("lint", !$settings.lint)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Show Invisibles</div>
+                <Toggle
+                    checked={$settings.showInvisibles}
+                    on:click={() => update("showInvisibles", !$settings.showInvisibles)}
                 />
             </div>
             <div class="modal__row">
@@ -219,10 +231,17 @@
                 <div>General Settings</div>
             </div>
             <div class="modal__row">
-                <div>Log Activity</div>
+                <div class:red={!$settings.active}>Enable Injection</div>
                 <Toggle
-                    checked={$settings.log}
-                    on:click={() => update("log", !$settings.log)}
+                    checked={$settings.active}
+                    on:click={() => update("active", !$settings.active)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Show Toolbar Count</div>
+                <Toggle
+                    checked={$settings.showCount}
+                    on:click={() => update("showCount", !$settings.showCount)}
                 />
             </div>
             <div class="modal__row">
@@ -253,7 +272,7 @@
             </div>
         </div>
         <div class="modal__section">
-            <div class="modal__title modal__title--borderless">Information</div>
+            <div class="modal__title">Information</div>
             <p>Version {$settings.version}<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support-development">supporting the project</a>.
         </div>
     </div>

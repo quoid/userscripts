@@ -10,7 +10,13 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         var responseName:String = ""
         var responseData:Any = ""
         var responseError = ""
+        
         switch messageName {
+        case "RESP_PAGEFRAMES":
+            if let frames = userInfo?["data"] as? [[String: Any]]  {
+                updateBadgeCount(frames)
+            }
+            return
         case "REQ_INIT_DATA":
             responseName = "RESP_INIT_DATA"
             if let initData = getInitData() {
@@ -96,7 +102,8 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 let url = data["url"] as? String,
                 let isTop = data["top"] as? Bool,
                 let id = data["id"] as? String,
-                let code = getCode(url, isTop)
+                let matched = getMatchedFiles(url),
+                let code = getCode(matched, isTop)
             {
                 responseData = ["code": code, "id": id]
             } else {
@@ -129,17 +136,23 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
     
     override func toolbarItemClicked(in window: SFSafariWindow) {
         // This method will be called when your toolbar item is clicked.
-        NSLog("The extension's toolbar item was clicked")
-        SFSafariExtension.getBaseURI { baseURI in
-            guard let baseURI = baseURI else { return }
-            window.openTab(with: baseURI.appendingPathComponent("index.html"), makeActiveIfPossible: true) { (tab) in
-                //print(baseURI)
-            }
-        }
     }
     
     override func validateToolbarItem(in window: SFSafariWindow, validationHandler: @escaping ((Bool, String) -> Void)) {
         validationHandler(true, "")
+        window.getActiveTab { tab in
+            tab?.getActivePage { page in
+                page?.getPropertiesWithCompletionHandler { props in
+                    if props?.url != nil {
+                        page?.dispatchMessageToScript(withName: "REQ_PAGEFRAMES", userInfo: [:])
+                    }
+                }
+            }
+        }
+    }
+    
+    override func popoverViewController() -> SFSafariExtensionViewController {
+        return PopoverView.shared
     }
 
 }

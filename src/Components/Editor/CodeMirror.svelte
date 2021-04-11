@@ -54,6 +54,7 @@
 
     // update settings when changed
     $: if (instance) {
+        instance.setOption("autoCloseBrackets", $settings.autoCloseBrackets);
         instance.setOption("showInvisibles", $settings.showInvisibles);
         instance.setOption("tabSize", parseInt($settings.tabSize));
         instance.setOption("indentUnit", parseInt($settings.tabSize));
@@ -101,7 +102,7 @@
         // create codemirror instance
         instance = CodeMirror.fromTextArea(textarea, {
             mode:  "javascript",
-            autoCloseBrackets: true,
+            autoCloseBrackets: $settings.autoCloseBrackets,
             continueComments: false,
             foldGutter: true,
             lineNumbers: true,

@@ -197,6 +197,7 @@
     <div class="sidebar__header">
         <div class="sidebar__filter"><Filter/></div>
         <IconButton
+            notification={!$settings.active}
             icon={iconSettings}
             on:click={() => state.add("settings")}
             title={"Open settings"}

@@ -135,6 +135,18 @@ function cspFallback(e) {
     }
 }
 
+function getCurrentPageFrames() {
+    let frames = [{url: window.location.href, top: true}];
+    const iframes = document.querySelectorAll("iframe");
+    if (iframes) {
+        iframes.forEach(iframe => {
+            const src = iframe.src || iframe.getAttribute("data-src");
+            src && frames.push({url: src, top: false});
+        });
+    }
+    return frames;
+}
+
 function handleMessage(e) {
     // the only message currently sent to the content script
     if (e.name === "RESP_USERSCRIPTS") {
@@ -148,6 +160,9 @@ function handleMessage(e) {
                 parseCode(data);
             }
         }
+    } else if (e.name === "REQ_PAGEFRAMES") {
+        const pageUrls = getCurrentPageFrames();
+        safari.extension.dispatchMessage("RESP_PAGEFRAMES", {data: pageUrls});
     }
 }
 
