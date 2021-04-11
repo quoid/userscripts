@@ -29,24 +29,24 @@ export function sortBy(array, order) {
 
 export function getRemoteFile(url, signal) {
     return new Promise(resolve => {
-        const callback = (e) => {
-            if (e.name !== 'RESP_GET_REMOTE_FILE') return;
+        const callback = e => {
+            if (e.name !== "RESP_GET_REMOTE_FILE") return;
             const message = e.message;
             const data = message.data;
             if (data.url !== url) return;
-            safari.self.removeEventListener('message', callback);
+            safari.self.removeEventListener("message", callback);
             const response = { };
             if (message.error) {
                 response.error = message.error;
             } else if (message.data.code) {
                 response.contents = message.data.code;
             } else {
-                response.error = 'Remote url bad or empty response!';
+                response.error = "Remote url bad or empty response!";
             }
             resolve(response);
         };
         safari.self.addEventListener("message", callback);
-        const data = { url: url };
+        const data = {url: url};
         safari.extension.dispatchMessage("REQ_GET_REMOTE_FILE", data);
     });
 }

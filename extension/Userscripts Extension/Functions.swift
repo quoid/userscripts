@@ -920,6 +920,26 @@ func trashFile(_ filename: String) -> Bool {
     return true
 }
 
+func getRemoteFile(_ url: String, _ callback: @escaping (String, Error?) -> Void) -> Bool {
+    guard let solidURL = URL(string: url) else {
+        return false
+    }
+    let request = URLRequest(url: solidURL, cachePolicy: .reloadIgnoringLocalCacheData)
+    URLSession.shared.dataTask(with: request) { data, _, error in
+        guard
+            let solidData = data,
+            let solidCode = String(data: solidData, encoding: .utf8)
+        else {
+            callback("", error)
+            return
+        }
+        callback(solidCode, nil)
+        return
+    }
+    .resume()
+    return true
+}
+
 func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
     let directory = getRequireLocation().appendingPathComponent(filename)
 
@@ -1183,26 +1203,6 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     allFiles["js"] = jsFiles
 
     return allFiles
-}
-
-func getRemoteFile(_ url: String, _ callback: @escaping (String, Error?) -> Void) -> Bool {
-    guard let solidURL = URL(string: url) else {
-        return false
-    }
-    let request = URLRequest(url: solidURL, cachePolicy: .reloadIgnoringLocalCacheData)
-    URLSession.shared.dataTask(with: request) { data, _, error in
-        guard
-            let solidData = data,
-            let solidCode = String(data: solidData, encoding: .utf8)
-        else {
-            callback("", error)
-            return
-        }
-        callback(solidCode, nil)
-        return
-    }
-    .resume()
-    return true
 }
 
 // popover
