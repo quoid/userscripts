@@ -110,9 +110,7 @@
         state.add("fetching");
         // get response from valid url
         const response = await getRemoteFile(url);
-        if (response.error) {
-            log.add(response.error, "error", true);
-        } else if (response.contents) {
+        if (response.contents) {
             const type = url.substring(url.lastIndexOf(".") + 1);
             newItem(type, response.contents, url);
         }

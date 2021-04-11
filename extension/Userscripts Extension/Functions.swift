@@ -924,7 +924,7 @@ func getRemoteFile(_ url: String, _ callback: @escaping (String, Error?) -> Void
     guard let solidURL = URL(string: url) else {
         return false
     }
-    let request = URLRequest(url: solidURL, cachePolicy: .reloadIgnoringLocalCacheData)
+    let request = URLRequest(url: solidURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
     URLSession.shared.dataTask(with: request) { data, _, error in
         guard
             let solidData = data,

@@ -19,8 +19,6 @@
     let discardDisabled = true;
     let saveDisabled = true;
 
-    let controller;
-
     $: disabled = !$state.includes("ready");
 
     $: activeItem = $items.find(a => a.active);
@@ -104,13 +102,10 @@
         if (!validateURL(updateURL)) return log.add(messages[4], "error", true);
         if (!validateURL(downloadURL)) return log.add(messages[5], "error", true);
         // start fetching remote content
-        controller = new AbortController();
-        const signal = controller.signal;
         state.add("updating");
-        const a = await getRemoteFile(updateURL, signal);
+        const a = await getRemoteFile(updateURL);
         if (a.error) {
-            state.remove("updating");
-            return log.add(messages[6], "error", true);
+            return state.remove("updating");
         }
         let content = a.contents;
         const remoteParsed = parse(a.contents);
@@ -124,10 +119,9 @@
         }
         if (updateURL != downloadURL) {
             // download location differs form update check location
-            const b = await getRemoteFile(downloadURL, signal);
+            const b = await getRemoteFile(downloadURL);
             if (b.error) {
                 state.remove("updating");
-                return log.add(messages[9], "error", true);
             }
             content = b.contents;
         }
@@ -138,8 +132,7 @@
     }
 
     function abort() {
-        controller.abort();
-        log.add("Update aborted!", "info", true);
+        safari.extension.dispatchMessage("REQ_CANCEL_ALL_REMOTE_REQUESTS");
         state.remove("updating");
     }
 
@@ -294,7 +287,7 @@
                 {:else if $state.includes("trashing")}
                     （◞‸◟）
                 {:else if $state.includes("updating")}
-                    Updating code<!--, <span class="link" on:click={abort}>cancel request</span>-->
+                    Updating code, <span class="link" on:click={abort}>cancel request</span>
                 {:else if remote}
                     Code was <span class="info" title={remote}>remotely fetched</span>, check carefully before saving!
                 {:else if temp}

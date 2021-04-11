@@ -27,7 +27,7 @@ export function sortBy(array, order) {
     return array;
 }
 
-export function getRemoteFile(url, signal) {
+export function getRemoteFile(url) {
     return new Promise(resolve => {
         const callback = e => {
             if (e.name !== "RESP_GET_REMOTE_FILE") return;
@@ -35,7 +35,7 @@ export function getRemoteFile(url, signal) {
             const data = message.data;
             if (data.url !== url) return;
             safari.self.removeEventListener("message", callback);
-            const response = { };
+            const response = {};
             if (message.error) {
                 response.error = message.error;
             } else if (message.data.code) {

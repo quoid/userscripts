@@ -113,7 +113,7 @@ function handleMessage(e) {
             break;
         }
         case "RESP_GET_REMOTE_FILE": {
-            // Should be handled by callback in getRemoteFile()
+            // handled by callback in getRemoteFile()
             break;
         }
         default: {

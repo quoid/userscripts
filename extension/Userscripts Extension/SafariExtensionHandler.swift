@@ -126,6 +126,12 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 responseData = [ "url": userInfo?["url"] ]
                 responseError = "failed to download"
             }
+        case "REQ_CANCEL_ALL_REMOTE_REQUESTS":
+            URLSession.shared.getAllTasks { tasks in
+                for task in tasks {
+                    task.cancel()
+                }
+            }
         default:
             err("message from js has no handler")
         }
