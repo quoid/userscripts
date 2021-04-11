@@ -1185,6 +1185,26 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     return allFiles
 }
 
+func getRemoteFile(_ url: String, _ callback: @escaping (String, Error?) -> Void) -> Bool {
+    guard let solidURL = URL(string: url) else {
+        return false
+    }
+    let request = URLRequest(url: solidURL, cachePolicy: .reloadIgnoringLocalCacheData)
+    URLSession.shared.dataTask(with: request) { data, _, error in
+        guard
+            let solidData = data,
+            let solidCode = String(data: solidData, encoding: .utf8)
+        else {
+            callback("", error)
+            return
+        }
+        callback(solidCode, nil)
+        return
+    }
+    .resume()
+    return true
+}
+
 // popover
 func updateBadgeCount(_ frames: [[String : Any]]) {
     guard

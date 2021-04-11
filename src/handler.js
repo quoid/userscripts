@@ -112,6 +112,10 @@ function handleMessage(e) {
             // in the event of a failure from one of the above, log error if needed and nothing else
             break;
         }
+        case "RESP_GET_REMOTE_FILE": {
+            // SHould be handled by callback in getRemoteFile()
+            break;
+        }
         default: {
             console.error(`message from swift has no handler - ${name}`);
         }
