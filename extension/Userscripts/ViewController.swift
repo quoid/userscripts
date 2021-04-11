@@ -5,13 +5,16 @@ class ViewController: NSViewController {
 
     @IBOutlet var appNameLabel: NSTextField!
     @IBOutlet var saveLocationLabel: NSTextField!
+    @IBOutlet weak var enabledText: NSTextField!
+    @IBOutlet weak var enabledIcon: NSView!
+    
     let extensionBundleIdentifier = "com.userscripts.macos.Userscripts-Extension"
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        self.appNameLabel.stringValue = "Userscripts Safari Version \(appVersion) extension is currently off. You can turn it on in Safari Extensions preferences. You can enable it by clicking the button below"
+        self.appNameLabel.stringValue = "Userscripts Safari Version \(appVersion)"
         // seems like a lot of work to id path for another target's documents directory
         let hostID = Bundle.main.bundleIdentifier!
         let extensionID = "com.userscripts.macos.Userscripts-Extension"
@@ -41,7 +44,8 @@ class ViewController: NSViewController {
             
             DispatchQueue.main.async {
                 if (state.isEnabled) {
-                    self.appNameLabel.stringValue = "Userscripts Safari extension is currently on."
+                    self.enabledIcon.layer?.backgroundColor = NSColor.green.cgColor
+                    self.enabledText.stringValue = "Safari Extension Enabled"
                 }
             }
         }
@@ -85,4 +89,5 @@ class ViewController: NSViewController {
             }
         }
     }
+    
 }

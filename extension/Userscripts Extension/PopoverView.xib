@@ -44,7 +44,7 @@
                     </connections>
                 </button>
                 <button verticalHuggingPriority="750" id="uco-dC-9ZY">
-                    <rect key="frame" x="241" y="41" width="65" height="31"/>
+                    <rect key="frame" x="241" y="38" width="65" height="31"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Open" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="F5L-Ew-yB9">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
