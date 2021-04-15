@@ -160,7 +160,7 @@ function handleMessage(e) {
                 parseCode(data);
             }
         }
-    } else if (e.name === "REQ_PAGEFRAMES") {
+    } else if (e.name === "REQ_PAGEFRAMES" && isTop) {
         const pageUrls = getCurrentPageFrames();
         safari.extension.dispatchMessage("RESP_PAGEFRAMES", {data: pageUrls});
     }
