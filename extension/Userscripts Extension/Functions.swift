@@ -1150,7 +1150,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         if type == "css" {
             cssFiles[filename] = ["code": code, "weight": weight]
         } else if type == "js" {
-            var injectInto = metadata["inject-into"]?[0] ?? "page"
+            var injectInto = metadata["inject-into"]?[0] ?? "auto"
             var runAt = metadata["run-at"]?[0] ?? "document-end"
 
             let injectVals = ["auto", "content", "page"]
