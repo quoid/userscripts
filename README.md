@@ -82,7 +82,7 @@ If you encounter an issue with a specific website, *please provide the website a
 10. **Open button** - opens the extension browser page
 11. **Enable Injection toggle** - turns on/off page script inject (on/off switch)
 
-## Userscript Metadata
+## Metadata
 
 Userscripts Safari currently supports the following userscript metadata:
 
