@@ -4,7 +4,6 @@ An open-source userscript editor for Safari.
 
 ![Userscripts Safari](/etc/screenshot.png)
 
-
 ## Table of Contents
 * [Installation](#installation)
 * [Getting Help](#getting-help)
@@ -136,7 +135,6 @@ Once the host app is open, you will see a button called "Change save location". 
 - Currently, when changing the save location, the app does not copy over userscripts from the previous save/load directory
 - After a new save location is selected, if you rename or move that selected folder, the extension will continue to load/save to that location - the only way to remove the “link” is by trashing the folder or selecting a new save location
 
-
 ## FAQs
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
@@ -156,14 +154,14 @@ Once the host app is open, you will see a button called "Change save location". 
 ## Contributing
 Code level contributions are welcome. I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
 
-Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance. 
+Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
+
+Please ensure your contributions align with the project's license before committing anything.
 
 ## Support
-There are a few ways you can support the development of this project. The quickest and easiest way is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see it improve in the future. Seeing these reviews let me now I am doing something right, or wrong, and motivates me to continue working on the project.
+The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see it improve in the future. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
 
-Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it's hard for me to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
-
-Please ensure your contributions align with the project's license before committing any contributions.
+Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
 
 ## Privacy Policy
 Userscripts does not collect any data from its users nor monitor activities or actions you perform within the application and extension. This means everything that you do with the application and extension is private to you and is never shared with the developers or third parties. Since there is no data collection, there is no data retention of any kind.
@@ -171,6 +169,3 @@ Userscripts does not collect any data from its users nor monitor activities or a
 ## License
 
 Licensed under the [GNU General Public License v3.0](/LICENSE) license for all open source applications. A commercial license is required for all other applications.
-
-
-
