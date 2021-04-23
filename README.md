@@ -4,9 +4,27 @@ An open-source userscript editor for Safari.
 
 ![Userscripts Safari](/etc/screenshot.png)
 
+
+## Table of Contents
+* [Installation](#installation)
+* [Getting Help](#getting-help)
+* [UI Overview](#ui-overview)
+* [Save Location](#save-location)
+* [FAQs](#faqs)
+* [Contributing](#contributing)
+* [Support](#support)
+* [Privacy Policy](#privacy-policy)
+* [License](#license)
+
 ## Installation
 
 Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id1463298887) or clone the project and build with Xcode. Alternatively, you can download the most current version for the [releases page](https://github.com/quoid/userscripts/releases).
+
+## Getting Help
+
+If you encounter a problem or need some assistance, please open an issue and *provide some system specs*. The specs requested are `macOS version`, `Safari version` and `Userscripts Safari version`. You can find the extension version by opening the contain app or by viewing the "Information" section within the settings modal of the extension's browser page.
+
+If you encounter an issue with a specific website, *please provide the website address and the userscript that is presenting the issue*. It can be a slimmed down version of the userscript that can demonstrate the issue.
 
 ## UI Overview
 
@@ -35,20 +53,26 @@ Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id146329
     - `Save` - while editing, saves all changes you've made to a userscript
         - `Command + S` is the keyboard shortcut for the action
 
----
-
-![Userscripts Safari Settings Window](/etc/ui02.png)
+![Userscripts Safari Settings Window](/etc/settings.png)
 
 ### Settings:
+- **Auto Close Brackets** - toggles on/off auto closing of brackets in the editor
+    - this affects the following characters: `() [] {} "" ''`
 - **Auto Hint** - automatically shows completion hints while editing
 - **Hide Descriptions** - hides the item descriptions in the sidebar
 - **Show Invisibles** - toggles the display of invisible characters in the editor
 - **Javascript Linter** - toggles basic Javascript linting within the editor
 - **Tab Size** - the number of spaces a tab is equal to while editing, obviously defaults to `4` because using `2` spaces is absolute insanity
-- **Log Activity** - shows some extra messages in the browser console when certain events take place
+- **Enable Injection** - toggle on/off script injection for the pages you visit (this is the on/off switch)
+- **Show Toolbar Count** - displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on
 - **Save Location** - where your file are currently located and being saved to (click the blue text to open location)
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
 - **Global Blacklist** - all domain patterns listed here will be *globally* ignored for script injection
+
+![Userscripts Safari Settings Window](/etc/popover.png)
+
+10. **Open button** - opens the extension browser page
+11. **Enable Injection toggle** - turns on/off page script inject (on/off switch)
 
 ## Userscript Metadata
 
@@ -68,6 +92,7 @@ Userscripts Safari currently supports the following userscript metadata:
     - allows the user to choose the injection timing
     - document-start, document-end (default), document-idle
     - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#run-at)
+    - **JS Only**
 - `@weight`
     - allows the user to further adjust script injection timing
     - can be used to ensure one script injects before another
@@ -128,12 +153,17 @@ Once the host app is open, you will see a button called "Change save location". 
 >
 > If you move files from the require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
 
-## Support Development
-Currently, there are a few ways you can support the development of this extension. The first way is simple; if you enjoy using the extension, consider [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887). Seeing the reviews motivates me to continue working on the development.
+## Contributing
+Code level contributions are welcome. I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
 
-Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it's hard for me to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming versions, but also give me the opportunity to elicit feedback from real users.
+Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance. 
 
-Last, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance. Outside of those issues, it is fair to assume outstanding issues are already being worked on and new features are being actively developed.
+## Support
+There are a few ways you can support the development of this project. The quickest and easiest way is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see it improve in the future. Seeing these reviews let me now I am doing something right, or wrong, and motivates me to continue working on the project.
+
+Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it's hard for me to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
+
+Please ensure your contributions align with the project's license before committing any contributions.
 
 ## Privacy Policy
 Userscripts does not collect any data from its users nor monitor activities or actions you perform within the application and extension. This means everything that you do with the application and extension is private to you and is never shared with the developers or third parties. Since there is no data collection, there is no data retention of any kind.
