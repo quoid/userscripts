@@ -8,6 +8,9 @@ An open-source userscript editor for Safari.
 * [Installation](#installation)
 * [Getting Help](#getting-help)
 * [UI Overview](#ui-overview)
+    * [Browser Page](#browser-page)
+    * [Settings Modal](#settings-modal)
+    * [Popover](#popover)
 * [Save Location](#save-location)
 * [FAQs](#faqs)
 * [Contributing](#contributing)
@@ -29,6 +32,7 @@ If you encounter an issue with a specific website, *please provide the website a
 
 ![Userscripts Safari Main Application Window](/etc/ui01.png)
 
+### Browser Page:
 1. **Extension button** - click this button to open the extension interface
 1. **Filter bar** - use this input to filter items in the sidebar, by *name*
 1. **Sort button** - changes the order of the items in the sidebar by name or modified time
@@ -54,7 +58,7 @@ If you encounter an issue with a specific website, *please provide the website a
 
 ![Userscripts Safari Settings Window](/etc/settings.png)
 
-### Settings:
+### Settings Modal:
 - **Auto Close Brackets** - toggles on/off auto closing of brackets in the editor
     - this affects the following characters: `() [] {} "" ''`
 - **Auto Hint** - automatically shows completion hints while editing
@@ -70,6 +74,7 @@ If you encounter an issue with a specific website, *please provide the website a
 
 ![Userscripts Safari Settings Window](/etc/popover.png)
 
+### Popover:
 10. **Open button** - opens the extension browser page
 11. **Enable Injection toggle** - turns on/off page script inject (on/off switch)
 
