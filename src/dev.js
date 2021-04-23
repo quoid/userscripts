@@ -6,16 +6,19 @@ import {parse} from "./utils";
 const delay = 500;
 
 const defaultSettings = {
+    active: "true",
+    autoCloseBrackets: "true",
     autoHint: "true",
     blacklist: ["domain123", "domainXYZ"],
     descriptions: "true",
     lint: "false",
-    log: "true",
+    log: "false",
     saveLocation: "/Users/UserName/Library/Containers/ParentFolder/SubFolder/",
     showInvisibles: "true",
+    showCount: "false",
     sortOrder: "lastModifiedDesc",
     tabSize: "4",
-    version: "3.0.2"
+    version: "3.1.0"
 };
 
 // example file contents

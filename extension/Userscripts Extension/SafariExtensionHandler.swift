@@ -10,7 +10,13 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
         var responseName:String = ""
         var responseData:Any = ""
         var responseError = ""
+        
         switch messageName {
+        case "RESP_PAGEFRAMES":
+            if let frames = userInfo?["data"] as? [[String: Any]]  {
+                updateBadgeCount(frames)
+            }
+            return
         case "REQ_INIT_DATA":
             responseName = "RESP_INIT_DATA"
             if let initData = getInitData() {
@@ -96,31 +102,63 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
                 let url = data["url"] as? String,
                 let isTop = data["top"] as? Bool,
                 let id = data["id"] as? String,
-                let code = getCode(url, isTop)
+                let matched = getMatchedFiles(url),
+                let code = getCode(matched, isTop)
             {
                 responseData = ["code": code, "id": id]
             } else {
                 responseError = "failed to get code"
             }
+        case "REQ_GET_REMOTE_FILE":
+            if
+                let data = userInfo,
+                let url = data["url"] as? String,
+                getRemoteFile(url, { code, error in
+                    page.dispatchMessageToScript(
+                        withName: "RESP_GET_REMOTE_FILE",
+                        userInfo: [ "data": [ "url": url, "code": code ], "error": error?.localizedDescription ?? "" ]
+                    )
+                })
+            {
+                // Started
+            } else {
+                responseName = "RESP_GET_REMOTE_FILE"
+                responseData = [ "url": userInfo?["url"] ]
+                responseError = "failed to download"
+            }
+        case "REQ_CANCEL_ALL_REMOTE_REQUESTS":
+            URLSession.shared.getAllTasks { tasks in
+                for task in tasks {
+                    task.cancel()
+                }
+            }
         default:
             err("message from js has no handler")
         }
-        page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+        if !responseName.isEmpty {
+            page.dispatchMessageToScript(withName: responseName, userInfo: ["data": responseData, "error": responseError])
+        }
     }
     
     override func toolbarItemClicked(in window: SFSafariWindow) {
         // This method will be called when your toolbar item is clicked.
-        NSLog("The extension's toolbar item was clicked")
-        SFSafariExtension.getBaseURI { baseURI in
-            guard let baseURI = baseURI else { return }
-            window.openTab(with: baseURI.appendingPathComponent("index.html"), makeActiveIfPossible: true) { (tab) in
-                //print(baseURI)
-            }
-        }
     }
     
     override func validateToolbarItem(in window: SFSafariWindow, validationHandler: @escaping ((Bool, String) -> Void)) {
         validationHandler(true, "")
+        window.getActiveTab { tab in
+            tab?.getActivePage { page in
+                page?.getPropertiesWithCompletionHandler { props in
+                    if props?.url != nil {
+                        page?.dispatchMessageToScript(withName: "REQ_PAGEFRAMES", userInfo: [:])
+                    }
+                }
+            }
+        }
+    }
+    
+    override func popoverViewController() -> SFSafariExtensionViewController {
+        return PopoverView.shared
     }
 
 }

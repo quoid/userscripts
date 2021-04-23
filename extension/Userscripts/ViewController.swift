@@ -3,14 +3,17 @@ import SafariServices.SFSafariApplication
 
 class ViewController: NSViewController {
 
-    @IBOutlet var appNameLabel: NSTextField!
-    @IBOutlet var saveLocationLabel: NSTextField!
+    @IBOutlet var appName: NSTextField!
+    @IBOutlet var saveLocation: NSTextField!
+    @IBOutlet weak var enabledText: NSTextField!
+    @IBOutlet weak var enabledIcon: NSView!
     
+    let extensionBundleIdentifier = "com.userscripts.macos.Userscripts-Extension"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        self.appNameLabel.stringValue = "Userscripts - Version \(appVersion)";
+        self.appName.stringValue = "Userscripts Safari Version \(appVersion)"
         // seems like a lot of work to id path for another target's documents directory
         let hostID = Bundle.main.bundleIdentifier!
         let extensionID = "com.userscripts.macos.Userscripts-Extension"
@@ -27,10 +30,24 @@ class ViewController: NSViewController {
             // moved directories retain association
             UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
             NSLog("removed sharedbookmark because it is non-existent, permanently deleted or exists in trash")
-            self.saveLocationLabel.stringValue = location
+            self.saveLocation.stringValue = location
             return
         }
-        self.saveLocationLabel.stringValue = url.absoluteString
+        self.saveLocation.stringValue = url.absoluteString
+        // set extension state
+        SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionBundleIdentifier) { (state, error) in
+            guard let state = state, error == nil else {
+                // Insert code to inform the user that something went wrong.
+                return
+            }
+            
+            DispatchQueue.main.async {
+                if (state.isEnabled) {
+                    self.enabledIcon.layer?.backgroundColor = NSColor.green.cgColor
+                    self.enabledText.stringValue = "Safari Extension Enabled"
+                }
+            }
+        }
     }
     
     @IBAction func changeSaveLocation(_ sender: NSButton) {
@@ -54,16 +71,20 @@ class ViewController: NSViewController {
                         err("couldn't save new location from host app")
                         return
                     }
-                    self.saveLocationLabel.stringValue = url.absoluteString
+                    self.saveLocation.stringValue = url.absoluteString
                 }
             }
         })
     }
     
     @IBAction func openSafariExtensionPreferences(_ sender: AnyObject?) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: "com.userscripts.macos.Userscripts-Extension") { error in
-            if let _ = error {
+        SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
+            guard error == nil else {
                 // Insert code to inform the user that something went wrong.
+                return
+            }
+            DispatchQueue.main.async {
+                NSApplication.shared.terminate(nil)
             }
         }
     }

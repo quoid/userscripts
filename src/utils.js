@@ -27,20 +27,28 @@ export function sortBy(array, order) {
     return array;
 }
 
-export async function getRemoteFile(url, signal) {
-    let r = {};
-    // add delay for testing
-    // url = `http://slowwly.robertomurray.co.uk/delay/5000/url/${url}`;
-    await fetch(url, {signal}).then(response => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.text();
-    }).then(text => {
-        r.contents = text;
-    }).catch(error => {
-        console.log(error);
-        r.error = "Remote url bad response!";
+export function getRemoteFile(url) {
+    return new Promise(resolve => {
+        const callback = e => {
+            if (e.name !== "RESP_GET_REMOTE_FILE") return;
+            const message = e.message;
+            const data = message.data;
+            if (data.url !== url) return;
+            safari.self.removeEventListener("message", callback);
+            const response = {};
+            if (message.error) {
+                response.error = message.error;
+            } else if (message.data.code) {
+                response.contents = message.data.code;
+            } else {
+                response.error = "Remote url bad or empty response!";
+            }
+            resolve(response);
+        };
+        safari.self.addEventListener("message", callback);
+        const data = {url: url};
+        safari.extension.dispatchMessage("REQ_GET_REMOTE_FILE", data);
     });
-    return r;
 }
 
 export function validateURL(url) {

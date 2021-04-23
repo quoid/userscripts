@@ -2,12 +2,12 @@
 // store code received
 let data;
 // determines whether strict csp injection has already run (JS only)
-let evalJS = 0;
+let cspFallbackAttempted = 0;
 // send the url to swift side for fetching applicable code
 const url = window.location.href;
-// tell script side if requester is window.top, needed to filter code for @noframes
+// tell swift side if requester is window.top, needed to filter code for @noframes
 const isTop = window === window.top;
-// unique id per requester to avoid redundant execution
+// unique id per requester to avoid repeat execution
 const id = Math.random().toString(36).substr(2, 8);
 
 // returns a sorted object
@@ -20,13 +20,14 @@ function sortByWeight(o) {
 function injectCSS(filename, code) {
     // there's no fallback if blocked by CSP
     // future fix?: https://wicg.github.io/construct-stylesheets/
+    console.info(`Injecting ${filename}`);
     const tag = document.createElement("style");
     tag.textContent = code;
     document.head.appendChild(tag);
-    console.info(`Injecting ${filename}`);
 }
 
 function injectJS(filename, code, scope) {
+    console.info(`Injecting ${filename}`);
     code = "(function() {\n" + code + "\n//# sourceURL=" + filename.replace(/\s/g, "-") + "\n})();";
     if (scope != "content") {
         const tag = document.createElement("script");
@@ -35,7 +36,6 @@ function injectJS(filename, code, scope) {
     } else {
         eval(code);
     }
-    console.info(`Injecting ${filename}`);
 }
 
 function processJS(filename, code, scope, timing) {
@@ -72,7 +72,7 @@ function processJS(filename, code, scope, timing) {
 }
 
 function parseCode(data, fallback = false) {
-    // get css / js code separately
+    // get css/js code separately
     for (const type in data) {
         // separate code type object (ie. {"css":{ ... }} {"js": { ... }})
         const codeTypeObject = data[type];
@@ -126,13 +126,25 @@ function cspFallback(e) {
     // ensure that violation came from the extension
     if ((ext.startsWith(src) || src.startsWith(ext))) {
         // get all "auto" code
-        if (Object.keys(data.js.auto).length != 0 && evalJS < 1) {
+        if (Object.keys(data.js.auto).length != 0 && cspFallbackAttempted < 1) {
             let n = {"js": {"auto": {}}};
             n.js.auto = data.js.auto;
             parseCode(n, true);
-            evalJS = 1;
+            cspFallbackAttempted = 1;
         }
     }
+}
+
+function getCurrentPageFrames() {
+    let frames = [{url: window.location.href, top: true}];
+    const iframes = document.querySelectorAll("iframe");
+    if (iframes) {
+        iframes.forEach(iframe => {
+            const src = iframe.src || iframe.getAttribute("data-src");
+            src && frames.push({url: src, top: false});
+        });
+    }
+    return frames;
 }
 
 function handleMessage(e) {
@@ -148,6 +160,9 @@ function handleMessage(e) {
                 parseCode(data);
             }
         }
+    } else if (e.name === "REQ_PAGEFRAMES" && isTop) {
+        const pageUrls = getCurrentPageFrames();
+        safari.extension.dispatchMessage("RESP_PAGEFRAMES", {data: pageUrls});
     }
 }
 

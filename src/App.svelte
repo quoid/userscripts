@@ -14,7 +14,8 @@
     // save errors separately so when they are cleared, they aren't removed from log
     $: $log.some(a => {
         if (!logger.includes(a)) {
-            if ($settings.log) console[a.type](a.message);
+            if (a.type === "error") console[a.type](a.message);
+            //if ($settings.log) console[a.type](a.message);
             //if (a.type === "error") errors = [a, ...errors];
             logger.push(a);
         }
