@@ -30,9 +30,10 @@ If you encounter an issue with a specific website, *please provide the website a
 
 ## UI Overview
 
+### Browser Page:
+
 ![Userscripts Safari Main Application Window](/etc/ui01.png)
 
-### Browser Page:
 1. **Extension button** - click this button to open the extension interface
 1. **Filter bar** - use this input to filter items in the sidebar, by *name*
 1. **Sort button** - changes the order of the items in the sidebar by name or modified time
@@ -56,9 +57,10 @@ If you encounter an issue with a specific website, *please provide the website a
     - `Save` - while editing, saves all changes you've made to a userscript
         - `Command + S` is the keyboard shortcut for the action
 
+### Settings Modal:
+
 ![Userscripts Safari Settings Window](/etc/settings.png)
 
-### Settings Modal:
 - **Auto Close Brackets** - toggles on/off auto closing of brackets in the editor
     - this affects the following characters: `() [] {} "" ''`
 - **Auto Hint** - automatically shows completion hints while editing
@@ -72,9 +74,10 @@ If you encounter an issue with a specific website, *please provide the website a
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
 - **Global Blacklist** - all domain patterns listed here will be *globally* ignored for script injection
 
+### Popover:
+
 ![Userscripts Safari Settings Window](/etc/popover.png)
 
-### Popover:
 10. **Open button** - opens the extension browser page
 11. **Enable Injection toggle** - turns on/off page script inject (on/off switch)
 
