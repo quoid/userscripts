@@ -93,7 +93,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
 - `@inject-into` - allows the user to choose which context to inject the script into
     - allows the user to choose which context to inject the script into
-    - values: auto, content, page (default)
+    - values: auto (default), content, page
     - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
 - `@run-at`
     - allows the user to choose the injection timing
