@@ -109,7 +109,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@require`
     - allows users to include remote resources in their scripts
     - the value must be a valid url, currently no local file support
-    - must require a resource of the same file type (js for js, css for css)
+    - must require a resource of the same file type (JS for JS, CSS for CSS)
     - when a resource is required, it is downloaded and saved locally
     - the resources is downloaded once at save and never checked for updates or parsed in anyway
         - if you want to update the require resources, and the url does not change, you must remove the resources, save, then re-input it
@@ -148,9 +148,9 @@ Once the host app is open, you will see a button called "Change save location". 
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
 
-> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are porperly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open (by clicking the extension button in Safari.
+> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are properly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open by clicking the extension button in Safari.
 
-**What are the the keyboard shortcuts?**
+**What are the keyboard shortcuts?**
 
 > While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
 
@@ -158,7 +158,7 @@ Once the host app is open, you will see a button called "Change save location". 
 
 > All required files are saved *as Javascript files* in the extension container folder in macOS 11.x. That folder is located in the default save location, at: `~/Library/Containers/Userscripts/Data/Documents/require/`.
 >
-> If you move files from the require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
+> If you move files from the `require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
 
 ## Contributing
 Code level contributions are welcome. I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
