@@ -158,7 +158,7 @@ Once the host app is open, you will see a button called "Change save location". 
 
 > All required files are saved *as Javascript files* in the extension container folder in macOS 11.x. That folder is located in the default save location, at: `~/Library/Containers/Userscripts/Data/Documents/require/`.
 >
-> If you move files from the `require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
+> If you move files from the require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
 
 ## Contributing
 Code level contributions are welcome. I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
