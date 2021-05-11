@@ -146,6 +146,14 @@ Once the host app is open, you will see a button called "Change save location". 
 
 ## FAQs
 
+**"Refused to execute a script" error(s), what should I do!?**
+
+> You are seeing this error because of the website's [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP). Currently there is no way to allow extension content scripts to bypass CSPs in Safari.
+>
+> Automatically, the extension will attempt to circumvent strict CSPs, but if you are still experiencing issues, trying setting the userscript metadata key/val `// @inject-into auto` or `// @inject-into content`.
+>
+> You can read more about this in [this issue](https://github.com/quoid/userscripts/issues/106#issuecomment-797320450).
+
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
 
 > You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are properly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open by clicking the extension button in Safari.
