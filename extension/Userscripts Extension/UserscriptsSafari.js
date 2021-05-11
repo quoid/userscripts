@@ -121,10 +121,12 @@ function parseCode(data, fallback = false) {
 }
 
 function cspFallback(e) {
-    const src = e.sourceFile.toUpperCase();
-    const ext = safari.extension.baseURI.toUpperCase();
-    // ensure that violation came from the extension
-    if ((ext.startsWith(src) || src.startsWith(ext))) {
+    // if a security policy violation event has occurred, and the directive is script-src
+    // it's fair to assume that there is a strict CSP for scripts
+    // if there's a strict CSP for scripts, it's unlikely this extension uri is whitelisted
+    // when any script-src violation is detected, re-attempt injection
+    // since it's fair to assume injection was blocked for extension's content script
+    if (e.effectiveDirective === "script-src") {
         // get all "auto" code
         if (Object.keys(data.js.auto).length != 0 && cspFallbackAttempted < 1) {
             let n = {"js": {"auto": {}}};
