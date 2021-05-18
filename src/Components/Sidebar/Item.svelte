@@ -47,6 +47,7 @@
         flex: 1 0 0;
         font-weight: 500;
         letter-spacing: var(--letter-spacing-default);
+        padding-right: 0.25rem;
     }
 
     .item__description {
@@ -78,7 +79,7 @@
 >
     <div class="item__header">
         <Tag type={data.type}/>
-        <div class="item__title">{data.name}</div>
+        <div class="item__title truncate">{data.name}</div>
         <Toggle
             checked={!data.disabled}
             on:click={e => toggle(e, data)}
