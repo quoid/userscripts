@@ -7,18 +7,17 @@ class ViewController: NSViewController {
     @IBOutlet var saveLocation: NSTextField!
     @IBOutlet weak var enabledText: NSTextField!
     @IBOutlet weak var enabledIcon: NSView!
-    
-    let extensionBundleIdentifier = "com.userscripts.macos.Userscripts-Extension"
-    
+
+    let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+    let hostID = Bundle.main.bundleIdentifier!
+    let extensionID = "com.userscripts.macos.Userscripts-Extension"
+    let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
-        self.appName.stringValue = "Userscripts Safari Version \(appVersion)"
-        // seems like a lot of work to id path for another target's documents directory
-        let hostID = Bundle.main.bundleIdentifier!
-        let extensionID = "com.userscripts.macos.Userscripts-Extension"
-        let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
         let location = documentsDirectory.replacingOccurrences(of: hostID, with: extensionID)
+        self.appName.stringValue = "Userscripts Safari Version \(appVersion)"
+        setExtensionState()
         // check if bookmark data exists
         guard
             let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
@@ -34,22 +33,22 @@ class ViewController: NSViewController {
             return
         }
         self.saveLocation.stringValue = url.absoluteString
-        // set extension state
-        SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionBundleIdentifier) { (state, error) in
+        NotificationCenter.default.addObserver(self, selector: #selector(setExtensionState), name: NSApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    @objc func setExtensionState() {
+        SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionID) { (state, error) in
             guard let state = state, error == nil else {
-                // Insert code to inform the user that something went wrong.
+                self.enabledText.stringValue = "Safari Extension State Unknown"
                 return
             }
-            
             DispatchQueue.main.async {
-                if (state.isEnabled) {
-                    self.enabledIcon.layer?.backgroundColor = NSColor.green.cgColor
-                    self.enabledText.stringValue = "Safari Extension Enabled"
-                }
+                self.enabledIcon.layer?.backgroundColor = state.isEnabled ? NSColor.green.cgColor : NSColor.red.cgColor
+                self.enabledText.stringValue = state.isEnabled ? "Safari Extension Enabled" : "Safari Extension Disabled"
             }
         }
     }
-    
+
     @IBAction func changeSaveLocation(_ sender: NSButton) {
         guard let window = self.view.window else { return }
         let panel = NSOpenPanel()
@@ -76,16 +75,8 @@ class ViewController: NSViewController {
             }
         })
     }
-    
+
     @IBAction func openSafariExtensionPreferences(_ sender: AnyObject?) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
-            guard error == nil else {
-                // Insert code to inform the user that something went wrong.
-                return
-            }
-            DispatchQueue.main.async {
-                NSApplication.shared.terminate(nil)
-            }
-        }
+        SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID)
     }
 }
