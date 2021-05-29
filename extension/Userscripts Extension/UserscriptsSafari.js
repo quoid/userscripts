@@ -3,8 +3,8 @@
 let data;
 // determines whether strict csp injection has already run (JS only)
 let cspFallbackAttempted = 0;
-// send the url to swift side for fetching applicable code
-const url = window.location.href;
+// send the location object to swift side for fetching applicable code
+const loc = window.location;
 // tell swift side if requester is window.top, needed to filter code for @noframes
 const isTop = window === window.top;
 // unique id per requester to avoid repeat execution
@@ -173,4 +173,4 @@ document.addEventListener("securitypolicyviolation", cspFallback);
 // event listener to handle messages
 safari.self.addEventListener("message", handleMessage);
 // request code for page url
-safari.extension.dispatchMessage("REQ_USERSCRIPTS", {id: id, top: isTop, url: url});
+safari.extension.dispatchMessage("REQ_USERSCRIPTS", {id: id, top: isTop, location: loc});

@@ -129,11 +129,6 @@ func unsanitize(_ str: String) -> String {
     return s
 }
 
-func patternMatch(_ string: String,_ pattern: String) -> Bool {
-    let predicate = NSPredicate(format: "self LIKE %@", pattern)
-    return !NSArray(object: string).filtered(using: predicate).isEmpty
-}
-
 func normalizeWeight(_ weight: String) -> String {
     if let w = Int(weight) {
         if w > 999 {
@@ -1022,15 +1017,25 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 }
 
 // injection
-func getMatchedFiles(_ url: String) -> [String]? {
+func getMatchedFiles(_ location: [String: Any]) -> [String]? {
     // get the manifest data
     guard
         let manifestKeys = getManifestKeys(),
         let active = manifestKeys.settings["active"]
     else {
-        err("could not read manifest when attempting to get page script count")
+        err("could not read manifest when attempting to get matched files")
         return nil
     }
+    // get the protocol, host, pathname
+    guard
+        let ptcl = location["protocol"] as? String,
+        let host = location["host"] as? String,
+        let path = location["pathname"] as? String
+    else {
+        err("could not get values from location object when attempting to get matched files")
+        return nil
+    }
+
     // domains where loading is excluded for file
     var excludedFilenames:[String] = []
     // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
@@ -1048,7 +1053,7 @@ func getMatchedFiles(_ url: String) -> [String]? {
     // url matches a pattern in blacklist
     // essentially all scripts are disabled, there are 0 active scripts for url
     for pattern in manifestKeys.blacklist {
-        if patternMatch(url, pattern) {
+        if match(ptcl, host, path, pattern) {
             return matchedFilenames
         }
     }
@@ -1059,7 +1064,7 @@ func getMatchedFiles(_ url: String) -> [String]? {
     // loop through exclude patterns and see if any match against page url
     for pattern in excludePatterns {
         // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
-        if patternMatch(url, pattern) {
+        if match(ptcl, host, path, pattern) {
             guard let filenames = manifestKeys.exclude[pattern] else {
                 err("error parsing manifest.keys when attempting to get code for injected script")
                 continue
@@ -1074,7 +1079,7 @@ func getMatchedFiles(_ url: String) -> [String]? {
 
     // loop through all match patterns from manifest to see if they match against the current page url
     for pattern in matchPatterns {
-        if patternMatch(url, pattern) {
+        if match(ptcl, host, path, pattern) {
             // the filenames listed for the pattern that match page url
             guard let filenames = manifestKeys.match[pattern] else {
                 err("error parsing manifestKets.match when attempting to get code for injected script")
@@ -1205,6 +1210,77 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     return allFiles
 }
 
+// matching
+func getURLProps(_ url: String) -> [String: String]? {
+    let pattern = #"^(.*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+))(\/.*)?$"#
+    let regex = try! NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+    guard
+        let result = regex.firstMatch(in: url, options: [], range: NSMakeRange(0, url.utf16.count)),
+        let ptclRange = Range(result.range(at: 1), in: url),
+        let hostRange = Range(result.range(at: 2), in: url)
+    else {
+        return nil
+    }
+    let ptcl = String(url[ptclRange])
+    let host = String(url[hostRange])
+    var path = "/"
+    if let pathRange = Range(result.range(at: 3), in: url) {
+        path = String(url[pathRange])
+    }
+    return ["protocol": ptcl, "host": host, "pathname": path]
+}
+
+func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
+    let pattern = #"[\.|\?|\^|\$|\+|\{|\}|\[|\]|\||\\(|\)|\/]"#
+    var patternReplace = "^\(stringPattern.replacingOccurrences(of: pattern, with: #"\\$0"#, options: .regularExpression))$"
+    patternReplace = patternReplace.replacingOccurrences(of: "*", with: ".*")
+    guard let regex = try? NSRegularExpression(pattern: patternReplace, options: .caseInsensitive) else {
+        return nil
+    }
+    return regex
+}
+
+func match(_ ptcl: String,_ host: String,_ path: String,_ matchPattern: String) -> Bool {
+    // matchPattern is the value from metatdata key @match or @exclude-match
+    if (matchPattern == "<all_urls>") {
+        return true
+    }
+    // currently only http/s supported
+    if (ptcl != "http:" && ptcl != "https:") {
+        return false
+    }
+    let partsPattern = #"^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*)(\/[^\s]*)$"#
+    let partsPatternReg = try! NSRegularExpression(pattern: partsPattern, options: .caseInsensitive)
+    let range = NSMakeRange(0, matchPattern.utf16.count)
+    guard let parts = partsPatternReg.firstMatch(in: matchPattern, options: [], range: range) else {
+        err("malformed regex match pattern")
+        return false
+    }
+    // construct host regex from matchPattern
+    let matchPatternHost = matchPattern[Range(parts.range(at: 2), in: matchPattern)!]
+    var hostPattern = "^\(matchPatternHost.replacingOccurrences(of: ".", with: "\\."))$"
+    hostPattern = hostPattern.replacingOccurrences(of: "^*$", with: ".*")
+    hostPattern = hostPattern.replacingOccurrences(of: "*\\.", with: "(.*\\.)?")
+    guard let hostRegEx = try? NSRegularExpression(pattern: hostPattern, options: .caseInsensitive) else {
+        err("invalid host regex")
+        return false
+    }
+    // contruct path regex from matchPattern
+    let matchPatternPath = matchPattern[Range(parts.range(at: 3), in: matchPattern)!]
+    guard let pathRegEx = stringToRegex(String(matchPatternPath)) else {
+        err("invalid path regex")
+        return false
+    }
+    guard
+        (hostRegEx.firstMatch(in: host, options: [], range: NSMakeRange(0, host.utf16.count)) != nil),
+        (pathRegEx.firstMatch(in: path, options: [], range: NSMakeRange(0, path.utf16.count)) != nil)
+    else {
+        return false
+    }
+
+    return true
+}
+
 // popover
 func updateBadgeCount(_ frames: [[String : Any]]) {
     guard
@@ -1222,7 +1298,12 @@ func updateBadgeCount(_ frames: [[String : Any]]) {
         urls.append(url)
     }
     for url in urls {
-        guard let m = getMatchedFiles(url) else { return }
+        guard
+            let parts = getURLProps(url),
+            let m = getMatchedFiles(parts)
+        else {
+            return
+        }
         // add values not already present in the matched array
         matched.append(contentsOf: m.filter{!matched.contains($0)})
     }

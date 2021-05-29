@@ -99,10 +99,10 @@ class SafariExtensionHandler: SFSafariExtensionHandler {
             responseName = "RESP_USERSCRIPTS"
             if
                 let data = userInfo,
-                let url = data["url"] as? String,
+                let location = data["location"] as? [String: Any],
                 let isTop = data["top"] as? Bool,
                 let id = data["id"] as? String,
-                let matched = getMatchedFiles(url),
+                let matched = getMatchedFiles(location),
                 let code = getCode(matched, isTop)
             {
                 responseData = ["code": code, "id": id]
