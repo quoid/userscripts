@@ -256,7 +256,7 @@ let defaultSettings = [
     "lint": "false",
     "log": "false",
     "sortOrder": "lastModifiedDesc",
-    "showCount": "false",
+    "showCount": "true",
     "showInvisibles": "true",
     "tabSize": "4"
 ]
@@ -598,7 +598,7 @@ func getInitData() -> [String: Any]? {
         }
     }
 
-    // check if default save location directory exists, if not create it
+    // check if default require location directory exists, if not create it
     if !FileManager.default.fileExists(atPath: requireLocation.path) {
         do {
             try FileManager.default.createDirectory(at: requireLocation, withIntermediateDirectories: false)
