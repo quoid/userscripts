@@ -89,6 +89,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@name` - This will be the name that displays in the sidebar and be used as the filename - you can *not* use the same name for multiple files of the same type
 - `@description`- Use this to describe what your userscript does - this will be displayed in the sidebar - there is a setting to hide descriptions
 - `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
+    - **Note:** this extension only supports `http/s`
 - `@exclude-match` - Domain patterns where you do *not* want the script to run
 - `@include` - An alias for `@match` - functions exactly like `@match`
 - `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
