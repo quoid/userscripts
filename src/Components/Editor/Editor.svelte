@@ -206,16 +206,21 @@
         padding: 1rem 0.5rem 1rem 1.5rem;
     }
 
-    :global(.editor__header > button:nth-of-type(2)) {
-        margin: 0 1.5rem;
-    }
-
     .editor__header__content {
         align-items: center;
         display: flex;
         flex-grow: 1;
         flex-wrap: wrap;
         font: var(--text-large);
+        min-width: 0; /* needed for .truncate on .title */
+    }
+
+    /* element needed so that .truncate works on .title */
+    .editor__header__content > div {
+        align-items: center;
+        display: flex;
+        max-width: 100%;
+        padding-right: 1rem;
     }
 
     .editor__title {
@@ -237,6 +242,14 @@
         flex-grow: 1;
         overflow: hidden;
         position: relative;
+    }
+
+    .editor__header__buttons {
+        display: flex;
+    }
+
+    :global(.editor__header__buttons > button:nth-of-type(2)) {
+        margin: 0 1.5rem;
     }
 
     .editor__footer {
@@ -279,8 +292,10 @@
     {/if}
     <div class="editor__header">
         <div class="editor__header__content">
-            <Tag type={type}/>
-            <div class="editor__title truncate">{name}</div>
+            <div>
+                <Tag type={type}/>
+                <div class="editor__title truncate">{name}</div>
+            </div>
             <div class="editor__status">
                 {#if $state.includes("saving")}
                     Saving...
@@ -297,24 +312,26 @@
                 {/if}
             </div>
         </div>
-        <IconButton
-            icon={iconSync}
-            on:click={update}
-            title={"Check for updates"}
-            disabled={disabled || !canUpdate}
-        />
-        <IconButton
-            icon={iconDownload}
-            on:click={download}
-            title={"Download file"}
-            {disabled}
-        />
-        <IconButton
-            icon={iconTrash}
-            on:click={trash}
-            title={"Trash file"}
-            {disabled}
-        />
+        <div class="editor__header__buttons">
+            <IconButton
+                icon={iconSync}
+                on:click={update}
+                title={"Check for updates"}
+                disabled={disabled || !canUpdate}
+            />
+            <IconButton
+                icon={iconDownload}
+                on:click={download}
+                title={"Download file"}
+                {disabled}
+            />
+            <IconButton
+                icon={iconTrash}
+                on:click={trash}
+                title={"Trash file"}
+                {disabled}
+            />
+        </div>
     </div>
     <div class="editor__code">
         <CodeMirror

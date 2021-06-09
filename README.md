@@ -89,6 +89,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@name` - This will be the name that displays in the sidebar and be used as the filename - you can *not* use the same name for multiple files of the same type
 - `@description`- Use this to describe what your userscript does - this will be displayed in the sidebar - there is a setting to hide descriptions
 - `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
+    - **Note:** this extension only supports `http/s`
 - `@exclude-match` - Domain patterns where you do *not* want the script to run
 - `@include` - An alias for `@match` - functions exactly like `@match`
 - `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
@@ -145,6 +146,14 @@ Once the host app is open, you will see a button called "Change save location". 
 - After a new save location is selected, if you rename or move that selected folder, the extension will continue to load/save to that location - the only way to remove the “link” is by trashing the folder or selecting a new save location
 
 ## FAQs
+
+**"Refused to execute a script" error(s), what should I do!?**
+
+> You are seeing this error because of the website's [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP). Currently there is no way to allow extension content scripts to bypass CSPs in Safari.
+>
+> Automatically, the extension will attempt to circumvent strict CSPs, but if you are still experiencing issues, trying setting the userscript metadata key/val `// @inject-into auto` or `// @inject-into content`.
+>
+> You can read more about this in [this issue](https://github.com/quoid/userscripts/issues/106#issuecomment-797320450).
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
 

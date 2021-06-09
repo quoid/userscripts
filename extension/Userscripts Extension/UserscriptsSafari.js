@@ -3,8 +3,8 @@
 let data;
 // determines whether strict csp injection has already run (JS only)
 let cspFallbackAttempted = 0;
-// send the url to swift side for fetching applicable code
-const url = window.location.href;
+// send the location object to swift side for fetching applicable code
+const loc = window.location;
 // tell swift side if requester is window.top, needed to filter code for @noframes
 const isTop = window === window.top;
 // unique id per requester to avoid repeat execution
@@ -121,10 +121,12 @@ function parseCode(data, fallback = false) {
 }
 
 function cspFallback(e) {
-    const src = e.sourceFile.toUpperCase();
-    const ext = safari.extension.baseURI.toUpperCase();
-    // ensure that violation came from the extension
-    if ((ext.startsWith(src) || src.startsWith(ext))) {
+    // if a security policy violation event has occurred, and the directive is script-src
+    // it's fair to assume that there is a strict CSP for scripts
+    // if there's a strict CSP for scripts, it's unlikely this extension uri is whitelisted
+    // when any script-src violation is detected, re-attempt injection
+    // since it's fair to assume injection was blocked for extension's content script
+    if (e.effectiveDirective === "script-src") {
         // get all "auto" code
         if (Object.keys(data.js.auto).length != 0 && cspFallbackAttempted < 1) {
             let n = {"js": {"auto": {}}};
@@ -171,4 +173,4 @@ document.addEventListener("securitypolicyviolation", cspFallback);
 // event listener to handle messages
 safari.self.addEventListener("message", handleMessage);
 // request code for page url
-safari.extension.dispatchMessage("REQ_USERSCRIPTS", {id: id, top: isTop, url: url});
+safari.extension.dispatchMessage("REQ_USERSCRIPTS", {id: id, top: isTop, location: loc});
