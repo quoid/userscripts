@@ -344,7 +344,7 @@ func toggleFile(_ filename: String,_ action: String) -> Bool {
     return true
 }
 
-func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ matchPatterns: [String]) -> Bool {
+func updateExcludesAndMatches(_ filename: String,_ excludeMatchPatterns: [String],_ matchPatterns: [String],_ excludePatterns: [String],_ includePatterns: [String]) -> Bool {
     guard var manifestKeys = getManifestKeys() else {
         err("failed to get manifest keys when attempting to update excludes and matches")
         return false
@@ -418,10 +418,14 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
     }
 
     // get updated data for exclude-match and match
-    patternsInFile = excludePatterns
+    patternsInFile = excludeMatchPatterns
     manifestKeys.excludeMatch = updatePatternDict(manifestKeys.excludeMatch)
     patternsInFile = matchPatterns
     manifestKeys.match = updatePatternDict(manifestKeys.match)
+    patternsInFile = excludePatterns
+    manifestKeys.exclude = updatePatternDict(manifestKeys.exclude)
+    patternsInFile = includePatterns
+    manifestKeys.include = updatePatternDict(manifestKeys.include)
 
     // save updated data to manifest
     if updateManifest(with: manifestKeys) != true {
@@ -710,22 +714,23 @@ func getAllFilesData() -> [[String: Any]]? {
             fileData["disabled"] = true
         }
         // update excludes & matches
-        var excluded = [String]()
+        var excludeMatched = [String]()
         var matched = [String]()
+        var excluded = [String]()
+        var included = [String]()
         if metadata["exclude-match"] != nil {
-            excluded.append(contentsOf: metadata["exclude-match"]!)
+            excludeMatched.append(contentsOf: metadata["exclude-match"]!)
         }
         if metadata["match"] != nil {
             matched.append(contentsOf: metadata["match"]!)
         }
-        // check for legacy include & exclude
         if metadata["include"] != nil {
-            matched.append(contentsOf: metadata["include"]!)
+            included.append(contentsOf: metadata["include"]!)
         }
         if metadata["exclude"] != nil {
             excluded.append(contentsOf: metadata["exclude"]!)
         }
-        if !updateExcludesAndMatches(filename, excluded, matched) {
+        if !updateExcludesAndMatches(filename, excludeMatched, matched, excluded, included) {
             err("error updating excludes & matches while getting all files data")
         }
 
@@ -855,18 +860,15 @@ func saveFile(_ data: [String: Any]) -> [String: Any] {
         try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
 
         // updateExcludesAndMatches for old file
-        _ = updateExcludesAndMatches(oldFilename, [], [])
+        _ = updateExcludesAndMatches(oldFilename, [], [], [], [])
     }
 
     // update new excludes and matches for new file
-    var excludes = metadata["exclude-match"] ?? []
-    var matches = metadata["match"] ?? []
-    // check for legacy include & exclude
-    let includeLegacy = metadata["include"] ?? []
-    let excludeLegacy = metadata["exclude"] ?? []
-    matches.append(contentsOf: includeLegacy)
-    excludes.append(contentsOf: excludeLegacy)
-    _ = updateExcludesAndMatches(newFilename, excludes, matches)
+    let excludeMatches = metadata["exclude-match"] ?? []
+    let matches = metadata["match"] ?? []
+    let includes = metadata["include"] ?? []
+    let excludes = metadata["exclude"] ?? []
+    _ = updateExcludesAndMatches(newFilename, excludeMatches, matches, excludes, includes)
 
     // un-santized name
     name = unsanitize(name)
@@ -891,7 +893,7 @@ func trashFile(_ filename: String) -> Bool {
     // remove file from manifest
     guard
         toggleFile(filename, "enable"),
-        updateExcludesAndMatches(filename, [], []),
+        updateExcludesAndMatches(filename, [], [], [], []),
         let type = filename.components(separatedBy: ".").last,
         getRequiredCode(filename, [], type),
         let saveLocation = getSaveLocation()
