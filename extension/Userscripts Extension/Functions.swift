@@ -1281,6 +1281,28 @@ func match(_ ptcl: String,_ host: String,_ path: String,_ matchPattern: String) 
     return true
 }
 
+func include(_ url: String,_ pattern: String) -> Bool {
+    var regex:NSRegularExpression
+    if pattern.hasPrefix("/") && pattern.hasSuffix("/") {
+        let p = String(pattern.dropFirst().dropLast())
+        guard let exp = try? NSRegularExpression(pattern: p, options: .caseInsensitive) else {
+            err("invalid regex in include func")
+            return false
+        }
+        regex = exp
+    } else {
+        guard let exp = stringToRegex(pattern) else {
+            err("coudn't convert string to regex in include func")
+            return false
+        }
+        regex = exp
+    }
+    if (regex.firstMatch(in: url, options: [], range: NSMakeRange(0, url.utf16.count)) == nil) {
+        return false
+    }
+    return true
+}
+
 // popover
 func updateBadgeCount(_ frames: [[String : Any]]) {
     guard
