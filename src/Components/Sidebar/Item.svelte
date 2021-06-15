@@ -85,5 +85,5 @@
             on:click={e => toggle(e, data)}
         />
     </div>
-    <div class="item__description">{data.description}</div>
+    <div class="item__description">{data.description || "No description provided"}</div>
 </div>
