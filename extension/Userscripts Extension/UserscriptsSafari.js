@@ -128,7 +128,9 @@ function cspFallback(e) {
     // since it's fair to assume injection was blocked for extension's content script
     if (e.effectiveDirective === "script-src") {
         // get all "auto" code
-        if (Object.keys(data.js.auto).length != 0 && cspFallbackAttempted < 1) {
+        // other extensions can trigger a security policy violation event
+        // make sure data var is not undefined before attempting fallback
+        if (data && Object.keys(data.js.auto).length != 0 && cspFallbackAttempted < 1) {
             let n = {"js": {"auto": {}}};
             n.js.auto = data.js.auto;
             parseCode(n, true);
