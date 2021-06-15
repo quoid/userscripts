@@ -238,12 +238,12 @@ func parse(_ content: String) -> [String: Any]? {
 struct Manifest: Codable {
     var blacklist:[String]
     var disabled:[String]
-    var exclude: [String: [String]]
+    var excludeMatch: [String: [String]]
     var match: [String: [String]]
     var require: [String: [String]]
     var settings: [String: String]
     private enum CodingKeys : String, CodingKey {
-        case blacklist, disabled, exclude = "exclude-match", match, require, settings
+        case blacklist, disabled, excludeMatch = "exclude-match", match, require, settings
     }
 }
 
@@ -265,7 +265,7 @@ func getManifestKeys() -> Manifest? {
     let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
     // if manifest doesn't exist, create new one
     if !FileManager.default.fileExists(atPath: url.path) {
-        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], require: [:], settings: [:])
+        let manifest = Manifest(blacklist: [], disabled: [], excludeMatch: [:], match: [:], require: [:], settings: [:])
         _ = updateManifest(with: manifest)
     }
     guard
@@ -417,7 +417,7 @@ func updateExcludesAndMatches(_ filename: String,_ excludePatterns: [String],_ m
 
     // get updated data for exclude-match and match
     patternsInFile = excludePatterns
-    manifestKeys.exclude = updatePatternDict(manifestKeys.exclude)
+    manifestKeys.excludeMatch = updatePatternDict(manifestKeys.excludeMatch)
     patternsInFile = matchPatterns
     manifestKeys.match = updatePatternDict(manifestKeys.match)
 
@@ -482,19 +482,19 @@ func purgeManifest() -> Bool {
         }
     }
     // iterate through manifest excludes
-    for (pattern, filenames) in manifestKeys.exclude {
+    for (pattern, filenames) in manifestKeys.excludeMatch {
         for filename in filenames {
             if !allSaveLocationFilenames.contains(filename) {
-                if let index = manifestKeys.exclude[pattern]?.firstIndex(of: filename) {
-                    manifestKeys.exclude[pattern]?.remove(at: index)
+                if let index = manifestKeys.excludeMatch[pattern]?.firstIndex(of: filename) {
+                    manifestKeys.excludeMatch[pattern]?.remove(at: index)
                     update = true
                     NSLog("Could not find \(filename) in save location, removed from exclude-match pattern - \(pattern)")
                 }
             }
             // if there are no more filenames in pattern, remove pattern from manifest
-            if let length = manifestKeys.exclude[pattern]?.count {
-                if length < 1, let ind = manifestKeys.exclude.index(forKey: pattern) {
-                    manifestKeys.exclude.remove(at: ind)
+            if let length = manifestKeys.excludeMatch[pattern]?.count {
+                if length < 1, let ind = manifestKeys.excludeMatch.index(forKey: pattern) {
+                    manifestKeys.excludeMatch.remove(at: ind)
                     NSLog("No more files for \(pattern) exclude-match pattern, removed from manifest")
                 }
             }
@@ -613,7 +613,7 @@ func getInitData() -> [String: Any]? {
     var manifestKeys = getManifestKeys()
     // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
     if manifestKeys == nil {
-        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], match: [:], require: [:], settings: [:])
+        manifestKeys = Manifest(blacklist: [], disabled: [], excludeMatch: [:], match: [:], require: [:], settings: [:])
         if !updateManifest(with: manifestKeys!) { // force unwrap since it was assigned in above line
             err("manifest had issues that could not be resolved while getting init data")
             return nil
@@ -1041,7 +1041,7 @@ func getMatchedFiles(_ location: [String: Any]) -> [String]? {
     // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
     var matchedFilenames:[String] = []
     // all exclude patterns from manifest
-    let excludePatterns = manifestKeys.exclude.keys
+    let excludePatterns = manifestKeys.excludeMatch.keys
     // all match patterns from manifest
     let matchPatterns = manifestKeys.match.keys
 
@@ -1065,7 +1065,7 @@ func getMatchedFiles(_ location: [String: Any]) -> [String]? {
     for pattern in excludePatterns {
         // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
         if match(ptcl, host, path, pattern) {
-            guard let filenames = manifestKeys.exclude[pattern] else {
+            guard let filenames = manifestKeys.excludeMatch[pattern] else {
                 err("error parsing manifest.keys when attempting to get code for injected script")
                 continue
             }
