@@ -63,9 +63,9 @@ export function validateURL(url) {
 
 export function  newScriptDefault(description, name, type) {
     if (type === "css") {
-        return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n@match       *://*.*\n==/UserStyle== */`;
+        return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n@match       <all_urls>\n==/UserStyle== */`;
     } else if (type === "js") {
-        return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// @match       *://*.*\n// ==/UserScript==`;
+        return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// @match       *://*/*\n// ==/UserScript==`;
     }
 }
 
