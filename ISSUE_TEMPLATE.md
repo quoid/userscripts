@@ -1,14 +1,16 @@
-<!-- Please fill out the below information before submitting your issue -->
 <!-- 
+Please fill out the below information before submitting your issue
 If you are having issues with script injection, please include examples of what is not working and try the userscript below:
 
 // ==UserScript==
 // @name        TestScript
 // @description This is your new file, start writing code
-// @match       *://*/*
+// @include       *://*/*
+// @exclude-match *://*.google.com/*
+// @noframes
 // ==/UserScript==
 
-console.log("This is a test script");
+console.log(`This is a test script - ${window.location.href}`);
 -->
 
 _System Information:_
