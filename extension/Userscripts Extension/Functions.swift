@@ -487,7 +487,7 @@ func purgeManifest() -> Bool {
             }
         }
     }
-    // iterate through manifest excludes
+    // iterate through manifest excludeMatch patterns
     for (pattern, filenames) in manifestKeys.excludeMatch {
         for filename in filenames {
             if !allSaveLocationFilenames.contains(filename) {
@@ -497,15 +497,54 @@ func purgeManifest() -> Bool {
                     NSLog("Could not find \(filename) in save location, removed from exclude-match pattern - \(pattern)")
                 }
             }
-            // if there are no more filenames in pattern, remove pattern from manifest
-            if let length = manifestKeys.excludeMatch[pattern]?.count {
-                if length < 1, let ind = manifestKeys.excludeMatch.index(forKey: pattern) {
-                    manifestKeys.excludeMatch.remove(at: ind)
-                    NSLog("No more files for \(pattern) exclude-match pattern, removed from manifest")
-                }
+        }
+        // if there are no more filenames in pattern, remove pattern from manifest
+        if let length = manifestKeys.excludeMatch[pattern]?.count {
+            if length < 1, let ind = manifestKeys.excludeMatch.index(forKey: pattern) {
+                manifestKeys.excludeMatch.remove(at: ind)
+                NSLog("No more files for \(pattern) exclude-match pattern, removed from manifest")
             }
         }
     }
+    // iterate through manifest exclude patterns
+    for (pattern, filenames) in manifestKeys.exclude {
+        for filename in filenames {
+            if !allSaveLocationFilenames.contains(filename) {
+                if let index = manifestKeys.exclude[pattern]?.firstIndex(of: filename) {
+                    manifestKeys.exclude[pattern]?.remove(at: index)
+                    update = true
+                    NSLog("Could not find \(filename) in save location, removed from exclude pattern - \(pattern)")
+                }
+            }
+        }
+        // if there are no more filenames in pattern, remove pattern from manifest
+        if let length = manifestKeys.exclude[pattern]?.count {
+            if length < 1, let ind = manifestKeys.exclude.index(forKey: pattern) {
+                manifestKeys.exclude.remove(at: ind)
+                NSLog("No more files for \(pattern) exclude pattern, removed from manifest")
+            }
+        }
+    }
+    // iterate through manifest include patterns
+    for (pattern, filenames) in manifestKeys.include {
+        for filename in filenames {
+            if !allSaveLocationFilenames.contains(filename) {
+                if let index = manifestKeys.include[pattern]?.firstIndex(of: filename) {
+                    manifestKeys.include[pattern]?.remove(at: index)
+                    update = true
+                    NSLog("Could not find \(filename) in save location, removed from exclude pattern - \(pattern)")
+                }
+            }
+        }
+        // if there are no more filenames in pattern, remove pattern from manifest
+        if let length = manifestKeys.include[pattern]?.count {
+            if length < 1, let ind = manifestKeys.include.index(forKey: pattern) {
+                manifestKeys.include.remove(at: ind)
+                NSLog("No more files for \(pattern) exclude pattern, removed from manifest")
+            }
+        }
+    }
+
     // iterate through manifest disabled
     for filename in manifestKeys.disabled {
         if !allSaveLocationFilenames.contains(filename) {
@@ -524,6 +563,7 @@ func purgeManifest() -> Bool {
             NSLog("Removed obsolete setting - \(setting.key)")
         }
     }
+
     // update manifest
     if update, updateManifest(with: manifestKeys) != true {
         err("failed to purge manifest")
