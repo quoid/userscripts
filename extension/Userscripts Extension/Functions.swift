@@ -487,6 +487,7 @@ func purgeManifest() -> Bool {
             }
         }
     }
+
     // iterate through manifest excludeMatch patterns
     for (pattern, filenames) in manifestKeys.excludeMatch {
         for filename in filenames {
@@ -506,6 +507,7 @@ func purgeManifest() -> Bool {
             }
         }
     }
+
     // iterate through manifest exclude patterns
     for (pattern, filenames) in manifestKeys.exclude {
         for filename in filenames {
@@ -525,6 +527,7 @@ func purgeManifest() -> Bool {
             }
         }
     }
+
     // iterate through manifest include patterns
     for (pattern, filenames) in manifestKeys.include {
         for filename in filenames {
@@ -545,6 +548,21 @@ func purgeManifest() -> Bool {
         }
     }
 
+    // iterate through manifest required
+    for (filename, _) in manifestKeys.require {
+        if !allSaveLocationFilenames.contains(filename) {
+            if let index = manifestKeys.require.index(forKey: filename) {
+                manifestKeys.require.remove(at: index)
+                // remove associated resources
+                if !getRequiredCode(filename, [], (filename as NSString).pathExtension) {
+                    err("failed to remove required resources when purging \(filename) from manifest required records")
+                }
+                update = true
+                NSLog("No more required resources for \(filename), removed from manifest along with resource folder")
+            }
+        }
+    }
+
     // iterate through manifest disabled
     for filename in manifestKeys.disabled {
         if !allSaveLocationFilenames.contains(filename) {
@@ -555,6 +573,7 @@ func purgeManifest() -> Bool {
             }
         }
     }
+
     // remove obsolete settings
     for setting in manifestKeys.settings {
         if !defaultSettings.keys.contains(setting.key) {
