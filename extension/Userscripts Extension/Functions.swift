@@ -1093,7 +1093,8 @@ func getMatchedFiles(_ location: [String: Any]) -> [String]? {
     guard
         let ptcl = location["protocol"] as? String,
         let host = location["host"] as? String,
-        let path = location["pathname"] as? String
+        let path = location["pathname"] as? String,
+        let href = location["href"] as? String
     else {
         err("could not get values from location object when attempting to get matched files")
         return nil
@@ -1103,10 +1104,14 @@ func getMatchedFiles(_ location: [String: Any]) -> [String]? {
     var excludedFilenames:[String] = []
     // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
     var matchedFilenames:[String] = []
-    // all exclude patterns from manifest
-    let excludePatterns = manifestKeys.excludeMatch.keys
+    // all exclude-match patterns from manifest
+    let excludeMatchPatterns = manifestKeys.excludeMatch.keys
     // all match patterns from manifest
     let matchPatterns = manifestKeys.match.keys
+    // all include patterns from manifest
+    let includeExpressions = manifestKeys.include.keys
+    // all exclude patterns from manifest
+    let excludeExpressions = manifestKeys.exclude.keys
 
     // if injection is disabled, return empty array
     if active != "true" {
@@ -1125,11 +1130,26 @@ func getMatchedFiles(_ location: [String: Any]) -> [String]? {
     excludedFilenames.append(contentsOf: manifestKeys.disabled)
 
     // loop through exclude patterns and see if any match against page url
-    for pattern in excludePatterns {
+    for pattern in excludeMatchPatterns {
         // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
         if match(ptcl, host, path, pattern) {
             guard let filenames = manifestKeys.excludeMatch[pattern] else {
                 err("error parsing manifest.keys when attempting to get code for injected script")
+                continue
+            }
+            for filename in filenames {
+                if !excludedFilenames.contains(filename) {
+                    excludedFilenames.append(filename)
+                }
+            }
+        }
+    }
+
+    // loop through exclude expressions and check for matches
+    for exp in excludeExpressions {
+        if include(href, exp) {
+            guard let filenames = manifestKeys.exclude[exp] else {
+                err("error parsing manifest when attempting to get code, excludeExpressions")
                 continue
             }
             for filename in filenames {
@@ -1158,6 +1178,22 @@ func getMatchedFiles(_ location: [String: Any]) -> [String]? {
 
         }
     }
+
+    // loop through include expressions and check for matches
+    for exp in includeExpressions {
+        if include(href, exp) {
+            guard let filenames = manifestKeys.include[exp] else {
+                err("error parsing manifest when attempting to get code, includeExpressions")
+                continue
+            }
+            for filename in filenames {
+                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
+                    matchedFilenames.append(filename)
+                }
+            }
+        }
+    }
+
     return matchedFilenames
 }
 
