@@ -1326,7 +1326,7 @@ func getURLProps(_ url: String) -> [String: String]? {
     if let pathRange = Range(result.range(at: 3), in: url) {
         path = String(url[pathRange])
     }
-    return ["protocol": ptcl, "host": host, "pathname": path]
+    return ["protocol": ptcl, "host": host, "pathname": path, "href": url]
 }
 
 func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
