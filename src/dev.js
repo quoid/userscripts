@@ -18,7 +18,7 @@ const defaultSettings = {
     showCount: "false",
     sortOrder: "lastModifiedDesc",
     tabSize: "4",
-    version: "3.2.2"
+    version: "3.3.0"
 };
 
 // example file contents
