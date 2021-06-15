@@ -238,12 +238,14 @@ func parse(_ content: String) -> [String: Any]? {
 struct Manifest: Codable {
     var blacklist:[String]
     var disabled:[String]
+    var exclude: [String: [String]]
     var excludeMatch: [String: [String]]
+    var include: [String: [String]]
     var match: [String: [String]]
     var require: [String: [String]]
     var settings: [String: String]
     private enum CodingKeys : String, CodingKey {
-        case blacklist, disabled, excludeMatch = "exclude-match", match, require, settings
+        case blacklist, disabled, exclude, excludeMatch = "exclude-match", include, match, require, settings
     }
 }
 
@@ -265,7 +267,7 @@ func getManifestKeys() -> Manifest? {
     let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
     // if manifest doesn't exist, create new one
     if !FileManager.default.fileExists(atPath: url.path) {
-        let manifest = Manifest(blacklist: [], disabled: [], excludeMatch: [:], match: [:], require: [:], settings: [:])
+        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], excludeMatch: [:], include: [:], match: [:], require: [:], settings: [:])
         _ = updateManifest(with: manifest)
     }
     guard
@@ -613,7 +615,7 @@ func getInitData() -> [String: Any]? {
     var manifestKeys = getManifestKeys()
     // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
     if manifestKeys == nil {
-        manifestKeys = Manifest(blacklist: [], disabled: [], excludeMatch: [:], match: [:], require: [:], settings: [:])
+        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], excludeMatch: [:], include: [:], match: [:], require: [:], settings: [:])
         if !updateManifest(with: manifestKeys!) { // force unwrap since it was assigned in above line
             err("manifest had issues that could not be resolved while getting init data")
             return nil
