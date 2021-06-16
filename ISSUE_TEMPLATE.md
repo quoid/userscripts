@@ -3,9 +3,9 @@ Please fill out the below information before submitting your issue
 If you are having issues with script injection, please include examples of what is not working and try the userscript below:
 
 // ==UserScript==
-// @name        TestScript
-// @description This is your new file, start writing code
-// @include       *://*/*
+// @name          TestScript
+// @description   This is your new file, start writing code
+// @match         <all_urls>
 // @exclude-match *://*.google.com/*
 // @noframes
 // ==/UserScript==
