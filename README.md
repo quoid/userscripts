@@ -91,8 +91,8 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
     - **Note:** this extension only supports `http/s`
 - `@exclude-match` - Domain patterns where you do *not* want the script to run
-- `@include` - An alias for `@match` - functions exactly like `@match`
-- `@exclude` - An alias for `@exclude-match` - functions exactly like `@exclude-match`
+- `@include` - Used to match against urls for injection, globs and regular expressions are allowed, [read more here](https://wiki.greasespot.net/Include_and_exclude_rules)
+- `@exclude` - Functions in a similar way as `@include` but rather than injecting, a match against this key's value will prevent injection
 - `@inject-into` - allows the user to choose which context to inject the script into
     - allows the user to choose which context to inject the script into
     - values: auto (default), content, page

@@ -1,14 +1,17 @@
-<!-- Please fill out the below information before submitting your issue -->
 <!-- 
-If you are having issues with script injection, please include examples of what is not working and try the userscript below:
+Please fill out the below information before submitting your issue.
+
+If you are having issues with script injection, please include examples of what is not working and try the userscript below to determine whether the issue is with the extension or your Javascript.
 
 // ==UserScript==
-// @name        TestScript
-// @description This is your new file, start writing code
-// @match       *://*/*
+// @name          TestScript
+// @description   This is your new file, start writing code
+// @match         <all_urls>
+// @exclude-match *://*.google.com/*
+// @noframes
 // ==/UserScript==
 
-console.log("This is a test script");
+console.log(`This is a test script - ${window.location.href}`);
 -->
 
 _System Information:_
@@ -16,4 +19,4 @@ _System Information:_
 > Userscripts version:
 > Safari version:
 > Is this issue related to script injection?
-> Did the test script run on your machine?
+> Did the test script (pasted above) successfully run on your machine?
