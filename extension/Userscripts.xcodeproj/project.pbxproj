@@ -7,21 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4A52196F25F47AE10084FA51 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A52196D25F47AE10084FA51 /* PopoverView.swift */; };
-		4A52197025F47AE10084FA51 /* PopoverView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A52196E25F47AE10084FA51 /* PopoverView.xib */; };
+		4A36A61A268266B30018536B /* images in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A616268266B30018536B /* images */; };
+		4A36A61B268266B30018536B /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A617268266B30018536B /* _locales */; };
 		4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F1227235CD008A9763 /* AppDelegate.swift */; };
 		4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F3227235CD008A9763 /* Main.storyboard */; };
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
 		4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F8227235CE008A9763 /* Assets.xcassets */; };
 		4A57BA00227235CE008A9763 /* Userscripts Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A57BA04227235CE008A9763 /* Cocoa.framework */; };
-		4A57BA08227235CE008A9763 /* SafariExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */; };
-		4A57BA10227235CE008A9763 /* UserscriptsSafari.js in Resources */ = {isa = PBXBuildFile; fileRef = 4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */; };
-		4A57BA12227235CE008A9763 /* ToolbarItemIcon.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */; };
-		4AB37AD923DA73E500413E1E /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AB37AD823DA73E500413E1E /* index.html */; };
-		4AE1EA8B24D73AB600D70037 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE1EA8A24D73AB600D70037 /* Shared.swift */; };
-		4AE1EA8C24D73AB600D70037 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE1EA8A24D73AB600D70037 /* Shared.swift */; };
-		4AED8EC823F0FE8A0059259E /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED8EC723F0FE8A0059259E /* Functions.swift */; };
+		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
+		4AA5E11B2682CDA100C5E90F /* background.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AA5E11A2682CDA100C5E90F /* background.html */; };
+		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
+		4AF757762683A506001E0D95 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 4AF757752683A506001E0D95 /* scripts */; };
+		4AF7577D2683BB5F001E0D95 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AF7577B2683BB5F001E0D95 /* popup.html */; };
+		4AF7577E2683BB5F001E0D95 /* page.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AF7577C2683BB5F001E0D95 /* page.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,8 +48,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4A52196D25F47AE10084FA51 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
-		4A52196E25F47AE10084FA51 /* PopoverView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PopoverView.xib; sourceTree = "<group>"; };
+		4A36A616268266B30018536B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
+		4A36A617268266B30018536B /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; path = _locales; sourceTree = "<group>"; };
 		4A57B9EC227235CD008A9763 /* Userscripts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Userscripts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57B9EF227235CD008A9763 /* Userscripts.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Userscripts.entitlements; sourceTree = "<group>"; };
 		4A57B9F1227235CD008A9763 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -60,14 +59,14 @@
 		4A57B9FA227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57BA04227235CE008A9763 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariExtensionHandler.swift; sourceTree = "<group>"; };
+		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = UserscriptsSafari.js; sourceTree = "<group>"; };
-		4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ToolbarItemIcon.pdf; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts Extension.entitlements"; sourceTree = "<group>"; };
-		4AB37AD823DA73E500413E1E /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
-		4AE1EA8A24D73AB600D70037 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
-		4AED8EC723F0FE8A0059259E /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		4AA5E11A2682CDA100C5E90F /* background.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = background.html; sourceTree = "<group>"; };
+		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
+		4AF757752683A506001E0D95 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripts; sourceTree = "<group>"; };
+		4AF7577B2683BB5F001E0D95 /* popup.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = popup.html; sourceTree = "<group>"; };
+		4AF7577C2683BB5F001E0D95 /* page.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = page.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,7 +91,6 @@
 		4A57B9E3227235CD008A9763 = {
 			isa = PBXGroup;
 			children = (
-				4AE1EA8A24D73AB600D70037 /* Shared.swift */,
 				4A57B9EE227235CD008A9763 /* Userscripts */,
 				4A57BA06227235CE008A9763 /* Userscripts Extension */,
 				4A57BA03227235CE008A9763 /* Frameworks */,
@@ -133,17 +131,26 @@
 		4A57BA06227235CE008A9763 /* Userscripts Extension */ = {
 			isa = PBXGroup;
 			children = (
-				4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */,
-				4A57BA07227235CE008A9763 /* SafariExtensionHandler.swift */,
-				4AED8EC723F0FE8A0059259E /* Functions.swift */,
-				4A52196D25F47AE10084FA51 /* PopoverView.swift */,
-				4A52196E25F47AE10084FA51 /* PopoverView.xib */,
-				4AB37AD823DA73E500413E1E /* index.html */,
+				4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */,
 				4A57BA0E227235CE008A9763 /* Info.plist */,
-				4A57BA0F227235CE008A9763 /* UserscriptsSafari.js */,
-				4A57BA11227235CE008A9763 /* ToolbarItemIcon.pdf */,
+				4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */,
+				4AF1DD0D268265DB00086E88 /* Resources */,
 			);
 			path = "Userscripts Extension";
+			sourceTree = "<group>";
+		};
+		4AF1DD0D268265DB00086E88 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4A36A617268266B30018536B /* _locales */,
+				4A36A616268266B30018536B /* images */,
+				4AF757752683A506001E0D95 /* scripts */,
+				4AA5E11A2682CDA100C5E90F /* background.html */,
+				4AD66D2026826D8100B004E8 /* manifest.json */,
+				4AF7577C2683BB5F001E0D95 /* page.html */,
+				4AF7577B2683BB5F001E0D95 /* popup.html */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -241,10 +248,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A57BA12227235CE008A9763 /* ToolbarItemIcon.pdf in Resources */,
-				4AB37AD923DA73E500413E1E /* index.html in Resources */,
-				4A52197025F47AE10084FA51 /* PopoverView.xib in Resources */,
-				4A57BA10227235CE008A9763 /* UserscriptsSafari.js in Resources */,
+				4AF7577E2683BB5F001E0D95 /* page.html in Resources */,
+				4AD66D2326826D8100B004E8 /* manifest.json in Resources */,
+				4AF7577D2683BB5F001E0D95 /* popup.html in Resources */,
+				4A36A61A268266B30018536B /* images in Resources */,
+				4AA5E11B2682CDA100C5E90F /* background.html in Resources */,
+				4A36A61B268266B30018536B /* _locales in Resources */,
+				4AF757762683A506001E0D95 /* scripts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +265,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AE1EA8B24D73AB600D70037 /* Shared.swift in Sources */,
 				4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */,
 				4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */,
 			);
@@ -265,10 +274,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AE1EA8C24D73AB600D70037 /* Shared.swift in Sources */,
-				4A57BA08227235CE008A9763 /* SafariExtensionHandler.swift in Sources */,
-				4A52196F25F47AE10084FA51 /* PopoverView.swift in Sources */,
-				4AED8EC823F0FE8A0059259E /* Functions.swift in Sources */,
+				4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,7 +352,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -402,7 +408,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -417,7 +423,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -426,7 +432,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 3.3.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -440,7 +446,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -449,7 +455,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 3.3.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -466,7 +472,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
@@ -474,7 +480,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 3.3.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -490,7 +496,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
@@ -498,7 +504,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 3.3.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

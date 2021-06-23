@@ -19,8 +19,7 @@
         }
     ],
     "globals": {
-        "safari": "writable",
-        "_safari": "readonly"
+        "browser": "readonly"
     },
     "rules": {
         "array-bracket-spacing": [
@@ -91,7 +90,7 @@
             "never"
         ],
         "require-jsdoc": [
-            "off"
+            "error"
         ],
         "jsx-a11y/a11y-missing-attribute": "off"
     }
