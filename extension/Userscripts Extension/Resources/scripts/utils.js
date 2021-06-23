@@ -1,8 +1,3 @@
-/**
- * console logs a message in a browser tab
- * @param {*} message
- * @param {number} tabId
- */
 export function log(message, tabId) {
     var id = tabId;
     var code = `console.log(${message});`;

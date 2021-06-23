@@ -1,7 +1,4 @@
-/**
- * navigates to extension page or creates new tab and loads extension page
- */
-async function openExtensionPage() {
+function openExtensionPage() {
     const extensionPageUrl = browser.runtime.getURL("/page.html");
     browser.tabs.query({}, tabs => {
         var open = false;

@@ -13,10 +13,6 @@ browser.webNavigation.onCommitted.addListener(details => {
     );
 });
 
-/**
- * handle responses sent from app extension
- * @param {Object} response
- */
 function handleResponse(response) {
     const message = response.name === "RESPONSE_01" ? "on filmgarb.com" : "not on filmgarb.com";
     log(message, response.tabId);

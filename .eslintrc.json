@@ -89,9 +89,6 @@
             "error",
             "never"
         ],
-        "require-jsdoc": [
-            "error"
-        ],
         "jsx-a11y/a11y-missing-attribute": "off"
     }
 }

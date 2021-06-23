@@ -28,6 +28,5 @@
         "nativeMessaging",
         "tabs",
         "webNavigation"
-    ],
-    "content_security_policy": "script-src 'self' 'unsafe-inline'; object-src 'self'"
+    ]
 }
