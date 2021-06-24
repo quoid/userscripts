@@ -4,8 +4,7 @@
     "lint-css": "npx stylelint ./",
     "lint-js": "eslint ./",
     "dev": "rollup -c -w",
-    "start": "sirv public",
-    "demo": "NODE_ENV=demo rollup -c && NODE_ENV=demo gulp demo"
+    "start": "sirv public"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^15.1.0",
@@ -18,9 +17,11 @@
     "eslint": "^7.11.0",
     "eslint-plugin-svelte3": "^2.7.3",
     "gulp": "^4.0.2",
+    "gulp-dom": "^1.0.0",
     "gulp-html-minifier-terser": "^6.0.1",
     "gulp-inline-source": "^4.0.0",
     "gulp-postcss": "^9.0.0",
+    "gulp-rename": "^2.0.0",
     "rollup": "^2.29.0",
     "rollup-plugin-css-only": "^2.1.0",
     "rollup-plugin-inline-svg": "^2.0.0",
