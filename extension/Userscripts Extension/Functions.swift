@@ -191,7 +191,7 @@ func parse(_ content: String) -> [String: Any]? {
     // iterate through the possible metadata keys in file
     if let metas = Range(match.range(at: g2), in: content) {
         // split metadatas by new line
-        let metaArray = "\(content[metas])".split(whereSeparator: \.isNewline)
+        let metaArray = content[metas].split(whereSeparator: \.isNewline)
         for meta in metaArray {
             let p = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
             // this pattern checks for specific keys that won't have values
