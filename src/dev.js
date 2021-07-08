@@ -6,7 +6,7 @@ const _browser = {
             if (message.name === "POPUP_TOGGLE_EXTENSION") {
                 //response = {error: "Failed toggle extension"};
                 response = {status: "success"};
-            } else if (message.name === "POPUP_REFRESH") {
+            } else if (message.name === "POPUP_UPDATE_ALL") {
                 response = {error: "Failed refresh scripts"};
                 response = {
                     items: [
@@ -52,7 +52,7 @@ const _browser = {
                 };
             } else if (message.name === "POPUP_MATCHES") {
                 response = {
-                    active: true,
+                    active: "true",
                     items: [],
                     updates: [
                         {name: "Google Images Restored", url: "https://www.k21p.com"},
