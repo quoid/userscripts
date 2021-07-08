@@ -19,6 +19,8 @@
     let updates = [];
     let main;
 
+    $: list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0]));
+
     function toggleExtension() {
         disabled = true;
         browser.runtime.sendNativeMessage({name: "POPUP_TOGGLE_EXTENSION"}, response => {
@@ -232,7 +234,7 @@
             <div class="none">No matched userscripts</div>
         {:else}
             <div class="items" class:disabled={disabled}>
-                {#each items as item (item.filename)}
+                {#each list as item (item.filename)}
                     <PopupItem
                         enabled={!item.disabled}
                         name={item.metadata.name[0]}
