@@ -16,7 +16,7 @@
             delay: params.delay || 0,
             duration: params.duration || 150,
             easing: params.easing || quintInOut,
-            css: t => `transform: translateX(${(t-1)*20}rem);`
+            css: t => `transform: translateX(${(t-1)*18}rem);`
         };
     }
 </script>

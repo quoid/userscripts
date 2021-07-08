@@ -10,7 +10,7 @@ body {
     letter-spacing: var(--letter-spacing-medium);
     position: relative;
     text-rendering: optimizeLegibility;
-    width: 20rem;
+    width: 18rem;
     -webkit-font-smoothing: antialiased;
 }
 
