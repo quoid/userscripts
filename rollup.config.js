@@ -40,11 +40,9 @@ export default {
         name: "app",
         file: "public/build/bundle.js"
     },
+    inlineDynamicImports: true,
     plugins: [
         multi(),
-        css({
-            output: "public/build/lib.css"
-        }),
         inlineSvg({}),
         svelte({
             // enable run-time checks when not in production

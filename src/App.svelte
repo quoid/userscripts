@@ -1,119 +1,259 @@
 <script>
-    import {onMount, tick} from "svelte";
-    import {blur} from "svelte/transition";
-    import {setupMessageHandler} from "./handler.js";
-    import {log, notifications, settings, state} from "./store.js";
-    import Notification from "./Components/Shared/Notification.svelte";
-    import Sidebar from "./Components/Sidebar/Sidebar.svelte";
-    import Editor from "./Components/Editor/Editor.svelte";
-    import Settings from "./Components/Settings.svelte";
+    import {onMount} from "svelte";
+    import IconButton from "./Components/IconButton.svelte";
+    import Loader from "./Components/Loader.svelte";
+    import PopupItem from "./Components/PopupItem.svelte";
+    import UpdateView from "./Components/UpdateView.svelte";
+    import iconPower from "./img/icon-power.svg";
+    import iconOpen from "./img/icon-open.svg";
+    import iconUpdate from "./img/icon-update.svg";
+    import iconClear from "./img/icon-clear.svg";
     import logo from "./img/logo.svg";
 
-    //log messages when they come in
-    let logger = [];
-    // save errors separately so when they are cleared, they aren't removed from log
-    $: $log.some(a => {
-        if (!logger.includes(a)) {
-            if (a.type === "error") console[a.type](a.message);
-            //if ($settings.log) console[a.type](a.message);
-            //if (a.type === "error") errors = [a, ...errors];
-            logger.push(a);
-        }
-    });
+    let error = undefined;
+    let active = true;
+    let loading = true;
+    let disabled = true;
+    let items = [];
+    let showUpdates = false;
+    let updates = [];
+    let main;
 
-    // disables default cmd+s (save) and cmd+f (find) behavior
-    function preventKeyCommands(e) {
-        if (e.metaKey && (e.code === "KeyS" || e.code === "KeyF")) {
-            return e.preventDefault();
-        }
+    function toggleExtension() {
+        disabled = true;
+        browser.runtime.sendNativeMessage({name: "POPUP_TOGGLE_EXTENSION"}, response => {
+            disabled = false;
+            if (response.error) return error = response.error;
+            active = !active;
+        });
     }
 
-    // app proportions can get messed up when opening/closing new tabs
-    async function windowResize() {
-        document.documentElement.style.height = "100vh";
-        // if tick is omitted, the style change won't apply
-        await tick();
-        document.documentElement.removeAttribute("style");
+    function updateAll() {
+        showUpdates = false;
+        disabled = true;
+        loading = true;
+        main.style.height = main.offsetHeight + "px";
+        browser.runtime.sendNativeMessage({name: "POPUP_UPDATE_ALL"}, response => {
+            if (response.error) {
+                error = response.error;
+            } else {
+                if (response.items) items = response.items;
+                updates = response.updates;
+            }
+            main.removeAttribute("style");
+            disabled = false;
+            loading = false;
+        });
     }
 
-    onMount(() => {
-        // environment setup
-        setupMessageHandler();
-        // start initialization process
-        safari.extension.dispatchMessage("REQ_INIT_DATA");
-    });
+    function toggleItem(item) {
+        disabled = true;
+        browser.runtime.sendNativeMessage({name: "POPUP_TOGGLE_SCRIPT", item: item}, response => {
+            if (response.error) {
+                error = response.error;
+            } else {
+                const i = items.findIndex(el => el === item);
+                item.disabled = !item.disabled;
+                items[i] = item;
+            }
+            disabled = false;
+        });
+    }
 
-    // currently inactive, but could be used to globally prevent auto text replacement in app
-    // eslint-disable-next-line no-unused-vars
-    function preventAutoTextReplacements(e) {
-        if (e.inputType === "insertReplacementText" && e.data === ". ") {
-            e.preventDefault();
-            e.target.value += " ";
+    function checkForUpdates() {
+        disabled = true;
+        setTimeout(() => disabled = false, 1000);
+    }
+
+    function openExtensionPage() {
+        browser.tabs.create({url: browser.runtime.getURL("page.html")});
+    }
+
+    function openSaveLocation() {
+        browser.runtime.sendNativeMessage({name: "OPEN_SAVE_LOCATION"});
+    }
+
+    async function mounted() {
+        let p = new Promise(resolve => {
+            browser.tabs.query({currentWindow: true, active: true}, tabs => {
+                resolve(tabs);
+            });
+        });
+        let tabs = await p;
+        const url = tabs[0].url;
+        const message = {name: "POPUP_MATCHES", url: url, frameUrls: []};
+        if (url) {
+            let p2 = new Promise(resolve => {
+                browser.webNavigation.getAllFrames({tabId: tabs[0].id}, frames => {
+                    resolve(frames);
+                });
+            });
+            let frames = await p2;
+            frames.forEach(frame => message.frameUrls.push(frame.url));
         }
+        browser.runtime.sendNativeMessage(message, response => {
+            if (response.error) {
+                error = response.error;
+            } else {
+                active = response.active === "true" ? true : false;
+                items = response.items;
+                updates = response.updates;
+            }
+            loading = false;
+            disabled = false;
+        });
     }
+
+    onMount(() => {mounted()});
 </script>
-
 <style>
-    .initializer {
+    .header {
         align-items: center;
-        background-color: var(--color-bg-primary);
+        border-bottom: 1px solid var(--color-black);
         display: flex;
-        flex-direction: column;
+        padding: 0.5rem 1rem calc(0.5rem - 1px) 1rem;
+    }
+
+    .header__logo {
+        flex-grow: 1;
+        height: 1rem;
+    }
+
+    :global(.header__logo svg) {
+        display: block;
         height: 100%;
+    }
+
+    .header :global(button:nth-of-type(2)) {
+        margin: 0 1rem;
+    }
+
+    .header :global(button:nth-of-type(1) svg) {
+        width: 75%;
+    }
+
+    .header :global(button:nth-of-type(2) svg) {
+        width: 90%;
+    }
+
+    .error {
+        background-color: var(--color-red);
+        color: var(--color-bg-secondary);
+        font: var(--text-small);
+        font-weight: 600;
+        letter-spacing: var(--letter-spacing-small);
+        line-height: 1.5rem;
+        position: relative;
+        text-align: center;
+    }
+
+    .error :global(button) {
+        position: absolute;
+        right: 0.5rem;
+        top: 0;
+    }
+
+    .error :global(button svg) {
+        width: 50%;
+    }
+
+    .main {
+        max-height: 20rem;
+        min-height: 12.5rem;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .none {
+        align-items: center;
+        bottom: 0;
+        color: var(--text-color-disabled);
+        display: flex;
+        font-weight: 600;
         justify-content: center;
         left: 0;
-        opacity: 1;
         position: absolute;
+        right: 0;
         top: 0;
-        visibility: visible;
-        width: 100%;
-        z-index: 99;
     }
 
-    .initializer :global(svg) {
-        height: 1.5rem;
-        margin-bottom: 0.5rem;
+    .items.disabled {
+        opacity: var(--opacity-disabled);
+        pointer-events: none;
     }
 
-    .initializer span {
-        color: var(--text-color-secondary);
-        font: var(--text-medium);
-    }
-
-    div:not(.initializer) {
-        display: flex;
-        flex: 1 0 0;
-        overflow: hidden;
-    }
-
-    ul {
-        bottom: 1rem;
-        left: 50%;
-        position: fixed;
-        transform: translateX(-50%);
-        z-index: 98;
+    .footer {
+        border-top: 1px solid var(--color-black);
+        display: none;
+        font-weight: 600;
+        line-height: 1.5rem;
+        padding: 0.5rem 0;
+        text-align: center;
     }
 </style>
-
-<svelte:window on:keydown={preventKeyCommands} on:resize={windowResize}/>
-
-{#if $state.includes("init")}
-    <div class="initializer" out:blur="{{duration: 350}}">
-        {@html logo}
-        {#if $state.includes("init-error")}
-            <span>Failed to initialize app, check the console!</span>
-        {:else}
-            <span>Initializing app...</span>
-        {/if}
+<div class="header">
+    <div class="header__logo">{@html logo}</div>
+    <IconButton
+        icon={iconOpen}
+        title={"Open save location"}
+        on:click={openSaveLocation}
+        {disabled}
+    />
+    <IconButton
+        icon={iconUpdate}
+        notification={updates.length}
+        on:click={() => showUpdates = true}
+        title={"Show updates"}
+        {disabled}
+    />
+    <IconButton
+        on:click={toggleExtension}
+        icon={iconPower}
+        title={"Toggle injection"}
+        color={active ? "var(--color-green)" : "var(--color-red)"}
+        {disabled}
+    />
+</div>
+{#if error}
+    <div class="error">
+        {error}
+        <IconButton
+            icon={iconClear}
+            on:click={() => error = undefined}
+            title={"Clear error"}
+        />
     </div>
 {/if}
-<div>
-    <Sidebar/>
-    <Editor/>
+<div class="main" bind:this={main}>
+    {#if loading}
+        <Loader/>
+    {:else}
+        {#if items.length < 1}
+            <div class="none">No matched userscripts</div>
+        {:else}
+            <div class="items" class:disabled={disabled}>
+                {#each items as item (item.filename)}
+                    <PopupItem
+                        enabled={!item.disabled}
+                        name={item.metadata.name[0]}
+                        subframe={item.subframe}
+                        type={item.type}
+                        on:click={() => toggleItem(item)}
+                    />
+                {/each}
+            </div>
+        {/if}
+    {/if}
 </div>
-<ul>
-    {#each $notifications as item (item.id)}
-        <Notification on:click={() =>  notifications.remove(item.id)} {item}/>
-    {/each}
-</ul>
-{#if $state.includes("settings")}<Settings />{/if}
+<div class="footer">
+    <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
+</div>
+{#if showUpdates}
+    <UpdateView
+        closeClick={() => showUpdates = false}
+        updateClick={updateAll}
+        checkClick={checkForUpdates}
+        loading={disabled}
+        updates={updates}
+    />
+{/if}

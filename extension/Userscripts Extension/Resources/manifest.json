@@ -13,8 +13,8 @@
         "512": "images/icon-512.png"
     },
     "background": {
-        "page": "background.html",
-        "__persistent": false
+        "scripts": ["background.js"],
+        "persistent": true
     },
     "browser_action": {
         "default_popup": "popup.html",
@@ -23,6 +23,14 @@
             "32": "images/toolbar-icon-32.png"
         }
     },
+    "content_scripts": [
+        {
+            "js": ["content.js"],
+            "matches": ["<all_urls>"],
+            "run_at": "document_start",
+            "all_frames": true
+        }
+    ],
     "permissions": [
         "<all_urls>",
         "nativeMessaging",

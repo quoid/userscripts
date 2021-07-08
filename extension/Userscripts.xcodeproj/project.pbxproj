@@ -16,11 +16,15 @@
 		4A57BA00227235CE008A9763 /* Userscripts Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A57BA04227235CE008A9763 /* Cocoa.framework */; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
+		4A6E19EE268CC84A00E0270C /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
+		4A6E19EF268CC84A00E0270C /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
 		4AA5E11B2682CDA100C5E90F /* background.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AA5E11A2682CDA100C5E90F /* background.html */; };
+		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
+		4AC2A1FA268A67A00081B045 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AC2A1F9268A67A00081B045 /* background.js */; };
 		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
-		4AF757762683A506001E0D95 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 4AF757752683A506001E0D95 /* scripts */; };
+		4AED6492268CDB58001794BF /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
+		4AED6494268CEBE4001794BF /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AED6493268CEBE4001794BF /* popup.js */; };
 		4AF7577D2683BB5F001E0D95 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AF7577B2683BB5F001E0D95 /* popup.html */; };
-		4AF7577E2683BB5F001E0D95 /* page.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AF7577C2683BB5F001E0D95 /* page.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,11 +66,14 @@
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts Extension.entitlements"; sourceTree = "<group>"; };
+		4A6E19ED268CC84A00E0270C /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 		4AA5E11A2682CDA100C5E90F /* background.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = background.html; sourceTree = "<group>"; };
+		4AB22357268B9B9200D551C6 /* content.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
+		4AC2A1F9268A67A00081B045 /* background.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
-		4AF757752683A506001E0D95 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripts; sourceTree = "<group>"; };
+		4AED6491268CDB58001794BF /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		4AED6493268CEBE4001794BF /* popup.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = popup.js; sourceTree = "<group>"; };
 		4AF7577B2683BB5F001E0D95 /* popup.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = popup.html; sourceTree = "<group>"; };
-		4AF7577C2683BB5F001E0D95 /* page.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = page.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +98,7 @@
 		4A57B9E3227235CD008A9763 = {
 			isa = PBXGroup;
 			children = (
+				4A6E19ED268CC84A00E0270C /* Shared.swift */,
 				4A57B9EE227235CD008A9763 /* Userscripts */,
 				4A57BA06227235CE008A9763 /* Userscripts Extension */,
 				4A57BA03227235CE008A9763 /* Frameworks */,
@@ -131,6 +139,7 @@
 		4A57BA06227235CE008A9763 /* Userscripts Extension */ = {
 			isa = PBXGroup;
 			children = (
+				4AED6491268CDB58001794BF /* Functions.swift */,
 				4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */,
 				4A57BA0E227235CE008A9763 /* Info.plist */,
 				4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */,
@@ -144,11 +153,12 @@
 			children = (
 				4A36A617268266B30018536B /* _locales */,
 				4A36A616268266B30018536B /* images */,
-				4AF757752683A506001E0D95 /* scripts */,
 				4AA5E11A2682CDA100C5E90F /* background.html */,
+				4AC2A1F9268A67A00081B045 /* background.js */,
+				4AB22357268B9B9200D551C6 /* content.js */,
 				4AD66D2026826D8100B004E8 /* manifest.json */,
-				4AF7577C2683BB5F001E0D95 /* page.html */,
 				4AF7577B2683BB5F001E0D95 /* popup.html */,
+				4AED6493268CEBE4001794BF /* popup.js */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -248,13 +258,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AF7577E2683BB5F001E0D95 /* page.html in Resources */,
 				4AD66D2326826D8100B004E8 /* manifest.json in Resources */,
 				4AF7577D2683BB5F001E0D95 /* popup.html in Resources */,
+				4AC2A1FA268A67A00081B045 /* background.js in Resources */,
+				4AB22358268B9B9200D551C6 /* content.js in Resources */,
 				4A36A61A268266B30018536B /* images in Resources */,
 				4AA5E11B2682CDA100C5E90F /* background.html in Resources */,
 				4A36A61B268266B30018536B /* _locales in Resources */,
-				4AF757762683A506001E0D95 /* scripts in Resources */,
+				4AED6494268CEBE4001794BF /* popup.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,6 +276,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A6E19EE268CC84A00E0270C /* Shared.swift in Sources */,
 				4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */,
 				4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */,
 			);
@@ -274,7 +286,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A6E19EF268CC84A00E0270C /* Shared.swift in Sources */,
 				4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */,
+				4AED6492268CDB58001794BF /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -423,7 +437,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -446,7 +460,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -472,7 +486,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
@@ -496,7 +510,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 29;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;

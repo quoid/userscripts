@@ -8,6 +8,7 @@ const dom = require("gulp-dom");
 const rename = require("gulp-rename");
 
 const copyLocation = "./temp";
+const destLocation = "./extension//Userscripts Extension/Resources";
 
 // clone public directory to avoid prefixing development assets
 function copy() {
@@ -53,7 +54,7 @@ function bundleJS() {
             return result;
         }, false))
         .pipe(rename("popup.js"))
-        .pipe(dest("./FOO"));
+        .pipe(dest(destLocation));
 }
 
 // remove the scripts tags from source file and move/rename html file
@@ -66,12 +67,12 @@ function removeTags() {
                 parent.removeChild(script);
             });
             const f = this.createElement("script");
-            f.setAttribute("src", "scripts/popup.js");
+            f.setAttribute("src", "popup.js");
             this.body.appendChild(f);
             return this;
         }, false))
         .pipe(rename("popup.html"))
-        .pipe(dest("./FOO"));
+        .pipe(dest(destLocation));
 }
 
 // remove the temp folder

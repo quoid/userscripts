@@ -1,7 +1,6 @@
 <script>
-    import iconLoader from "../../img/icon-loader.svg";
-
     export let checked = false;
+    export let disabled = false;
 </script>
 
 <style>
@@ -54,27 +53,13 @@
         left: calc(100% - (0.75em + 0.125em)); /* minus el width + left */
     }
 
-    :global(label svg) {
-        display: none;
-        height: 1em;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 1em;
-    }
-
     input:disabled + span {
-        opacity: 0;
-    }
-
-    :global(input:disabled + span + svg) {
-        display: block;
+        opacity: var(--opacity-disabled);
     }
 </style>
 
 <!-- prevent toggle label clicks from triggering parent element on:click -->
 <label on:click|stopPropagation={() => {}}>
-    <input type="checkbox" on:click|stopPropagation bind:checked={checked}>
+    <input type="checkbox" on:click|stopPropagation bind:checked={checked} {disabled}>
     <span></span>
-    {@html iconLoader}
 </label>

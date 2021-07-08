@@ -26,7 +26,7 @@
         border-radius: 50%;
         content: "";
         height: 0.75rem;
-        right: 0;
+        left: 0;
         position: absolute;
         top: 0;
         width: 0.75rem;
