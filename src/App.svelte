@@ -73,6 +73,7 @@
 
     function openSaveLocation() {
         browser.runtime.sendNativeMessage({name: "OPEN_SAVE_LOCATION"});
+        window.close();
     }
 
     async function mounted() {

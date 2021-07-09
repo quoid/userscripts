@@ -1517,7 +1517,7 @@
     	return child_ctx;
     }
 
-    // (219:0) {#if error}
+    // (220:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1565,7 +1565,7 @@
     	};
     }
 
-    // (235:8) {:else}
+    // (236:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1638,7 +1638,7 @@
     	};
     }
 
-    // (233:8) {#if items.length < 1}
+    // (234:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1660,7 +1660,7 @@
     	};
     }
 
-    // (230:4) {#if loading}
+    // (231:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1690,7 +1690,7 @@
     	};
     }
 
-    // (237:16) {#each list as item (item.filename)}
+    // (238:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1749,7 +1749,7 @@
     	};
     }
 
-    // (253:0) {#if showUpdates}
+    // (254:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2055,6 +2055,7 @@
 
     function openSaveLocation() {
     	browser.runtime.sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
+    	window.close();
     }
 
     function instance$5($$self, $$props, $$invalidate) {
