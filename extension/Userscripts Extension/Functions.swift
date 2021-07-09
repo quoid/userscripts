@@ -1132,17 +1132,24 @@ func getInjectionFilenames(_ url: String) -> [String]? {
 }
 
 // popup
-func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+func getPopupMatches(_ url: String, _ subframeUrls: [String], _ shouldUpdate: Bool) -> [[String: Any]]? {
     var matches = [[String: Any]]()
     let matched = getMatchedFiles(url)
     guard
-        let files = getAllFiles(),
-        updateManifestMatches(),
-        updateManifestRequired(),
-        purgeManifest()
+        let files = getAllFiles()
     else {
         err("getPopupMatches failed at (1)")
         return nil
+    }
+    if shouldUpdate {
+        guard
+            updateManifestMatches(),
+            updateManifestRequired(),
+            purgeManifest()
+        else {
+            err("getPopupMatches failed at (2)")
+            return nil
+        }
     }
     // force unwrap filename to string since getAllFiles always returns it
     matches = files.filter{matched.contains($0["filename"] as! String)}
@@ -1180,4 +1187,29 @@ func popupUpdateAll() -> Bool {
         return false
     }
     return true
+}
+
+func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
+    let manifest = getManifest()
+    guard
+        var matches = getPopupMatches(url, subframeUrls, false),
+        let active = manifest.settings["active"]
+    else {
+        err("getPopupBadgeCount failed at (1)")
+        return nil
+    }
+    if let parts = getUrlProps(url), let ptcl = parts["protocol"], let host = parts["host"], let path = parts["pathname"] {
+        for pattern in manifest.blacklist {
+            if match(ptcl, host, path, pattern) {
+                return 0
+            }
+        }
+    } else {
+        return 0
+    }
+    if active != "true" {
+        return 0
+    }
+    matches = matches.filter{!manifest.disabled.contains($0["filename"] as! String)}
+    return matches.count
 }

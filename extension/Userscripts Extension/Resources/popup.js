@@ -1472,7 +1472,7 @@
     			delay: params.delay || 0,
     			duration: params.duration || 150,
     			easing: params.easing || quintInOut,
-    			css: t => `transform: translateX(${(t - 1) * 20}rem);`
+    			css: t => `transform: translateX(${(t - 1) * 18}rem);`
     		};
     	}
 
@@ -1513,11 +1513,11 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[18] = list[i];
+    	child_ctx[19] = list[i];
     	return child_ctx;
     }
 
-    // (242:0) {#if error}
+    // (219:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1529,7 +1529,7 @@
     			props: { icon: iconClear, title: "Clear error" }
     		});
 
-    	iconbutton.$on("click", /*click_handler_1*/ ctx[13]);
+    	iconbutton.$on("click", /*click_handler_1*/ ctx[14]);
 
     	return {
     		c() {
@@ -1565,14 +1565,14 @@
     	};
     }
 
-    // (258:8) {:else}
+    // (235:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	let each_value = /*items*/ ctx[4];
-    	const get_key = ctx => /*item*/ ctx[18].filename;
+    	let each_value = /*list*/ ctx[8];
+    	const get_key = ctx => /*item*/ ctx[19].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -1601,8 +1601,8 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*items, toggleItem*/ 1040) {
-    				const each_value = /*items*/ ctx[4];
+    			if (dirty & /*list, toggleItem*/ 2304) {
+    				const each_value = /*list*/ ctx[8];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
     				check_outros();
@@ -1638,7 +1638,7 @@
     	};
     }
 
-    // (256:8) {#if items.length < 1}
+    // (233:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1660,7 +1660,7 @@
     	};
     }
 
-    // (253:4) {#if loading}
+    // (230:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1690,22 +1690,22 @@
     	};
     }
 
-    // (260:16) {#each items as item (item.filename)}
+    // (237:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_2(...args) {
-    		return /*click_handler_2*/ ctx[14](/*item*/ ctx[18], ...args);
+    		return /*click_handler_2*/ ctx[15](/*item*/ ctx[19], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[18].disabled,
-    				name: /*item*/ ctx[18].metadata.name[0],
-    				subframe: /*item*/ ctx[18].subframe,
-    				type: /*item*/ ctx[18].type
+    				enabled: !/*item*/ ctx[19].disabled,
+    				name: /*item*/ ctx[19].metadata.name[0],
+    				subframe: /*item*/ ctx[19].subframe,
+    				type: /*item*/ ctx[19].type
     			}
     		});
 
@@ -1727,10 +1727,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*items*/ 16) popupitem_changes.enabled = !/*item*/ ctx[18].disabled;
-    			if (dirty & /*items*/ 16) popupitem_changes.name = /*item*/ ctx[18].metadata.name[0];
-    			if (dirty & /*items*/ 16) popupitem_changes.subframe = /*item*/ ctx[18].subframe;
-    			if (dirty & /*items*/ 16) popupitem_changes.type = /*item*/ ctx[18].type;
+    			if (dirty & /*list*/ 256) popupitem_changes.enabled = !/*item*/ ctx[19].disabled;
+    			if (dirty & /*list*/ 256) popupitem_changes.name = /*item*/ ctx[19].metadata.name[0];
+    			if (dirty & /*list*/ 256) popupitem_changes.subframe = /*item*/ ctx[19].subframe;
+    			if (dirty & /*list*/ 256) popupitem_changes.type = /*item*/ ctx[19].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -1749,16 +1749,16 @@
     	};
     }
 
-    // (276:0) {#if showUpdates}
+    // (253:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
 
     	updateview = new UpdateView({
     			props: {
-    				closeClick: /*func*/ ctx[16],
-    				updateClick: /*updateAll*/ ctx[9],
-    				checkClick: /*checkForUpdates*/ ctx[11],
+    				closeClick: /*func*/ ctx[17],
+    				updateClick: /*updateAll*/ ctx[10],
+    				checkClick: /*checkForUpdates*/ ctx[12],
     				loading: /*disabled*/ ctx[3],
     				updates: /*updates*/ ctx[6]
     			}
@@ -1774,7 +1774,7 @@
     		},
     		p(ctx, dirty) {
     			const updateview_changes = {};
-    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[16];
+    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[17];
     			if (dirty & /*disabled*/ 8) updateview_changes.loading = /*disabled*/ ctx[3];
     			if (dirty & /*updates*/ 64) updateview_changes.updates = /*updates*/ ctx[6];
     			updateview.$set(updateview_changes);
@@ -1836,7 +1836,7 @@
     			}
     		});
 
-    	iconbutton1.$on("click", /*click_handler*/ ctx[12]);
+    	iconbutton1.$on("click", /*click_handler*/ ctx[13]);
 
     	iconbutton2 = new IconButton({
     			props: {
@@ -1849,7 +1849,7 @@
     			}
     		});
 
-    	iconbutton2.$on("click", /*toggleExtension*/ ctx[8]);
+    	iconbutton2.$on("click", /*toggleExtension*/ ctx[9]);
     	let if_block0 = /*error*/ ctx[0] && create_if_block_3(ctx);
     	const if_block_creators = [create_if_block_1$1, create_if_block_2, create_else_block$1];
     	const if_blocks = [];
@@ -1907,7 +1907,7 @@
     			insert(target, t4, anchor);
     			insert(target, div2, anchor);
     			if_blocks[current_block_type_index].m(div2, null);
-    			/*div2_binding*/ ctx[15](div2);
+    			/*div2_binding*/ ctx[16](div2);
     			insert(target, t5, anchor);
     			insert(target, div4, anchor);
     			append(div4, div3);
@@ -2037,7 +2037,7 @@
     			if (detaching) detach(t4);
     			if (detaching) detach(div2);
     			if_blocks[current_block_type_index].d();
-    			/*div2_binding*/ ctx[15](null);
+    			/*div2_binding*/ ctx[16](null);
     			if (detaching) detach(t5);
     			if (detaching) detach(div4);
     			if (detaching) detach(t7);
@@ -2175,6 +2175,13 @@
     	}
 
     	const func = () => $$invalidate(5, showUpdates = false);
+    	let list;
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*items*/ 16) {
+    			 $$invalidate(8, list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0])));
+    		}
+    	};
 
     	return [
     		error,
@@ -2185,6 +2192,7 @@
     		showUpdates,
     		updates,
     		main,
+    		list,
     		toggleExtension,
     		updateAll,
     		toggleItem,

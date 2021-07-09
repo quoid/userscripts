@@ -25,12 +25,22 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 return
             }
             response.userInfo = [SFExtensionMessageKey: ["code": code]]
+        } else if name == "POPUP_BADGE_COUNT" {
+            guard
+                let url = message?["url"] as? String,
+                let frameUrls = message?["frameUrls"] as? [String],
+                let matches = getPopupBadgeCount(url, frameUrls)
+            else {
+                // TODO: handle error
+                return
+            }
+            response.userInfo = [SFExtensionMessageKey: ["count": matches]]
         } else if name == "POPUP_MATCHES" {
             let manifest = getManifest()
             guard
                 let url = message?["url"] as? String,
                 let frameUrls = message?["frameUrls"] as? [String],
-                let matches = getPopupMatches(url, frameUrls),
+                let matches = getPopupMatches(url, frameUrls, true),
                 let active = manifest.settings["active"],
                 let updates = checkForRemoteUpdates()
             else {
