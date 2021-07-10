@@ -983,7 +983,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "SUB";
-    			attr(div, "class", "subframe svelte-90wvxt");
+    			attr(div, "class", "subframe svelte-wpje9c");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1021,9 +1021,9 @@
     			if (if_block) if_block.c();
     			t3 = space();
     			create_component(tag.$$.fragment);
-    			attr(span, "class", "svelte-90wvxt");
-    			attr(div0, "class", "truncate svelte-90wvxt");
-    			attr(div1, "class", div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-90wvxt");
+    			attr(span, "class", "svelte-wpje9c");
+    			attr(div0, "class", "truncate svelte-wpje9c");
+    			attr(div1, "class", div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-wpje9c");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -1060,7 +1060,7 @@
     			if (dirty & /*type*/ 4) tag_changes.type = /*type*/ ctx[2];
     			tag.$set(tag_changes);
 
-    			if (!current || dirty & /*enabled*/ 1 && div1_class_value !== (div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-90wvxt")) {
+    			if (!current || dirty & /*enabled*/ 1 && div1_class_value !== (div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-wpje9c")) {
     				attr(div1, "class", div1_class_value);
     			}
     		},
@@ -1513,11 +1513,11 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[19] = list[i];
+    	child_ctx[20] = list[i];
     	return child_ctx;
     }
 
-    // (220:0) {#if error}
+    // (234:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1529,7 +1529,7 @@
     			props: { icon: iconClear, title: "Clear error" }
     		});
 
-    	iconbutton.$on("click", /*click_handler_1*/ ctx[14]);
+    	iconbutton.$on("click", /*click_handler_1*/ ctx[15]);
 
     	return {
     		c() {
@@ -1537,7 +1537,7 @@
     			t0 = text(/*error*/ ctx[0]);
     			t1 = space();
     			create_component(iconbutton.$$.fragment);
-    			attr(div, "class", "error svelte-1ew6uno");
+    			attr(div, "class", "error svelte-17scc1x");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1565,14 +1565,14 @@
     	};
     }
 
-    // (236:8) {:else}
+    // (250:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	let each_value = /*list*/ ctx[8];
-    	const get_key = ctx => /*item*/ ctx[19].filename;
+    	let each_value = /*list*/ ctx[9];
+    	const get_key = ctx => /*item*/ ctx[20].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -1588,7 +1588,7 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "items svelte-1ew6uno");
+    			attr(div, "class", "items svelte-17scc1x");
     			toggle_class(div, "disabled", /*disabled*/ ctx[3]);
     		},
     		m(target, anchor) {
@@ -1601,8 +1601,8 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*list, toggleItem*/ 2304) {
-    				const each_value = /*list*/ ctx[8];
+    			if (dirty & /*list, toggleItem*/ 4608) {
+    				const each_value = /*list*/ ctx[9];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
     				check_outros();
@@ -1638,7 +1638,7 @@
     	};
     }
 
-    // (234:8) {#if items.length < 1}
+    // (248:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1646,7 +1646,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "No matched userscripts";
-    			attr(div, "class", "none svelte-1ew6uno");
+    			attr(div, "class", "none svelte-17scc1x");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1660,7 +1660,7 @@
     	};
     }
 
-    // (231:4) {#if loading}
+    // (245:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1690,22 +1690,22 @@
     	};
     }
 
-    // (238:16) {#each list as item (item.filename)}
+    // (252:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_2(...args) {
-    		return /*click_handler_2*/ ctx[15](/*item*/ ctx[19], ...args);
+    		return /*click_handler_2*/ ctx[16](/*item*/ ctx[20], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[19].disabled,
-    				name: /*item*/ ctx[19].metadata.name[0],
-    				subframe: /*item*/ ctx[19].subframe,
-    				type: /*item*/ ctx[19].type
+    				enabled: !/*item*/ ctx[20].disabled,
+    				name: /*item*/ ctx[20].metadata.name[0],
+    				subframe: /*item*/ ctx[20].subframe,
+    				type: /*item*/ ctx[20].type
     			}
     		});
 
@@ -1727,10 +1727,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*list*/ 256) popupitem_changes.enabled = !/*item*/ ctx[19].disabled;
-    			if (dirty & /*list*/ 256) popupitem_changes.name = /*item*/ ctx[19].metadata.name[0];
-    			if (dirty & /*list*/ 256) popupitem_changes.subframe = /*item*/ ctx[19].subframe;
-    			if (dirty & /*list*/ 256) popupitem_changes.type = /*item*/ ctx[19].type;
+    			if (dirty & /*list*/ 512) popupitem_changes.enabled = !/*item*/ ctx[20].disabled;
+    			if (dirty & /*list*/ 512) popupitem_changes.name = /*item*/ ctx[20].metadata.name[0];
+    			if (dirty & /*list*/ 512) popupitem_changes.subframe = /*item*/ ctx[20].subframe;
+    			if (dirty & /*list*/ 512) popupitem_changes.type = /*item*/ ctx[20].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -1749,16 +1749,16 @@
     	};
     }
 
-    // (254:0) {#if showUpdates}
+    // (268:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
 
     	updateview = new UpdateView({
     			props: {
-    				closeClick: /*func*/ ctx[17],
-    				updateClick: /*updateAll*/ ctx[10],
-    				checkClick: /*checkForUpdates*/ ctx[12],
+    				closeClick: /*func*/ ctx[18],
+    				updateClick: /*updateAll*/ ctx[11],
+    				checkClick: /*checkForUpdates*/ ctx[13],
     				loading: /*disabled*/ ctx[3],
     				updates: /*updates*/ ctx[6]
     			}
@@ -1774,7 +1774,7 @@
     		},
     		p(ctx, dirty) {
     			const updateview_changes = {};
-    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[17];
+    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[18];
     			if (dirty & /*disabled*/ 8) updateview_changes.loading = /*disabled*/ ctx[3];
     			if (dirty & /*updates*/ 64) updateview_changes.updates = /*updates*/ ctx[6];
     			updateview.$set(updateview_changes);
@@ -1808,6 +1808,7 @@
     	let div2;
     	let current_block_type_index;
     	let if_block1;
+    	let div2_class_value;
     	let t5;
     	let div4;
     	let div3;
@@ -1836,7 +1837,7 @@
     			}
     		});
 
-    	iconbutton1.$on("click", /*click_handler*/ ctx[13]);
+    	iconbutton1.$on("click", /*click_handler*/ ctx[14]);
 
     	iconbutton2 = new IconButton({
     			props: {
@@ -1849,7 +1850,7 @@
     			}
     		});
 
-    	iconbutton2.$on("click", /*toggleExtension*/ ctx[9]);
+    	iconbutton2.$on("click", /*toggleExtension*/ ctx[10]);
     	let if_block0 = /*error*/ ctx[0] && create_if_block_3(ctx);
     	const if_block_creators = [create_if_block_1$1, create_if_block_2, create_else_block$1];
     	const if_blocks = [];
@@ -1886,11 +1887,11 @@
     			t7 = space();
     			if (if_block2) if_block2.c();
     			if_block2_anchor = empty();
-    			attr(div0, "class", "header__logo svelte-1ew6uno");
-    			attr(div1, "class", "header svelte-1ew6uno");
-    			attr(div2, "class", "main svelte-1ew6uno");
+    			attr(div0, "class", "header__logo svelte-17scc1x");
+    			attr(div1, "class", "header svelte-17scc1x");
+    			attr(div2, "class", div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-17scc1x");
     			attr(div3, "class", "link");
-    			attr(div4, "class", "footer svelte-1ew6uno");
+    			attr(div4, "class", "footer svelte-17scc1x");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -1907,7 +1908,7 @@
     			insert(target, t4, anchor);
     			insert(target, div2, anchor);
     			if_blocks[current_block_type_index].m(div2, null);
-    			/*div2_binding*/ ctx[16](div2);
+    			/*div2_binding*/ ctx[17](div2);
     			insert(target, t5, anchor);
     			insert(target, div4, anchor);
     			append(div4, div3);
@@ -1985,6 +1986,10 @@
     				if_block1.m(div2, null);
     			}
 
+    			if (!current || dirty & /*rowColors*/ 256 && div2_class_value !== (div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-17scc1x")) {
+    				attr(div2, "class", div2_class_value);
+    			}
+
     			if (/*showUpdates*/ ctx[5]) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
@@ -2037,7 +2042,7 @@
     			if (detaching) detach(t4);
     			if (detaching) detach(div2);
     			if_blocks[current_block_type_index].d();
-    			/*div2_binding*/ ctx[16](null);
+    			/*div2_binding*/ ctx[17](null);
     			if (detaching) detach(t5);
     			if (detaching) detach(div4);
     			if (detaching) detach(t7);
@@ -2067,6 +2072,7 @@
     	let showUpdates = false;
     	let updates = [];
     	let main;
+    	let rowColors;
 
     	function toggleExtension() {
     		$$invalidate(3, disabled = true);
@@ -2180,7 +2186,17 @@
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*items*/ 16) {
-    			 $$invalidate(8, list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0])));
+    			 $$invalidate(9, list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0])));
+    		}
+
+    		if ($$self.$$.dirty & /*list*/ 512) {
+    			 if (list.length > 1 && list.length % 2 === 0) {
+    				$$invalidate(8, rowColors = "even");
+    			} else if (list.length > 1 && list.length % 2 != 0) {
+    				$$invalidate(8, rowColors = "odd");
+    			} else {
+    				$$invalidate(8, rowColors = undefined);
+    			}
     		}
     	};
 
@@ -2193,6 +2209,7 @@
     		showUpdates,
     		updates,
     		main,
+    		rowColors,
     		list,
     		toggleExtension,
     		updateAll,

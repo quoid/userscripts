@@ -8,7 +8,6 @@
 <style>
     .item {
         align-items: center;
-        border-radius: var(--border-radius);
         cursor: pointer;
         display: flex;
         padding: 0.5rem 1rem;

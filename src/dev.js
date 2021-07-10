@@ -53,7 +53,21 @@ const _browser = {
             } else if (message.name === "POPUP_MATCHES") {
                 response = {
                     active: "true",
-                    items: [],
+                    items: [
+                        {
+                            metadata: {name: ["Google Images Restored"]},
+                            filename: "Google Images Restored.js",
+                            disabled: false,
+                            type: "js"
+                        },
+                        {
+                            metadata: {name: ["Subframe Script Managerial Staffing Company"]},
+                            filename: "Subframe Script.js",
+                            disabled: false,
+                            subframe: true,
+                            type: "css"
+                        }
+                    ],
                     updates: [
                         {name: "Google Images Restored", url: "https://www.k21p.com"},
                         {name: "New Userscript With a Really Really Long Name", url: "https://www.filmgarb.com"}

@@ -18,8 +18,17 @@
     let showUpdates = false;
     let updates = [];
     let main;
+    let rowColors;
 
     $: list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0]));
+
+    $: if (list.length > 1 && list.length % 2 === 0) {
+        rowColors = "even";
+    } else if (list.length > 1 && list.length % 2 != 0) {
+        rowColors = "odd";
+    } else {
+        rowColors = undefined;
+    }
 
     function toggleExtension() {
         disabled = true;
@@ -167,6 +176,11 @@
         position: relative;
     }
 
+    .main.even :global(.item:nth-of-type(odd)),
+    .main.odd :global(.item:nth-of-type(even)) {
+        background-color: var(--color-bg-primary);
+    }
+
     .none {
         align-items: center;
         bottom: 0;
@@ -227,7 +241,7 @@
         />
     </div>
 {/if}
-<div class="main" bind:this={main}>
+<div class="main {rowColors || ""}" bind:this={main}>
     {#if loading}
         <Loader/>
     {:else}
