@@ -132,12 +132,10 @@ function cspFallback(e) {
 }
 
 // request code
-browser.runtime.sendMessage(
-    {name: "REQ_USERSCRIPTS"}, response => {
-        data = response.code;
-        if (Object.keys(data).length != 0) parseCode(data);
-    }
-);
+browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
+    data = response.code;
+    if (Object.keys(data).length != 0) parseCode(data);
+});
 
 // when userscript fails due to a CSP and has @inject-into value of auto
 document.addEventListener("securitypolicyviolation", cspFallback);
