@@ -66,7 +66,14 @@ function processJS(filename, code, scope, timing, name) {
         // for that reason use the current url + filename for the menuItemId
         // when this file gets an run request, which file to run can be parsed from the menuItemId
         // construct url from window.location since url params in href can break match pattern
-        const url = window.location.origin + window.location.pathname;
+
+        // potential bug? https://developer.apple.com/forums/thread/685273
+        // https://stackoverflow.com/q/68431201
+        let pathname = window.location.pathname;
+        if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
+        console.log(pathname);
+        const url = window.location.origin + pathname;
+        //const url = window.location.origin + window.location.pathname;
         const menuItemId = url + "&$&" + filename;
         const message = {name: "CONTEXT_CREATE", menuItemId: menuItemId, title: name, url: url};
         browser.runtime.sendMessage(message, response => {
