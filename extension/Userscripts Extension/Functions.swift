@@ -975,6 +975,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["context-menu"] = ["auto": [:], "content": [:], "page": [:]]
     var auto_docStart = [String: [String: String]]()
     var auto_docEnd = [String: [String: String]]()
     var auto_docIdle = [String: [String: String]]()
@@ -984,20 +985,29 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     var page_docStart = [String: [String: String]]()
     var page_docEnd = [String: [String: String]]()
     var page_docIdle = [String: [String: String]]()
+    
+    var auto_context_scripts = [String: [String: String]]()
+    var content_context_scripts = [String: [String: String]]()
+    var page_context_scripts = [String: [String: String]]()
+    
+    guard let saveLocation = getSaveLocation() else {
+        err("getCode failed at (1)")
+        return nil
+    }
 
     for filename in filenames {
         guard
-            let saveLocation = getSaveLocation(),
             let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
             var code = contents["code"] as? String,
             let type = filename.split(separator: ".").last
         else {
             // if guard fails, log error continue to next file
-            err("getCode failed at (1) for \(filename)")
+            err("getCode failed at (2) for \(filename)")
             continue
         }
         // can force unwrap b/c getFileContentsParsed ensures metadata exists
         let metadata = contents["metadata"] as! [String: [String]]
+        let name = metadata["name"]![0]
 
         // if metadata has noframes option and the url is not the top window, don't load
         if (metadata["noframes"] != nil && !isTop) {
@@ -1017,7 +1027,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
                     code = "\(requiredContent)\n\(code)"
                 } else {
-                    err("getCode failed at (2) for \(requiredFileURL)")
+                    err("getCode failed at (3) for \(requiredFileURL)")
                 }
             }
         }
@@ -1029,7 +1039,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             var runAt = metadata["run-at"]?[0] ?? "document-end"
 
             let injectVals = ["auto", "content", "page"]
-            let runAtVals = ["document-start", "document-end", "document-idle"]
+            let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
             // if inject/runAt values are not valid, use default
             if !injectVals.contains(injectInto) {
                 injectInto = "page"
@@ -1039,7 +1049,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             }
 
             let data = ["code": code, "weight": weight]
-            // add file data to appropiate dict
+            // add file data to appropriate dict
             if injectInto == "auto" && runAt == "document-start" {
                 auto_docStart[filename] = data
             } else if injectInto == "auto" && runAt == "document-end" {
@@ -1059,6 +1069,16 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             } else if injectInto == "page" && runAt == "document-idle" {
                 page_docIdle[filename] = data
             }
+            
+            if runAt == "context-menu" && injectInto == "auto" {
+                auto_context_scripts[filename] = ["code": code, "name": name]
+            }
+            if runAt == "context-menu" && injectInto == "content" {
+                content_context_scripts[filename] = ["code": code, "name": name]
+            }
+            if runAt == "context-menu" && injectInto == "page" {
+                page_context_scripts[filename] = ["code": code, "name": name]
+            }
         }
     }
 
@@ -1072,6 +1092,11 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     jsFiles["page"]!["document-start"] = page_docStart
     jsFiles["page"]!["document-end"] = page_docEnd
     jsFiles["page"]!["document-idle"] = page_docIdle
+    // the context-menu dictionaries are constructed differently
+    // they will need to be handled in a unique way on the JS side
+    jsFiles["context-menu"]!["auto"] = auto_context_scripts
+    jsFiles["context-menu"]!["content"] = content_context_scripts
+    jsFiles["context-menu"]!["page"] = page_context_scripts
 
     // construct the returned dictionary
     allFiles["css"] = cssFiles

@@ -33,6 +33,8 @@
     ],
     "permissions": [
         "<all_urls>",
+        "contextMenus",
+        "menus",
         "nativeMessaging",
         "tabs",
         "webNavigation"
