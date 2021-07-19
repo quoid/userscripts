@@ -696,7 +696,7 @@ func getRemoteFileContents(_ url: String) -> String? {
         semaphore.signal()
     }
     task?.resume()
-    // wait 10 seconds before timing out
+    // wait 30 seconds before timing out
     if semaphore.wait(timeout: .now() + 30) == .timedOut {
         task?.cancel()
     }
