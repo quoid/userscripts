@@ -2,6 +2,8 @@
 let data;
 // determines whether strict csp injection has already run (JS only)
 let cspFallbackAttempted = 0;
+// save url to compare to later
+let currentUrl = window.location.href;
 
 function sortByWeight(o) {
     let sorted = {};
@@ -60,31 +62,6 @@ function processJS(filename, code, scope, timing, name) {
                 }
             });
         }
-    } else if (timing === "context-menu" && window === window.top) {
-        // when context menu item found, create a unique menuItemId and clean name
-        // the menuItemId will be passed back and forth between content and background
-        // for that reason use the current url + filename for the menuItemId
-        // when this file gets an run request, which file to run can be parsed from the menuItemId
-        // construct url from window.location since url params in href can break match pattern
-        // run on window load since urls can change during the load process
-        window.addEventListener("load", () => {
-            // potential bug? https://developer.apple.com/forums/thread/685273
-            // https://stackoverflow.com/q/68431201
-            let pathname = window.location.pathname;
-            if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
-            console.log(pathname);
-            const url = window.location.origin + pathname;
-            //const url = window.location.origin + window.location.pathname;
-            const menuItemId = url + "&$&" + filename;
-            const message = {name: "CONTEXT_CREATE", menuItemId: menuItemId, title: name, url: url};
-            browser.runtime.sendMessage(message, response => {
-                window.addEventListener("beforeunload", () => {
-                    // beforeunload doesn't fire on page refresh?
-                    // OK since we wouldn't want to remove the context menu items when that happens
-                    browser.runtime.sendMessage({name: "CONTEXT_REMOVE", menuItemId: menuItemId});
-                });
-            });
-        });
     }
 }
 
@@ -116,19 +93,7 @@ function parseCode(data, fallback = false) {
                 // the "scope" is context-menu even though it's really a timing
                 // needs to be handled in a different manner
                 if (scope === "context-menu") {
-                    const timingObject = codeTypeObject[scope];
-                    for (const realScope in timingObject) {
-                        const scopeObject = timingObject[realScope];
-                        if (Object.keys(scopeObject).length != 0) {
-                            for (const filename in scopeObject) {
-                                const code = scopeObject[filename].code;
-                                const name = scopeObject[filename].name;
-                                // scope = timing as mentioned above
-                                const timing = scope;
-                                processJS(filename, code, realScope, timing, name);
-                            }
-                        }
-                    }
+                    processJSContextMenuItems();
                 } else {
                     // get the nested scoped objects, separated by timing
                     const scopeObject = codeTypeObject[scope];
@@ -175,6 +140,52 @@ function cspFallback(e) {
     }
 }
 
+function processJSContextMenuItems() {
+    if (window != window.top) return;
+    const contextMenuCodeObject = data.js["context-menu"];
+    for (const scope in contextMenuCodeObject) {
+        const scopeObject = contextMenuCodeObject[scope];
+        if (Object.keys(scopeObject).length != 0) {
+            for (const filename in scopeObject) {
+                const name = scopeObject[filename].name;
+                if (document.readyState === "complete") {
+                    addContextMenuItem(filename, name);
+                } else {
+                    window.addEventListener("load", () => {
+                        addContextMenuItem(filename, name);
+                    });
+                }
+            }
+        }
+    }
+}
+
+function addContextMenuItem(filename, name) {
+    // when context menu item found, create a unique menuItemId and clean name
+    // the menuItemId will be passed back and forth between content and background
+    // for that reason use the current url + filename for the menuItemId
+    // when this file gets an run request, which file to run can be parsed from the menuItemId
+    // construct url from window.location since url params in href can break match pattern
+    // run on window load since urls can change during the load process
+
+    // potential bug? https://developer.apple.com/forums/thread/685273
+    // https://stackoverflow.com/q/68431201
+    let pathname = window.location.pathname;
+    if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
+    const url = window.location.origin + pathname;
+
+    //const url = window.location.origin + window.location.pathname;
+    const menuItemId = url + "&$&" + filename;
+    const message = {name: "CONTEXT_CREATE", menuItemId: menuItemId, title: name, url: url};
+    browser.runtime.sendMessage(message, response => {
+        window.addEventListener("beforeunload", () => {
+            // beforeunload doesn't fire on page refresh?
+            // OK since we wouldn't want to remove the context menu items when that happens
+            browser.runtime.sendMessage({name: "CONTEXT_REMOVE", menuItemId: menuItemId});
+        });
+    });
+}
+
 // request code
 browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
     // save code to data var so cspFallback can be attempted
@@ -218,3 +229,10 @@ browser.runtime.onMessage.addListener(request => {
 
 // when userscript fails due to a CSP and has @inject-into value of auto
 document.addEventListener("securitypolicyviolation", cspFallback);
+// attempt to address url changes from SPAs
+document.addEventListener("contextmenu", () => {
+    if (window.location.href != currentUrl && window === window.top && data) {
+        currentUrl = window.location.href;
+        processJSContextMenuItems();
+    }
+});
