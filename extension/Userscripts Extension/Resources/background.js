@@ -130,3 +130,4 @@ async function setBadgeCount() {
 
 browser.tabs.onActivated.addListener(setBadgeCount);
 browser.windows.onFocusChanged.addListener(setBadgeCount);
+browser.webNavigation.onCompleted.addListener(setBadgeCount);
