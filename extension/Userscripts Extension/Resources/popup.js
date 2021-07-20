@@ -1517,7 +1517,7 @@
     	return child_ctx;
     }
 
-    // (234:0) {#if error}
+    // (232:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1565,7 +1565,7 @@
     	};
     }
 
-    // (250:8) {:else}
+    // (248:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1638,7 +1638,7 @@
     	};
     }
 
-    // (248:8) {#if items.length < 1}
+    // (246:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1660,7 +1660,7 @@
     	};
     }
 
-    // (245:4) {#if loading}
+    // (243:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1690,7 +1690,7 @@
     	};
     }
 
-    // (252:16) {#each list as item (item.filename)}
+    // (250:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1749,7 +1749,7 @@
     	};
     }
 
-    // (268:0) {#if showUpdates}
+    // (266:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2126,13 +2126,12 @@
     	}
 
     	async function mounted() {
-    		let p = new Promise(resolve => {
+    		const tabs = await new Promise(resolve => {
     				browser.tabs.query({ currentWindow: true, active: true }, tabs => {
     					resolve(tabs);
     				});
     			});
 
-    		let tabs = await p;
     		const url = tabs[0].url;
 
     		const message = {
@@ -2142,13 +2141,12 @@
     		};
 
     		if (url) {
-    			let p2 = new Promise(resolve => {
+    			const frames = await new Promise(resolve => {
     					browser.webNavigation.getAllFrames({ tabId: tabs[0].id }, frames => {
     						resolve(frames);
     					});
     				});
 
-    			let frames = await p2;
     			frames.forEach(frame => message.frameUrls.push(frame.url));
     		}
 

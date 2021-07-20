@@ -86,21 +86,19 @@
     }
 
     async function mounted() {
-        let p = new Promise(resolve => {
+        const tabs = await new Promise(resolve => {
             browser.tabs.query({currentWindow: true, active: true}, tabs => {
                 resolve(tabs);
             });
         });
-        let tabs = await p;
         const url = tabs[0].url;
         const message = {name: "POPUP_MATCHES", url: url, frameUrls: []};
         if (url) {
-            let p2 = new Promise(resolve => {
+            const frames = await new Promise(resolve => {
                 browser.webNavigation.getAllFrames({tabId: tabs[0].id}, frames => {
                     resolve(frames);
                 });
             });
-            let frames = await p2;
             frames.forEach(frame => message.frameUrls.push(frame.url));
         }
         browser.runtime.sendNativeMessage(message, response => {
