@@ -2,8 +2,6 @@
 let data;
 // determines whether strict csp injection has already run (JS only)
 let cspFallbackAttempted = 0;
-// save url to compare to later
-let currentUrl = window.location.href;
 
 function sortByWeight(o) {
     let sorted = {};
@@ -32,7 +30,7 @@ function injectJS(filename, code, scope) {
     }
 }
 
-function processJS(filename, code, scope, timing, name) {
+function processJS(filename, code, scope, timing) {
     // this is about to get ugly
     if (timing === "document-start") {
         if (document.readyState === "loading") {
@@ -89,33 +87,28 @@ function parseCode(data, fallback = false) {
             // js code can be context scoped to the content script, page, or auto
             // if auto is set, page scope is attempted, if fails content scope attempted
             for (let scope in codeTypeObject) {
-                // the object for context-menu scripts is constructed differently
-                // the "scope" is context-menu even though it's really a timing
-                // needs to be handled in a different manner
-                if (scope === "context-menu") {
-                    processJSContextMenuItems();
-                } else {
-                    // get the nested scoped objects, separated by timing
-                    const scopeObject = codeTypeObject[scope];
-                    // possible execution timings
-                    const timings = ["document-start", "document-end", "document-idle"];
-                    timings.forEach(timing => {
-                        // get the nested timing objects, separated by filename, skip if empty
-                        const timingObject = scopeObject[timing];
-                        if (Object.keys(timingObject).length != 0) {
-                            sorted = sortByWeight(timingObject);
-                            for (const filename in sorted) {
-                                const code = sorted[filename].code;
-                                // when block by csp rules, auto scope script will auto retry injection
-                                if (fallback) {
-                                    console.warn(`Attempting fallback injection for ${filename}`);
-                                    scope = "content";
-                                }
-                                processJS(filename, code, scope, timing);
+                // context menu scripts will be handled in event listener below
+                if (scope === "context-menu") continue;
+                // get the nested scoped objects, separated by timing
+                const scopeObject = codeTypeObject[scope];
+                // possible execution timings
+                const timings = ["document-start", "document-end", "document-idle"];
+                timings.forEach(timing => {
+                    // get the nested timing objects, separated by filename, skip if empty
+                    const timingObject = scopeObject[timing];
+                    if (Object.keys(timingObject).length != 0) {
+                        sorted = sortByWeight(timingObject);
+                        for (const filename in sorted) {
+                            const code = sorted[filename].code;
+                            // when block by csp rules, auto scope script will auto retry injection
+                            if (fallback) {
+                                console.warn(`Attempting fallback injection for ${filename}`);
+                                scope = "content";
                             }
+                            processJS(filename, code, scope, timing);
                         }
-                    });
-                }
+                    }
+                });
             }
         }
     }
@@ -145,16 +138,14 @@ function processJSContextMenuItems() {
     const contextMenuCodeObject = data.js["context-menu"];
     for (const scope in contextMenuCodeObject) {
         const scopeObject = contextMenuCodeObject[scope];
-        if (Object.keys(scopeObject).length != 0) {
-            for (const filename in scopeObject) {
-                const name = scopeObject[filename].name;
-                if (document.readyState === "complete") {
+        for (const filename in scopeObject) {
+            const name = scopeObject[filename].name;
+            if (document.readyState === "complete") {
+                addContextMenuItem(filename, name);
+            } else {
+                window.addEventListener("load", () => {
                     addContextMenuItem(filename, name);
-                } else {
-                    window.addEventListener("load", () => {
-                        addContextMenuItem(filename, name);
-                    });
-                }
+                });
             }
         }
     }
@@ -179,8 +170,10 @@ function addContextMenuItem(filename, name) {
     const message = {name: "CONTEXT_CREATE", menuItemId: menuItemId, title: name, url: url};
     browser.runtime.sendMessage(message, response => {
         window.addEventListener("beforeunload", () => {
-            // beforeunload doesn't fire on page refresh?
+            // beforeunload doesn't always fire on page refresh?
             // OK since we wouldn't want to remove the context menu items when that happens
+            // BAD for when user disabled a context-menu script then refreshes...
+            // b/c of this all context menu items for a url will be removed/remade on refresh
             browser.runtime.sendMessage({name: "CONTEXT_REMOVE", menuItemId: menuItemId});
         });
     });
@@ -190,6 +183,7 @@ function addContextMenuItem(filename, name) {
 browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
     // save code to data var so cspFallback can be attempted
     data = response.code;
+    console.log(data);
     if (Object.keys(data).length != 0) parseCode(data);
 });
 
@@ -211,9 +205,7 @@ browser.runtime.onMessage.addListener(request => {
                     const code = contextMenuCodeObject[scope][filename].code;
                     // if strict csp already detected change auto scoped scripts to content
                     if (cspFallbackAttempted && scope === "auto") {
-                        console.warn(
-                            `Strict CSP encountered, changing injection context for ${filename}`
-                        );
+                        console.warn(`Attempting fallback injection for ${filename}`);
                         scope = "content";
                     }
                     scope = cspFallbackAttempted && scope === "auto" ? "content" : scope;
@@ -229,10 +221,5 @@ browser.runtime.onMessage.addListener(request => {
 
 // when userscript fails due to a CSP and has @inject-into value of auto
 document.addEventListener("securitypolicyviolation", cspFallback);
-// attempt to address url changes from SPAs
-document.addEventListener("contextmenu", () => {
-    if (window.location.href != currentUrl && window === window.top && data) {
-        currentUrl = window.location.href;
-        processJSContextMenuItems();
-    }
-});
+// create context menu items as needed
+document.addEventListener("contextmenu", processJSContextMenuItems);
