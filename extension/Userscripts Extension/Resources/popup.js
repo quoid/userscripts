@@ -1509,7 +1509,7 @@
     	return child_ctx;
     }
 
-    // (232:0) {#if error}
+    // (231:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1529,7 +1529,7 @@
     			t0 = text(/*error*/ ctx[0]);
     			t1 = space();
     			create_component(iconbutton.$$.fragment);
-    			attr(div, "class", "error svelte-17scc1x");
+    			attr(div, "class", "error svelte-9jwptc");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1557,7 +1557,7 @@
     	};
     }
 
-    // (248:8) {:else}
+    // (247:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1580,7 +1580,7 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "items svelte-17scc1x");
+    			attr(div, "class", "items svelte-9jwptc");
     			toggle_class(div, "disabled", /*disabled*/ ctx[3]);
     		},
     		m(target, anchor) {
@@ -1630,7 +1630,7 @@
     	};
     }
 
-    // (246:8) {#if items.length < 1}
+    // (245:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1638,7 +1638,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "No matched userscripts";
-    			attr(div, "class", "none svelte-17scc1x");
+    			attr(div, "class", "none svelte-9jwptc");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1652,7 +1652,7 @@
     	};
     }
 
-    // (243:4) {#if loading}
+    // (242:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1682,7 +1682,7 @@
     	};
     }
 
-    // (250:16) {#each list as item (item.filename)}
+    // (249:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1741,7 +1741,7 @@
     	};
     }
 
-    // (266:0) {#if showUpdates}
+    // (265:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -1879,11 +1879,11 @@
     			t7 = space();
     			if (if_block2) if_block2.c();
     			if_block2_anchor = empty();
-    			attr(div0, "class", "header__logo svelte-17scc1x");
-    			attr(div1, "class", "header svelte-17scc1x");
-    			attr(div2, "class", div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-17scc1x");
+    			attr(div0, "class", "header__logo svelte-9jwptc");
+    			attr(div1, "class", "header svelte-9jwptc");
+    			attr(div2, "class", div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-9jwptc");
     			attr(div3, "class", "link");
-    			attr(div4, "class", "footer svelte-17scc1x");
+    			attr(div4, "class", "footer svelte-9jwptc");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -1978,7 +1978,7 @@
     				if_block1.m(div2, null);
     			}
 
-    			if (!current || dirty & /*rowColors*/ 256 && div2_class_value !== (div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-17scc1x")) {
+    			if (!current || dirty & /*rowColors*/ 256 && div2_class_value !== (div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-9jwptc")) {
     				attr(div2, "class", div2_class_value);
     			}
 

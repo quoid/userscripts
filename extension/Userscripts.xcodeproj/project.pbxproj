@@ -21,6 +21,8 @@
 		4AA5E11B2682CDA100C5E90F /* background.html in Resources */ = {isa = PBXBuildFile; fileRef = 4AA5E11A2682CDA100C5E90F /* background.html */; };
 		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
 		4AC2A1FA268A67A00081B045 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AC2A1F9268A67A00081B045 /* background.js */; };
+		4ACB857026ACE9520094D919 /* page.html in Resources */ = {isa = PBXBuildFile; fileRef = 4ACB856F26ACE9520094D919 /* page.html */; };
+		4ACB857226ACE9580094D919 /* page.js in Resources */ = {isa = PBXBuildFile; fileRef = 4ACB857126ACE9580094D919 /* page.js */; };
 		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
 		4AED6492268CDB58001794BF /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
 		4AED6494268CEBE4001794BF /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AED6493268CEBE4001794BF /* popup.js */; };
@@ -70,6 +72,8 @@
 		4AA5E11A2682CDA100C5E90F /* background.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = background.html; sourceTree = "<group>"; };
 		4AB22357268B9B9200D551C6 /* content.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
 		4AC2A1F9268A67A00081B045 /* background.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
+		4ACB856F26ACE9520094D919 /* page.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = page.html; sourceTree = "<group>"; };
+		4ACB857126ACE9580094D919 /* page.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = page.js; sourceTree = "<group>"; };
 		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		4AED6491268CDB58001794BF /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		4AED6493268CEBE4001794BF /* popup.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = popup.js; sourceTree = "<group>"; };
@@ -157,6 +161,8 @@
 				4AC2A1F9268A67A00081B045 /* background.js */,
 				4AB22357268B9B9200D551C6 /* content.js */,
 				4AD66D2026826D8100B004E8 /* manifest.json */,
+				4ACB856F26ACE9520094D919 /* page.html */,
+				4ACB857126ACE9580094D919 /* page.js */,
 				4AF7577B2683BB5F001E0D95 /* popup.html */,
 				4AED6493268CEBE4001794BF /* popup.js */,
 			);
@@ -259,10 +265,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				4AD66D2326826D8100B004E8 /* manifest.json in Resources */,
+				4ACB857226ACE9580094D919 /* page.js in Resources */,
 				4AF7577D2683BB5F001E0D95 /* popup.html in Resources */,
 				4AC2A1FA268A67A00081B045 /* background.js in Resources */,
 				4AB22358268B9B9200D551C6 /* content.js in Resources */,
 				4A36A61A268266B30018536B /* images in Resources */,
+				4ACB857026ACE9520094D919 /* page.html in Resources */,
 				4AA5E11B2682CDA100C5E90F /* background.html in Resources */,
 				4A36A61B268266B30018536B /* _locales in Resources */,
 				4AED6494268CEBE4001794BF /* popup.js in Resources */,

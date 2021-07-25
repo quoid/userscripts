@@ -199,7 +199,6 @@
 
     .footer {
         border-top: 1px solid var(--color-black);
-        display: none;
         font-weight: 600;
         line-height: 1.5rem;
         padding: 0.5rem 0;

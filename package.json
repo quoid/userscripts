@@ -1,6 +1,7 @@
 {
   "scripts": {
     "build:popup": "NODE_ENV=popup rollup -c && NODE_ENV=popup gulp build",
+    "build:page": "NODE_ENV=page rollup -c && NODE_ENV=page gulp build",
     "dev:page": "NODE_ENV=page rollup -c -w",
     "dev:popup": "NODE_ENV=popup rollup -c -w",
     "lint-css": "npx stylelint ./",
