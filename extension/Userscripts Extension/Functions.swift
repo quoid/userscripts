@@ -17,19 +17,18 @@ func dateToMilliseconds(_ date: Date) -> Int {
     return Int(since1970 * 1000)
 }
 
-func santize(_ str: String) -> String? {
+func sanitize(_ str: String) -> String? {
     // removes dubious characters from strings (filenames)
-    var santized = str
-    if santized.first == "." {
-        santized = "%2" + str.dropFirst()
+    var sanitized = str
+    if sanitized.first == "." {
+        sanitized = "%2" + str.dropFirst()
     }
     let allowedCharacterSet = (CharacterSet(charactersIn: "/:\\").inverted)
-    return santized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
+    return sanitized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
 }
 
 func unsanitize(_ str: String) -> String {
     var s = str
-    // un-santized name
     if s.hasPrefix("%2") && !s.hasPrefix("%2F") {
         s = "." + s.dropFirst(2)
     }
@@ -386,13 +385,13 @@ func updateManifestRequired() -> Bool {
             continue
         }
 
-        // create filenames from santized resource urls
+        // create filenames from sanitized resource urls
         // getRequiredCode does the same thing when saving to disk
         // populate array with entries for manifest
         var r = [String]()
         for resource in required {
-            if let santizedResourceName = santize(resource) {
-                r.append(santizedResourceName)
+            if let sanitizedResourceName = sanitize(resource) {
+                r.append(sanitizedResourceName)
             }
         }
 
@@ -409,7 +408,7 @@ func updateManifestRequired() -> Bool {
 }
 
 func purgeManifest() -> Bool {
-    // comment
+    // TODO: comment
     var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
     let allFiles = getAllFiles() ?? []
     // populate array with filenames
@@ -617,7 +616,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         do {
             try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
         } catch {
-            // failing to trash item won't break functonality, so log error and move on
+            // failing to trash item won't break functionality, so log error and move on
             err("failed to trash directory in getRequiredCode \(error.localizedDescription)")
             return true
         }
@@ -626,7 +625,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
     for resourceUrlString in resources {
         // skip urls pointing to files of different types
         if resourceUrlString.hasSuffix(fileType) {
-            guard let resourceFilename = santize(resourceUrlString) else {return false}
+            guard let resourceFilename = sanitize(resourceUrlString) else {return false}
             let fileURL = directory.appendingPathComponent(resourceFilename)
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
@@ -1022,7 +1021,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         // if required resource is inaccessible, log error and continue
         if let required = metadata["require"] {
             for require in required {
-                let sanitizedName = santize(require) ?? ""
+                let sanitizedName = sanitize(require) ?? ""
                 let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
                     code = "\(requiredContent)\n\(code)"
