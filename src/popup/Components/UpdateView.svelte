@@ -1,9 +1,9 @@
 <script>
     import {quintInOut} from "svelte/easing";
-    import Loader from "./Loader.svelte";
-    import IconButton from "./IconButton.svelte";
-    import iconArrowLeft from "../img/icon-arrow-left.svg";
-    import iconUpdate from "../img/icon-update.svg";
+    import Loader from "../../shared/Components/Loader.svelte";
+    import IconButton from "../../shared/Components/IconButton.svelte";
+    import iconArrowLeft from "../../shared/img/icon-arrow-left.svg";
+    import iconUpdate from "../../shared/img/icon-update.svg";
 
     export let loading = false;
     export let updates = [];
@@ -104,6 +104,7 @@
 
     .link {
         font-weight: 600;
+        padding-bottom: 1rem;
     }
 </style>
 <div class="view view--updates" transition:slide>
@@ -121,10 +122,11 @@
         {:else}
             {#if updates.length}
                 {#each updates as item (item.name)}
+                <!-- {#each Array(10) as _, i} -->
                     <div class="item">
                         <div class="truncate">{item.name}</div>
                         <a href="{item.url}" target="_blank">Source</a>
-                        <span class="link">Update</span>
+                        <!-- <span class="link">Update</span> -->
                     </div>
                 {/each}
                 <p>Be sure you trust the authors before downloading remote code to your machine.</p>

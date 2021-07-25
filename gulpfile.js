@@ -7,18 +7,20 @@ const htmlmin = require("gulp-html-minifier-terser");
 const dom = require("gulp-dom");
 const rename = require("gulp-rename");
 
+const directory =  process.env.NODE_ENV === "popup" ? "popup" : "page";
+
 const copyLocation = "./temp";
-const destLocation = "./extension//Userscripts Extension/Resources";
+const destLocation = "./extension/Userscripts Extension/Resources";
 
 // clone public directory to avoid prefixing development assets
 function copy() {
-    return src("./public/**/*")
+    return src("./public/" + directory + "/**/*")
         .pipe(dest(copyLocation));
 }
 
 // autoprefix select stylesheets and overwrite in place
 function autoprefix() {
-    return src([`${copyLocation}/build/bundle.css`, `${copyLocation}/css/global.css`])
+    return src([copyLocation + "/build/bundle.css", copyLocation + "/css/global.css"])
         .pipe(postcss([
             autoprefixer({overrideBrowserslist: ["safari >= 13"]})
         ]))
@@ -53,7 +55,7 @@ function bundleJS() {
             });
             return result;
         }, false))
-        .pipe(rename("popup.js"))
+        .pipe(rename(directory + ".js"))
         .pipe(dest(destLocation));
 }
 
@@ -67,11 +69,11 @@ function removeTags() {
                 parent.removeChild(script);
             });
             const f = this.createElement("script");
-            f.setAttribute("src", "popup.js");
+            f.setAttribute("src", directory + ".js");
             this.body.appendChild(f);
             return this;
         }, false))
-        .pipe(rename("popup.html"))
+        .pipe(rename(directory + ".html"))
         .pipe(dest(destLocation));
 }
 

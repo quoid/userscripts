@@ -1,14 +1,14 @@
 <script>
     import {onMount} from "svelte";
-    import IconButton from "./Components/IconButton.svelte";
-    import Loader from "./Components/Loader.svelte";
+    import IconButton from "../shared/Components/IconButton.svelte";
+    import Loader from "../shared/Components/Loader.svelte";
     import PopupItem from "./Components/PopupItem.svelte";
     import UpdateView from "./Components/UpdateView.svelte";
-    import iconPower from "./img/icon-power.svg";
-    import iconOpen from "./img/icon-open.svg";
-    import iconUpdate from "./img/icon-update.svg";
-    import iconClear from "./img/icon-clear.svg";
-    import logo from "./img/logo.svg";
+    import iconPower from "../shared/img/icon-power.svg";
+    import iconOpen from "../shared/img/icon-open.svg";
+    import iconUpdate from "../shared/img/icon-update.svg";
+    import iconClear from "../shared/img/icon-clear.svg";
+    import logo from "../shared/img/logo.svg";
 
     let error = undefined;
     let active = true;

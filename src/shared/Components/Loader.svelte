@@ -1,6 +1,6 @@
 <script>
     import {fade} from "svelte/transition";
-    import iconLoader from "../img/icon-loader.svg";
+    import iconLoader from "../../shared/img/icon-loader.svg";
 
     export let abort = false;
     export let abortClick = () => {};

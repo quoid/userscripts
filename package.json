@@ -1,10 +1,12 @@
 {
   "scripts": {
-    "build": "rollup -c && gulp build",
+    "build:popup": "NODE_ENV=popup rollup -c && NODE_ENV=popup gulp build",
+    "dev:page": "NODE_ENV=page rollup -c -w",
+    "dev:popup": "NODE_ENV=popup rollup -c -w",
     "lint-css": "npx stylelint ./",
     "lint-js": "eslint ./",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start:page": "sirv public/page",
+    "start:popup": "sirv public/popup"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^15.1.0",
