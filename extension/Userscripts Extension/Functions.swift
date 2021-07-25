@@ -888,7 +888,7 @@ func getMatchedFiles(_ url: String) -> [String] {
         let path = parts["pathname"],
         let href = parts["href"]
     else {
-        err("getMatchedFiles failed at (1)")
+        err("getMatchedFiles failed at (1) for \(url)")
         return [String]()
     }
     // domains where loading is excluded for file
