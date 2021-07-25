@@ -16,6 +16,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             guard
                 let url = message?["url"] as? String,
                 let isTop = message?["isTop"] as? Bool,
+                checkDefaultDirectories(),
                 let matches = getInjectionFilenames(url),
                 let code = getCode(matches, isTop)
             else {
@@ -40,6 +41,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             guard
                 let url = message?["url"] as? String,
                 let frameUrls = message?["frameUrls"] as? [String],
+                checkDefaultDirectories(),
                 let matches = getPopupMatches(url, frameUrls, true),
                 let active = manifest.settings["active"],
                 let updates = checkForRemoteUpdates()

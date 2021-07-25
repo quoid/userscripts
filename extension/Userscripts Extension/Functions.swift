@@ -785,6 +785,24 @@ func toggleFile(_ filename: String,_ action: String) -> Bool {
     return true
 }
 
+func checkDefaultDirectories() -> Bool {
+    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
+    let requireLocation = getRequireLocation()
+    let urls = [defaultSaveLocation, requireLocation]
+    for url in urls {
+        if !FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
+            } catch {
+                // could not create the save location directory, show error
+                err("checkDefaultDirectories failed at (1) - \(url) - \(error.localizedDescription)")
+                return false
+            }
+        }
+    }
+    return true
+}
+
 // matching
 func getUrlProps(_ url: String) -> [String: String]? {
     let pattern = #"^(.*:)\/\/((?:\*\.)?(?:[a-z0-9-:]+\.?)+(?:[a-z0-9]+))(\/.*)?$"#
