@@ -828,7 +828,7 @@
     			span = element("span");
     			span.textContent = "cancel request";
     			attr(span, "class", "link");
-    			attr(div, "class", "svelte-1sjqtn5");
+    			attr(div, "class", "svelte-1v2lr3c");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -868,7 +868,7 @@
     			t = space();
     			if (if_block) if_block.c();
     			html_tag = new HtmlTag(t);
-    			attr(div, "class", "loader svelte-1sjqtn5");
+    			attr(div, "class", "loader svelte-1v2lr3c");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1505,11 +1505,11 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[19] = list[i];
     	return child_ctx;
     }
 
-    // (231:0) {#if error}
+    // (224:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1557,14 +1557,14 @@
     	};
     }
 
-    // (247:8) {:else}
+    // (240:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
     	let each_value = /*list*/ ctx[9];
-    	const get_key = ctx => /*item*/ ctx[20].filename;
+    	const get_key = ctx => /*item*/ ctx[19].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -1630,7 +1630,7 @@
     	};
     }
 
-    // (245:8) {#if items.length < 1}
+    // (238:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1652,7 +1652,7 @@
     	};
     }
 
-    // (242:4) {#if loading}
+    // (235:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1682,22 +1682,22 @@
     	};
     }
 
-    // (249:16) {#each list as item (item.filename)}
+    // (242:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_2(...args) {
-    		return /*click_handler_2*/ ctx[16](/*item*/ ctx[20], ...args);
+    		return /*click_handler_2*/ ctx[16](/*item*/ ctx[19], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[20].disabled,
-    				name: /*item*/ ctx[20].metadata.name[0],
-    				subframe: /*item*/ ctx[20].subframe,
-    				type: /*item*/ ctx[20].type
+    				enabled: !/*item*/ ctx[19].disabled,
+    				name: /*item*/ ctx[19].metadata.name[0],
+    				subframe: /*item*/ ctx[19].subframe,
+    				type: /*item*/ ctx[19].type
     			}
     		});
 
@@ -1719,10 +1719,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*list*/ 512) popupitem_changes.enabled = !/*item*/ ctx[20].disabled;
-    			if (dirty & /*list*/ 512) popupitem_changes.name = /*item*/ ctx[20].metadata.name[0];
-    			if (dirty & /*list*/ 512) popupitem_changes.subframe = /*item*/ ctx[20].subframe;
-    			if (dirty & /*list*/ 512) popupitem_changes.type = /*item*/ ctx[20].type;
+    			if (dirty & /*list*/ 512) popupitem_changes.enabled = !/*item*/ ctx[19].disabled;
+    			if (dirty & /*list*/ 512) popupitem_changes.name = /*item*/ ctx[19].metadata.name[0];
+    			if (dirty & /*list*/ 512) popupitem_changes.subframe = /*item*/ ctx[19].subframe;
+    			if (dirty & /*list*/ 512) popupitem_changes.type = /*item*/ ctx[19].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -1741,7 +1741,7 @@
     	};
     }
 
-    // (265:0) {#if showUpdates}
+    // (258:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2099,9 +2099,9 @@
     	function toggleItem(item) {
     		$$invalidate(3, disabled = true);
 
-    		browser.runtime.sendNativeMessage({ name: "POPUP_TOGGLE_SCRIPT", item }, response => {
+    		browser.runtime.sendNativeMessage({ name: "TOGGLE_ITEM", item }, response => {
     			if (response.error) {
-    				$$invalidate(0, error = response.error);
+    				$$invalidate(0, error = "Failed to toggle item");
     			} else {
     				const i = items.findIndex(el => el === item);
     				item.disabled = !item.disabled;
@@ -2117,47 +2117,29 @@
     		setTimeout(() => $$invalidate(3, disabled = false), 1000);
     	}
 
-    	async function mounted() {
-    		const tabs = await new Promise(resolve => {
-    				browser.tabs.query({ currentWindow: true, active: true }, tabs => {
-    					resolve(tabs);
-    				});
-    			});
-
+    	onMount(async () => {
+    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
     		const url = tabs[0].url;
-
-    		const message = {
-    			name: "POPUP_MATCHES",
-    			url,
-    			frameUrls: []
-    		};
+    		const frameUrls = [];
 
     		if (url) {
-    			const frames = await new Promise(resolve => {
-    					browser.webNavigation.getAllFrames({ tabId: tabs[0].id }, frames => {
-    						resolve(frames);
-    					});
-    				});
-
-    			frames.forEach(frame => message.frameUrls.push(frame.url));
+    			const frames = await browser.webNavigation.getAllFrames({ tabId: tabs[0].id });
+    			frames.forEach(frame => frameUrls.push(frame.url));
     		}
 
-    		browser.runtime.sendNativeMessage(message, response => {
-    			if (response.error) {
-    				$$invalidate(0, error = response.error);
-    			} else {
-    				$$invalidate(1, active = response.active === "true" ? true : false);
-    				$$invalidate(4, items = response.items);
-    				$$invalidate(6, updates = response.updates);
-    			}
+    		const message = { name: "POPUP_MATCHES", url, frameUrls };
+    		const response = await browser.runtime.sendNativeMessage(message);
 
-    			$$invalidate(2, loading = false);
-    			$$invalidate(3, disabled = false);
-    		});
-    	}
+    		if (response.error) {
+    			$$invalidate(0, error = response.error);
+    		} else {
+    			$$invalidate(1, active = response.active === "true" ? true : false);
+    			$$invalidate(4, items = response.items);
+    			$$invalidate(6, updates = response.updates);
+    		}
 
-    	onMount(() => {
-    		mounted();
+    		$$invalidate(2, loading = false);
+    		$$invalidate(3, disabled = false);
     	});
 
     	const click_handler = () => $$invalidate(5, showUpdates = true);

@@ -47,9 +47,9 @@ export default {
     inlineDynamicImports: true,
     plugins: [
         multi(),
-        // css({
-        //     output: "public/" + directory + "/build.lib.css"
-        // }),
+        css({
+            output: "public/" + directory + "/build/lib.css"
+        }),
         inlineSvg({}),
         svelte({
             // enable run-time checks when not in production

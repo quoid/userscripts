@@ -126,6 +126,16 @@ func openSaveLocation() -> Bool {
     return true
 }
 
+func validateUrl(_ urlString: String) -> Bool {
+    if
+        (!urlString.hasPrefix("https://") && !urlString.hasPrefix("http://"))
+        || (!urlString.hasSuffix(".css") && !urlString.hasSuffix(".js"))
+    {
+        return false
+    }
+    return true
+}
+
 // parser
 func parse(_ content: String) -> [String: Any]? {
     // returns structured data from content of file
@@ -595,12 +605,18 @@ func getAllFiles() -> [[String: Any]]? {
             logText("ignoring \(filename), file missing or metadata missing from file contents")
             continue
         }
-        fileData["filename"] = filename
-        fileData["metadata"] = metadata
-        fileData["type"] = "\(type)"
-        fileData["lastModified"] = dateToMilliseconds(dateMod)
-        fileData["disabled"] = manifest.disabled.contains(filename)
         fileData["canUpdate"] = false
+        fileData["content"] = content
+        fileData["disabled"] = manifest.disabled.contains(filename)
+        fileData["filename"] = filename
+        fileData["lastModified"] = dateToMilliseconds(dateMod)
+        fileData["metadata"] = metadata
+        // for unwrap name since parse ensure it exists
+        fileData["name"] = metadata["name"]![0]
+        fileData["type"] = "\(type)"
+        if metadata["description"] != nil {
+            fileData["description"] = metadata["description"]![0]
+        }
         if metadata["version"] != nil && metadata["updateURL"] != nil {
             fileData["canUpdate"] = true
         }
@@ -1254,4 +1270,218 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     }
     matches = matches.filter{!manifest.disabled.contains($0["filename"] as! String)}
     return matches.count
+}
+
+// page
+
+func getInitData() -> [String: Any]? {
+    let manifest = getManifest()
+    guard let saveLocation = getSaveLocation() else {
+        err("getInitData failed at (1)")
+        return nil
+    }
+    var data:[String: Any] = manifest.settings
+    data["blacklist"] = manifest.blacklist
+    data["saveLocation"] = saveLocation.path
+    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    return data
+}
+
+func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
+    var response = [String: Any]()
+    let newContent = content
+    guard let saveLocation = getSaveLocation() else {
+        err("saveFile failed at (1)")
+        return ["error": "failed to get save location when attempting to save"]
+    }
+    guard
+        let oldFilename = item["filename"] as? String,
+        let type = item["type"] as? String
+    else {
+        return ["error": "invalid argument in save function"]
+    }
+    guard
+        let parsed = parse(newContent),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let n = metadata["name"]?[0],
+        var name = sanitize(n)
+    else {
+        return ["error": "failed to parse argument in save function"]
+    }
+    
+    // construct new file name
+    let newFilename = "\(name).\(type)"
+    
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    guard
+        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
+    else {
+        return ["error": "failed to read save urls in save function"]
+    }
+    
+    // validate file before save
+    var allFilenames:[String] = [] // stores the indv filenames for later comparison
+    // old and new filenames are equal, overwriting and can skip
+    if oldFilename.lowercased() != newFilename.lowercased() {
+        // loop through all the file urls in the save location and save filename to var
+        for fileUrl in allFilesUrls {
+            // skip file if it is not of the proper type
+            let filename = fileUrl.lastPathComponent
+            if (!filename.hasSuffix(type)) {
+                continue
+            }
+            // if file is of the proper type, add it to the allFilenames array
+            allFilenames.append(filename.lowercased())
+        }
+    }
+    
+    if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
+        // filename taken or too long
+        return ["error": "filename validation failed in save function"]
+    }
+    
+    // file passed validation
+    
+    // attempt to save to disk
+    let newFileUrl = saveLocation.appendingPathComponent(newFilename)
+    do {
+        try newContent.write(to: newFileUrl, atomically: false, encoding: .utf8)
+    } catch {
+        err("saveFile failed at (2)")
+        return ["error": "failed to write file to disk"]
+    }
+    
+    // saved to disk successfully
+    
+    // get the file last modified date
+    guard
+        let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
+    else {
+        err("saveFile failed at (3)")
+        return ["error": "failed to read modified date in save function"]
+    }
+    
+    // remove old file and manifest records for old file if they exist
+    if oldFilename != newFilename {
+        // if user changed the filename, remove file with old filename
+        let oldFileUrl = saveLocation.appendingPathComponent(oldFilename)
+        // however, when creating a new file, if user changes the temp given name by app...
+        // oldFilename (the temp name in activeItem) and newFilename (@name in file contents) will differ
+        // the file with oldFilename will not be on the filesystem and can not be deleted
+        // for that edge case, using try? rather than try(!) to allow failures
+        try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
+    }
+    
+    // update manifest for new file and purge anything from old file
+    guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
+        err("saveFile failed at (4)")
+        return ["error": "file save but manifest couldn't be updated"]
+    }
+    
+    // un-santized name
+    name = unsanitize(name)
+    
+    // build response dict
+    response["canUpdate"] = false
+    response["content"] = newContent
+    response["filename"] = newFilename
+    response["lastModified"] = dateToMilliseconds(dateMod)
+    response["name"] = name
+    if metadata["description"] != nil {
+        response["description"] = metadata["description"]![0]
+    }
+    if metadata["version"] != nil && metadata["updateURL"] != nil {
+        response["canUpdate"] = true
+    }
+    
+    return response
+    
+}
+
+func trashFile(_ item: [String: Any]) -> Bool {
+    guard
+        let saveLocation = getSaveLocation(),
+        let filename = item["filename"] as? String
+    else {
+        err("trashFile failed at (1)")
+        return false
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    let url = saveLocation.appendingPathComponent(filename)
+    // if file is already removed from path, assume it was removed by user and return true
+    if (FileManager.default.fileExists(atPath: url.path)) {
+        do {
+            try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+        } catch {
+            err(error.localizedDescription)
+            return false
+        }
+    }
+    // update manifest
+    guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
+        err("trashFile failed at (2)")
+        return false
+    }
+    return true;
+}
+
+func updateFile(_ content: String) -> [String: String] {
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]]
+    else {
+        // can't parse editor contents
+        return ["error": "Update failed, metadata missing"]
+    }
+    // editor contents missing version value
+    guard let version = metadata["version"]?[0] else {
+        return ["error": "Update failed, version value required"]
+    }
+    // editor contents missing updateURL
+    guard let updateURL = metadata["updateURL"]?[0] else {
+        return ["error": "Update failed, update url required"]
+    }
+    // set download url
+    let downloadURL = (metadata["downloadURL"] != nil) ? metadata["downloadURL"]![0] : updateURL
+    // basic url validation
+    guard validateUrl(updateURL) else {
+        return ["error": "Update failed, invalid updateURL"]
+    }
+    guard validateUrl(downloadURL) else {
+        return ["error": "Update failed, invalid downloadURL"]
+    }
+    // get the remote file contents for checking version
+    guard var remoteContent = getRemoteFileContents(updateURL) else {
+        return ["error": "Update failed, updateURL unreachable"]
+    }
+    // parse remote file contents
+    guard
+        let remoteParsed = parse(remoteContent),
+        let remoteMetadata = remoteParsed["metadata"] as? [String: [String]],
+        let remoteVersion = remoteMetadata["version"]?[0]
+    else {
+        // can't parse editor contents
+        return ["error": "Update failed, couldn't parse remote file contents"]
+    }
+    // check if update is needed
+    if version >= remoteVersion {
+        return ["info": "No updates found"]
+    }
+    // at this point it is known an update is available, get new code from downloadURL
+    // is there's a specific downloadURL overwrite remoteContents with code from downloadURL
+    if updateURL != downloadURL {
+        guard let remoteDownloadContent = getRemoteFileContents(downloadURL) else {
+            return ["error": "Update failed, downloadURL unreachable"]
+        }
+        remoteContent = remoteDownloadContent
+    }
+    return ["content": remoteContent]
 }

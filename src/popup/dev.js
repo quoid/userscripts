@@ -4,8 +4,8 @@ const _browser = {
             console.log(`Got message: ${message.name}`);
             let response = {};
             if (message.name === "POPUP_TOGGLE_EXTENSION") {
-                //response = {error: "Failed toggle extension"};
-                response = {status: "success"};
+                response = {error: "Failed toggle extension"};
+                //response = {status: "success"};
             } else if (message.name === "POPUP_UPDATE_ALL") {
                 response = {error: "Failed refresh scripts"};
                 response = {
@@ -73,27 +73,41 @@ const _browser = {
                         {name: "New Userscript With a Really Really Long Name", url: "https://www.filmgarb.com"}
                     ]
                 };
-            } else if (message.name === "POPUP_TOGGLE_SCRIPT") {
+            } else if (message.name === "TOGGLE_ITEM") {
+                //response = {error: "Failed toggle item"};
                 response = {status: "success"};
             } else if (message.name === "POPUP_OPEN_EXTENSION_PAGE") {
                 response = {error: "Failed to get page url"};
                 window.open("https://github.com/quoid/userscripts");
             }
+            if (!responseCallback) {
+                return new Promise(resolve => setTimeout(() => resolve(response), 500));
+            }
             setTimeout(() => {
                 responseCallback(response);
-            }, 1000);
+            }, 500);
         }
     },
     tabs: {
         query(message, responseCallback) {
+            const response = [{url: "https://www.filmgarb.com/"}];
+            if (!responseCallback) {
+                return new Promise(resolve => setTimeout(() => resolve(response), 500));
+            }
             setTimeout(() => {
-                responseCallback([{url: "https://www.filmgarb.com/"}]);
-            }, 100);
+                responseCallback(response);
+            }, 500);
         }
     },
     webNavigation: {
         getAllFrames(message, responseCallback) {
-            responseCallback([]);
+            const response = [];
+            if (!responseCallback) {
+                return new Promise(resolve => setTimeout(() => resolve(response), 500));
+            }
+            setTimeout(() => {
+                responseCallback(response);
+            }, 500);
         }
     }
 };

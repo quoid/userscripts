@@ -1,9 +1,25 @@
 <script>
     import {onMount, tick} from "svelte";
     import {blur} from "svelte/transition";
+    import {items, log, notifications, settings, state} from "./store.js";
+    import Sidebar from "./Components/Sidebar/Sidebar.svelte";
+    import Editor from "./Components/Editor/Editor.svelte";
+    import Settings from "./Components/Settings.svelte";
+    import Notification from "./Components/Notification.svelte";
     import logo from "../shared/img/logo.svg";
 
-    let state = ["init"];
+    let logger = [];
+
+    $: $log.some(item => {
+        if (!logger.includes(item)) {
+            console[item.type](item.message);
+            logger.push(item);
+        }
+    });
+
+    // TODO: remove below console.logs
+    $: console.log($items);
+    $: console.log($settings);
 
     // disables default cmd+s (save) and cmd+f (find) behavior
     function preventKeyCommands(e) {
@@ -19,8 +35,34 @@
         document.documentElement.removeAttribute("style");
     }
 
-    onMount(() => {
-        setTimeout(() => {state = []}, 2000);
+    // currently inactive, but could be used to globally prevent auto text replacement in app
+    // eslint-disable-next-line no-unused-vars
+    function preventAutoTextReplacements(e) {
+        if (e.inputType === "insertReplacementText" && e.data === ". ") {
+            e.preventDefault();
+            e.target.value += " ";
+        }
+    }
+
+    onMount(async () => {
+        log.add("Requesting initialization data", "info", false);
+        const initData = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
+        if (initData.error) return console.error(initData.error);
+        console.log(initData);
+        for (const [key, value] of Object.entries(initData)) {
+            if (value === "true" || value === "false") {
+                initData[key] = JSON.parse(value);
+            }
+        }
+        settings.set(initData);
+        state.add("items-loading");
+        state.remove("init");
+
+        log.add("Requesting all files in save location", "info", false);
+        const files = await browser.runtime.sendNativeMessage({name: "PAGE_ALL_FILES"});
+        if (files.error) return console.error(files.error);
+        items.set(files);
+        state.remove("items-loading");
     });
 </script>
 <style>
@@ -49,16 +91,41 @@
         color: var(--text-color-secondary);
         font: var(--text-medium);
     }
+
+    div:not(.initializer) {
+        display: flex;
+        flex: 1 0 0;
+        overflow: hidden;
+    }
+
+    ul {
+        bottom: 1rem;
+        left: 50%;
+        position: fixed;
+        transform: translateX(-50%);
+        z-index: 98;
+    }
 </style>
 
 <svelte:window on:keydown={preventKeyCommands} on:resize={windowResize}/>
-{#if state.includes("init")}
+
+{#if $state.includes("init")}
     <div class="initializer" out:blur="{{duration: 350}}">
         {@html logo}
-        {#if state.includes("init-error")}
+        {#if $state.includes("init-error")}
             <span>Failed to initialize app, check the console!</span>
         {:else}
-            <span>Initializing app...</span>
+            <span>Initializing page...</span>
         {/if}
     </div>
 {/if}
+<div>
+    <Sidebar/>
+    <Editor/>
+</div>
+<ul>
+    {#each $notifications as item (item.id)}
+        <Notification on:click={() =>  notifications.remove(item.id)} {item}/>
+    {/each}
+</ul>
+{#if $state.includes("settings")}<Settings/>{/if}

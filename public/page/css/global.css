@@ -36,3 +36,15 @@ a,
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+button {
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    user-select: none;
+}
+
+button:disabled {
+    opacity: var(--opacity-disabled);
+    pointer-events: none;
+}

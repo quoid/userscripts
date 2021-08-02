@@ -9,6 +9,9 @@ function sortByWeight(o) {
     return sorted;
 }
 
+// TODO: insertCSS via:
+// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/insertCSS
+// cssOrigin: "user"
 function injectCSS(filename, code) {
     // there's no fallback if blocked by CSP
     // future fix?: https://wicg.github.io/construct-stylesheets/

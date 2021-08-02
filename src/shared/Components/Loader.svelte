@@ -17,7 +17,7 @@
         position: absolute;
         right: 0;
         top: 0;
-        z-index: 2;
+        z-index: 90;
     }
 
     .loader :global(svg) {

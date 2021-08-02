@@ -20,6 +20,9 @@
     let main;
     let rowColors;
 
+    // TODO: fix awaits
+    function foo() {}
+
     $: list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0]));
 
     $: if (list.length > 1 && list.length % 2 === 0) {
@@ -59,9 +62,9 @@
 
     function toggleItem(item) {
         disabled = true;
-        browser.runtime.sendNativeMessage({name: "POPUP_TOGGLE_SCRIPT", item: item}, response => {
+        browser.runtime.sendNativeMessage({name: "TOGGLE_ITEM", item: item}, response => {
             if (response.error) {
-                error = response.error;
+                error = "Failed to toggle item";
             } else {
                 const i = items.findIndex(el => el === item);
                 item.disabled = !item.disabled;
@@ -85,36 +88,26 @@
         window.close();
     }
 
-    async function mounted() {
-        const tabs = await new Promise(resolve => {
-            browser.tabs.query({currentWindow: true, active: true}, tabs => {
-                resolve(tabs);
-            });
-        });
+    onMount(async () => {
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
         const url = tabs[0].url;
-        const message = {name: "POPUP_MATCHES", url: url, frameUrls: []};
+        const frameUrls = [];
         if (url) {
-            const frames = await new Promise(resolve => {
-                browser.webNavigation.getAllFrames({tabId: tabs[0].id}, frames => {
-                    resolve(frames);
-                });
-            });
-            frames.forEach(frame => message.frameUrls.push(frame.url));
+            const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
+            frames.forEach(frame => frameUrls.push(frame.url));
         }
-        browser.runtime.sendNativeMessage(message, response => {
-            if (response.error) {
-                error = response.error;
-            } else {
-                active = response.active === "true" ? true : false;
-                items = response.items;
-                updates = response.updates;
-            }
-            loading = false;
-            disabled = false;
-        });
-    }
-
-    onMount(() => {mounted()});
+        const message = {name: "POPUP_MATCHES", url: url, frameUrls: frameUrls};
+        const response = await browser.runtime.sendNativeMessage(message);
+        if (response.error) {
+            error = response.error;
+        } else {
+            active = response.active === "true" ? true : false;
+            items = response.items;
+            updates = response.updates;
+        }
+        loading = false;
+        disabled = false;
+    });
 </script>
 <style>
     .header {
