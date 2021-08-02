@@ -79,8 +79,16 @@
         setTimeout(() => disabled = false, 1000);
     }
 
-    function openExtensionPage() {
-        browser.tabs.create({url: browser.runtime.getURL("page.html")});
+    async function openExtensionPage() {
+        const url = browser.runtime.getURL("page.html");
+        const tabs =  await browser.tabs.query({});
+        for (let i = 0; i < tabs.length; i++) {
+            if (tabs[i].url === url) {
+                browser.tabs.update(tabs[i].id, {active: true});
+                return;
+            }
+        }
+        browser.tabs.create({url: url});
     }
 
     function openSaveLocation() {

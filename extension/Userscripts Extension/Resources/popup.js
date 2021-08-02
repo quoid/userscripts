@@ -1509,7 +1509,7 @@
     	return child_ctx;
     }
 
-    // (224:0) {#if error}
+    // (232:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1557,7 +1557,7 @@
     	};
     }
 
-    // (240:8) {:else}
+    // (248:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1630,7 +1630,7 @@
     	};
     }
 
-    // (238:8) {#if items.length < 1}
+    // (246:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1652,7 +1652,7 @@
     	};
     }
 
-    // (235:4) {#if loading}
+    // (243:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1682,7 +1682,7 @@
     	};
     }
 
-    // (242:16) {#each list as item (item.filename)}
+    // (250:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1741,7 +1741,7 @@
     	};
     }
 
-    // (258:0) {#if showUpdates}
+    // (266:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2046,8 +2046,18 @@
     	};
     }
 
-    function openExtensionPage() {
-    	browser.tabs.create({ url: browser.runtime.getURL("page.html") });
+    async function openExtensionPage() {
+    	const url = browser.runtime.getURL("page.html");
+    	const tabs = await browser.tabs.query({});
+
+    	for (let i = 0; i < tabs.length; i++) {
+    		if (tabs[i].url === url) {
+    			browser.tabs.update(tabs[i].id, { active: true });
+    			return;
+    		}
+    	}
+
+    	browser.tabs.create({ url });
     }
 
     function openSaveLocation() {
