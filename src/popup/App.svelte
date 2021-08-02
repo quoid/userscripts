@@ -84,7 +84,9 @@
         const tabs =  await browser.tabs.query({});
         for (let i = 0; i < tabs.length; i++) {
             if (tabs[i].url === url) {
-                browser.tabs.update(tabs[i].id, {active: true});
+                await browser.windows.update(tabs[i].windowId, {focused: true});
+                await browser.tabs.update(tabs[i].id, {active: true});
+                window.close();
                 return;
             }
         }

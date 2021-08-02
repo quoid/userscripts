@@ -1509,7 +1509,7 @@
     	return child_ctx;
     }
 
-    // (232:0) {#if error}
+    // (234:0) {#if error}
     function create_if_block_3(ctx) {
     	let div;
     	let t0;
@@ -1557,7 +1557,7 @@
     	};
     }
 
-    // (248:8) {:else}
+    // (250:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1630,7 +1630,7 @@
     	};
     }
 
-    // (246:8) {#if items.length < 1}
+    // (248:8) {#if items.length < 1}
     function create_if_block_2(ctx) {
     	let div;
 
@@ -1652,7 +1652,7 @@
     	};
     }
 
-    // (243:4) {#if loading}
+    // (245:4) {#if loading}
     function create_if_block_1$1(ctx) {
     	let loader;
     	let current;
@@ -1682,7 +1682,7 @@
     	};
     }
 
-    // (250:16) {#each list as item (item.filename)}
+    // (252:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1741,7 +1741,7 @@
     	};
     }
 
-    // (266:0) {#if showUpdates}
+    // (268:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2052,7 +2052,9 @@
 
     	for (let i = 0; i < tabs.length; i++) {
     		if (tabs[i].url === url) {
-    			browser.tabs.update(tabs[i].id, { active: true });
+    			await browser.windows.update(tabs[i].windowId, { focused: true });
+    			await browser.tabs.update(tabs[i].id, { active: true });
+    			window.close();
     			return;
     		}
     	}
