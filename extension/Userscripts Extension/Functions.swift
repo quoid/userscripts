@@ -1192,6 +1192,9 @@ func getInjectionFilenames(_ url: String) -> [String]? {
 // popup
 func getPopupMatches(_ url: String, _ subframeUrls: [String], _ shouldUpdate: Bool) -> [[String: Any]]? {
     var matches = [[String: Any]]()
+    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+        return matches
+    }
     let matched = getMatchedFiles(url)
     guard
         let files = getAllFiles()
@@ -1248,6 +1251,9 @@ func popupUpdateAll() -> Bool {
 }
 
 func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
+    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+        return 0
+    }
     let manifest = getManifest()
     guard
         var matches = getPopupMatches(url, subframeUrls, false),
