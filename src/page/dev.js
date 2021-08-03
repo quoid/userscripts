@@ -94,7 +94,7 @@ const _browser = {
                     version: "4.0.0"
                 };
             } else if (name === "PAGE_ALL_FILES") {
-                response.data = [];
+                response = [];
                 files.forEach(file => {
                     const content = file.content;
                     const parsed = parse(content);
@@ -111,7 +111,7 @@ const _browser = {
                         name: metadata.name[0],
                         type: file.filename.substring(file.filename.lastIndexOf(".") + 1)
                     };
-                    response.data.push(scriptData);
+                    response.push(scriptData);
                 });
             } else if (name === "TOGGLE_ITEM") {
                 // response = {success: true};
