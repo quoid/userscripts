@@ -147,7 +147,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 // TODO: handle error
                 return
             }
-            let updateResponse = updateFile(content)
+            let updateResponse = getFileRemoteUpdate(content)
             response.userInfo = [SFExtensionMessageKey: updateResponse]
         }
         else if name == "CANCEL_REQUESTS" {

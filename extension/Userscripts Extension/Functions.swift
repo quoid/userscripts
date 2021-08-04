@@ -1439,7 +1439,7 @@ func trashFile(_ item: [String: Any]) -> Bool {
     return true;
 }
 
-func updateFile(_ content: String) -> [String: String] {
+func getFileRemoteUpdate(_ content: String) -> [String: String] {
     guard
         let parsed = parse(content),
         let metadata = parsed["metadata"] as? [String: [String]]
