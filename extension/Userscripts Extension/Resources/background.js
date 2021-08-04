@@ -25,7 +25,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     } else if (request.name === "CONTEXT_CREATE") {
         const menuItemId = request.menuItemId;
-        const menuObj = {id: menuItemId, title: request.title, documentUrlPatterns: [request.url]};
+        const menuObj = {
+            contexts: ["all"],
+            documentUrlPatterns: [request.url],
+            id: menuItemId,
+            title: request.title,
+        };
         const onCreate = () => {
             if (browser.runtime.lastError) {
                 console.error(browser.runtime.lastError);
