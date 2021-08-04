@@ -48,6 +48,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
                 browser.contextMenus.create(menuObj, onCreate);
             });
+        } else {
+            browser.contextMenus.create(menuObj, onCreate);
         }
         return true;
     } else if (request.name === "CONTEXT_REMOVE") {
