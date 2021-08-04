@@ -1695,7 +1695,7 @@
     	popupitem = new PopupItem({
     			props: {
     				enabled: !/*item*/ ctx[19].disabled,
-    				name: /*item*/ ctx[19].metadata.name[0],
+    				name: /*item*/ ctx[19].name,
     				subframe: /*item*/ ctx[19].subframe,
     				type: /*item*/ ctx[19].type
     			}
@@ -1720,7 +1720,7 @@
     			ctx = new_ctx;
     			const popupitem_changes = {};
     			if (dirty & /*list*/ 512) popupitem_changes.enabled = !/*item*/ ctx[19].disabled;
-    			if (dirty & /*list*/ 512) popupitem_changes.name = /*item*/ ctx[19].metadata.name[0];
+    			if (dirty & /*list*/ 512) popupitem_changes.name = /*item*/ ctx[19].name;
     			if (dirty & /*list*/ 512) popupitem_changes.subframe = /*item*/ ctx[19].subframe;
     			if (dirty & /*list*/ 512) popupitem_changes.type = /*item*/ ctx[19].type;
     			popupitem.$set(popupitem_changes);
@@ -2170,7 +2170,7 @@
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*items*/ 16) {
-    			 $$invalidate(9, list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0])));
+    			 $$invalidate(9, list = items.sort((a, b) => a.name.localeCompare(b.name)));
     		}
 
     		if ($$self.$$.dirty & /*list*/ 512) {

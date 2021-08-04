@@ -11,37 +11,37 @@ const _browser = {
                 response = {
                     items: [
                         {
-                            metadata: {name: ["Google Images Restored"]},
+                            name: "Google Images Restored",
                             filename: "Google Images Restored.js",
                             disabled: false,
                             type: "js"
                         },
                         {
-                            metadata: {name: ["Wikipedia Mobile Redirect"]},
+                            name: "Wikipedia Mobile Redirect",
                             filename: "Wikipedia Mobile Redirect.js",
                             disabled: true,
                             type: "js"
                         },
                         {
-                            metadata: {name: ["A Special Userscript"]},
+                            name: "A Special Userscript",
                             filename: "A Special Userscript.js",
                             disabled: false,
                             type: "js"
                         },
                         {
-                            metadata: {name: ["CSS Adblock"]},
+                            name: "CSS Adblock",
                             filename: "CSS Adblock.css",
                             disabled: false,
                             type: "css"
                         },
                         {
-                            metadata: {name: ["New Userscript With a Really Really Long Name"]},
+                            name: "New Userscript With a Really Really Long Name",
                             filename: "New Userscript With a Really Really Long Name.css",
                             disabled: true,
                             type: "css"
                         },
                         {
-                            metadata: {name: ["Subframe Script Managerial Staffing Company"]},
+                            name: "Subframe Script Managerial Staffing Company",
                             filename: "Subframe Script.js",
                             disabled: false,
                             subframe: true,
@@ -55,13 +55,13 @@ const _browser = {
                     active: "true",
                     items: [
                         {
-                            metadata: {name: ["Google Images Restored"]},
+                            name: "Google Images Restored",
                             filename: "Google Images Restored.js",
                             disabled: false,
                             type: "js"
                         },
                         {
-                            metadata: {name: ["Subframe Script Managerial Staffing Company"]},
+                            name: "Subframe Script Managerial Staffing Company",
                             filename: "Subframe Script.js",
                             disabled: false,
                             subframe: true,
@@ -69,8 +69,16 @@ const _browser = {
                         }
                     ],
                     updates: [
-                        {name: "Google Images Restored", url: "https://www.k21p.com"},
-                        {name: "New Userscript With a Really Really Long Name", url: "https://www.filmgarb.com"}
+                        {
+                            filename: "Google Images Restored.js",
+                            name: "Google Images Restored",
+                            url: "https://www.k21p.com"
+                        },
+                        {
+                            filename: "New Userscript With a Really Really Long Name.js",
+                            name: "New Userscript With a Really Really Long Name",
+                            url: "https://www.filmgarb.com"
+                        }
                     ]
                 };
             } else if (message.name === "TOGGLE_ITEM") {

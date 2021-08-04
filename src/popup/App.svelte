@@ -23,7 +23,7 @@
     // TODO: fix awaits
     function foo() {}
 
-    $: list = items.sort((a, b) => a.metadata.name[0].localeCompare(b.metadata.name[0]));
+    $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
     $: if (list.length > 1 && list.length % 2 === 0) {
         rowColors = "even";
@@ -252,7 +252,7 @@
                 {#each list as item (item.filename)}
                     <PopupItem
                         enabled={!item.disabled}
-                        name={item.metadata.name[0]}
+                        name={item.name}
                         subframe={item.subframe}
                         type={item.type}
                         on:click={() => toggleItem(item)}
