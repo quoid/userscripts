@@ -2,6 +2,8 @@
 let data;
 // determines whether strict csp injection has already run (JS only)
 let cspFallbackAttempted = 0;
+// track whether event listener added
+let beforeunload = 0;
 
 function sortByWeight(o) {
     let sorted = {};
@@ -166,19 +168,22 @@ function addContextMenuItem(filename, name) {
     // https://stackoverflow.com/q/68431201
     let pathname = window.location.pathname;
     if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
-    const url = window.location.origin + pathname;
+    const url = window.location.protocol + "//" + window.location.hostname + pathname;
 
-    //const url = window.location.origin + window.location.pathname;
     const menuItemId = url + "&$&" + filename;
     const message = {name: "CONTEXT_CREATE", menuItemId: menuItemId, title: name, url: url};
     browser.runtime.sendMessage(message, response => {
-        window.addEventListener("beforeunload", () => {
-            // beforeunload doesn't always fire on page refresh?
-            // OK since we wouldn't want to remove the context menu items when that happens
-            // BAD for when user disabled a context-menu script then refreshes...
-            // b/c of this all context menu items for a url will be removed/remade on refresh
-            browser.runtime.sendMessage({name: "CONTEXT_REMOVE", menuItemId: menuItemId});
-        });
+        // avoid adding unnecessary event listeners
+        if (!beforeunload) {
+            window.addEventListener("beforeunload", () => {
+                // beforeunload doesn't always fire on page refresh?
+                // OK since we wouldn't want to remove the context menu items when that happens
+                // BAD for when user disabled a context-menu script then refreshes...
+                // b/c of this all context menu items for a url will be removed/remade on refresh
+                browser.runtime.sendMessage({name: "CONTEXT_REMOVE", menuItemId: menuItemId});
+            });
+            beforeunload = 1;
+        }
     });
 }
 
@@ -186,7 +191,6 @@ function addContextMenuItem(filename, name) {
 browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
     // save code to data var so cspFallback can be attempted
     data = response.code;
-    console.log(data);
     if (Object.keys(data).length != 0) parseCode(data);
 });
 

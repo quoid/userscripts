@@ -25,21 +25,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     } else if (request.name === "CONTEXT_CREATE") {
         const menuItemId = request.menuItemId;
-        // first check if the context menu item is already present for a tab on the same url
-        // if so, remove the current context menu item & entry in context menu items array
-        // although already created context menu items automatically apply
-        // to subsequent tab urls that match the documentUrlPatterns supplied at creation
-        // the user could have edited the userscript since the first application
-        if (contextMenuItems.includes(menuItemId)) {
-            browser.contextMenus.remove(menuItemId);
-            contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
-        }
-        // create the context menu item and attach event listener if needed
-        browser.contextMenus.create({
-            id: menuItemId,
-            title: request.title,
-            documentUrlPatterns: [request.url]
-        }, () => {
+        const menuObj = {id: menuItemId, title: request.title, documentUrlPatterns: [request.url]};
+        const onCreate = () => {
             if (browser.runtime.lastError) {
                 console.error(browser.runtime.lastError);
             } else {
@@ -50,16 +37,28 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     browser.menus.onClicked.addListener(contextClick);
                 }
             }
-        });
+        };
+        // first check if the context menu item is already present for a tab on the same url
+        // if so, remove the current context menu item & entry in context menu items array
+        // although already created context menu items automatically apply
+        // to subsequent tab urls that match the documentUrlPatterns supplied at creation
+        // the user could have edited the userscript since the first application
+        if (contextMenuItems.includes(menuItemId)) {
+            browser.contextMenus.remove(menuItemId, () => {
+                contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
+                browser.contextMenus.create(menuObj, onCreate);
+            });
+        }
         return true;
     } else if (request.name === "CONTEXT_REMOVE") {
         // tab closes events dispatch remove request with a menuItemId
         // remove the context menu item associated with the menuItemId when that event comes in
         // if tabs with the same url exist, the context menu item will be recreated on right click
         const menuItemId = request.menuItemId;
-        browser.contextMenus.remove(menuItemId);
-        contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
-        purgeContextMenus();
+        browser.contextMenus.remove(menuItemId, () => {
+            contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
+            purgeContextMenus();
+        });
     }
 });
 
