@@ -1505,12 +1505,12 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[19] = list[i];
+    	child_ctx[20] = list[i];
     	return child_ctx;
     }
 
-    // (234:0) {#if error}
-    function create_if_block_3(ctx) {
+    // (242:0) {#if error}
+    function create_if_block_5(ctx) {
     	let div;
     	let t0;
     	let t1;
@@ -1521,7 +1521,7 @@
     			props: { icon: iconClear, title: "Clear error" }
     		});
 
-    	iconbutton.$on("click", /*click_handler_1*/ ctx[15]);
+    	iconbutton.$on("click", /*click_handler_1*/ ctx[16]);
 
     	return {
     		c() {
@@ -1557,14 +1557,14 @@
     	};
     }
 
-    // (250:8) {:else}
+    // (260:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	let each_value = /*list*/ ctx[9];
-    	const get_key = ctx => /*item*/ ctx[19].filename;
+    	let each_value = /*list*/ ctx[10];
+    	const get_key = ctx => /*item*/ ctx[20].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -1593,8 +1593,8 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*list, toggleItem*/ 4608) {
-    				const each_value = /*list*/ ctx[9];
+    			if (dirty & /*list, toggleItem*/ 9216) {
+    				const each_value = /*list*/ ctx[10];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
     				check_outros();
@@ -1630,8 +1630,8 @@
     	};
     }
 
-    // (248:8) {#if items.length < 1}
-    function create_if_block_2(ctx) {
+    // (258:35) 
+    function create_if_block_4(ctx) {
     	let div;
 
     	return {
@@ -1652,8 +1652,30 @@
     	};
     }
 
-    // (245:4) {#if loading}
-    function create_if_block_1$1(ctx) {
+    // (256:8) {#if inactive}
+    function create_if_block_3(ctx) {
+    	let div;
+
+    	return {
+    		c() {
+    			div = element("div");
+    			div.textContent = "Popup inactive on extension page";
+    			attr(div, "class", "none svelte-9jwptc");
+    		},
+    		m(target, anchor) {
+    			insert(target, div, anchor);
+    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d(detaching) {
+    			if (detaching) detach(div);
+    		}
+    	};
+    }
+
+    // (253:4) {#if loading}
+    function create_if_block_2(ctx) {
     	let loader;
     	let current;
     	loader = new Loader({});
@@ -1682,22 +1704,22 @@
     	};
     }
 
-    // (252:16) {#each list as item (item.filename)}
+    // (262:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_2(...args) {
-    		return /*click_handler_2*/ ctx[16](/*item*/ ctx[19], ...args);
+    		return /*click_handler_2*/ ctx[17](/*item*/ ctx[20], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[19].disabled,
-    				name: /*item*/ ctx[19].name,
-    				subframe: /*item*/ ctx[19].subframe,
-    				type: /*item*/ ctx[19].type
+    				enabled: !/*item*/ ctx[20].disabled,
+    				name: /*item*/ ctx[20].name,
+    				subframe: /*item*/ ctx[20].subframe,
+    				type: /*item*/ ctx[20].type
     			}
     		});
 
@@ -1719,10 +1741,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*list*/ 512) popupitem_changes.enabled = !/*item*/ ctx[19].disabled;
-    			if (dirty & /*list*/ 512) popupitem_changes.name = /*item*/ ctx[19].name;
-    			if (dirty & /*list*/ 512) popupitem_changes.subframe = /*item*/ ctx[19].subframe;
-    			if (dirty & /*list*/ 512) popupitem_changes.type = /*item*/ ctx[19].type;
+    			if (dirty & /*list*/ 1024) popupitem_changes.enabled = !/*item*/ ctx[20].disabled;
+    			if (dirty & /*list*/ 1024) popupitem_changes.name = /*item*/ ctx[20].name;
+    			if (dirty & /*list*/ 1024) popupitem_changes.subframe = /*item*/ ctx[20].subframe;
+    			if (dirty & /*list*/ 1024) popupitem_changes.type = /*item*/ ctx[20].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -1741,16 +1763,49 @@
     	};
     }
 
-    // (268:0) {#if showUpdates}
+    // (275:0) {#if !inactive}
+    function create_if_block_1$1(ctx) {
+    	let div1;
+    	let div0;
+    	let mounted;
+    	let dispose;
+
+    	return {
+    		c() {
+    			div1 = element("div");
+    			div0 = element("div");
+    			div0.textContent = "Open Extension Page";
+    			attr(div0, "class", "link");
+    			attr(div1, "class", "footer svelte-9jwptc");
+    		},
+    		m(target, anchor) {
+    			insert(target, div1, anchor);
+    			append(div1, div0);
+
+    			if (!mounted) {
+    				dispose = listen(div0, "click", openExtensionPage);
+    				mounted = true;
+    			}
+    		},
+    		p: noop,
+    		d(detaching) {
+    			if (detaching) detach(div1);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+    }
+
+    // (280:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
 
     	updateview = new UpdateView({
     			props: {
-    				closeClick: /*func*/ ctx[18],
-    				updateClick: /*updateAll*/ ctx[11],
-    				checkClick: /*checkForUpdates*/ ctx[13],
+    				closeClick: /*func*/ ctx[19],
+    				updateClick: /*updateAll*/ ctx[12],
+    				checkClick: /*checkForUpdates*/ ctx[14],
     				loading: /*disabled*/ ctx[3],
     				updates: /*updates*/ ctx[6]
     			}
@@ -1766,7 +1821,7 @@
     		},
     		p(ctx, dirty) {
     			const updateview_changes = {};
-    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[18];
+    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[19];
     			if (dirty & /*disabled*/ 8) updateview_changes.loading = /*disabled*/ ctx[3];
     			if (dirty & /*updates*/ 64) updateview_changes.updates = /*updates*/ ctx[6];
     			updateview.$set(updateview_changes);
@@ -1802,13 +1857,9 @@
     	let if_block1;
     	let div2_class_value;
     	let t5;
-    	let div4;
-    	let div3;
-    	let t7;
-    	let if_block2_anchor;
+    	let t6;
+    	let if_block3_anchor;
     	let current;
-    	let mounted;
-    	let dispose;
 
     	iconbutton0 = new IconButton({
     			props: {
@@ -1829,7 +1880,7 @@
     			}
     		});
 
-    	iconbutton1.$on("click", /*click_handler*/ ctx[14]);
+    	iconbutton1.$on("click", /*click_handler*/ ctx[15]);
 
     	iconbutton2 = new IconButton({
     			props: {
@@ -1842,20 +1893,22 @@
     			}
     		});
 
-    	iconbutton2.$on("click", /*toggleExtension*/ ctx[10]);
-    	let if_block0 = /*error*/ ctx[0] && create_if_block_3(ctx);
-    	const if_block_creators = [create_if_block_1$1, create_if_block_2, create_else_block$1];
+    	iconbutton2.$on("click", /*toggleExtension*/ ctx[11]);
+    	let if_block0 = /*error*/ ctx[0] && create_if_block_5(ctx);
+    	const if_block_creators = [create_if_block_2, create_if_block_3, create_if_block_4, create_else_block$1];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
     		if (/*loading*/ ctx[2]) return 0;
-    		if (/*items*/ ctx[4].length < 1) return 1;
-    		return 2;
+    		if (/*inactive*/ ctx[9]) return 1;
+    		if (/*items*/ ctx[4].length < 1) return 2;
+    		return 3;
     	}
 
     	current_block_type_index = select_block_type(ctx);
     	if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    	let if_block2 = /*showUpdates*/ ctx[5] && create_if_block$3(ctx);
+    	let if_block2 = !/*inactive*/ ctx[9] && create_if_block_1$1();
+    	let if_block3 = /*showUpdates*/ ctx[5] && create_if_block$3(ctx);
 
     	return {
     		c() {
@@ -1873,17 +1926,13 @@
     			div2 = element("div");
     			if_block1.c();
     			t5 = space();
-    			div4 = element("div");
-    			div3 = element("div");
-    			div3.textContent = "Open Extension Page";
-    			t7 = space();
     			if (if_block2) if_block2.c();
-    			if_block2_anchor = empty();
+    			t6 = space();
+    			if (if_block3) if_block3.c();
+    			if_block3_anchor = empty();
     			attr(div0, "class", "header__logo svelte-9jwptc");
     			attr(div1, "class", "header svelte-9jwptc");
     			attr(div2, "class", div2_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-9jwptc");
-    			attr(div3, "class", "link");
-    			attr(div4, "class", "footer svelte-9jwptc");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -1900,19 +1949,13 @@
     			insert(target, t4, anchor);
     			insert(target, div2, anchor);
     			if_blocks[current_block_type_index].m(div2, null);
-    			/*div2_binding*/ ctx[17](div2);
+    			/*div2_binding*/ ctx[18](div2);
     			insert(target, t5, anchor);
-    			insert(target, div4, anchor);
-    			append(div4, div3);
-    			insert(target, t7, anchor);
     			if (if_block2) if_block2.m(target, anchor);
-    			insert(target, if_block2_anchor, anchor);
+    			insert(target, t6, anchor);
+    			if (if_block3) if_block3.m(target, anchor);
+    			insert(target, if_block3_anchor, anchor);
     			current = true;
-
-    			if (!mounted) {
-    				dispose = listen(div3, "click", openExtensionPage);
-    				mounted = true;
-    			}
     		},
     		p(ctx, [dirty]) {
     			const iconbutton0_changes = {};
@@ -1939,7 +1982,7 @@
     						transition_in(if_block0, 1);
     					}
     				} else {
-    					if_block0 = create_if_block_3(ctx);
+    					if_block0 = create_if_block_5(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(t4.parentNode, t4);
@@ -1982,24 +2025,37 @@
     				attr(div2, "class", div2_class_value);
     			}
 
-    			if (/*showUpdates*/ ctx[5]) {
+    			if (!/*inactive*/ ctx[9]) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
-
-    					if (dirty & /*showUpdates*/ 32) {
-    						transition_in(if_block2, 1);
-    					}
     				} else {
-    					if_block2 = create_if_block$3(ctx);
+    					if_block2 = create_if_block_1$1();
     					if_block2.c();
-    					transition_in(if_block2, 1);
-    					if_block2.m(if_block2_anchor.parentNode, if_block2_anchor);
+    					if_block2.m(t6.parentNode, t6);
     				}
     			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
+
+    			if (/*showUpdates*/ ctx[5]) {
+    				if (if_block3) {
+    					if_block3.p(ctx, dirty);
+
+    					if (dirty & /*showUpdates*/ 32) {
+    						transition_in(if_block3, 1);
+    					}
+    				} else {
+    					if_block3 = create_if_block$3(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(if_block3_anchor.parentNode, if_block3_anchor);
+    				}
+    			} else if (if_block3) {
     				group_outros();
 
-    				transition_out(if_block2, 1, 1, () => {
-    					if_block2 = null;
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
     				});
 
     				check_outros();
@@ -2012,7 +2068,7 @@
     			transition_in(iconbutton2.$$.fragment, local);
     			transition_in(if_block0);
     			transition_in(if_block1);
-    			transition_in(if_block2);
+    			transition_in(if_block3);
     			current = true;
     		},
     		o(local) {
@@ -2021,7 +2077,7 @@
     			transition_out(iconbutton2.$$.fragment, local);
     			transition_out(if_block0);
     			transition_out(if_block1);
-    			transition_out(if_block2);
+    			transition_out(if_block3);
     			current = false;
     		},
     		d(detaching) {
@@ -2034,14 +2090,12 @@
     			if (detaching) detach(t4);
     			if (detaching) detach(div2);
     			if_blocks[current_block_type_index].d();
-    			/*div2_binding*/ ctx[17](null);
+    			/*div2_binding*/ ctx[18](null);
     			if (detaching) detach(t5);
-    			if (detaching) detach(div4);
-    			if (detaching) detach(t7);
     			if (if_block2) if_block2.d(detaching);
-    			if (detaching) detach(if_block2_anchor);
-    			mounted = false;
-    			dispose();
+    			if (detaching) detach(t6);
+    			if (if_block3) if_block3.d(detaching);
+    			if (detaching) detach(if_block3_anchor);
     		}
     	};
     }
@@ -2077,6 +2131,7 @@
     	let updates = [];
     	let main;
     	let rowColors;
+    	let inactive = false;
 
     	function toggleExtension() {
     		$$invalidate(3, disabled = true);
@@ -2133,6 +2188,15 @@
     		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
     		const url = tabs[0].url;
     		const frameUrls = [];
+    		const extensionPageUrl = browser.runtime.getURL("page.html");
+
+    		if (url === extensionPageUrl) {
+    			// disable popup on extension page
+    			$$invalidate(9, inactive = true);
+
+    			$$invalidate(2, loading = false);
+    			return;
+    		}
 
     		if (url) {
     			const frames = await browser.webNavigation.getAllFrames({ tabId: tabs[0].id });
@@ -2170,10 +2234,10 @@
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*items*/ 16) {
-    			 $$invalidate(9, list = items.sort((a, b) => a.name.localeCompare(b.name)));
+    			 $$invalidate(10, list = items.sort((a, b) => a.name.localeCompare(b.name)));
     		}
 
-    		if ($$self.$$.dirty & /*list*/ 512) {
+    		if ($$self.$$.dirty & /*list*/ 1024) {
     			 if (list.length > 1 && list.length % 2 === 0) {
     				$$invalidate(8, rowColors = "even");
     			} else if (list.length > 1 && list.length % 2 != 0) {
@@ -2194,6 +2258,7 @@
     		updates,
     		main,
     		rowColors,
+    		inactive,
     		list,
     		toggleExtension,
     		updateAll,

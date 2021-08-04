@@ -1,5 +1,8 @@
 const _browser = {
     runtime: {
+        getURL() {
+            return "https://www.example.com/";
+        },
         sendNativeMessage(message, responseCallback) {
             console.log(`Got message: ${message.name}`);
             let response = {};

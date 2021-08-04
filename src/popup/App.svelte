@@ -19,6 +19,7 @@
     let updates = [];
     let main;
     let rowColors;
+    let inactive = false;
 
     // TODO: fix awaits
     function foo() {}
@@ -102,6 +103,13 @@
         const tabs = await browser.tabs.query({currentWindow: true, active: true});
         const url = tabs[0].url;
         const frameUrls = [];
+        const extensionPageUrl = browser.runtime.getURL("page.html");
+        if (url === extensionPageUrl) {
+            // disable popup on extension page
+            inactive = true;
+            loading = false;
+            return;
+        }
         if (url) {
             const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
             frames.forEach(frame => frameUrls.push(frame.url));
@@ -245,7 +253,9 @@
     {#if loading}
         <Loader/>
     {:else}
-        {#if items.length < 1}
+        {#if inactive}
+        <div class="none">Popup inactive on extension page</div>
+        {:else if items.length < 1}
             <div class="none">No matched userscripts</div>
         {:else}
             <div class="items" class:disabled={disabled}>
@@ -262,9 +272,11 @@
         {/if}
     {/if}
 </div>
-<div class="footer">
-    <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
-</div>
+{#if !inactive}
+    <div class="footer">
+        <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
+    </div>
+{/if}
 {#if showUpdates}
     <UpdateView
         closeClick={() => showUpdates = false}
