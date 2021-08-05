@@ -418,7 +418,7 @@ func updateManifestRequired() -> Bool {
 }
 
 func purgeManifest() -> Bool {
-    // TODO: comment
+    // purge all manifest keys of any stale entries
     var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
     let allFiles = getAllFiles() ?? []
     // populate array with filenames
