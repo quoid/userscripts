@@ -14,12 +14,19 @@
         padding: 1rem 1rem calc(1rem - 1px);
     }
 
+    .item.temp {
+        position: -webkit-sticky;
+        top: 0;
+        z-index: 2;
+    }
+
     .item:hover {
         background-color: var(--color-bg-primary);
     }
 
     .item.active {
         background-color: var(--color-script-highlighted);
+        background-color: #364049;
         cursor: default;
     }
 
@@ -56,6 +63,7 @@
     class="item {data.class || ""}"
     class:active={data.active}
     class:disabled={data.disabled}
+    class:temp={data.temp}
     data-filename={data.filename}
     data-last-modified={data.lastModified}
     data-type={data.type}

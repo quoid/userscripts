@@ -22,11 +22,8 @@
 
     $: list = sortBy($items, $settings.sortOrder).filter(a => a.visible != false);
 
-    // TODO: edit comment below
-    // uncomment this to always scroll to an active item
+    // always scroll to an active item
     // when sorting is changed, a save occurs, etc... will scroll to active item
-    // should remove the temp check in the sortBy func in utils & scroll to in activate func
-    // this can be a bit jarring, so unsure to enable it
     $: if (list.find(a => a.active)) {
         const active = list.find(a => a.active);
         scrollToEl(active.filename);

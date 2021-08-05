@@ -23,7 +23,7 @@ export function sortBy(array, order) {
         array.sort((a, b) => (a.lastModified > b.lastModified) ? -1 : 1);
     }
     // always keep temp file pinned to the top, should only ever have one temp script
-    // if (array.find(f => f.temp)) array.sort((a, b) => a.temp ? -1 : b.temp ? 1 : 0);
+    if (array.find(f => f.temp)) array.sort((a, b) => a.temp ? -1 : b.temp ? 1 : 0);
     return array;
 }
 

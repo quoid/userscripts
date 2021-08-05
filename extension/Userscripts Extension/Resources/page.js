@@ -987,7 +987,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             array.sort((a, b) => (a.lastModified > b.lastModified) ? -1 : 1);
         }
         // always keep temp file pinned to the top, should only ever have one temp script
-        // if (array.find(f => f.temp)) array.sort((a, b) => a.temp ? -1 : b.temp ? 1 : 0);
+        if (array.find(f => f.temp)) array.sort((a, b) => a.temp ? -1 : b.temp ? 1 : 0);
         return array;
     }
 
@@ -2002,15 +2002,16 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t3 = space();
     			div2 = element("div");
     			t4 = text(t4_value);
-    			attr(div0, "class", "item__title truncate svelte-ilu1m6");
-    			attr(div1, "class", "item__header svelte-ilu1m6");
-    			attr(div2, "class", "item__description svelte-ilu1m6");
-    			attr(div3, "class", div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-ilu1m6");
+    			attr(div0, "class", "item__title truncate svelte-lgtj0i");
+    			attr(div1, "class", "item__header svelte-lgtj0i");
+    			attr(div2, "class", "item__description svelte-lgtj0i");
+    			attr(div3, "class", div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-lgtj0i");
     			attr(div3, "data-filename", div3_data_filename_value = /*data*/ ctx[0].filename);
     			attr(div3, "data-last-modified", div3_data_last_modified_value = /*data*/ ctx[0].lastModified);
     			attr(div3, "data-type", div3_data_type_value = /*data*/ ctx[0].type);
     			toggle_class(div3, "active", /*data*/ ctx[0].active);
     			toggle_class(div3, "disabled", /*data*/ ctx[0].disabled);
+    			toggle_class(div3, "temp", /*data*/ ctx[0].temp);
     		},
     		m(target, anchor) {
     			insert(target, div3, anchor);
@@ -2042,7 +2043,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			toggle.$set(toggle_changes);
     			if ((!current || dirty & /*data*/ 1) && t4_value !== (t4_value = (/*data*/ ctx[0].description || "No description provided") + "")) set_data(t4, t4_value);
 
-    			if (!current || dirty & /*data*/ 1 && div3_class_value !== (div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-ilu1m6")) {
+    			if (!current || dirty & /*data*/ 1 && div3_class_value !== (div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-lgtj0i")) {
     				attr(div3, "class", div3_class_value);
     			}
 
@@ -2064,6 +2065,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (dirty & /*data, data*/ 1) {
     				toggle_class(div3, "disabled", /*data*/ ctx[0].disabled);
+    			}
+
+    			if (dirty & /*data, data*/ 1) {
+    				toggle_class(div3, "temp", /*data*/ ctx[0].temp);
     			}
     		},
     		i(local) {
@@ -17543,7 +17548,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return child_ctx;
     }
 
-    // (233:8) <Dropdown icon={iconPlus} title={"New item"} {disabled}>
+    // (230:8) <Dropdown icon={iconPlus} title={"New item"} {disabled}>
     function create_default_slot$1(ctx) {
     	let li0;
     	let t1;
@@ -17594,7 +17599,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (240:8) {#if $state.includes("items-loading")}
+    // (237:8) {#if $state.includes("items-loading")}
     function create_if_block_1(ctx) {
     	let loader;
     	let current;
@@ -17623,7 +17628,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (243:8) {#each list as item (item.filename)}
+    // (240:8) {#each list as item (item.filename)}
     function create_each_block(key_1, ctx) {
     	let first;
     	let switch_instance;
@@ -17721,7 +17726,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (252:4) {#if showCount}
+    // (249:4) {#if showCount}
     function create_if_block$4(ctx) {
     	let div;
     	let t0_value = /*list*/ ctx[3].length + "";
@@ -18197,11 +18202,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		}
 
     		if ($$self.$$.dirty & /*list*/ 8) {
-    			// TODO: edit comment below
-    			// uncomment this to always scroll to an active item
+    			// always scroll to an active item
     			// when sorting is changed, a save occurs, etc... will scroll to active item
-    			// should remove the temp check in the sortBy func in utils & scroll to in activate func
-    			// this can be a bit jarring, so unsure to enable it
     			 if (list.find(a => a.active)) {
     				const active = list.find(a => a.active);
     				scrollToEl(active.filename);

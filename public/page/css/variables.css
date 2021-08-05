@@ -3,7 +3,7 @@
     --box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.25);
     --color-bg-primary: #323639;
     --color-bg-secondary: #2f3337;
-    --color-script-highlighted: rgba(116, 178, 235, 0.1);
+    --color-script-highlighted: #364049; /* rgba(116, 178, 235, 0.1); */
     --color-black: #1d2023;
     --color-blue: #74b1eb;
     --color-green: #60f36c;
