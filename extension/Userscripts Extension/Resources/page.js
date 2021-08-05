@@ -18121,7 +18121,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			log.add(response.error, "error", true);
     		} else {
     			const type = url.substring(url.lastIndexOf(".") + 1);
-    			newItem(type, response.content, url);
+    			newItem(type, response, url);
     		}
 
     		state.remove("fetching");

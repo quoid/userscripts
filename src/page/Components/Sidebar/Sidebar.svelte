@@ -121,7 +121,7 @@
             log.add(response.error, "error", true);
         } else {
             const type = url.substring(url.lastIndexOf(".") + 1);
-            newItem(type, response.content, url);
+            newItem(type, response, url);
         }
         state.remove("fetching");
     }
