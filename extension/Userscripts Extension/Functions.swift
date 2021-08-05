@@ -1279,7 +1279,6 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
 }
 
 // page
-
 func getInitData() -> [String: Any]? {
     let manifest = getManifest()
     guard let saveLocation = getSaveLocation() else {
