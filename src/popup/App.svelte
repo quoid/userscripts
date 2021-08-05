@@ -21,9 +21,6 @@
     let rowColors;
     let inactive = false;
 
-    // TODO: fix awaits
-    function foo() {}
-
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
     $: if (list.length > 1 && list.length % 2 === 0) {
