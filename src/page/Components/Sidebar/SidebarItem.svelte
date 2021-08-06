@@ -14,11 +14,11 @@
         padding: 1rem 1rem calc(1rem - 1px);
     }
 
-    .item.temp {
+    /* .item.temp {
         position: -webkit-sticky;
         top: 0;
         z-index: 2;
-    }
+    } */
 
     .item:hover {
         background-color: var(--color-bg-primary);

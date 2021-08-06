@@ -987,7 +987,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             array.sort((a, b) => (a.lastModified > b.lastModified) ? -1 : 1);
         }
         // always keep temp file pinned to the top, should only ever have one temp script
-        if (array.find(f => f.temp)) array.sort((a, b) => a.temp ? -1 : b.temp ? 1 : 0);
+        // if (array.find(f => f.temp)) array.sort((a, b) => a.temp ? -1 : b.temp ? 1 : 0);
         return array;
     }
 
@@ -2002,10 +2002,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t3 = space();
     			div2 = element("div");
     			t4 = text(t4_value);
-    			attr(div0, "class", "item__title truncate svelte-lgtj0i");
-    			attr(div1, "class", "item__header svelte-lgtj0i");
-    			attr(div2, "class", "item__description svelte-lgtj0i");
-    			attr(div3, "class", div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-lgtj0i");
+    			attr(div0, "class", "item__title truncate svelte-3ix3ls");
+    			attr(div1, "class", "item__header svelte-3ix3ls");
+    			attr(div2, "class", "item__description svelte-3ix3ls");
+    			attr(div3, "class", div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-3ix3ls");
     			attr(div3, "data-filename", div3_data_filename_value = /*data*/ ctx[0].filename);
     			attr(div3, "data-last-modified", div3_data_last_modified_value = /*data*/ ctx[0].lastModified);
     			attr(div3, "data-type", div3_data_type_value = /*data*/ ctx[0].type);
@@ -2043,7 +2043,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			toggle.$set(toggle_changes);
     			if ((!current || dirty & /*data*/ 1) && t4_value !== (t4_value = (/*data*/ ctx[0].description || "No description provided") + "")) set_data(t4, t4_value);
 
-    			if (!current || dirty & /*data*/ 1 && div3_class_value !== (div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-lgtj0i")) {
+    			if (!current || dirty & /*data*/ 1 && div3_class_value !== (div3_class_value = "item " + (/*data*/ ctx[0].class || "") + " svelte-3ix3ls")) {
     				attr(div3, "class", div3_class_value);
     			}
 
