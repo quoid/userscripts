@@ -17,10 +17,6 @@
         }
     });
 
-    // TODO: remove below console.logs
-    $: console.log($items);
-    $: console.log($settings);
-
     // disables default cmd+s (save) and cmd+f (find) behavior
     function preventKeyCommands(e) {
         if (e.metaKey && (e.code === "KeyS" || e.code === "KeyF")) {
