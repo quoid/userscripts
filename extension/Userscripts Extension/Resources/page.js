@@ -18852,8 +18852,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			if (response.error) {
     				log.add(response.error, "error", true);
     			} else {
-    				// TODO: add log message here, add logs elsewhere as well
     				items.update(i => i.filter(a => !a.active));
+    				log.add("Successfully trashed " + activeItem.filename, "info", true);
     			}
     		}
 
@@ -19712,11 +19712,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
+    	child_ctx[6] = list[i];
     	return child_ctx;
     }
 
-    // (112:0) {#if $state.includes("init")}
+    // (108:0) {#if $state.includes("init")}
     function create_if_block_1$2(ctx) {
     	let div;
     	let html_tag;
@@ -19777,7 +19777,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (117:8) {:else}
+    // (113:8) {:else}
     function create_else_block$1(ctx) {
     	let span;
 
@@ -19796,7 +19796,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (115:8) {#if $state.includes("init-error")}
+    // (111:8) {#if $state.includes("init-error")}
     function create_if_block_2$1(ctx) {
     	let span;
 
@@ -19815,17 +19815,17 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (127:4) {#each $notifications as item (item.id)}
+    // (123:4) {#each $notifications as item (item.id)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let notification;
     	let current;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[3](/*item*/ ctx[8], ...args);
+    		return /*click_handler*/ ctx[3](/*item*/ ctx[6], ...args);
     	}
 
-    	notification = new Notification({ props: { item: /*item*/ ctx[8] } });
+    	notification = new Notification({ props: { item: /*item*/ ctx[6] } });
     	notification.$on("click", click_handler);
 
     	return {
@@ -19844,7 +19844,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const notification_changes = {};
-    			if (dirty & /*$notifications*/ 2) notification_changes.item = /*item*/ ctx[8];
+    			if (dirty & /*$notifications*/ 2) notification_changes.item = /*item*/ ctx[6];
     			notification.$set(notification_changes);
     		},
     		i(local) {
@@ -19863,7 +19863,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (131:0) {#if $state.includes("settings")}
+    // (127:0) {#if $state.includes("settings")}
     function create_if_block$7(ctx) {
     	let settings_1;
     	let current;
@@ -19913,7 +19913,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	sidebar = new Sidebar({});
     	editor = new Editor({});
     	let each_value = /*$notifications*/ ctx[1];
-    	const get_key = ctx => /*item*/ ctx[8].id;
+    	const get_key = ctx => /*item*/ ctx[6].id;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -20083,13 +20083,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     function instance$c($$self, $$props, $$invalidate) {
     	let $log;
-    	let $items;
-    	let $settings;
     	let $state;
     	let $notifications;
     	component_subscribe($$self, log, $$value => $$invalidate(4, $log = $$value));
-    	component_subscribe($$self, items, $$value => $$invalidate(5, $items = $$value));
-    	component_subscribe($$self, settings, $$value => $$invalidate(6, $settings = $$value));
     	component_subscribe($$self, state, $$value => $$invalidate(0, $state = $$value));
     	component_subscribe($$self, notifications, $$value => $$invalidate(1, $notifications = $$value));
     	let logger = [];
@@ -20136,15 +20132,6 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     					logger.push(item);
     				}
     			});
-    		}
-
-    		if ($$self.$$.dirty & /*$items*/ 32) {
-    			// TODO: remove below console.logs
-    			 console.log($items);
-    		}
-
-    		if ($$self.$$.dirty & /*$settings*/ 64) {
-    			 console.log($settings);
     		}
     	};
 
