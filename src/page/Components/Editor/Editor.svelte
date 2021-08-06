@@ -124,8 +124,8 @@
             if (response.error) {
                 log.add(response.error, "error", true);
             } else {
-                // TODO: add log message here, add logs elsewhere as well
                 items.update(i => i.filter(a => !a.active));
+                log.add("Successfully trashed " + activeItem.filename, "info", true);
             }
         }
         state.remove("trashing");
