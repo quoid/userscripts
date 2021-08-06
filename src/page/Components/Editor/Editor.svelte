@@ -125,7 +125,7 @@
                 log.add(response.error, "error", true);
             } else {
                 items.update(i => i.filter(a => !a.active));
-                log.add("Successfully trashed " + activeItem.filename, "info", true);
+                log.add("Successfully trashed " + activeItem.filename, "info", false);
             }
         }
         state.remove("trashing");

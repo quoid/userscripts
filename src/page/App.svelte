@@ -44,7 +44,6 @@
         log.add("Requesting initialization data", "info", false);
         const initData = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
         if (initData.error) return console.error(initData.error);
-        console.log(initData);
         for (const [key, value] of Object.entries(initData)) {
             if (value === "true" || value === "false") {
                 initData[key] = JSON.parse(value);

@@ -82,7 +82,6 @@ function settingsStore() {
             // blacklist not stored in normal setting object in manifest, so handle differently
             if (key === "blacklist") {
                 // update blacklist on swift side
-                console.log(value);
                 const message = {name: "PAGE_UPDATE_BLACKLIST", blacklist: value};
                 browser.runtime.sendNativeMessage(message, response => {
                     if (response.error) {

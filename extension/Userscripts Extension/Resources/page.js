@@ -1080,7 +1080,6 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
                 // blacklist not stored in normal setting object in manifest, so handle differently
                 if (key === "blacklist") {
                     // update blacklist on swift side
-                    console.log(value);
                     const message = {name: "PAGE_UPDATE_BLACKLIST", blacklist: value};
                     browser.runtime.sendNativeMessage(message, response => {
                         if (response.error) {
@@ -18853,7 +18852,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				log.add(response.error, "error", true);
     			} else {
     				items.update(i => i.filter(a => !a.active));
-    				log.add("Successfully trashed " + activeItem.filename, "info", true);
+    				log.add("Successfully trashed " + activeItem.filename, "info", false);
     			}
     		}
 
@@ -19716,7 +19715,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return child_ctx;
     }
 
-    // (108:0) {#if $state.includes("init")}
+    // (107:0) {#if $state.includes("init")}
     function create_if_block_1$2(ctx) {
     	let div;
     	let html_tag;
@@ -19777,7 +19776,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (113:8) {:else}
+    // (112:8) {:else}
     function create_else_block$1(ctx) {
     	let span;
 
@@ -19796,7 +19795,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (111:8) {#if $state.includes("init-error")}
+    // (110:8) {#if $state.includes("init-error")}
     function create_if_block_2$1(ctx) {
     	let span;
 
@@ -19815,7 +19814,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (123:4) {#each $notifications as item (item.id)}
+    // (122:4) {#each $notifications as item (item.id)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let notification;
@@ -19863,7 +19862,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (127:0) {#if $state.includes("settings")}
+    // (126:0) {#if $state.includes("settings")}
     function create_if_block$7(ctx) {
     	let settings_1;
     	let current;
@@ -20104,7 +20103,6 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		log.add("Requesting initialization data", "info", false);
     		const initData = await browser.runtime.sendNativeMessage({ name: "PAGE_INIT_DATA" });
     		if (initData.error) return console.error(initData.error);
-    		console.log(initData);
 
     		for (const [key, value] of Object.entries(initData)) {
     			if (value === "true" || value === "false") {
