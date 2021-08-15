@@ -200,11 +200,9 @@
                     </view>
                     <connections>
                         <outlet property="appName" destination="gGD-M9-Dwj" id="WOi-mP-IbI"/>
-                        <outlet property="appNameLabel" destination="gGD-M9-Dwj" id="gkb-AM-mGp"/>
                         <outlet property="enabledIcon" destination="i4K-xO-vlx" id="M8i-Qj-l6w"/>
                         <outlet property="enabledText" destination="v0r-qO-55O" id="wNQ-gC-2zf"/>
                         <outlet property="saveLocation" destination="6k5-Oz-mOV" id="pgz-od-dyH"/>
-                        <outlet property="saveLocationLabel" destination="6k5-Oz-mOV" id="hVb-Ga-kTU"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
