@@ -4,11 +4,11 @@
 
     export let abort = false;
     export let abortClick = () => {};
+    export let backgroundColor = "var(--color-bg-secondary)";
 </script>
 <style>
     .loader {
         align-items: center;
-        background-color: var(--color-bg-secondary);
         bottom: 0;
         display: flex;
         flex-direction: column;
@@ -32,7 +32,7 @@
         margin-top: 1rem;
     }
 </style>
-<div class="loader" out:fade="{{duration: 125}}">
+<div class="loader" style="background-color: {backgroundColor};" out:fade="{{duration: 125}}">
     {@html iconLoader}
     {#if abort}
         <div>
