@@ -1278,6 +1278,41 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     return matches.count
 }
 
+func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+    guard let saveLocation = getSaveLocation() else {
+        err("updateSingleItem failed at (1)")
+        return nil
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+    }
+    let fileUrl = saveLocation.appendingPathComponent(filename)
+    guard
+        let content = try? String(contentsOf: fileUrl, encoding: .utf8),
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let updateUrl = metadata["updateURL"]?[0]
+    else {
+        err("updateSingleItem failed at (2)")
+        return nil
+    }
+    let downloadUrl = metadata["downloadURL"] != nil ? metadata["downloadURL"]![0] : updateUrl
+    guard
+        let remoteFileContents = getRemoteFileContents(downloadUrl),
+        ((try? remoteFileContents.write(to: fileUrl, atomically: false, encoding: .utf8)) != nil)
+    else {
+        err("updateSingleItem failed at (3)")
+        return nil
+    }
+    guard let matches = getPopupMatches(url, subframeUrls, true) else {
+        err("updateSingleItem failed at (4)")
+        return nil
+    }
+    return matches
+}
+
 // page
 func getInitData() -> [String: Any]? {
     let manifest = getManifest()

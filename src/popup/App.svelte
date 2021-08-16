@@ -58,11 +58,38 @@
         });
     }
 
+    async function updateItem(item) {
+        disabled = true;
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        const url = tabs[0].url;
+        const frameUrls = [];
+        if (url) {
+            const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
+            frames.forEach(frame => frameUrls.push(frame.url));
+        }
+        const message = {
+            name: "POPUP_UPDATE_SINGLE",
+            filename: item.filename,
+            url: url,
+            frameUrls: frameUrls
+        };
+        const response = await browser.runtime.sendNativeMessage(message);
+        if (response.error) {
+            error = response.error;
+            showUpdates = false;
+        } else {
+            console.log(response);
+            updates = updates.filter(e => e.filename != item.filename);
+            items = response.items;
+        }
+        disabled = false;
+    }
+
     function toggleItem(item) {
         disabled = true;
         browser.runtime.sendNativeMessage({name: "TOGGLE_ITEM", item: item}, response => {
             if (response.error) {
-                error = "Failed to toggle item";
+                error = response.error;
             } else {
                 const i = items.findIndex(el => el === item);
                 item.disabled = !item.disabled;
@@ -74,7 +101,15 @@
 
     function checkForUpdates() {
         disabled = true;
-        setTimeout(() => disabled = false, 1000);
+        browser.runtime.sendNativeMessage({name: "POPUP_CHECK_UPDATES"}, response => {
+            if (response.error) {
+                error = response.error;
+                showUpdates = false;
+            } else {
+                updates = response.updates;
+            }
+            disabled = false;
+        });
     }
 
     async function openExtensionPage() {
@@ -88,11 +123,11 @@
                 return;
             }
         }
-        browser.tabs.create({url: url});
+        await browser.tabs.create({url: url});
     }
 
-    function openSaveLocation() {
-        browser.runtime.sendNativeMessage({name: "OPEN_SAVE_LOCATION"});
+    async function openSaveLocation() {
+        await browser.runtime.sendNativeMessage({name: "OPEN_SAVE_LOCATION"});
         window.close();
     }
 
@@ -281,5 +316,6 @@
         checkClick={checkForUpdates}
         loading={disabled}
         updates={updates}
+        updateSingleClick={updateItem}
     />
 {/if}

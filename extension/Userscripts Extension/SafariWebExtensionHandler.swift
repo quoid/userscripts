@@ -69,6 +69,28 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                response.userInfo = [SFExtensionMessageKey: ["error": "failed to run update sequence"]]
             }
         }
+        else if name == "POPUP_UPDATE_SINGLE" {
+            if
+                let filename = message?["filename"] as? String,
+                let url = message?["url"] as? String,
+                let frameUrls = message?["frameUrls"] as? [String]
+            {
+                if let matches = popupUpdateSingle(filename, url, frameUrls) {
+                    response.userInfo = [SFExtensionMessageKey: ["items": matches]]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to update file"]]
+                }
+            } else {
+                inBoundError = true
+            }
+        }
+        else if name == "POPUP_CHECK_UPDATES" {
+            if let updates = checkForRemoteUpdates() {
+                response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to check for updates"]]
+            }
+        }
         else if name == "POPUP_TOGGLE_EXTENSION" {
             var manifest = getManifest()
             let active = manifest.settings["active"]

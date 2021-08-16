@@ -8,7 +8,7 @@ const _browser = {
             let response = {};
             if (message.name === "POPUP_TOGGLE_EXTENSION") {
                 response = {error: "Failed toggle extension"};
-                //response = {status: "success"};
+                //response = {success: true};
             } else if (message.name === "POPUP_UPDATE_ALL") {
                 response = {error: "Failed refresh scripts"};
                 response = {
@@ -53,6 +53,24 @@ const _browser = {
                     ],
                     updates: []
                 };
+            } else if (message.name === "POPUP_UPDATE_SINGLE") {
+                // response = {error: "Failed to updated item"};
+                response = {success: true};
+            } else if (message.name === "POPUP_CHECK_UPDATES") {
+                response = {
+                    updates: [
+                        {
+                            filename: "Google Images Restored.js",
+                            name: "Google Images Restored",
+                            url: "https://www.k21p.com"
+                        },
+                        {
+                            filename: "New Userscript With a Really Really Long Name.js",
+                            name: "New Userscript With a Really Really Long Name",
+                            url: "https://www.filmgarb.com"
+                        }
+                    ]
+                };
             } else if (message.name === "POPUP_MATCHES") {
                 response = {
                     active: "true",
@@ -85,8 +103,8 @@ const _browser = {
                     ]
                 };
             } else if (message.name === "TOGGLE_ITEM") {
-                //response = {error: "Failed toggle item"};
-                response = {status: "success"};
+                //response = {error: "Failed to toggle item"};
+                response = {success: true};
             } else if (message.name === "POPUP_OPEN_EXTENSION_PAGE") {
                 response = {error: "Failed to get page url"};
                 window.open("https://github.com/quoid/userscripts");
@@ -96,7 +114,7 @@ const _browser = {
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, 500);
+            }, 1000);
         }
     },
     tabs: {

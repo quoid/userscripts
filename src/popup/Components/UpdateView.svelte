@@ -10,6 +10,7 @@
     export let closeClick;
     export let updateClick;
     export let checkClick;
+    export let updateSingleClick;
 
     function slide(node, params) {
         return {
@@ -96,13 +97,13 @@
         width: 4rem;
     }
 
-    .none div {
+    .none div:not(.link) {
         color: var(--text-color-disabled);
         font-weight: 600;
         margin-bottom: 2rem;
     }
 
-    .link {
+    div.link {
         font-weight: 600;
         padding-bottom: 1rem;
     }
@@ -118,7 +119,7 @@
     </div>
     <div class="view__body">
         {#if loading}
-            <Loader/>
+            <Loader backgroundColor="var(--color-bg-primary)"/>
         {:else}
             {#if updates.length}
                 {#each updates as item (item.name)}
@@ -126,7 +127,12 @@
                     <div class="item">
                         <div class="truncate">{item.name}</div>
                         <a href="{item.url}" target="_blank">Source</a>
-                        <!-- <span class="link">Update</span> -->
+                        <span
+                            class="link"
+                            on:click={() => updateSingleClick(item)}
+                        >
+                            Update
+                        </span>
                     </div>
                 {/each}
                 <p>Be sure you trust the authors before downloading remote code to your machine.</p>
@@ -137,7 +143,7 @@
                     <div>
                         There are no file updates available
                         <br>
-                        <span class="link" on:click={checkClick}>Check Again</span>
+                        <div class="link" on:click={checkClick}>Check Again</div>
                     </div>
                 </div>
             {/if}

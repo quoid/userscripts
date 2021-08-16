@@ -828,7 +828,7 @@
     			span = element("span");
     			span.textContent = "cancel request";
     			attr(span, "class", "link");
-    			attr(div, "class", "svelte-1v2lr3c");
+    			attr(div, "class", "svelte-tibcgr");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -868,7 +868,8 @@
     			t = space();
     			if (if_block) if_block.c();
     			html_tag = new HtmlTag(t);
-    			attr(div, "class", "loader svelte-1v2lr3c");
+    			attr(div, "class", "loader svelte-tibcgr");
+    			set_style(div, "background-color", /*backgroundColor*/ ctx[2]);
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -889,6 +890,10 @@
     			} else if (if_block) {
     				if_block.d(1);
     				if_block = null;
+    			}
+
+    			if (!current || dirty & /*backgroundColor*/ 4) {
+    				set_style(div, "background-color", /*backgroundColor*/ ctx[2]);
     			}
     		},
     		i(local) {
@@ -915,18 +920,26 @@
     		
     	} } = $$props;
 
+    	let { backgroundColor = "var(--color-bg-secondary)" } = $$props;
+
     	$$self.$$set = $$props => {
     		if ("abort" in $$props) $$invalidate(0, abort = $$props.abort);
     		if ("abortClick" in $$props) $$invalidate(1, abortClick = $$props.abortClick);
+    		if ("backgroundColor" in $$props) $$invalidate(2, backgroundColor = $$props.backgroundColor);
     	};
 
-    	return [abort, abortClick];
+    	return [abort, abortClick, backgroundColor];
     }
 
     class Loader extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { abort: 0, abortClick: 1 });
+
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {
+    			abort: 0,
+    			abortClick: 1,
+    			backgroundColor: 2
+    		});
     	}
     }
 
@@ -1124,50 +1137,50 @@
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[6] = list[i];
+    	child_ctx[8] = list[i];
     	return child_ctx;
     }
 
-    // (134:12) {:else}
+    // (140:12) {:else}
     function create_else_block(ctx) {
-    	let div1;
+    	let div2;
     	let html_tag;
     	let t0;
-    	let div0;
+    	let div1;
     	let t1;
     	let br;
     	let t2;
-    	let span;
+    	let div0;
     	let mounted;
     	let dispose;
 
     	return {
     		c() {
-    			div1 = element("div");
+    			div2 = element("div");
     			t0 = space();
-    			div0 = element("div");
+    			div1 = element("div");
     			t1 = text("There are no file updates available\n                        ");
     			br = element("br");
     			t2 = space();
-    			span = element("span");
-    			span.textContent = "Check Again";
+    			div0 = element("div");
+    			div0.textContent = "Check Again";
     			html_tag = new HtmlTag(t0);
-    			attr(span, "class", "link svelte-1lm5x78");
-    			attr(div0, "class", "svelte-1lm5x78");
-    			attr(div1, "class", "none svelte-1lm5x78");
+    			attr(div0, "class", "link svelte-vy30nd");
+    			attr(div1, "class", "svelte-vy30nd");
+    			attr(div2, "class", "none svelte-vy30nd");
     		},
     		m(target, anchor) {
-    			insert(target, div1, anchor);
-    			html_tag.m(iconUpdate, div1);
-    			append(div1, t0);
+    			insert(target, div2, anchor);
+    			html_tag.m(iconUpdate, div2);
+    			append(div2, t0);
+    			append(div2, div1);
+    			append(div1, t1);
+    			append(div1, br);
+    			append(div1, t2);
     			append(div1, div0);
-    			append(div0, t1);
-    			append(div0, br);
-    			append(div0, t2);
-    			append(div0, span);
 
     			if (!mounted) {
-    				dispose = listen(span, "click", function () {
+    				dispose = listen(div0, "click", function () {
     					if (is_function(/*checkClick*/ ctx[4])) /*checkClick*/ ctx[4].apply(this, arguments);
     				});
 
@@ -1180,14 +1193,14 @@
     		i: noop,
     		o: noop,
     		d(detaching) {
-    			if (detaching) detach(div1);
+    			if (detaching) detach(div2);
     			mounted = false;
     			dispose();
     		}
     	};
     }
 
-    // (123:12) {#if updates.length}
+    // (124:12) {#if updates.length}
     function create_if_block_1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -1198,7 +1211,7 @@
     	let mounted;
     	let dispose;
     	let each_value = /*updates*/ ctx[1];
-    	const get_key = ctx => /*item*/ ctx[6].name;
+    	const get_key = ctx => /*item*/ ctx[8].name;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context(ctx, each_value, i);
@@ -1218,8 +1231,8 @@
     			t2 = space();
     			div = element("div");
     			div.textContent = "Update All";
-    			attr(p, "class", "svelte-1lm5x78");
-    			attr(div, "class", "link svelte-1lm5x78");
+    			attr(p, "class", "svelte-vy30nd");
+    			attr(div, "class", "link svelte-vy30nd");
     		},
     		m(target, anchor) {
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -1242,7 +1255,7 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*updates*/ 2) {
+    			if (dirty & /*updateSingleClick, updates*/ 34) {
     				const each_value = /*updates*/ ctx[1];
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, t0.parentNode, destroy_block, create_each_block, t0, get_each_context);
     			}
@@ -1264,11 +1277,16 @@
     	};
     }
 
-    // (120:8) {#if loading}
+    // (121:8) {#if loading}
     function create_if_block$2(ctx) {
     	let loader;
     	let current;
-    	loader = new Loader({});
+
+    	loader = new Loader({
+    			props: {
+    				backgroundColor: "var(--color-bg-primary)"
+    			}
+    		});
 
     	return {
     		c() {
@@ -1294,16 +1312,24 @@
     	};
     }
 
-    // (124:16) {#each updates as item (item.name)}
+    // (125:16) {#each updates as item (item.name)}
     function create_each_block(key_1, ctx) {
     	let div1;
     	let div0;
-    	let t0_value = /*item*/ ctx[6].name + "";
+    	let t0_value = /*item*/ ctx[8].name + "";
     	let t0;
     	let t1;
     	let a;
     	let t2;
     	let a_href_value;
+    	let t3;
+    	let span;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler(...args) {
+    		return /*click_handler*/ ctx[7](/*item*/ ctx[8], ...args);
+    	}
 
     	return {
     		key: key_1,
@@ -1315,11 +1341,15 @@
     			t1 = space();
     			a = element("a");
     			t2 = text("Source");
-    			attr(div0, "class", "truncate svelte-1lm5x78");
-    			attr(a, "href", a_href_value = /*item*/ ctx[6].url);
+    			t3 = space();
+    			span = element("span");
+    			span.textContent = "Update";
+    			attr(div0, "class", "truncate svelte-vy30nd");
+    			attr(a, "href", a_href_value = /*item*/ ctx[8].url);
     			attr(a, "target", "_blank");
-    			attr(a, "class", "svelte-1lm5x78");
-    			attr(div1, "class", "item svelte-1lm5x78");
+    			attr(a, "class", "svelte-vy30nd");
+    			attr(span, "class", "link svelte-vy30nd");
+    			attr(div1, "class", "item svelte-vy30nd");
     			this.first = div1;
     		},
     		m(target, anchor) {
@@ -1329,16 +1359,26 @@
     			append(div1, t1);
     			append(div1, a);
     			append(a, t2);
-    		},
-    		p(ctx, dirty) {
-    			if (dirty & /*updates*/ 2 && t0_value !== (t0_value = /*item*/ ctx[6].name + "")) set_data(t0, t0_value);
+    			append(div1, t3);
+    			append(div1, span);
 
-    			if (dirty & /*updates*/ 2 && a_href_value !== (a_href_value = /*item*/ ctx[6].url)) {
+    			if (!mounted) {
+    				dispose = listen(span, "click", click_handler);
+    				mounted = true;
+    			}
+    		},
+    		p(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*updates*/ 2 && t0_value !== (t0_value = /*item*/ ctx[8].name + "")) set_data(t0, t0_value);
+
+    			if (dirty & /*updates*/ 2 && a_href_value !== (a_href_value = /*item*/ ctx[8].url)) {
     				attr(a, "href", a_href_value);
     			}
     		},
     		d(detaching) {
     			if (detaching) detach(div1);
+    			mounted = false;
+    			dispose();
     		}
     	};
     }
@@ -1384,9 +1424,9 @@
     			t1 = space();
     			div1 = element("div");
     			if_block.c();
-    			attr(div0, "class", "view__header svelte-1lm5x78");
-    			attr(div1, "class", "view__body svelte-1lm5x78");
-    			attr(div2, "class", "view view--updates svelte-1lm5x78");
+    			attr(div0, "class", "view__header svelte-vy30nd");
+    			attr(div1, "class", "view__body svelte-vy30nd");
+    			attr(div2, "class", "view view--updates svelte-vy30nd");
     		},
     		m(target, anchor) {
     			insert(target, div2, anchor);
@@ -1430,7 +1470,7 @@
     			transition_in(if_block);
 
     			add_render_callback(() => {
-    				if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[5], {}, true);
+    				if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[6], {}, true);
     				div2_transition.run(1);
     			});
 
@@ -1439,7 +1479,7 @@
     		o(local) {
     			transition_out(iconbutton.$$.fragment, local);
     			transition_out(if_block);
-    			if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[5], {}, false);
+    			if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[6], {}, false);
     			div2_transition.run(0);
     			current = false;
     		},
@@ -1458,6 +1498,7 @@
     	let { closeClick } = $$props;
     	let { updateClick } = $$props;
     	let { checkClick } = $$props;
+    	let { updateSingleClick } = $$props;
 
     	function slide(node, params) {
     		return {
@@ -1468,15 +1509,27 @@
     		};
     	}
 
+    	const click_handler = item => updateSingleClick(item);
+
     	$$self.$$set = $$props => {
     		if ("loading" in $$props) $$invalidate(0, loading = $$props.loading);
     		if ("updates" in $$props) $$invalidate(1, updates = $$props.updates);
     		if ("closeClick" in $$props) $$invalidate(2, closeClick = $$props.closeClick);
     		if ("updateClick" in $$props) $$invalidate(3, updateClick = $$props.updateClick);
     		if ("checkClick" in $$props) $$invalidate(4, checkClick = $$props.checkClick);
+    		if ("updateSingleClick" in $$props) $$invalidate(5, updateSingleClick = $$props.updateSingleClick);
     	};
 
-    	return [loading, updates, closeClick, updateClick, checkClick, slide];
+    	return [
+    		loading,
+    		updates,
+    		closeClick,
+    		updateClick,
+    		checkClick,
+    		updateSingleClick,
+    		slide,
+    		click_handler
+    	];
     }
 
     class UpdateView extends SvelteComponent {
@@ -1488,7 +1541,8 @@
     			updates: 1,
     			closeClick: 2,
     			updateClick: 3,
-    			checkClick: 4
+    			checkClick: 4,
+    			updateSingleClick: 5
     		});
     	}
     }
@@ -1505,11 +1559,11 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[21] = list[i];
     	return child_ctx;
     }
 
-    // (242:0) {#if error}
+    // (274:0) {#if error}
     function create_if_block_5(ctx) {
     	let div;
     	let t0;
@@ -1521,7 +1575,7 @@
     			props: { icon: iconClear, title: "Clear error" }
     		});
 
-    	iconbutton.$on("click", /*click_handler_1*/ ctx[16]);
+    	iconbutton.$on("click", /*click_handler_1*/ ctx[17]);
 
     	return {
     		c() {
@@ -1557,14 +1611,14 @@
     	};
     }
 
-    // (260:8) {:else}
+    // (292:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
     	let each_value = /*list*/ ctx[10];
-    	const get_key = ctx => /*item*/ ctx[20].filename;
+    	const get_key = ctx => /*item*/ ctx[21].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -1593,7 +1647,7 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*list, toggleItem*/ 9216) {
+    			if (dirty & /*list, toggleItem*/ 17408) {
     				const each_value = /*list*/ ctx[10];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
@@ -1630,7 +1684,7 @@
     	};
     }
 
-    // (258:35) 
+    // (290:35) 
     function create_if_block_4(ctx) {
     	let div;
 
@@ -1652,7 +1706,7 @@
     	};
     }
 
-    // (256:8) {#if inactive}
+    // (288:8) {#if inactive}
     function create_if_block_3(ctx) {
     	let div;
 
@@ -1674,7 +1728,7 @@
     	};
     }
 
-    // (253:4) {#if loading}
+    // (285:4) {#if loading}
     function create_if_block_2(ctx) {
     	let loader;
     	let current;
@@ -1704,22 +1758,22 @@
     	};
     }
 
-    // (262:16) {#each list as item (item.filename)}
+    // (294:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_2(...args) {
-    		return /*click_handler_2*/ ctx[17](/*item*/ ctx[20], ...args);
+    		return /*click_handler_2*/ ctx[18](/*item*/ ctx[21], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[20].disabled,
-    				name: /*item*/ ctx[20].name,
-    				subframe: /*item*/ ctx[20].subframe,
-    				type: /*item*/ ctx[20].type
+    				enabled: !/*item*/ ctx[21].disabled,
+    				name: /*item*/ ctx[21].name,
+    				subframe: /*item*/ ctx[21].subframe,
+    				type: /*item*/ ctx[21].type
     			}
     		});
 
@@ -1741,10 +1795,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*list*/ 1024) popupitem_changes.enabled = !/*item*/ ctx[20].disabled;
-    			if (dirty & /*list*/ 1024) popupitem_changes.name = /*item*/ ctx[20].name;
-    			if (dirty & /*list*/ 1024) popupitem_changes.subframe = /*item*/ ctx[20].subframe;
-    			if (dirty & /*list*/ 1024) popupitem_changes.type = /*item*/ ctx[20].type;
+    			if (dirty & /*list*/ 1024) popupitem_changes.enabled = !/*item*/ ctx[21].disabled;
+    			if (dirty & /*list*/ 1024) popupitem_changes.name = /*item*/ ctx[21].name;
+    			if (dirty & /*list*/ 1024) popupitem_changes.subframe = /*item*/ ctx[21].subframe;
+    			if (dirty & /*list*/ 1024) popupitem_changes.type = /*item*/ ctx[21].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -1763,7 +1817,7 @@
     	};
     }
 
-    // (275:0) {#if !inactive}
+    // (307:0) {#if !inactive}
     function create_if_block_1$1(ctx) {
     	let div1;
     	let div0;
@@ -1796,18 +1850,19 @@
     	};
     }
 
-    // (280:0) {#if showUpdates}
+    // (312:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
 
     	updateview = new UpdateView({
     			props: {
-    				closeClick: /*func*/ ctx[19],
+    				closeClick: /*func*/ ctx[20],
     				updateClick: /*updateAll*/ ctx[12],
-    				checkClick: /*checkForUpdates*/ ctx[14],
+    				checkClick: /*checkForUpdates*/ ctx[15],
     				loading: /*disabled*/ ctx[3],
-    				updates: /*updates*/ ctx[6]
+    				updates: /*updates*/ ctx[6],
+    				updateSingleClick: /*updateItem*/ ctx[13]
     			}
     		});
 
@@ -1821,7 +1876,7 @@
     		},
     		p(ctx, dirty) {
     			const updateview_changes = {};
-    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[19];
+    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[20];
     			if (dirty & /*disabled*/ 8) updateview_changes.loading = /*disabled*/ ctx[3];
     			if (dirty & /*updates*/ 64) updateview_changes.updates = /*updates*/ ctx[6];
     			updateview.$set(updateview_changes);
@@ -1880,7 +1935,7 @@
     			}
     		});
 
-    	iconbutton1.$on("click", /*click_handler*/ ctx[15]);
+    	iconbutton1.$on("click", /*click_handler*/ ctx[16]);
 
     	iconbutton2 = new IconButton({
     			props: {
@@ -1949,7 +2004,7 @@
     			insert(target, t4, anchor);
     			insert(target, div2, anchor);
     			if_blocks[current_block_type_index].m(div2, null);
-    			/*div2_binding*/ ctx[18](div2);
+    			/*div2_binding*/ ctx[19](div2);
     			insert(target, t5, anchor);
     			if (if_block2) if_block2.m(target, anchor);
     			insert(target, t6, anchor);
@@ -2090,7 +2145,7 @@
     			if (detaching) detach(t4);
     			if (detaching) detach(div2);
     			if_blocks[current_block_type_index].d();
-    			/*div2_binding*/ ctx[18](null);
+    			/*div2_binding*/ ctx[19](null);
     			if (detaching) detach(t5);
     			if (if_block2) if_block2.d(detaching);
     			if (detaching) detach(t6);
@@ -2113,11 +2168,11 @@
     		}
     	}
 
-    	browser.tabs.create({ url });
+    	await browser.tabs.create({ url });
     }
 
-    function openSaveLocation() {
-    	browser.runtime.sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
+    async function openSaveLocation() {
+    	await browser.runtime.sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
     	window.close();
     }
 
@@ -2163,12 +2218,44 @@
     		});
     	}
 
+    	async function updateItem(item) {
+    		$$invalidate(3, disabled = true);
+    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
+    		const url = tabs[0].url;
+    		const frameUrls = [];
+
+    		if (url) {
+    			const frames = await browser.webNavigation.getAllFrames({ tabId: tabs[0].id });
+    			frames.forEach(frame => frameUrls.push(frame.url));
+    		}
+
+    		const message = {
+    			name: "POPUP_UPDATE_SINGLE",
+    			filename: item.filename,
+    			url,
+    			frameUrls
+    		};
+
+    		const response = await browser.runtime.sendNativeMessage(message);
+
+    		if (response.error) {
+    			$$invalidate(0, error = response.error);
+    			$$invalidate(5, showUpdates = false);
+    		} else {
+    			console.log(response);
+    			$$invalidate(6, updates = updates.filter(e => e.filename != item.filename));
+    			$$invalidate(4, items = response.items);
+    		}
+
+    		$$invalidate(3, disabled = false);
+    	}
+
     	function toggleItem(item) {
     		$$invalidate(3, disabled = true);
 
     		browser.runtime.sendNativeMessage({ name: "TOGGLE_ITEM", item }, response => {
     			if (response.error) {
-    				$$invalidate(0, error = "Failed to toggle item");
+    				$$invalidate(0, error = response.error);
     			} else {
     				const i = items.findIndex(el => el === item);
     				item.disabled = !item.disabled;
@@ -2181,7 +2268,17 @@
 
     	function checkForUpdates() {
     		$$invalidate(3, disabled = true);
-    		setTimeout(() => $$invalidate(3, disabled = false), 1000);
+
+    		browser.runtime.sendNativeMessage({ name: "POPUP_CHECK_UPDATES" }, response => {
+    			if (response.error) {
+    				$$invalidate(0, error = response.error);
+    				$$invalidate(5, showUpdates = false);
+    			} else {
+    				$$invalidate(6, updates = response.updates);
+    			}
+
+    			$$invalidate(3, disabled = false);
+    		});
     	}
 
     	onMount(async () => {
@@ -2262,6 +2359,7 @@
     		list,
     		toggleExtension,
     		updateAll,
+    		updateItem,
     		toggleItem,
     		checkForUpdates,
     		click_handler,
