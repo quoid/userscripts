@@ -8,7 +8,6 @@
     import iconOpen from "../shared/img/icon-open.svg";
     import iconUpdate from "../shared/img/icon-update.svg";
     import iconClear from "../shared/img/icon-clear.svg";
-    import logo from "../shared/img/logo.svg";
 
     let error = undefined;
     let active = true;
@@ -167,18 +166,8 @@
         padding: 0.5rem 1rem calc(0.5rem - 1px) 1rem;
     }
 
-    .header__logo {
-        flex-grow: 1;
-        height: 1rem;
-    }
-
-    :global(.header__logo svg) {
-        display: block;
-        height: 100%;
-    }
-
     .header :global(button:nth-of-type(2)) {
-        margin: 0 1rem;
+        margin: 0 auto 0 1rem;
     }
 
     .header :global(button:nth-of-type(1) svg) {
@@ -249,7 +238,6 @@
     }
 </style>
 <div class="header">
-    <div class="header__logo">{@html logo}</div>
     <IconButton
         icon={iconOpen}
         title={"Open save location"}
