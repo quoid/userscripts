@@ -283,7 +283,7 @@
         </div>
         <div class="modal__section">
             <div class="modal__title">Information</div>
-            <p>Version {$settings.version}<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support-development">supporting the project</a>.
+            <p>Userscripts Safari Version {$settings.version}<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support-development">supporting the project</a>.
         </div>
     </div>
 </div>

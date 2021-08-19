@@ -1719,7 +1719,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			span = element("span");
     			span.textContent = "cancel request";
     			attr(span, "class", "link");
-    			attr(div, "class", "svelte-1v2lr3c");
+    			attr(div, "class", "svelte-tibcgr");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1759,7 +1759,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t = space();
     			if (if_block) if_block.c();
     			html_tag = new HtmlTag(t);
-    			attr(div, "class", "loader svelte-1v2lr3c");
+    			attr(div, "class", "loader svelte-tibcgr");
+    			set_style(div, "background-color", /*backgroundColor*/ ctx[2]);
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1780,6 +1781,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			} else if (if_block) {
     				if_block.d(1);
     				if_block = null;
+    			}
+
+    			if (!current || dirty & /*backgroundColor*/ 4) {
+    				set_style(div, "background-color", /*backgroundColor*/ ctx[2]);
     			}
     		},
     		i(local) {
@@ -1806,18 +1811,26 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		
     	} } = $$props;
 
+    	let { backgroundColor = "var(--color-bg-secondary)" } = $$props;
+
     	$$self.$$set = $$props => {
     		if ("abort" in $$props) $$invalidate(0, abort = $$props.abort);
     		if ("abortClick" in $$props) $$invalidate(1, abortClick = $$props.abortClick);
+    		if ("backgroundColor" in $$props) $$invalidate(2, backgroundColor = $$props.backgroundColor);
     	};
 
-    	return [abort, abortClick];
+    	return [abort, abortClick, backgroundColor];
     }
 
     class Loader extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { abort: 0, abortClick: 1 });
+
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {
+    			abort: 0,
+    			abortClick: 1,
+    			backgroundColor: 2
+    		});
     	}
     }
 
@@ -19203,7 +19216,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			div25.textContent = "Information";
     			t38 = space();
     			p = element("p");
-    			t39 = text("Version ");
+    			t39 = text("Userscripts Safari Version ");
     			t40 = text(t40_value);
     			br0 = element("br");
     			br1 = element("br");
