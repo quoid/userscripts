@@ -2,7 +2,7 @@ import Foundation
 import os
 
 struct SharedDefaults {
-    static let suiteName = "group.com.userscripts.macos"
+    static let suiteName = "J74Q8V8V8N.com.userscripts.macos"
     static let keyName = "hostSelectedSaveLocation"
 }
 
