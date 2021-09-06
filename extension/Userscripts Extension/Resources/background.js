@@ -66,6 +66,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
             purgeContextMenus();
         });
+    } else if (request.name === "API_OPEN_TAB") {
+        const active = (request.active == true) ? true : false;
+        browser.tabs.create({active: active, index: sender.tab.index + 1, url: request.url}, response => {
+            sendResponse(response);
+        });
+        return true;
+    } else if (request.name === "API_CLOSE_TAB") {
+        browser.tabs.remove(sender.tab.id, response => {/* */});
     }
 });
 

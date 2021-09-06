@@ -4,6 +4,9 @@ let data;
 let cspFallbackAttempted = 0;
 // track whether event listener added
 let beforeunload = 0;
+//
+const uid = Math.random().toString(36).substr(2, 8);
+
 
 function sortByWeight(o) {
     let sorted = {};
@@ -22,7 +25,9 @@ function injectCSS(filename, code) {
 
 function injectJS(filename, code, scope) {
     console.info(`Injecting ${filename}`);
-    code = "(function() {\n" + code + "\n//# sourceURL=" + filename.replace(/\s/g, "-") + "\n})();";
+    // include api methods
+    const api = `const uid = "${uid}";\n${openInTab}\n${closeTab}\n${GM}`;
+    code = `(function() {\n${api}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
     if (scope != "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
@@ -220,6 +225,43 @@ browser.runtime.onMessage.addListener(request => {
             }
             if (found) break;
         }
+    }
+});
+
+// api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
+function openInTab(url, openInBackground) {
+    return new Promise(resolve => {
+        const callback = e => {
+            if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        const active = (openInBackground === true) ? false : true;
+        window.postMessage({id: uid, name: "API_OPEN_TAB", url: url, active: active});
+    });
+}
+
+function closeTab() {
+    window.postMessage({id: uid, name: "API_CLOSE_TAB"});
+}
+
+// create api aliases
+const GM = "const GM = {openInTab: openInTab}";
+
+window.addEventListener("message", e => {
+    // only respond to messages that have matching unique id and have a name value
+    if (e.data.id != uid || !e.data.name) return;
+    let message;
+    if (e.data.name === "API_OPEN_TAB") {
+        // ignore requests that don't supply a url
+        if (!e.data.url) return;
+        message = {name: "API_OPEN_TAB", url: e.data.url, active: e.data.active};
+        browser.runtime.sendMessage(message, response => {
+            window.postMessage({id: uid, name: "RESP_OPEN_TAB", response: response});
+        });
+    } else if (e.data.name === "API_CLOSE_TAB") {
+        browser.runtime.sendMessage({name: "API_CLOSE_TAB"}, response => {/* */});
     }
 });
 
