@@ -26,7 +26,7 @@ function injectCSS(filename, code) {
 function injectJS(filename, code, scope) {
     console.info(`Injecting ${filename}`);
     // include api methods
-    const api = `const uid = "${uid}";\n${openInTab}\n${closeTab}\n${GM}`;
+    const api = `const uid = "${uid}";\n${openTab}\n${closeTab}\n${GM}`;
     code = `(function() {\n${api}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
     if (scope != "content") {
         const tag = document.createElement("script");
@@ -229,7 +229,7 @@ browser.runtime.onMessage.addListener(request => {
 });
 
 // api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
-function openInTab(url, openInBackground) {
+function openTab(url, openInBackground) {
     return new Promise(resolve => {
         const callback = e => {
             if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
@@ -247,7 +247,7 @@ function closeTab() {
 }
 
 // create api aliases
-const GM = "const GM = {openInTab: openInTab}";
+const GM = "const GM = {openInTab: openTab}";
 
 window.addEventListener("message", e => {
     // only respond to messages that have matching unique id and have a name value
