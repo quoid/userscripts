@@ -4,9 +4,8 @@ let data;
 let cspFallbackAttempted = 0;
 // track whether event listener added
 let beforeunload = 0;
-//
+// unique id for api messaging
 const uid = Math.random().toString(36).substr(2, 8);
-
 
 function sortByWeight(o) {
     let sorted = {};
