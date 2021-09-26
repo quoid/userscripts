@@ -89,6 +89,7 @@ const _browser = {
                             type: "css"
                         }
                     ],
+                    platform: "macos",
                     updates: [
                         {
                             filename: "Google Images Restored.js",

@@ -1557,11 +1557,11 @@
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[21] = list[i];
+    	child_ctx[22] = list[i];
     	return child_ctx;
     }
 
-    // (262:0) {#if error}
+    // (265:0) {#if error}
     function create_if_block_5(ctx) {
     	let div;
     	let t0;
@@ -1573,7 +1573,7 @@
     			props: { icon: iconClear, title: "Clear error" }
     		});
 
-    	iconbutton.$on("click", /*click_handler_1*/ ctx[17]);
+    	iconbutton.$on("click", /*click_handler_1*/ ctx[18]);
 
     	return {
     		c() {
@@ -1609,14 +1609,14 @@
     	};
     }
 
-    // (280:8) {:else}
+    // (283:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	let each_value = /*list*/ ctx[10];
-    	const get_key = ctx => /*item*/ ctx[21].filename;
+    	let each_value = /*list*/ ctx[11];
+    	const get_key = ctx => /*item*/ ctx[22].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
@@ -1645,8 +1645,8 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*list, toggleItem*/ 17408) {
-    				const each_value = /*list*/ ctx[10];
+    			if (dirty & /*list, toggleItem*/ 34816) {
+    				const each_value = /*list*/ ctx[11];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
     				check_outros();
@@ -1682,7 +1682,7 @@
     	};
     }
 
-    // (278:35) 
+    // (281:35) 
     function create_if_block_4(ctx) {
     	let div;
 
@@ -1704,7 +1704,7 @@
     	};
     }
 
-    // (276:8) {#if inactive}
+    // (279:8) {#if inactive}
     function create_if_block_3(ctx) {
     	let div;
 
@@ -1726,7 +1726,7 @@
     	};
     }
 
-    // (273:4) {#if loading}
+    // (276:4) {#if loading}
     function create_if_block_2(ctx) {
     	let loader;
     	let current;
@@ -1756,22 +1756,22 @@
     	};
     }
 
-    // (282:16) {#each list as item (item.filename)}
+    // (285:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_2(...args) {
-    		return /*click_handler_2*/ ctx[18](/*item*/ ctx[21], ...args);
+    		return /*click_handler_2*/ ctx[19](/*item*/ ctx[22], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[21].disabled,
-    				name: /*item*/ ctx[21].name,
-    				subframe: /*item*/ ctx[21].subframe,
-    				type: /*item*/ ctx[21].type
+    				enabled: !/*item*/ ctx[22].disabled,
+    				name: /*item*/ ctx[22].name,
+    				subframe: /*item*/ ctx[22].subframe,
+    				type: /*item*/ ctx[22].type
     			}
     		});
 
@@ -1793,10 +1793,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*list*/ 1024) popupitem_changes.enabled = !/*item*/ ctx[21].disabled;
-    			if (dirty & /*list*/ 1024) popupitem_changes.name = /*item*/ ctx[21].name;
-    			if (dirty & /*list*/ 1024) popupitem_changes.subframe = /*item*/ ctx[21].subframe;
-    			if (dirty & /*list*/ 1024) popupitem_changes.type = /*item*/ ctx[21].type;
+    			if (dirty & /*list*/ 2048) popupitem_changes.enabled = !/*item*/ ctx[22].disabled;
+    			if (dirty & /*list*/ 2048) popupitem_changes.name = /*item*/ ctx[22].name;
+    			if (dirty & /*list*/ 2048) popupitem_changes.subframe = /*item*/ ctx[22].subframe;
+    			if (dirty & /*list*/ 2048) popupitem_changes.type = /*item*/ ctx[22].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -1815,7 +1815,7 @@
     	};
     }
 
-    // (295:0) {#if !inactive}
+    // (298:0) {#if !inactive && platform === "macos"}
     function create_if_block_1$1(ctx) {
     	let div1;
     	let div0;
@@ -1848,19 +1848,19 @@
     	};
     }
 
-    // (300:0) {#if showUpdates}
+    // (303:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
 
     	updateview = new UpdateView({
     			props: {
-    				closeClick: /*func*/ ctx[20],
-    				updateClick: /*updateAll*/ ctx[12],
-    				checkClick: /*checkForUpdates*/ ctx[15],
+    				closeClick: /*func*/ ctx[21],
+    				updateClick: /*updateAll*/ ctx[13],
+    				checkClick: /*checkForUpdates*/ ctx[16],
     				loading: /*disabled*/ ctx[3],
     				updates: /*updates*/ ctx[6],
-    				updateSingleClick: /*updateItem*/ ctx[13]
+    				updateSingleClick: /*updateItem*/ ctx[14]
     			}
     		});
 
@@ -1874,7 +1874,7 @@
     		},
     		p(ctx, dirty) {
     			const updateview_changes = {};
-    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[20];
+    			if (dirty & /*showUpdates*/ 32) updateview_changes.closeClick = /*func*/ ctx[21];
     			if (dirty & /*disabled*/ 8) updateview_changes.loading = /*disabled*/ ctx[3];
     			if (dirty & /*updates*/ 64) updateview_changes.updates = /*updates*/ ctx[6];
     			updateview.$set(updateview_changes);
@@ -1931,7 +1931,7 @@
     			}
     		});
 
-    	iconbutton1.$on("click", /*click_handler*/ ctx[16]);
+    	iconbutton1.$on("click", /*click_handler*/ ctx[17]);
 
     	iconbutton2 = new IconButton({
     			props: {
@@ -1944,7 +1944,7 @@
     			}
     		});
 
-    	iconbutton2.$on("click", /*toggleExtension*/ ctx[11]);
+    	iconbutton2.$on("click", /*toggleExtension*/ ctx[12]);
     	let if_block0 = /*error*/ ctx[0] && create_if_block_5(ctx);
     	const if_block_creators = [create_if_block_2, create_if_block_3, create_if_block_4, create_else_block$1];
     	const if_blocks = [];
@@ -1958,7 +1958,7 @@
 
     	current_block_type_index = select_block_type(ctx);
     	if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    	let if_block2 = !/*inactive*/ ctx[9] && create_if_block_1$1();
+    	let if_block2 = !/*inactive*/ ctx[9] && /*platform*/ ctx[10] === "macos" && create_if_block_1$1();
     	let if_block3 = /*showUpdates*/ ctx[5] && create_if_block$3(ctx);
 
     	return {
@@ -1994,7 +1994,7 @@
     			insert(target, t3, anchor);
     			insert(target, div1, anchor);
     			if_blocks[current_block_type_index].m(div1, null);
-    			/*div1_binding*/ ctx[19](div1);
+    			/*div1_binding*/ ctx[20](div1);
     			insert(target, t4, anchor);
     			if (if_block2) if_block2.m(target, anchor);
     			insert(target, t5, anchor);
@@ -2070,7 +2070,7 @@
     				attr(div1, "class", div1_class_value);
     			}
 
-    			if (!/*inactive*/ ctx[9]) {
+    			if (!/*inactive*/ ctx[9] && /*platform*/ ctx[10] === "macos") {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
@@ -2135,7 +2135,7 @@
     			if (detaching) detach(t3);
     			if (detaching) detach(div1);
     			if_blocks[current_block_type_index].d();
-    			/*div1_binding*/ ctx[19](null);
+    			/*div1_binding*/ ctx[20](null);
     			if (detaching) detach(t4);
     			if (if_block2) if_block2.d(detaching);
     			if (detaching) detach(t5);
@@ -2177,6 +2177,7 @@
     	let main;
     	let rowColors;
     	let inactive = false;
+    	let platform;
 
     	function toggleExtension() {
     		$$invalidate(3, disabled = true);
@@ -2298,6 +2299,7 @@
     		} else {
     			$$invalidate(1, active = response.active === "true" ? true : false);
     			$$invalidate(4, items = response.items);
+    			$$invalidate(10, platform = response.platform);
     			$$invalidate(6, updates = response.updates);
     		}
 
@@ -2321,10 +2323,10 @@
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*items*/ 16) {
-    			 $$invalidate(10, list = items.sort((a, b) => a.name.localeCompare(b.name)));
+    			 $$invalidate(11, list = items.sort((a, b) => a.name.localeCompare(b.name)));
     		}
 
-    		if ($$self.$$.dirty & /*list*/ 1024) {
+    		if ($$self.$$.dirty & /*list*/ 2048) {
     			 if (list.length > 1 && list.length % 2 === 0) {
     				$$invalidate(8, rowColors = "even");
     			} else if (list.length > 1 && list.length % 2 != 0) {
@@ -2346,6 +2348,7 @@
     		main,
     		rowColors,
     		inactive,
+    		platform,
     		list,
     		toggleExtension,
     		updateAll,

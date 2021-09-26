@@ -19,6 +19,7 @@
     let main;
     let rowColors;
     let inactive = false;
+    let platform;
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -77,7 +78,6 @@
             error = response.error;
             showUpdates = false;
         } else {
-            console.log(response);
             updates = updates.filter(e => e.filename != item.filename);
             items = response.items;
         }
@@ -152,6 +152,7 @@
         } else {
             active = response.active === "true" ? true : false;
             items = response.items;
+            platform = response.platform;
             updates = response.updates;
         }
         loading = false;
@@ -237,6 +238,7 @@
         text-align: center;
     }
 </style>
+
 <div class="header">
     <IconButton
         icon={iconOpen}
@@ -292,7 +294,7 @@
         {/if}
     {/if}
 </div>
-{#if !inactive}
+{#if !inactive && platform === "macos"}
     <div class="footer">
         <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
     </div>
