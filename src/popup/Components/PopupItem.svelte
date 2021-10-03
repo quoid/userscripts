@@ -16,8 +16,10 @@
         user-select: none;
     }
 
-    .item:hover {
-        background-color: rgba(255, 255, 255, 0.075);
+    @media (hover: hover) {
+        .item:hover {
+            background-color: rgba(255, 255, 255, 0.075);
+        }
     }
 
     .item:active {

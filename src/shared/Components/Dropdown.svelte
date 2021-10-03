@@ -82,9 +82,11 @@
         pointer-events: none;
     }
 
-    ul :global(li:hover:not(.separator)) {
-        background-color: var(--color-blue);
-        color: var(--color-black);
+    @media (hover: hover) {
+        ul :global(li:hover:not(.separator)) {
+            background-color: var(--color-blue);
+            color: var(--color-black);
+        }
     }
 
 </style>

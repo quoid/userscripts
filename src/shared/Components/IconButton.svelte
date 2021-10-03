@@ -45,8 +45,10 @@
         width: 66.7%;
     }
 
-    button:hover :global(svg) {
-        opacity: 1;
+    @media (hover: hover) {
+        button:hover :global(svg) {
+            opacity: 1;
+        }
     }
 </style>
 
