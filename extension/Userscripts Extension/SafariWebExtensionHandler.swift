@@ -45,12 +45,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "POPUP_MATCHES" {
             let manifest = getManifest()
-            var platform:String
-            #if os(iOS)
-                platform = "ios"
-            #elseif os(macOS)
-                platform = "macos"
-            #endif
             if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
                 if
                     checkDefaultDirectories(),
@@ -59,7 +53,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                     let active = manifest.settings["active"],
                     let updates = checkForRemoteUpdates()
                 {
-                    let r = ["active": active, "items": matches, "updates": updates, "platform": platform] as [String : Any]
+                    let r = ["active": active, "items": matches, "updates": updates] as [String : Any]
                     response.userInfo = [SFExtensionMessageKey: r]
                 } else {
                     response.userInfo = [SFExtensionMessageKey: ["error": "failed to run match sequence"]]

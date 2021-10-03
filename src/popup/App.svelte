@@ -153,7 +153,6 @@
         } else {
             active = response.active === "true" ? true : false;
             items = response.items;
-            platform = response.platform;
             updates = response.updates;
         }
         loading = false;
