@@ -1419,7 +1419,7 @@
     		c() {
     			div2 = element("div");
     			div0 = element("div");
-    			t0 = text("Userscript Updates\n        ");
+    			t0 = text("Updates\n        ");
     			create_component(iconbutton.$$.fragment);
     			t1 = space();
     			div1 = element("div");

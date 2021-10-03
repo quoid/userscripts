@@ -110,7 +110,7 @@
 </style>
 <div class="view view--updates" transition:slide>
     <div class="view__header">
-        Userscript Updates
+        Updates
         <IconButton
             icon={iconArrowLeft}
             title={"Go back"}
