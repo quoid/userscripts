@@ -132,6 +132,12 @@
     }
 
     onMount(async () => {
+        const platformResponse = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
+        if (!platformResponse.platform) {
+            error = "Failed to get platform";
+        } else {
+            platform = platformResponse.platform;
+        }
         const tabs = await browser.tabs.query({currentWindow: true, active: true});
         const url = tabs[0].url;
         const frameUrls = [];
