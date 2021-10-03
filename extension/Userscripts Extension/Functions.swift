@@ -283,8 +283,15 @@ func getManifest() -> Manifest {
     }
 }
 
-func updateManifestMatches() -> Bool {
-    guard let files = getAllFiles() else {return false}
+func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    // only get all files if files were not provided
+    var files = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        guard let getFiles = getAllFiles() else {return false}
+        files = getFiles
+    } else {
+        files = optionalFilesArray
+    }
     var manifest = getManifest()
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
@@ -379,8 +386,15 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
     return returnDictionary
 }
 
-func updateManifestRequired() -> Bool {
-    guard let files = getAllFiles() else {return false}
+func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    // only get all files if files were not provided
+    var files = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        guard let getFiles = getAllFiles() else {return false}
+        files = getFiles
+    } else {
+        files = optionalFilesArray
+    }
     var manifest = getManifest()
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
@@ -417,17 +431,24 @@ func updateManifestRequired() -> Bool {
     return true
 }
 
-func purgeManifest() -> Bool {
+func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
     // purge all manifest keys of any stale entries
     var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
-    let allFiles = getAllFiles() ?? []
+    // only get all files if files were not provided
+    var allFiles = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        // if getAllFiles fails to return, ignore and pass an empty array
+        let getFiles = getAllFiles() ?? []
+        allFiles = getFiles
+    } else {
+        allFiles = optionalFilesArray
+    }
     // populate array with filenames
     for file in allFiles {
         if let filename = file["filename"] as? String {
             allSaveLocationFilenames.append(filename)
         }
     }
-
     // loop through manifest keys, if no file exists for value, remove value from manifest
     // if there are no more filenames in pattern, remove pattern from manifest
     for (pattern, filenames) in manifest.match {
@@ -664,8 +685,18 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
     return true
 }
 
-func checkForRemoteUpdates() -> [[String: String]]? {
-    guard let files = getAllFiles() else {return nil}
+func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[String: String]]? {
+    // only get all files if files were not provided
+    var files = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        guard let getFiles = getAllFiles() else {
+            err("checkForRemoteUpdates failed at (1)")
+            return nil
+        }
+        files = getFiles
+    } else {
+        files = optionalFilesArray
+    }
     var hasUpdates = [[String: String]]()
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
@@ -724,10 +755,10 @@ func getRemoteFileContents(_ url: String) -> String? {
     return contents
 }
 
-func updateAllFiles() -> Bool {
+func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
     // get names of all files with updates available
     guard
-        let filesWithUpdates = checkForRemoteUpdates(),
+        let filesWithUpdates = checkForRemoteUpdates(optionalFilesArray),
         let saveLocation = getSaveLocation()
     else {
         err("failed to update files (1)")
@@ -1204,9 +1235,9 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String], _ shouldUpdate: Bo
     }
     if shouldUpdate {
         guard
-            updateManifestMatches(),
-            updateManifestRequired(),
-            purgeManifest()
+            updateManifestMatches(files),
+            updateManifestRequired(files),
+            purgeManifest(files)
         else {
             err("getPopupMatches failed at (2)")
             return nil
@@ -1240,10 +1271,11 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String], _ shouldUpdate: Bo
 
 func popupUpdateAll() -> Bool {
     guard
-        updateAllFiles(),
-        updateManifestMatches(),
-        updateManifestRequired(),
-        purgeManifest()
+        let files = getAllFiles(),
+        updateAllFiles(files),
+        updateManifestMatches(files),
+        updateManifestRequired(files),
+        purgeManifest(files)
     else {
         return false
     }
