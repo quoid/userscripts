@@ -1563,7 +1563,7 @@
     	return child_ctx;
     }
 
-    // (275:0) {#if error}
+    // (280:0) {#if error}
     function create_if_block_5(ctx) {
     	let div;
     	let t0;
@@ -1611,7 +1611,7 @@
     	};
     }
 
-    // (293:8) {:else}
+    // (298:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1684,7 +1684,7 @@
     	};
     }
 
-    // (291:35) 
+    // (296:35) 
     function create_if_block_4(ctx) {
     	let div;
 
@@ -1706,7 +1706,7 @@
     	};
     }
 
-    // (289:8) {#if inactive}
+    // (294:8) {#if inactive}
     function create_if_block_3(ctx) {
     	let div;
 
@@ -1728,7 +1728,7 @@
     	};
     }
 
-    // (286:4) {#if loading}
+    // (291:4) {#if loading}
     function create_if_block_2(ctx) {
     	let loader;
     	let current;
@@ -1758,7 +1758,7 @@
     	};
     }
 
-    // (295:16) {#each list as item (item.filename)}
+    // (300:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1817,7 +1817,7 @@
     	};
     }
 
-    // (308:0) {#if !inactive && platform === "macos"}
+    // (313:0) {#if !inactive && platform === "macos"}
     function create_if_block_1$1(ctx) {
     	let div1;
     	let div0;
@@ -1850,7 +1850,7 @@
     	};
     }
 
-    // (313:0) {#if showUpdates}
+    // (318:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2296,6 +2296,14 @@
     	}
 
     	onMount(async () => {
+    		const platformResponse = await browser.runtime.sendNativeMessage({ name: "REQ_PLATFORM" });
+
+    		if (!platformResponse.platform) {
+    			$$invalidate(0, error = "Failed to get platform");
+    		} else {
+    			$$invalidate(10, platform = platformResponse.platform);
+    		}
+
     		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
     		const url = tabs[0].url;
     		const frameUrls = [];
@@ -2322,7 +2330,6 @@
     		} else {
     			$$invalidate(1, active = response.active === "true" ? true : false);
     			$$invalidate(4, items = response.items);
-    			$$invalidate(10, platform = response.platform);
     			$$invalidate(6, updates = response.updates);
     		}
 
