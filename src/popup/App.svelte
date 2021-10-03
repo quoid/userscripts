@@ -8,6 +8,7 @@
     import iconOpen from "../shared/img/icon-open.svg";
     import iconUpdate from "../shared/img/icon-update.svg";
     import iconClear from "../shared/img/icon-clear.svg";
+    import iconRefresh from "../shared/img/icon-refresh.svg";
 
     let error = undefined;
     let active = true;
@@ -171,6 +172,10 @@
         margin: 0 auto 0 1rem;
     }
 
+    .header :global(button:nth-of-type(3)) {
+        margin-right: 1rem;
+    }
+
     .header :global(button:nth-of-type(1) svg) {
         width: 75%;
     }
@@ -251,6 +256,12 @@
         notification={updates.length}
         on:click={() => showUpdates = true}
         title={"Show updates"}
+        {disabled}
+    />
+    <IconButton
+        icon={iconRefresh}
+        on:click={() => window.location.reload()}
+        title={"Refresh view"}
         {disabled}
     />
     <IconButton
