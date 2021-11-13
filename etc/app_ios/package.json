@@ -1,0 +1,30 @@
+{
+  "name": "static-website-builder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "websiteTitle": "My Website",
+  "scripts": {
+    "build": "NODE_ENV=production gulp build",
+    "clean": "gulp clean",
+    "server": "gulp server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^9.7.1",
+    "cssnano": "^4.1.10",
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-connect": "^5.7.0",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-inline-source": "^4.0.0",
+    "gulp-nunjucks-render": "^2.2.3",
+    "gulp-postcss": "^8.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "postcss-assets": "^5.0.0",
+    "postcss-import": "^12.0.1"
+  }
+}
