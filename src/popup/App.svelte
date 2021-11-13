@@ -21,6 +21,9 @@
     let rowColors;
     let inactive = false;
     let platform;
+    let initError;
+    let windowHeight = 0;
+    let header;
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -31,6 +34,8 @@
     } else {
         rowColors = undefined;
     }
+
+    $: if (platform) document.body.classList.add(platform);
 
     function toggleExtension() {
         disabled = true;
@@ -101,6 +106,7 @@
 
     function checkForUpdates() {
         disabled = true;
+        initError = false;
         browser.runtime.sendNativeMessage({name: "POPUP_CHECK_UPDATES"}, response => {
             if (response.error) {
                 error = response.error;
@@ -131,17 +137,55 @@
         window.close();
     }
 
-    onMount(async () => {
-        const platformResponse = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
-        if (!platformResponse.platform) {
-            error = "Failed to get platform";
-        } else {
-            platform = platformResponse.platform;
+    async function initialize() {
+        // get platform first since it applies important styling
+        let pltfm;
+        try {
+            pltfm = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
+        } catch (error) {
+            console.log("Error for pltfm promise: " + error);
+            initError = true;
+            loading = false;
+            return;
         }
+        if (pltfm.error) {
+            error = pltfm.error;
+            loading = false;
+            disabled = false;
+            return;
+        } else {
+            console.log("Got response from pltfm promise");
+            console.log(pltfm);
+            platform = pltfm.platform;
+        }
+
+        // run init checks
+        // const init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"}).catch(error => {});
+        let init;
+        try {
+            init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"});
+        } catch (error) {
+            console.log("Error for init promise: " + error);
+            initError = true;
+            loading = false;
+            return;
+        }
+        if (init.error) {
+            error = init.error;
+            loading = false;
+            disabled = false;
+            return;
+        } else {
+            console.log("Got response from init promise");
+            console.log(init);
+            active = init.initData.active === "true" ? true : false;
+        }
+
+        // get matches
+        const extensionPageUrl = browser.runtime.getURL("page.html");
         const tabs = await browser.tabs.query({currentWindow: true, active: true});
         const url = tabs[0].url;
         const frameUrls = [];
-        const extensionPageUrl = browser.runtime.getURL("page.html");
         if (url === extensionPageUrl) {
             // disable popup on extension page
             inactive = true;
@@ -153,18 +197,155 @@
             frames.forEach(frame => frameUrls.push(frame.url));
         }
         const message = {name: "POPUP_MATCHES", url: url, frameUrls: frameUrls};
-        const response = await browser.runtime.sendNativeMessage(message);
-        if (response.error) {
-            error = response.error;
+        let matches;
+        try {
+            matches = await browser.runtime.sendNativeMessage(message);
+            // response = await browser.runtime.sendMessage(message);
+        } catch (error) {
+            console.log("Error for matches promise: " + error);
+            initError = true;
+            loading = false;
+            return;
+        }
+        if (matches.error) {
+            error = matches.error;
+            loading = false;
+            disabled = false;
+            return;
         } else {
-            active = response.active === "true" ? true : false;
-            items = response.items;
-            updates = response.updates;
+            console.log("Got response from matches promise");
+            console.log(matches);
+            items = matches.matches;
+        }
+
+        // get updates
+        let updatesResponse;
+        try {
+            updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
+        } catch (error) {
+            console.log("Error for updates promise: " + error);
+            initError = true;
+            loading = false;
+            return;
+        }
+        if (updatesResponse.error) {
+            error = updatesResponse.error;
+            loading = false;
+            disabled = false;
+            return;
+        } else {
+            console.log("Got response from updates promise");
+            console.log(updatesResponse);
+            updates = updatesResponse.updates;
         }
         loading = false;
         disabled = false;
+    }
+
+    function resize() {
+        if (platform != "ios") return;
+        const headerHeight = header.offsetHeight;
+        windowHeight = (window.outerHeight - headerHeight);
+        main.style.height = windowHeight + "px";
+        main.style.paddingBottom = headerHeight + "px";
+    }
+
+    onMount(async () => {
+        initialize();
+        resize();
     });
 </script>
+<svelte:window on:resize={resize}/>
+<div class="header" bind:this={header}>
+    <IconButton
+        icon={iconOpen}
+        title={"Open save location"}
+        on:click={openSaveLocation}
+        disabled={disabled || platform !== "macos"}
+    />
+    <IconButton
+        icon={iconUpdate}
+        notification={updates.length}
+        on:click={() => showUpdates = true}
+        title={"Show updates"}
+        {disabled}
+    />
+    <IconButton
+        icon={iconRefresh}
+        on:click={() => {
+            error = undefined;
+            loading = true;
+            disabled = true;
+            items = [];
+            showUpdates = false;
+            updates = [];
+            inactive = false;
+            initialize();
+        }}
+        title={"Refresh view"}
+        {disabled}
+    />
+    <IconButton
+        on:click={toggleExtension}
+        icon={iconPower}
+        title={"Toggle injection"}
+        color={active ? "var(--color-green)" : "var(--color-red)"}
+        {disabled}
+    />
+</div>
+{#if error}
+    <div class="error">
+        {error}
+        <IconButton
+            icon={iconClear}
+            on:click={() => error = undefined}
+            title={"Clear error"}
+        />
+    </div>
+{/if}
+<div class="main {rowColors || ""}" bind:this={main}>
+    {#if loading}
+        <Loader/>
+    {:else}
+        {#if inactive}
+            <div class="none">Popup inactive on extension page</div>
+        {:else if initError}
+            <div class="none">
+                Something went wrong:&nbsp;<span class="link" on:click={() => window.location.reload()}> click to retry</span>
+            </div>
+        {:else if items.length < 1}
+            <div class="none">No matched userscripts</div>
+        {:else}
+            <div class="items" class:disabled={disabled}>
+                {#each list as item (item.filename)}
+                    <PopupItem
+                        enabled={!item.disabled}
+                        name={item.name}
+                        subframe={item.subframe}
+                        type={item.type}
+                        on:click={() => toggleItem(item)}
+                    />
+                {/each}
+            </div>
+        {/if}
+    {/if}
+</div>
+{#if !inactive && platform === "macos"}
+    <div class="footer">
+        <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
+    </div>
+{/if}
+{#if showUpdates}
+    <UpdateView
+        closeClick={() => showUpdates = false}
+        updateClick={updateAll}
+        checkClick={checkForUpdates}
+        loading={disabled}
+        updates={updates}
+        updateSingleClick={updateItem}
+    />
+{/if}
+
 <style>
     .header {
         align-items: center;
@@ -211,10 +392,14 @@
     }
 
     .main {
-        max-height: 20rem;
+        /* max-height: 20rem; */
         min-height: 12.5rem;
         overflow-y: auto;
         position: relative;
+    }
+
+    :global(body:not(.ios) .main) {
+        max-height: 20rem;
     }
 
     .main.even :global(.item:nth-of-type(odd)),
@@ -248,80 +433,3 @@
         text-align: center;
     }
 </style>
-
-<div class="header">
-    <IconButton
-        icon={iconOpen}
-        title={"Open save location"}
-        on:click={openSaveLocation}
-        {disabled}
-    />
-    <IconButton
-        icon={iconUpdate}
-        notification={updates.length}
-        on:click={() => showUpdates = true}
-        title={"Show updates"}
-        {disabled}
-    />
-    <IconButton
-        icon={iconRefresh}
-        on:click={() => window.location.reload()}
-        title={"Refresh view"}
-        {disabled}
-    />
-    <IconButton
-        on:click={toggleExtension}
-        icon={iconPower}
-        title={"Toggle injection"}
-        color={active ? "var(--color-green)" : "var(--color-red)"}
-        {disabled}
-    />
-</div>
-{#if error}
-    <div class="error">
-        {error}
-        <IconButton
-            icon={iconClear}
-            on:click={() => error = undefined}
-            title={"Clear error"}
-        />
-    </div>
-{/if}
-<div class="main {rowColors || ""}" bind:this={main}>
-    {#if loading}
-        <Loader/>
-    {:else}
-        {#if inactive}
-        <div class="none">Popup inactive on extension page</div>
-        {:else if items.length < 1}
-            <div class="none">No matched userscripts</div>
-        {:else}
-            <div class="items" class:disabled={disabled}>
-                {#each list as item (item.filename)}
-                    <PopupItem
-                        enabled={!item.disabled}
-                        name={item.name}
-                        subframe={item.subframe}
-                        type={item.type}
-                        on:click={() => toggleItem(item)}
-                    />
-                {/each}
-            </div>
-        {/if}
-    {/if}
-</div>
-{#if !inactive && platform === "macos"}
-    <div class="footer">
-        <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
-    </div>
-{/if}
-{#if showUpdates}
-    <UpdateView
-        closeClick={() => showUpdates = false}
-        updateClick={updateAll}
-        checkClick={checkForUpdates}
-        loading={disabled}
-        updates={updates}
-        updateSingleClick={updateItem}
-    />
-{/if}

@@ -18,12 +18,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         // typically the "else if" would be on the same line as the preceding statements close backet
         // ie. } else if {
         if name == "REQ_PLATFORM" {
-            var platform:String
-            #if os(iOS)
-                platform = "ios"
-            #elseif os(macOS)
-                platform = "macos"
-            #endif
+            let platform = getPlatform()
             response.userInfo = [SFExtensionMessageKey: ["platform": platform]]
         } else if name == "REQ_USERSCRIPTS" {
             if let url = message?["url"] as? String, let isTop = message?["isTop"] as? Bool {
@@ -41,30 +36,64 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
         }
         else if name == "POPUP_BADGE_COUNT" {
-            if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-                if let matches = getPopupBadgeCount(url, frameUrls) {
-                    response.userInfo = [SFExtensionMessageKey: ["count": matches]]
+            #if os(macOS)
+                if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
+                    if let matches = getPopupBadgeCount(url, frameUrls) {
+                        response.userInfo = [SFExtensionMessageKey: ["count": matches]]
+                    } else {
+                        response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
+                    }
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
+                    inBoundError = true
+                }
+            #endif
+        }
+        else if name == "POPUP_INIT" {
+            if let initData = popupInit() {
+                response.userInfo = [SFExtensionMessageKey: ["initData": initData]]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
+            }
+        }
+        else if name == "POPUP_MATCHES"{
+            if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
+                if let matches = getPopupMatches(url, frameUrls) {
+                    response.userInfo = [SFExtensionMessageKey: ["matches": matches]]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to get matches"]]
                 }
             } else {
                 inBoundError = true
             }
         }
-        else if name == "POPUP_MATCHES" {
-            let manifest = getManifest()
+        else if name == "POPUP_UPDATES" {
+            if let updates = checkForRemoteUpdates() {
+                response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get updates"]]
+            }
+        }
+        else if name == "POPUP_INITX" {
             if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
+                let platform = getPlatform()
+                let manifest = getManifest()
                 if
                     checkDefaultDirectories(),
                     checkSettings(),
-                    let matches = getPopupMatches(url, frameUrls, true),
+                    let files = getAllFiles(),
+                    updateManifestMatches(files),
+                    updateManifestRequired(files),
+                    purgeManifest(files),
+                    let matches = getPopupMatches(url, frameUrls),
                     let active = manifest.settings["active"],
                     let updates = checkForRemoteUpdates()
                 {
-                    let r = ["active": active, "items": matches, "updates": updates] as [String : Any]
+                    let r = [
+                        "active": active, "items": matches, "platform": platform, "updates": updates
+                    ] as [String : Any]
                     response.userInfo = [SFExtensionMessageKey: r]
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to run match sequence"]]
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to run init sequence"]]
                 }
             } else {
                 inBoundError = true
@@ -101,14 +130,17 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "POPUP_TOGGLE_EXTENSION" {
             var manifest = getManifest()
-            let active = manifest.settings["active"]
-            if active == "true" {
-                manifest.settings["active"] = "false"
-            } else {
-                manifest.settings["active"] = "true"
-            }
-            if updateManifest(with: manifest) {
-                response.userInfo = [SFExtensionMessageKey: ["success": true]]
+            if let active = manifest.settings["active"] {
+                if active == "true" {
+                    manifest.settings["active"] = "false"
+                } else {
+                    manifest.settings["active"] = "true"
+                }
+                if updateManifest(with: manifest) {
+                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to update injection state"]]
+                }
             } else {
                 response.userInfo = [SFExtensionMessageKey: ["error": "failed to update injection state"]]
             }
@@ -136,48 +168,58 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
         }
         else if name == "PAGE_INIT_DATA" {
-            if let settings = getInitData() {
-                response.userInfo = [SFExtensionMessageKey: settings]
-            } else {
-                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
-            }
+            #if os(macOS)
+                if let settings = getInitData() {
+                    response.userInfo = [SFExtensionMessageKey: settings]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
+                }
+            #endif
         }
         else if name == "PAGE_ALL_FILES" {
-            if let files = getAllFiles() {
-                response.userInfo = [SFExtensionMessageKey: files]
-            } else {
-                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get all files"]]
-            }
+            #if os(macOS)
+                if let files = getAllFiles() {
+                    response.userInfo = [SFExtensionMessageKey: files]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to get all files"]]
+                }
+            #endif
         }
         else if name == "PAGE_SAVE" {
-            if
-                let item = message?["item"] as? [String: Any],
-                let content = message?["content"] as? String
-            {
-                let saveResponse = saveFile(item, content)
-                response.userInfo = [SFExtensionMessageKey: saveResponse]
-            } else {
-                inBoundError = true
-            }
+            #if os(macOS)
+                if
+                    let item = message?["item"] as? [String: Any],
+                    let content = message?["content"] as? String
+                {
+                    let saveResponse = saveFile(item, content)
+                    response.userInfo = [SFExtensionMessageKey: saveResponse]
+                } else {
+                    inBoundError = true
+                }
+            #endif
         }
         else if name == "PAGE_TRASH" {
-            if let item = message?["item"] as? [String: Any] {
-                if trashFile(item) {
-                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
+            #if os(macOS)
+                if let item = message?["item"] as? [String: Any] {
+                    if trashFile(item) {
+                        response.userInfo = [SFExtensionMessageKey: ["success": true]]
+                    } else {
+                        response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
+                    }
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
+                    inBoundError = true
                 }
-            } else {
-                inBoundError = true
-            }
+            #endif
         }
         else if name == "PAGE_UPDATE" {
-            if let content = message?["content"] as? String {
-                let updateResponse = getFileRemoteUpdate(content)
-                response.userInfo = [SFExtensionMessageKey: updateResponse]
-            } else {
-                inBoundError = true
-            }
+            #if os(macOS)
+                if let content = message?["content"] as? String {
+                    let updateResponse = getFileRemoteUpdate(content)
+                    response.userInfo = [SFExtensionMessageKey: updateResponse]
+                } else {
+                    inBoundError = true
+                }
+            #endif
         }
         else if name == "CANCEL_REQUESTS" {
             URLSession.shared.getAllTasks { tasks in
@@ -187,42 +229,47 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
         }
         else if name == "PAGE_NEW_REMOTE" {
-            if let url = message?["url"] as? String {
-                if !validateUrl(url) {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "Failed to get remote content, invalid url"]]
-                } else if let content = getRemoteFileContents(url) {
-                    response.userInfo = [SFExtensionMessageKey: content]
+            #if os(macOS)
+                if let url = message?["url"] as? String {
+                    if !validateUrl(url) {
+                        response.userInfo = [SFExtensionMessageKey: ["error": "Failed to get remote content, invalid url"]]
+                    } else if let content = getRemoteFileContents(url) {
+                        response.userInfo = [SFExtensionMessageKey: content]
+                    } else {
+                        response.userInfo = [SFExtensionMessageKey: ["error": "Failed to get remote content"]]
+                    }
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "Failed to get remote content"]]
+                    inBoundError = true
                 }
-            } else {
-                inBoundError = true
-            }
+            #endif
         }
         else if name == "PAGE_UPDATE_SETTINGS" {
-            if let settings = message?["settings"] as? [String: String] {
-                if updateSettings(settings) {
-                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
+            #if os(macOS)
+                if let settings = message?["settings"] as? [String: String] {
+                    if updateSettings(settings) {
+                        response.userInfo = [SFExtensionMessageKey: ["success": true]]
+                    } else {
+                        response.userInfo = [SFExtensionMessageKey: ["error": "Failed to save settings to disk"]]
+                    }
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "Failed to save settings to disk"]]
+                    inBoundError = true
                 }
-            } else {
-                inBoundError = true
-            }
+            #endif
         }
         else if name == "PAGE_UPDATE_BLACKLIST" {
-            if let blacklist = message?["blacklist"] as? [String] {
-                var manifest = getManifest()
-                manifest.blacklist = blacklist
-                if !updateManifest(with: manifest) {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "Failed to save blacklist to disk"]]
+            #if os(macOS)
+                if let blacklist = message?["blacklist"] as? [String] {
+                    var manifest = getManifest()
+                    manifest.blacklist = blacklist
+                    if !updateManifest(with: manifest) {
+                        response.userInfo = [SFExtensionMessageKey: ["error": "Failed to save blacklist to disk"]]
+                    } else {
+                        response.userInfo = [SFExtensionMessageKey: ["success": true]]
+                    }
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
+                    inBoundError = true
                 }
-            } else {
-                inBoundError = true
-            }
-
+            #endif
         }
         // send inBoundError if found
         if inBoundError {

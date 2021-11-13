@@ -71,8 +71,8 @@ const _browser = {
                         }
                     ]
                 };
-            } else if (message.name === "POPUP_MATCHES") {
-                response = {
+            } else if (message.name === "POPUP_INIT") {
+                response.initData = {
                     active: "true",
                     items: [
                         {
@@ -103,6 +103,41 @@ const _browser = {
                         }
                     ]
                 };
+            } else if (message.name === "POPUP_MATCHES") {
+                response = {
+                    matches: [
+                        {
+                            name: "Google Images Restored",
+                            filename: "Google Images Restored.js",
+                            disabled: false,
+                            type: "js"
+                        },
+                        {
+                            name: "Subframe Script Managerial Staffing Company",
+                            filename: "Subframe Script.js",
+                            disabled: false,
+                            subframe: true,
+                            type: "css"
+                        }
+                    ]
+                };
+            } else if (message.name === "POPUP_UPDATES") {
+                response = {
+                    updates: [
+                        {
+                            filename: "Google Images Restored.js",
+                            name: "Google Images Restored",
+                            url: "https://www.k21p.com"
+                        },
+                        {
+                            filename: "New Userscript With a Really Really Long Name.js",
+                            name: "New Userscript With a Really Really Long Name",
+                            url: "https://www.filmgarb.com"
+                        }
+                    ]
+                };
+            } else if (message.name === "REQ_PLATFORM") {
+                response = {platform: "macos"};
             } else if (message.name === "TOGGLE_ITEM") {
                 //response = {error: "Failed to toggle item"};
                 response = {success: true};

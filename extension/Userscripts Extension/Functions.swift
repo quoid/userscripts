@@ -2,11 +2,6 @@ import Foundation
 import SafariServices
 
 // helpers
-func logText(_ message: String) { // CHANGE PRINT TO NSLOG!
-    // create helper log func to easily disable logging
-    NSLog(message)
-}
-
 func getRequireLocation() -> URL {
     // simple helper in case required code save directory needs to change
     return getDocumentsDirectory().appendingPathComponent("require")
@@ -53,76 +48,89 @@ func normalizeWeight(_ weight: String) -> String {
 }
 
 func getSaveLocation() -> URL? {
-    let standardDefaults = UserDefaults.standard
-    let userSaveLocationKey = "userSaveLocation"
-    var defaultSaveLocation:URL
-
-    // get the default save location, if key doesn't exist write it to user defaults
-    if let saveLocationValue = standardDefaults.url(forKey: "saveLocation") {
-        defaultSaveLocation = saveLocationValue
-    } else {
-        logText("default save location not set, writing to user defaults")
-        let url = getDocumentsDirectory().appendingPathComponent("scripts")
-        UserDefaults.standard.set(url, forKey: "saveLocation")
-        defaultSaveLocation = url
-    }
-
-    // check if shared bookmark data exists
-    // check if can get shared bookmark url
-    // won't be able to if directory trashed
-    guard
-        let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-        let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
-        directoryExists(path: sharedBookmark.path)
-    else {
-        // can't get shared bookmark, use default location and remove shared bookmark key from shared user defaults
-        UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-        logText("removed sharedbookmark because it was either permanently deleted or in trash")
-        return defaultSaveLocation
-    }
-
-    // at this point, it's known sharedbookmark exists
-    // check local bookmark exists, can read url from bookmark and if bookmark url == shared bookmark url
-    // if local bookmark exists, no need to check if directory exists for it
-    // can't think of an instance where shared bookmark directory exists (checked above), yet local bookmark directory does not
-    if
-        let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
-        let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
-        sharedBookmark == userSaveLocation
-    {
-        return userSaveLocation
-    }
-
-    // at this point one of the following conditions met
-    // - local bookmark data doesn't exist
-    // - for some reason can't get url from local bookmark data
-    // - local bookmark url != shared bookmark url (user updated save location)
-    // when any of those conditions are met, create new local bookmark from shared bookmark
-    if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
-        // read the newly saved bookmark and return it
-        guard
-            let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
-            let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
-        else {
-            err("reading local bookmark in getSaveLocation failed")
+    #if os(iOS)
+        if
+            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+            let bookmarkUrl = readBookmark(data: sharedBookmarkData, isSecure: true)
+        {
+            return bookmarkUrl
+        } else {
             return nil
         }
-        return localBookmarkUrl
-    } else {
-        err("could not save local version of shared bookmark")
-        return nil
-    }
+    #elseif os(macOS)
+        let standardDefaults = UserDefaults.standard
+        let userSaveLocationKey = "userSaveLocation"
+        var defaultSaveLocation:URL
+
+        // get the default save location, if key doesn't exist write it to user defaults
+        if let saveLocationValue = standardDefaults.url(forKey: "saveLocation") {
+            defaultSaveLocation = saveLocationValue
+        } else {
+            logText("default save location not set, writing to user defaults")
+            let url = getDocumentsDirectory().appendingPathComponent("scripts")
+            UserDefaults.standard.set(url, forKey: "saveLocation")
+            defaultSaveLocation = url
+        }
+
+        // check if shared bookmark data exists
+        // check if can get shared bookmark url
+        // won't be able to if directory trashed
+        guard
+            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+            let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
+            directoryExists(path: sharedBookmark.path)
+        else {
+            // can't get shared bookmark, use default location and remove shared bookmark key from shared user defaults
+            UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
+            logText("removed sharedbookmark because it was either permanently deleted or in trash")
+            return defaultSaveLocation
+        }
+
+        // at this point, it's known sharedbookmark exists
+        // check local bookmark exists, can read url from bookmark and if bookmark url == shared bookmark url
+        // if local bookmark exists, no need to check if directory exists for it
+        // can't think of an instance where shared bookmark directory exists (checked above), yet local bookmark directory does not
+        if
+            let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
+            let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
+            sharedBookmark == userSaveLocation
+        {
+            return userSaveLocation
+        }
+
+        // at this point one of the following conditions met
+        // - local bookmark data doesn't exist
+        // - for some reason can't get url from local bookmark data
+        // - local bookmark url != shared bookmark url (user updated save location)
+        // when any of those conditions are met, create new local bookmark from shared bookmark
+        if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
+            // read the newly saved bookmark and return it
+            guard
+                let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
+                let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
+            else {
+                err("reading local bookmark in getSaveLocation failed")
+                return nil
+            }
+            return localBookmarkUrl
+        } else {
+            err("could not save local version of shared bookmark")
+            return nil
+        }
+    #endif
 }
 
 func openSaveLocation() -> Bool {
-    guard let saveLocation = getSaveLocation() else {
-        return false
-    }
-    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
-    }
-    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: saveLocation.path)
+    #if os(macOS)
+        guard let saveLocation = getSaveLocation() else {
+            return false
+        }
+        let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+        }
+        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: saveLocation.path)
+    #endif
     return true
 }
 
@@ -284,6 +292,7 @@ func getManifest() -> Manifest {
 }
 
 func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("updateManifestMatches started")
     // only get all files if files were not provided
     var files = [[String: Any]]()
     if optionalFilesArray.count < 1 {
@@ -326,6 +335,7 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             return false
         }
     }
+    logText("updateManifestMatches complete")
     return true
 }
 
@@ -387,14 +397,19 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
 }
 
 func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("updateManifestRequired started")
     // only get all files if files were not provided
     var files = [[String: Any]]()
     if optionalFilesArray.count < 1 {
-        guard let getFiles = getAllFiles() else {return false}
+        guard let getFiles = getAllFiles() else {
+            logText("updateManifestRequired count not get files")
+            return false
+        }
         files = getFiles
     } else {
         files = optionalFilesArray
     }
+    logText("updateManifestRequired will loop through \(files.count)")
     var manifest = getManifest()
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
@@ -402,7 +417,7 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
         let metadata = file["metadata"] as! [String: [String]]
         let type = file["type"] as! String
         let required = metadata["require"] ?? []
-
+        logText("updateManifestRequired start \(filename)")
         // get required resources for file, if fail, skip updating manifest
         if !getRequiredCode(filename, required, type) {
             err("couldn't fetch remote content for \(filename) in updateManifestRequired")
@@ -427,11 +442,14 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
                 err("couldn't update manifest when getting required resources")
             }
         }
+        logText("updateManifestRequired end \(filename)")
     }
+    logText("updateManifestRequired complete")
     return true
 }
 
 func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("purgeManifest started")
     // purge all manifest keys of any stale entries
     var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
     // only get all files if files were not provided
@@ -555,6 +573,7 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         err("failed to purge manifest")
         return false
     }
+    logText("purgeManifest complete")
     return true
 }
 
@@ -643,6 +662,7 @@ func getAllFiles() -> [[String: Any]]? {
         }
         files.append(fileData)
     }
+    logText("getAllFiles completed")
     return files
 }
 
@@ -697,6 +717,7 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
     } else {
         files = optionalFilesArray
     }
+
     var hasUpdates = [[String: String]]()
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
@@ -705,6 +726,7 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
         let metadata = file["metadata"] as! [String: [String]]
         let type = file["type"] as! String
         let name = metadata["name"]![0]
+        logText("Checking for remote updates for \(filename)")
         if canUpdate {
             let currentVersion = metadata["version"]![0]
             let updateUrl = metadata["updateURL"]![0]
@@ -724,10 +746,12 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
             }
         }
     }
+    logText("Finished checking for remote updates for \(files.count) files")
     return hasUpdates
 }
 
 func getRemoteFileContents(_ url: String) -> String? {
+    logText("getRemoteFileContents for \(url) start")
     guard let solidURL = URL(string: url) else {return nil}
     var contents = ""
     // get remote file contents, synchronously
@@ -752,6 +776,7 @@ func getRemoteFileContents(_ url: String) -> String? {
         logText("something went wrong while trying to fetch remote file contents \(url)")
         return nil
     }
+    logText("getRemoteFileContents for \(url) end")
     return contents
 }
 
@@ -767,7 +792,7 @@ func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
     }
     for file in filesWithUpdates {
         // can be force unwrapped because checkForRemoteUpdates didn't return nil
@@ -944,6 +969,7 @@ func include(_ url: String,_ pattern: String) -> Bool {
 }
 
 func getMatchedFiles(_ url: String) -> [String] {
+    logText("Getting matched files for \(url)")
     let manifest = getManifest()
     guard
         let parts = getUrlProps(url),
@@ -1028,6 +1054,7 @@ func getMatchedFiles(_ url: String) -> [String] {
             }
         }
     }
+    logText("Got \(matchedFilenames.count) matched files for \(url)")
     return matchedFilenames
 }
 
@@ -1177,7 +1204,7 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
     }
     // check that url is a valid path to a directory or single file
     guard
@@ -1221,7 +1248,7 @@ func getInjectionFilenames(_ url: String) -> [String]? {
 }
 
 // popup
-func getPopupMatches(_ url: String, _ subframeUrls: [String], _ shouldUpdate: Bool) -> [[String: Any]]? {
+func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
     var matches = [[String: Any]]()
     if !url.starts(with: "http://") && !url.starts(with: "https://") {
         return matches
@@ -1232,16 +1259,6 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String], _ shouldUpdate: Bo
     else {
         err("getPopupMatches failed at (1)")
         return nil
-    }
-    if shouldUpdate {
-        guard
-            updateManifestMatches(files),
-            updateManifestRequired(files),
-            purgeManifest(files)
-        else {
-            err("getPopupMatches failed at (2)")
-            return nil
-        }
     }
     // force unwrap filename to string since getAllFiles always returns it
     matches = files.filter{matched.contains($0["filename"] as! String)}
@@ -1288,7 +1305,7 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     }
     let manifest = getManifest()
     guard
-        var matches = getPopupMatches(url, subframeUrls, false),
+        var matches = getPopupMatches(url, subframeUrls),
         let active = manifest.settings["active"]
     else {
         err("getPopupBadgeCount failed at (1)")
@@ -1318,7 +1335,7 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
     }
     let fileUrl = saveLocation.appendingPathComponent(filename)
     guard
@@ -1338,7 +1355,13 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
         err("updateSingleItem failed at (3)")
         return nil
     }
-    guard let matches = getPopupMatches(url, subframeUrls, true) else {
+    guard
+        let files = getAllFiles(),
+        updateManifestMatches(files),
+        updateManifestRequired(files),
+        purgeManifest(files),
+        let matches = getPopupMatches(url, subframeUrls)
+    else {
         err("updateSingleItem failed at (4)")
         return nil
     }
@@ -1387,7 +1410,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
     }
     guard
         let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
@@ -1485,7 +1508,7 @@ func trashFile(_ item: [String: Any]) -> Bool {
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
     }
     let url = saveLocation.appendingPathComponent(filename)
     // if file is already removed from path, assume it was removed by user and return true
@@ -1556,4 +1579,108 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
         remoteContent = remoteDownloadContent
     }
     return ["content": remoteContent]
+}
+
+// ios
+func popupInit() -> [String: String]? {
+    // check the default directories
+    let checkDefaultDirectories = checkDefaultDirectories()
+    // check the settings
+    let checkSettings = checkSettings()
+    // get all files to pass as arguments to function below
+    guard let allFiles = getAllFiles() else {
+        err("Failed to getAllFiles in popupInit")
+        return nil
+    }
+    // purge the manifest of old records
+    let purgeManifest = purgeManifest(allFiles)
+    // update matches in manifest
+    let updateManifestMatches = updateManifestMatches(allFiles)
+    // update the required resources
+    let updateManifestRequired = updateManifestRequired(allFiles)
+    // verbose error checking
+    if !checkDefaultDirectories {
+        err("Failed to checkDefaultDirectories in popupInit")
+        return nil
+    }
+    if !checkSettings {
+        err("Failed to checkSettings in popupInit")
+        return nil
+    }
+    if !purgeManifest {
+        err("Failed to purgeManifest in popupInit")
+        return nil
+    }
+    if !updateManifestMatches {
+        err("Failed to updateManifestMatches in popupInit")
+        return nil
+    }
+    if !updateManifestRequired {
+        err("Failed to updateManifestRequired in popupInit")
+        return nil
+    }
+    let manifest = getManifest()
+    guard let active = manifest.settings["active"] else {
+        err("Failed at getManifest active in popupInit")
+        return nil
+    }
+    // pass some info in response
+    guard let saveLocation = getSaveLocation() else {
+        err("Failed at getSaveLocation in popupInit")
+        return nil
+    }
+    let documentsDirectory = getDocumentsDirectory()
+    let requireLocation = getRequireLocation()
+    
+    return [
+        "active": active,
+        "saveLocation": saveLocation.absoluteString,
+        "documentsDirectory": documentsDirectory.absoluteString,
+        "requireLocation": requireLocation.absoluteString
+    ]
+}
+
+func popupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+    var matches = [[String: Any]]()
+    // if the url doesn't start with http/s return empty array
+    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+        return matches
+    }
+    // get all the files saved to manifest that match the passed url
+    let matched = getMatchedFiles(url)
+    // get all the files at the save location
+    guard let files = getAllFiles() else {
+        err("popupMatches failed at (1)")
+        return nil
+    }
+    // filter out the files that are present in both files and matched
+    // force unwrap filename to string since getAllFiles always returns it
+    matches = files.filter{matched.contains($0["filename"] as! String)}
+    
+    // get the subframe url matches
+    var frameUrlsMatched = [[String: Any]]()
+    var frameUrlsMatches = [String]()
+    // filter out the top page url from the frame urls
+    let frameUrls = subframeUrls.filter{$0 != url}
+    // for each url just pushed to frameUrls, get all the files saved to manifest that match their url
+    for frameUrl in frameUrls {
+        let frameMatches = getMatchedFiles(frameUrl)
+        for frameMatch in frameMatches {
+            if !matched.contains(frameMatch) {
+                frameUrlsMatches.append(frameMatch)
+            }
+        }
+    }
+    // filter out the files that are present in both files and frameUrlsMatches
+    // force unwrap filename to string since getAllFiles always returns it
+    frameUrlsMatched = files.filter{frameUrlsMatches.contains($0["filename"] as! String)}
+    // loop through frameUrlsMatched and add subframe key/val
+    for (index, var frameUrlsMatch) in frameUrlsMatched.enumerated() {
+        frameUrlsMatch["subframe"] = true
+        frameUrlsMatched[index] = frameUrlsMatch
+    }
+    // add frameUrlsMatched to matches array
+    matches.append(contentsOf: frameUrlsMatched)
+
+    return matches
 }

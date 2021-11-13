@@ -246,7 +246,7 @@ function closeTab() {
 }
 
 // create api aliases
-const GM = "const GM = {openInTab: openTab}";
+const GM = "const GM = {openInTab: openTab};";
 
 window.addEventListener("message", e => {
     // only respond to messages that have matching unique id and have a name value

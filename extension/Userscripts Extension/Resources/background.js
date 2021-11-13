@@ -2,6 +2,7 @@
 // this var will be referenced to determine the removal of the context menu click event handler
 // it'll also be used to know if a specific url already has active context menu items
 let contextMenuItems = [];
+let platformGlobal;
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // content script listening seems to be the most reliable way to trigger injection
@@ -110,6 +111,10 @@ function purgeContextMenus() {
 }
 
 async function setBadgeCount() {
+    // only set badge on macOS
+    const platform = await getPlatform();
+    if (platform != "macos") return;
+
     const tabs = await new Promise(resolve => {
         browser.tabs.query({currentWindow: true, active: true}, tabs => {
             resolve(tabs);
@@ -134,6 +139,17 @@ async function setBadgeCount() {
             browser.browserAction.setBadgeText({text: ""});
         }
     });
+}
+
+async function getPlatform() {
+    if (platformGlobal) return platformGlobal;
+    const response = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
+    if (!response.platform) {
+        console.error("Failed to get platform");
+        return "";
+    }
+    platformGlobal = response.platform;
+    return response.platform;
 }
 
 browser.tabs.onActivated.addListener(setBadgeCount);
