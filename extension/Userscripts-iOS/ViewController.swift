@@ -14,15 +14,11 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 
     @IBOutlet var webView: WKWebView!
 
-//    override var preferredStatusBarStyle: UIStatusBarStyle {
-//        return .lightContent
-//    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        //let backgroundColor = NSColor.init(red: (39/255.0), green: (42/255.0), blue: (46/255.0), alpha: 1.0)
+        // let backgroundColor = NSColor.init(red: (39/255.0), green: (42/255.0), blue: (46/255.0), alpha: 1.0)
         let backgroundColor = UIColor.init(red: (47/255.0), green: (51/255.0), blue: (55/255.0), alpha: 1.0)
-//        view.setValue(backgroundColor, forKey: "backgroundColor")
+        // view.setValue(backgroundColor, forKey: "backgroundColor")
         self.webView.isOpaque = false
         self.webView.backgroundColor = backgroundColor
         self.webView.navigationDelegate = self
@@ -44,6 +40,21 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
             readLocation = "Select a directory to load userscripts"
         }
         webView.evaluateJavaScript("printDirectory('\(readLocation)')")
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.navigationType == .linkActivated  {
+            guard
+                let url =  navigationAction.request.url,
+                UIApplication.shared.canOpenURL(url)
+            else {
+                return
+            }
+            UIApplication.shared.open(url)
+            decisionHandler(.cancel)
+        } else {
+            decisionHandler(.allow)
+        }
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -76,5 +87,4 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
             return
         }
     }
-    
 }
