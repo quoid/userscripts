@@ -16,9 +16,8 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // let backgroundColor = NSColor.init(red: (39/255.0), green: (42/255.0), blue: (46/255.0), alpha: 1.0)
         let backgroundColor = UIColor.init(red: (47/255.0), green: (51/255.0), blue: (55/255.0), alpha: 1.0)
-        // view.setValue(backgroundColor, forKey: "backgroundColor")
+        view.setValue(backgroundColor, forKey: "backgroundColor")
         self.webView.isOpaque = false
         self.webView.backgroundColor = backgroundColor
         self.webView.navigationDelegate = self
