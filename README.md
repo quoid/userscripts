@@ -21,13 +21,15 @@ An open-source userscript editor for Safari.
 
 ## Installation
 
-Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id1463298887) or clone the project and build with Xcode. Alternatively, you can download the most current version for the [releases page](https://github.com/quoid/userscripts/releases).
+Userscripts is available for iOS (+ipadOS) and macOS. For all versions, installation is done through [Apple's App Store](https://itunes.apple.com/us/app/userscripts/id1463298887). On macOS, versions prior to `4.x` were made available to download and install directly from the repository, but due to [changes in the way Apple allows developers to distribute apps built with the WebExtension API](https://github.com/quoid/userscripts/issues/154), that is no longer an option.
+
+**[App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
+
 
 ## Getting Help
 
-If you encounter a problem or need some assistance, please open an issue and *provide some system specs*. The specs requested are `macOS version`, `Safari version` and `Userscripts Safari version`. You can find the extension version by opening the contain app or by viewing the "Information" section within the settings modal of the extension's browser page.
+If you encounter a problem while using this app/extension or are in need of some assistance, please open an issue here in the repository. When doing so, please provide as much detail as possible. This includes listing you system specs and what website and script you are trying to execute. *Please follow the issue template!*
 
-If you encounter an issue with a specific website, *please provide the website address and the userscript that is presenting the issue*. It can be a slimmed down version of the userscript that can demonstrate the issue.
 
 ## UI Overview
 
@@ -133,17 +135,15 @@ Userscripts Safari currently supports the following userscript metadata:
     
 **All userscripts need at least 1 `@match` or `@include` to run!**
 
-## Save Location
+## Scripts Directory
 
-In order to change the save location, you must either launch `Userscripts.app` as you would any other application, or open the settings modal within the browser extension and click the "settings" icon within the "Save location" row.
+On macOS this is the directory where the app/extension will read from and write to (if working with the included code editor). For both iOS and macOS this directory is changed by opening the **containing app** and clicking the respective "change location" button (verbiage may vary).
 
-Once the host app is open, you will see a button called "Change save location". Click this and select the directory where you'd like to save to/load from.
 
-**Save Location Notes**
+**Script Directory Notes**
 
-- Close all instances of the extension UI (browser app) before you change the save location. The extension will attempt to do this automatically, but it could fail (if it does, please bug report)
-- Currently, when changing the save location, the app does not copy over userscripts from the previous save/load directory
-- After a new save location is selected, if you rename or move that selected folder, the extension will continue to load/save to that location - the only way to remove the “link” is by trashing the folder or selecting a new save location
+- Close all instances of the extension UI (browser app and/or popup) before changing the scripts directory
+- **On macOS**, after a directory outside of the default is selected, if you rename or move that selected directory, the extension will continue to read/write to that directory - the only way to remove the “link” is by trashing the folder or selecting a new save location
 
 ## FAQs
 
@@ -170,7 +170,7 @@ Once the host app is open, you will see a button called "Change save location". 
 > If you move files from the require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
 
 ## Contributing
-Code level contributions are welcome. I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
+Code level contributions are welcome. *I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests*. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
 
@@ -179,11 +179,17 @@ Please ensure your contributions align with the project's license before committ
 ## Support
 The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see it improve in the future. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
 
-Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
+The second best way to help out is to sign up to beta test new versions of the app. Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
+
+**[iOS Beta Sign Up Form](https://forms.gle/QB46uYQHVyCxULue9)**
+
+**[macOS Beta Sign Up Form](https://forms.gle/cUDtKg1ip4Vc9Xhc7)**
 
 ## Privacy Policy
 Userscripts does not collect any data from its users nor monitor activities or actions you perform within the application and extension. This means everything that you do with the application and extension is private to you and is never shared with the developers or third parties. Since there is no data collection, there is no data retention of any kind.
 
 ## License
+
+Copyright (c) 2021 Justin Wasack
 
 Licensed under the [GNU General Public License v3.0](/LICENSE) license for all open source applications. A commercial license is required for all other applications.
