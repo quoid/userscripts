@@ -75,6 +75,17 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     } else if (request.name === "API_CLOSE_TAB") {
         browser.tabs.remove(sender.tab.id, response => {/* */});
+    } else if (request.name === "REQ_PLATFORM") {
+        (async () => {
+            try {
+                const p = await getPlatform();
+                sendResponse({platform: p});
+            } catch (error) {
+                console.error(error);
+                sendResponse({error: "Couldn't get platform"});
+            }
+        })();
+        return true;
     }
 });
 

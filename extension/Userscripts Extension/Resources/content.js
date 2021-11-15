@@ -6,6 +6,15 @@ let cspFallbackAttempted = 0;
 let beforeunload = 0;
 // unique id for api messaging
 const uid = Math.random().toString(36).substr(2, 8);
+// keep reference to platform
+let platform;
+
+// request code immediately
+browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
+    // save code to data var so cspFallback can be attempted
+    data = response.code;
+    if (Object.keys(data).length != 0) parseCode(data);
+});
 
 function sortByWeight(o) {
     let sorted = {};
@@ -139,8 +148,18 @@ function cspFallback(e) {
     }
 }
 
-function processJSContextMenuItems() {
+async function processJSContextMenuItems() {
+    // if not top window, stop execution
     if (window != window.top) return;
+    // context menu injection is macOS exclusive
+    // check if platform is stored
+    if (!platform) {
+        const response = await browser.runtime.sendMessage({name: "REQ_PLATFORM"});
+        if (response.error) console.error(response.error);
+        if (response.platform) platform = response.platform;
+    }
+    // if not macOS, stop execution
+    if (platform != "macos") return;
     const contextMenuCodeObject = data.js["context-menu"];
     for (const scope in contextMenuCodeObject) {
         const scopeObject = contextMenuCodeObject[scope];
@@ -188,12 +207,26 @@ function addContextMenuItem(filename, name) {
     });
 }
 
-// request code
-browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
-    // save code to data var so cspFallback can be attempted
-    data = response.code;
-    if (Object.keys(data).length != 0) parseCode(data);
-});
+// api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
+function openTab(url, openInBackground) {
+    return new Promise(resolve => {
+        const callback = e => {
+            if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        const active = (openInBackground === true) ? false : true;
+        window.postMessage({id: uid, name: "API_OPEN_TAB", url: url, active: active});
+    });
+}
+
+function closeTab() {
+    window.postMessage({id: uid, name: "API_CLOSE_TAB"});
+}
+
+// create api aliases
+const GM = "const GM = {openInTab: openTab};";
 
 // listen for messages from background, popup, etc...
 browser.runtime.onMessage.addListener(request => {
@@ -226,27 +259,6 @@ browser.runtime.onMessage.addListener(request => {
         }
     }
 });
-
-// api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
-function openTab(url, openInBackground) {
-    return new Promise(resolve => {
-        const callback = e => {
-            if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
-            resolve(e.data.response);
-            window.removeEventListener("message", callback);
-        };
-        window.addEventListener("message", callback);
-        const active = (openInBackground === true) ? false : true;
-        window.postMessage({id: uid, name: "API_OPEN_TAB", url: url, active: active});
-    });
-}
-
-function closeTab() {
-    window.postMessage({id: uid, name: "API_CLOSE_TAB"});
-}
-
-// create api aliases
-const GM = "const GM = {openInTab: openTab};";
 
 window.addEventListener("message", e => {
     // only respond to messages that have matching unique id and have a name value
