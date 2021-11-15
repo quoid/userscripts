@@ -1126,7 +1126,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			button.disabled = /*disabled*/ ctx[1];
     			set_style(button, "--svg-fill", /*color*/ ctx[0]);
     			attr(button, "title", /*title*/ ctx[3]);
-    			attr(button, "class", "svelte-11cw0r2");
+    			attr(button, "class", "svelte-imdogx");
     			toggle_class(button, "notification", /*notification*/ ctx[4]);
     		},
     		m(target, anchor) {
@@ -1248,8 +1248,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t = space();
     			ul = element("ul");
     			if (default_slot_or_fallback) default_slot_or_fallback.c();
-    			attr(ul, "class", "svelte-t5xyft");
-    			attr(div, "class", "svelte-t5xyft");
+    			attr(ul, "class", "svelte-15c6s44");
+    			attr(div, "class", "svelte-15c6s44");
     			toggle_class(div, "active", /*active*/ ctx[3]);
     		},
     		m(target, anchor) {
@@ -19495,7 +19495,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     async function changeSaveLocation() {
     	const m = "Changing the save location requires all instances of the extension to be closed and the host application to be opened. This will be automatically attempted.\n\nDo you wish to continue?";
     	if (!confirm(m)) return;
-    	window.open("userscriptsurlscheme:changesavelocation");
+    	window.open("userscriptsurlscheme://changesavelocation");
 
     	// close all open extension pages
     	const url = browser.runtime.getURL("page.html");

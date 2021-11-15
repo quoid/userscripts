@@ -22,7 +22,7 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeRole</key>
-			<string>None</string>
+			<string>Viewer</string>
 			<key>CFBundleURLName</key>
 			<string>com.userscripts.macos</string>
 			<key>CFBundleURLSchemes</key>
