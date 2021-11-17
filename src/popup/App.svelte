@@ -363,11 +363,11 @@
     }
 
     .header :global(button:nth-of-type(1) svg) {
-        width: 75%;
+        transform: scale(0.75);
     }
 
     .header :global(button:nth-of-type(2) svg) {
-        width: 90%;
+        transform: scale(0.9);
     }
 
     .error {

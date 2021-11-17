@@ -42,7 +42,8 @@
         height: auto;
         opacity: 0.75;
         pointer-events: none; /* prevent svg from triggering click events */
-        width: 66.7%;
+        transform: scale(0.667);
+        width: 100%;
     }
 
     @media (hover: hover) {
