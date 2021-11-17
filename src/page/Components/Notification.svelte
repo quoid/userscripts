@@ -46,7 +46,7 @@
         color: var(--color-yellow);
     }
 
-    :global(div svg) {
+    div :global(svg) {
         fill: currentColor;
         height: auto;
         pointer-events: none;
