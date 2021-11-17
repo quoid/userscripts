@@ -173,6 +173,8 @@ const _browser = {
                 // not overwriting but all validation passed
                 saveFile(newContent, lastModified, newFilename, oldFilename);
                 return success;
+            } else if (name === "PAGE_UPDATE") {
+                response.content = message.content + "\n//I was updated";
             }
             if (!responseCallback) {
                 return new Promise(resolve => setTimeout(() => resolve(response), 500));
