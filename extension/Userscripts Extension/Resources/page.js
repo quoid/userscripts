@@ -1126,7 +1126,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			button.disabled = /*disabled*/ ctx[1];
     			set_style(button, "--svg-fill", /*color*/ ctx[0]);
     			attr(button, "title", /*title*/ ctx[3]);
-    			attr(button, "class", "svelte-imdogx");
+    			attr(button, "class", "svelte-2umijw");
     			toggle_class(button, "notification", /*notification*/ ctx[4]);
     		},
     		m(target, anchor) {
@@ -19634,9 +19634,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t1 = text(t1_value);
     			t2 = space();
     			create_component(iconbutton.$$.fragment);
-    			attr(div, "class", "svelte-2hv0ag");
-    			attr(span, "class", "svelte-2hv0ag");
-    			attr(li, "class", "svelte-2hv0ag");
+    			attr(div, "class", "svelte-imlbn0");
+    			attr(span, "class", "svelte-imlbn0");
+    			attr(li, "class", "svelte-imlbn0");
     			toggle_class(li, "error", /*item*/ ctx[0].type === "error");
     			toggle_class(li, "info", /*item*/ ctx[0].type === "info");
     			toggle_class(li, "warn", /*item*/ ctx[0].type === "warn");

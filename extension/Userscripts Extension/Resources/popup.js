@@ -724,7 +724,7 @@
     			button.disabled = /*disabled*/ ctx[1];
     			set_style(button, "--svg-fill", /*color*/ ctx[0]);
     			attr(button, "title", /*title*/ ctx[3]);
-    			attr(button, "class", "svelte-imdogx");
+    			attr(button, "class", "svelte-2umijw");
     			toggle_class(button, "notification", /*notification*/ ctx[4]);
     		},
     		m(target, anchor) {
@@ -1571,7 +1571,7 @@
     	return child_ctx;
     }
 
-    // (291:0) {#if error}
+    // (296:0) {#if error}
     function create_if_block_6(ctx) {
     	let div;
     	let t0;
@@ -1591,7 +1591,7 @@
     			t0 = text(/*error*/ ctx[0]);
     			t1 = space();
     			create_component(iconbutton.$$.fragment);
-    			attr(div, "class", "error svelte-11c1r01");
+    			attr(div, "class", "error svelte-11k3hqx");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1619,7 +1619,7 @@
     	};
     }
 
-    // (313:8) {:else}
+    // (318:8) {:else}
     function create_else_block$1(ctx) {
     	let div;
     	let each_blocks = [];
@@ -1642,7 +1642,7 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "items svelte-11c1r01");
+    			attr(div, "class", "items svelte-11k3hqx");
     			toggle_class(div, "disabled", /*disabled*/ ctx[3]);
     		},
     		m(target, anchor) {
@@ -1692,7 +1692,7 @@
     	};
     }
 
-    // (311:35) 
+    // (316:35) 
     function create_if_block_5(ctx) {
     	let div;
 
@@ -1700,7 +1700,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "No matched userscripts";
-    			attr(div, "class", "none svelte-11c1r01");
+    			attr(div, "class", "none svelte-11k3hqx");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1714,7 +1714,7 @@
     	};
     }
 
-    // (307:28) 
+    // (312:28) 
     function create_if_block_4(ctx) {
     	let div;
     	let t0;
@@ -1729,7 +1729,7 @@
     			span = element("span");
     			span.textContent = "click to retry";
     			attr(span, "class", "link");
-    			attr(div, "class", "none svelte-11c1r01");
+    			attr(div, "class", "none svelte-11k3hqx");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1752,7 +1752,7 @@
     	};
     }
 
-    // (305:8) {#if inactive}
+    // (310:8) {#if inactive}
     function create_if_block_3(ctx) {
     	let div;
 
@@ -1760,7 +1760,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "Popup inactive on extension page";
-    			attr(div, "class", "none svelte-11c1r01");
+    			attr(div, "class", "none svelte-11k3hqx");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1774,7 +1774,7 @@
     	};
     }
 
-    // (302:4) {#if loading}
+    // (307:4) {#if loading}
     function create_if_block_2(ctx) {
     	let loader;
     	let current;
@@ -1804,7 +1804,7 @@
     	};
     }
 
-    // (315:16) {#each list as item (item.filename)}
+    // (320:16) {#each list as item (item.filename)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -1863,7 +1863,7 @@
     	};
     }
 
-    // (328:0) {#if !inactive && platform === "macos"}
+    // (333:0) {#if !inactive && platform === "macos"}
     function create_if_block_1$1(ctx) {
     	let div1;
     	let div0;
@@ -1876,7 +1876,7 @@
     			div0 = element("div");
     			div0.textContent = "Open Extension Page";
     			attr(div0, "class", "link");
-    			attr(div1, "class", "footer svelte-11c1r01");
+    			attr(div1, "class", "footer svelte-11k3hqx");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -1896,7 +1896,7 @@
     	};
     }
 
-    // (333:0) {#if showUpdates}
+    // (338:0) {#if showUpdates}
     function create_if_block$3(ctx) {
     	let updateview;
     	let current;
@@ -2052,8 +2052,8 @@
     			t6 = space();
     			if (if_block3) if_block3.c();
     			if_block3_anchor = empty();
-    			attr(div0, "class", "header svelte-11c1r01");
-    			attr(div1, "class", div1_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-11c1r01");
+    			attr(div0, "class", "header svelte-11k3hqx");
+    			attr(div1, "class", div1_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-11k3hqx");
     		},
     		m(target, anchor) {
     			insert(target, div0, anchor);
@@ -2150,7 +2150,7 @@
     				if_block1.m(div1, null);
     			}
 
-    			if (!current || dirty[0] & /*rowColors*/ 256 && div1_class_value !== (div1_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-11c1r01")) {
+    			if (!current || dirty[0] & /*rowColors*/ 256 && div1_class_value !== (div1_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-11k3hqx")) {
     				attr(div1, "class", div1_class_value);
     			}
 
@@ -2269,6 +2269,8 @@
     	let inactive = false;
     	let platform;
     	let initError;
+    	let windowHeight = 0;
+    	let header;
 
     	function toggleExtension() {
     		$$invalidate(3, disabled = true);
@@ -2480,9 +2482,6 @@
     		$$invalidate(2, loading = false);
     		$$invalidate(3, disabled = false);
     	}
-
-    	let windowHeight = 0;
-    	let header;
 
     	function resize() {
     		if (platform != "ios") return;
