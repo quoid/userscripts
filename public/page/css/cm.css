@@ -145,6 +145,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .CodeMirror-lint-marker {
     border-radius: 50%;
+    cursor: default;
     height: 0.375rem;
     left: 0.25rem;
     position: relative;
