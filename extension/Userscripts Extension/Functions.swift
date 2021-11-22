@@ -1062,24 +1062,24 @@ func getMatchedFiles(_ url: String) -> [String] {
 func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
     var allFiles = [String: [String: [String: Any]]]()
     var cssFiles = [String:[String:String]]()
-    var jsFiles = [String: [String: [String: [String: String]]]]()
+    var jsFiles = [String: [String: [String: [String: Any]]]]()
     jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
     jsFiles["context-menu"] = ["auto": [:], "content": [:], "page": [:]]
-    var auto_docStart = [String: [String: String]]()
-    var auto_docEnd = [String: [String: String]]()
-    var auto_docIdle = [String: [String: String]]()
-    var content_docStart = [String: [String: String]]()
-    var content_docEnd = [String: [String: String]]()
-    var content_docIdle = [String: [String: String]]()
-    var page_docStart = [String: [String: String]]()
-    var page_docEnd = [String: [String: String]]()
-    var page_docIdle = [String: [String: String]]()
+    var auto_docStart = [String: [String: Any]]()
+    var auto_docEnd = [String: [String: Any]]()
+    var auto_docIdle = [String: [String: Any]]()
+    var content_docStart = [String: [String: Any]]()
+    var content_docEnd = [String: [String: Any]]()
+    var content_docIdle = [String: [String: Any]]()
+    var page_docStart = [String: [String: Any]]()
+    var page_docEnd = [String: [String: Any]]()
+    var page_docIdle = [String: [String: Any]]()
     
-    var auto_context_scripts = [String: [String: String]]()
-    var content_context_scripts = [String: [String: String]]()
-    var page_context_scripts = [String: [String: String]]()
+    var auto_context_scripts = [String: [String: Any]]()
+    var content_context_scripts = [String: [String: Any]]()
+    var page_context_scripts = [String: [String: Any]]()
     
     guard let saveLocation = getSaveLocation() else {
         err("getCode failed at (1)")
@@ -1122,6 +1122,11 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
                 }
             }
         }
+        
+        // attempt to get all @grant value
+        var grants = metadata["grant"] ?? []
+        // remove duplicates, if any exist
+        grants = Array(Set(grants))
 
         if type == "css" {
             cssFiles[filename] = ["code": code, "weight": weight]
@@ -1139,7 +1144,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
                 runAt = "document-end"
             }
 
-            let data = ["code": code, "weight": weight]
+            let data = ["code": code, "weight": weight, "grant": grants] as [String : Any]
             // add file data to appropriate dict
             if injectInto == "auto" && runAt == "document-start" {
                 auto_docStart[filename] = data
@@ -1162,13 +1167,13 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             }
             
             if runAt == "context-menu" && injectInto == "auto" {
-                auto_context_scripts[filename] = ["code": code, "name": name]
+                auto_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
             }
             if runAt == "context-menu" && injectInto == "content" {
-                content_context_scripts[filename] = ["code": code, "name": name]
+                content_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
             }
             if runAt == "context-menu" && injectInto == "page" {
-                page_context_scripts[filename] = ["code": code, "name": name]
+                page_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
             }
         }
     }
