@@ -36,7 +36,9 @@
         "contextMenus",
         "menus",
         "nativeMessaging",
+        "storage",
         "tabs",
+        "unlimitedStorage",
         "webNavigation"
     ]
 }
