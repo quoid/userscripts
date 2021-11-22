@@ -75,6 +75,42 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     } else if (request.name === "API_CLOSE_TAB") {
         browser.tabs.remove(sender.tab.id, response => {/* */});
+    } else if (request.name === "API_SET_VALUE") {
+        const item = {};
+        item[request.filename + "---" + request.key] = request.value;
+        browser.storage.local.set(item, response => {
+            sendResponse({success: true});
+        });
+        return true;
+    } else if (request.name === "API_GET_VALUE") {
+        const key = request.filename + "---" + request.key;
+        browser.storage.local.get(key, item => {
+            if (Object.keys(item).length === 0 && request.defaultValue) {
+                sendResponse(request.defaultValue);
+            } else {
+                sendResponse(Object.values(item)[0]);
+            }
+        });
+        return true;
+    } else if (request.name === "API_DELETE_VALUE") {
+        const key = request.filename + "---" + request.key;
+        browser.storage.local.remove(key, response => {
+            sendResponse({success: true, response: response});
+        });
+        return true;
+    } else if (request.name === "API_LIST_VALUES") {
+        const prefix = request.filename + "---";
+        const keys = [];
+        browser.storage.local.get().then(items => {
+            for (const key in items) {
+                if (key.startsWith(prefix)) {
+                    const k = key.replace(prefix, "");
+                    keys.push(k);
+                }
+            }
+            sendResponse(keys);
+        });
+        return true;
     } else if (request.name === "REQ_PLATFORM") {
         (async () => {
             try {

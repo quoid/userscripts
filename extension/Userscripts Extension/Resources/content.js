@@ -31,11 +31,36 @@ function injectCSS(filename, code) {
     document.head.appendChild(tag);
 }
 
-function injectJS(filename, code, scope) {
+function injectJS(filename, code, scope, grants) {
     console.info(`Injecting ${filename}`);
     // include api methods
-    const api = `const uid = "${uid}";\n${openTab}\n${closeTab}\n${GM}`;
-    code = `(function() {\n${api}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
+    let api = "";
+    let gmVals = [];
+    if (grants.length) api = `const uid = "${uid}";const filename = "${filename}";`;
+    grants.forEach(grant => {
+        if (grant === "GM_openInTab") {
+            api += `\n${GM_openInTab}\n${GM_closeTab}`;
+            gmVals.push("openInTab: GM_openInTab");
+        } else if (grant === "GM_closeTab") {
+            api += `\n${GM_closeTab}`;
+            gmVals.push("closeTab: GM_closeTab");
+        } else if (grant === "GM_setValue") {
+            api += `\n${GM_setValue}`;
+            gmVals.push("setValue: GM_setValue");
+        } else if (grant === "GM_getValue") {
+            api += `\n${GM_getValue}`;
+            gmVals.push("getValue: GM_getValue");
+        } else if (grant === "GM_deleteValue") {
+            api += `\n${GM_deleteValue}`;
+            gmVals.push("deleteValue: GM_deleteValue");
+        } else if (grant === "GM_listValues") {
+            api += `\n${GM_listValues}`;
+            gmVals.push("listValues: GM_listValues");
+        }
+    });
+    // create api aliases
+    let GM = `const GM = {${gmVals.join(",")}};`;
+    code = `(function() {\n${api}\n${GM}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
     if (scope != "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
@@ -45,33 +70,33 @@ function injectJS(filename, code, scope) {
     }
 }
 
-function processJS(filename, code, scope, timing) {
+function processJS(filename, code, scope, timing, grants) {
     // this is about to get ugly
     if (timing === "document-start") {
         if (document.readyState === "loading") {
             document.addEventListener("readystatechange", function() {
                 if (document.readyState === "interactive") {
-                    injectJS(filename, code, scope);
+                    injectJS(filename, code, scope, grants);
                 }
             });
         } else {
-            injectJS(filename, code, scope);
+            injectJS(filename, code, scope, grants);
         }
     } else if (timing === "document-end") {
         if (document.readyState !== "loading") {
-            injectJS(filename, code, scope);
+            injectJS(filename, code, scope, grants);
         } else {
             document.addEventListener("DOMContentLoaded", function() {
-                injectJS(filename, code, scope);
+                injectJS(filename, code, scope, grants);
             });
         }
     } else if (timing === "document-idle") {
         if (document.readyState === "complete") {
-            injectJS(filename, code, scope);
+            injectJS(filename, code, scope, grants);
         } else {
             document.addEventListener("readystatechange", function(e) {
                 if (document.readyState === "complete") {
-                    injectJS(filename, code, scope);
+                    injectJS(filename, code, scope, grants);
                 }
             });
         }
@@ -115,12 +140,13 @@ function parseCode(data, fallback = false) {
                         sorted = sortByWeight(timingObject);
                         for (const filename in sorted) {
                             const code = sorted[filename].code;
+                            const grants = sorted[filename].grant;
                             // when block by csp rules, auto scope script will auto retry injection
                             if (fallback) {
                                 console.warn(`Attempting fallback injection for ${filename}`);
                                 scope = "content";
                             }
-                            processJS(filename, code, scope, timing);
+                            processJS(filename, code, scope, timing, grants);
                         }
                     }
                 });
@@ -208,7 +234,7 @@ function addContextMenuItem(filename, name) {
 }
 
 // api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
-function openTab(url, openInBackground) {
+function GM_openInTab(url, openInBackground) {
     return new Promise(resolve => {
         const callback = e => {
             if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
@@ -221,12 +247,65 @@ function openTab(url, openInBackground) {
     });
 }
 
-function closeTab() {
+function GM_closeTab() {
     window.postMessage({id: uid, name: "API_CLOSE_TAB"});
 }
 
-// create api aliases
-const GM = "const GM = {openInTab: openTab};";
+function GM_setValue(key, value) {
+    return new Promise(resolve => {
+        const callback = e => {
+            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+            if (e.data.id != uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename != filename) return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+        window.postMessage({id: uid, name: "API_SET_VALUE", filename: filename, key: key, value: value});
+    });
+}
+
+function GM_getValue(key, defaultValue) {
+    return new Promise(resolve => {
+        const callback = e => {
+            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+            if (e.data.id != uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename != filename) return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+        window.postMessage({id: uid, name: "API_GET_VALUE", filename: filename, key: key, defaultValue: defaultValue});
+    });
+}
+
+function GM_listValues() {
+    return new Promise(resolve => {
+        const callback = e => {
+            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+            if (e.data.id != uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename != filename) return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+        window.postMessage({id: uid, name: "API_LIST_VALUES", filename: filename});
+    });
+}
+
+function GM_deleteValue(key) {
+    return new Promise(resolve => {
+        const callback = e => {
+            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+            if (e.data.id != uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename != filename) return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+        window.postMessage({id: uid, name: "API_DELETE_VALUE", filename: filename, key: key});
+    });
+}
 
 // listen for messages from background, popup, etc...
 browser.runtime.onMessage.addListener(request => {
@@ -244,13 +323,14 @@ browser.runtime.onMessage.addListener(request => {
                 if (fn === filename) {
                     // get code from object and send for injection along with filename & scope
                     const code = contextMenuCodeObject[scope][filename].code;
+                    const grants = contextMenuCodeObject[scope][filename].grant;
                     // if strict csp already detected change auto scoped scripts to content
                     if (cspFallbackAttempted && scope === "auto") {
                         console.warn(`Attempting fallback injection for ${filename}`);
                         scope = "content";
                     }
                     scope = cspFallbackAttempted && scope === "auto" ? "content" : scope;
-                    injectJS(filename, code, scope);
+                    injectJS(filename, code, scope, grants);
                     found = true;
                     break;
                 }
@@ -260,6 +340,7 @@ browser.runtime.onMessage.addListener(request => {
     }
 });
 
+// listen for message from api
 window.addEventListener("message", e => {
     // only respond to messages that have matching unique id and have a name value
     if (e.data.id != uid || !e.data.name) return;
@@ -269,10 +350,30 @@ window.addEventListener("message", e => {
         if (!e.data.url) return;
         message = {name: "API_OPEN_TAB", url: e.data.url, active: e.data.active};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: uid, name: "RESP_OPEN_TAB", response: response});
+            window.postMessage({id: e.data.id, name: "RESP_OPEN_TAB", response: response});
         });
     } else if (e.data.name === "API_CLOSE_TAB") {
-        browser.runtime.sendMessage({name: "API_CLOSE_TAB"}, response => {/* */});
+        browser.runtime.sendMessage({name: "API_CLOSE_TAB"}, response => {});
+    } else if (e.data.name === "API_SET_VALUE") {
+        message = {name: "API_SET_VALUE", filename: e.data.filename, key: e.data.key, value: e.data.value};
+        browser.runtime.sendMessage(message, response => {
+            window.postMessage({id: e.data.id, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
+        });
+    } else if (e.data.name === "API_GET_VALUE") {
+        message = {name: "API_GET_VALUE", filename: e.data.filename, key: e.data.key, defaultValue: e.data.defaultValue};
+        browser.runtime.sendMessage(message, response => {
+            window.postMessage({id: e.data.id, name: "RESP_GET_VALUE", filename: e.data.filename, response: response});
+        });
+    } else if (e.data.name === "API_DELETE_VALUE") {
+        message = {name: "API_DELETE_VALUE", filename: e.data.filename, key: e.data.key};
+        browser.runtime.sendMessage(message, response => {
+            window.postMessage({id: e.data.id, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
+        });
+    } else if (e.data.name === "API_LIST_VALUES") {
+        message = {name: "API_LIST_VALUES", filename: e.data.filename};
+        browser.runtime.sendMessage(message, response => {
+            window.postMessage({id: e.data.id, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
+        });
     }
 });
 
