@@ -551,7 +551,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
@@ -592,7 +592,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
@@ -631,7 +631,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
@@ -664,7 +664,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
@@ -817,7 +817,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -840,7 +840,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -866,7 +866,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
@@ -890,7 +890,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
