@@ -95,7 +95,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.name === "API_DELETE_VALUE") {
         const key = request.filename + "---" + request.key;
         browser.storage.local.remove(key, response => {
-            sendResponse({success: true, response: response});
+            sendResponse({success: true});
         });
         return true;
     } else if (request.name === "API_LIST_VALUES") {
