@@ -36,26 +36,25 @@ function injectJS(filename, code, scope, grants) {
     // include api methods
     let api = "";
     let gmVals = [];
-    if (grants.length) api = `const uid = "${uid}";const filename = "${filename}";`;
+    if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
     grants.forEach(grant => {
-        if (grant === "GM_openInTab") {
-            api += `\n${GM_openInTab}\n${GM_closeTab}`;
-            gmVals.push("openInTab: GM_openInTab");
-        } else if (grant === "GM_closeTab") {
-            api += `\n${GM_closeTab}`;
-            gmVals.push("closeTab: GM_closeTab");
-        } else if (grant === "GM_setValue") {
-            api += `\n${GM_setValue}`;
-            gmVals.push("setValue: GM_setValue");
-        } else if (grant === "GM_getValue") {
-            api += `\n${GM_getValue}`;
-            gmVals.push("getValue: GM_getValue");
-        } else if (grant === "GM_deleteValue") {
-            api += `\n${GM_deleteValue}`;
-            gmVals.push("deleteValue: GM_deleteValue");
-        } else if (grant === "GM_listValues") {
-            api += `\n${GM_listValues}`;
-            gmVals.push("listValues: GM_listValues");
+        if (grant === "GM.openInTab" || grant === "openInTab") {
+            api += `\n${openInTab}`;
+            gmVals.push("openInTab: openInTab");
+        } else if (grant === "closeTab") {
+            api += `\n${closeTab}`;
+        } else if (grant === "GM.setValue" || grant === "setValue") {
+            api += `\n${setValue}`;
+            gmVals.push("setValue: setValue");
+        } else if (grant === "GM.getValue" || grant === "getValue") {
+            api += `\n${getValue}`;
+            gmVals.push("getValue: getValue");
+        } else if (grant === "GM.deleteValue"|| grant === "deleteValue") {
+            api += `\n${deleteValue}`;
+            gmVals.push("deleteValue: deleteValue");
+        } else if (grant === "GM.listValues" || grant === "listValues") {
+            api += `\n${listValues}`;
+            gmVals.push("listValues: listValues");
         }
     });
     // create api aliases
@@ -234,7 +233,7 @@ function addContextMenuItem(filename, name) {
 }
 
 // api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
-function GM_openInTab(url, openInBackground) {
+function openInTab(url, openInBackground) {
     return new Promise(resolve => {
         const callback = e => {
             if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
@@ -247,11 +246,11 @@ function GM_openInTab(url, openInBackground) {
     });
 }
 
-function GM_closeTab() {
+function closeTab() {
     window.postMessage({id: uid, name: "API_CLOSE_TAB"});
 }
 
-function GM_setValue(key, value) {
+function setValue(key, value) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
@@ -265,7 +264,7 @@ function GM_setValue(key, value) {
     });
 }
 
-function GM_getValue(key, defaultValue) {
+function getValue(key, defaultValue) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
@@ -279,7 +278,7 @@ function GM_getValue(key, defaultValue) {
     });
 }
 
-function GM_listValues() {
+function listValues() {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
@@ -293,7 +292,7 @@ function GM_listValues() {
     });
 }
 
-function GM_deleteValue(key) {
+function deleteValue(key) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
