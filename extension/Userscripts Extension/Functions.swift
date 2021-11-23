@@ -1112,7 +1112,10 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         // attempt to get require resource from disk
         // if required resource is inaccessible, log error and continue
         if let required = metadata["require"] {
-            for require in required {
+            // reverse required metadata
+            // if required is ["A", "B", "C"], C gets added above B which is above A, etc..
+            // the reverse of that is desired
+            for require in required.reversed() {
                 let sanitizedName = sanitize(require) ?? ""
                 let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
