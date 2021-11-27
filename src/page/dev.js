@@ -32,7 +32,7 @@ const exampleJSContent = `// ==UserScript==
 // @name        Example JS Userscript
 // @description This a standard userscript with javascript code
 // @match       https://github.com/quoid/userscripts
-// @exclude-match: *://*.*
+// @exclude-match *://*.*
 // @version 1.0
 // @updateURL https://www.k21p.com/example.user.js
 // @noframes
@@ -84,7 +84,7 @@ const _browser = {
                     blacklist: [],
                     descriptions: "true",
                     languageCode: "en",
-                    lint: "false",
+                    lint: "true",
                     log: "false",
                     saveLocation: "/Users/someone/Library/Directory",
                     showCount: "true",
