@@ -1,8 +1,13 @@
 <script>
     export let checked = false;
     export let disabled = false;
+    export let title = undefined;
 </script>
-
+<!-- prevent toggle label clicks from triggering parent element on:click -->
+<label on:click|stopPropagation={() => {}} class:disabled={disabled} title={title}>
+    <input type="checkbox" on:click|stopPropagation bind:checked={checked} {disabled}>
+    <span></span>
+</label>
 <style>
     label {
         --switch-timing: 150ms 75ms;
@@ -17,7 +22,11 @@
         width: 1.75em;
     }
 
-    input[type=checkbox] {
+    label.disabled {
+        cursor: default;
+    }
+
+    input[type="checkbox"] {
         display: block;
         position: absolute;
         visibility: hidden;
@@ -57,9 +66,3 @@
         opacity: var(--opacity-disabled);
     }
 </style>
-
-<!-- prevent toggle label clicks from triggering parent element on:click -->
-<label on:click|stopPropagation={() => {}}>
-    <input type="checkbox" on:click|stopPropagation bind:checked={checked} {disabled}>
-    <span></span>
-</label>
