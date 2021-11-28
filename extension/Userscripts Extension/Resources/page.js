@@ -1896,9 +1896,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			span = element("span");
     			attr(input, "type", "checkbox");
     			input.disabled = /*disabled*/ ctx[1];
-    			attr(input, "class", "svelte-xj6rne");
-    			attr(span, "class", "svelte-xj6rne");
-    			attr(label, "class", "svelte-xj6rne");
+    			attr(input, "class", "svelte-1dd8fli");
+    			attr(span, "class", "svelte-1dd8fli");
+    			attr(label, "title", /*title*/ ctx[2]);
+    			attr(label, "class", "svelte-1dd8fli");
+    			toggle_class(label, "disabled", /*disabled*/ ctx[1]);
     		},
     		m(target, anchor) {
     			insert(target, label, anchor);
@@ -1909,8 +1911,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (!mounted) {
     				dispose = [
-    					listen(input, "click", stop_propagation(/*click_handler*/ ctx[2])),
-    					listen(input, "change", /*input_change_handler*/ ctx[3]),
+    					listen(input, "click", stop_propagation(/*click_handler*/ ctx[3])),
+    					listen(input, "change", /*input_change_handler*/ ctx[4]),
     					listen(label, "click", stop_propagation(click_handler_1))
     				];
 
@@ -1924,6 +1926,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (dirty & /*checked*/ 1) {
     				input.checked = /*checked*/ ctx[0];
+    			}
+
+    			if (dirty & /*title*/ 4) {
+    				attr(label, "title", /*title*/ ctx[2]);
+    			}
+
+    			if (dirty & /*disabled*/ 2) {
+    				toggle_class(label, "disabled", /*disabled*/ ctx[1]);
     			}
     		},
     		i: noop,
@@ -1943,6 +1953,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     function instance$5($$self, $$props, $$invalidate) {
     	let { checked = false } = $$props;
     	let { disabled = false } = $$props;
+    	let { title = undefined } = $$props;
 
     	function click_handler(event) {
     		bubble($$self, event);
@@ -1956,15 +1967,16 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	$$self.$$set = $$props => {
     		if ("checked" in $$props) $$invalidate(0, checked = $$props.checked);
     		if ("disabled" in $$props) $$invalidate(1, disabled = $$props.disabled);
+    		if ("title" in $$props) $$invalidate(2, title = $$props.title);
     	};
 
-    	return [checked, disabled, click_handler, input_change_handler];
+    	return [checked, disabled, title, click_handler, input_change_handler];
     }
 
     class Toggle extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { checked: 0, disabled: 1 });
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { checked: 0, disabled: 1, title: 2 });
     	}
     }
 
