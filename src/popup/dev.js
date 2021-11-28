@@ -7,8 +7,8 @@ const _browser = {
             console.log(`Got message: ${message.name}`);
             let response = {};
             if (message.name === "POPUP_TOGGLE_EXTENSION") {
-                response = {error: "Failed toggle extension"};
-                //response = {success: true};
+                //response = {error: "Failed toggle extension"};
+                response = {success: true};
             } else if (message.name === "POPUP_UPDATE_ALL") {
                 response = {error: "Failed refresh scripts"};
                 response = {
@@ -89,7 +89,6 @@ const _browser = {
                             type: "css"
                         }
                     ],
-                    platform: "macos",
                     updates: [
                         {
                             filename: "Google Images Restored.js",
@@ -139,8 +138,8 @@ const _browser = {
             } else if (message.name === "REQ_PLATFORM") {
                 response = {platform: "macos"};
             } else if (message.name === "TOGGLE_ITEM") {
-                //response = {error: "Failed to toggle item"};
-                response = {success: true};
+                response = {error: "Failed to toggle item"};
+                //response = {success: true};
             } else if (message.name === "POPUP_OPEN_EXTENSION_PAGE") {
                 response = {error: "Failed to get page url"};
                 window.open("https://github.com/quoid/userscripts");
