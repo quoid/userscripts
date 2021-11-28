@@ -5,7 +5,13 @@
     export let title = undefined;
     export let notification = false;
 </script>
-
+<button
+    class:notification={notification}
+    on:click {disabled} style="--svg-fill: {color};"
+    {title}
+>
+    {@html icon}
+</button>
 <style>
     button {
         align-items: center;
@@ -52,10 +58,3 @@
         }
     }
 </style>
-
-<button
-    class:notification={notification}
-    on:click {disabled} style="--svg-fill: {color};" {title}
->
-    {@html icon}
-</button>
