@@ -1,10 +1,10 @@
 <script>
     import {onMount} from "svelte";
     import IconButton from "../shared/Components/IconButton.svelte";
+    import Toggle from "../shared/Components/Toggle.svelte";
     import Loader from "../shared/Components/Loader.svelte";
     import PopupItem from "./Components/PopupItem.svelte";
     import UpdateView from "./Components/UpdateView.svelte";
-    import iconPower from "../shared/img/icon-power.svg";
     import iconOpen from "../shared/img/icon-open.svg";
     import iconUpdate from "../shared/img/icon-update.svg";
     import iconClear from "../shared/img/icon-clear.svg";
@@ -24,6 +24,8 @@
     let initError;
     let windowHeight = 0;
     let header;
+    let warn;
+    let err;
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -37,7 +39,8 @@
 
     $: if (platform) document.body.classList.add(platform);
 
-    function toggleExtension() {
+    function toggleExtension(e) {
+        e.preventDefault(); // prevent check state from changing on click
         disabled = true;
         browser.runtime.sendNativeMessage({name: "POPUP_TOGGLE_EXTENSION"}, response => {
             disabled = false;
@@ -154,8 +157,6 @@
             disabled = false;
             return;
         } else {
-            console.log("Got response from pltfm promise");
-            console.log(pltfm);
             platform = pltfm.platform;
         }
 
@@ -176,10 +177,11 @@
             disabled = false;
             return;
         } else {
-            console.log("Got response from init promise");
-            console.log(init);
             active = init.initData.active === "true" ? true : false;
         }
+
+        // set popup height
+        resize();
 
         // get matches
         const extensionPageUrl = browser.runtime.getURL("page.html");
@@ -213,8 +215,6 @@
             disabled = false;
             return;
         } else {
-            console.log("Got response from matches promise");
-            console.log(matches);
             items = matches.matches;
         }
 
@@ -234,8 +234,6 @@
             disabled = false;
             return;
         } else {
-            console.log("Got response from updates promise");
-            console.log(updatesResponse);
             updates = updatesResponse.updates;
         }
         loading = false;
@@ -244,14 +242,22 @@
 
     function resize() {
         if (platform != "ios") return;
+        // on ios programmatically set the height of the scrollable container
+        // first get the header height
         const headerHeight = header.offsetHeight;
-        windowHeight = (window.outerHeight - headerHeight);
+        // then check if a warning or error is visible (ie. taking up height)
+        let addHeight = 0;
+        // if warn or error elements visible, also subtract that from applied height
+        if (warn) addHeight += warn.offsetHeight;
+        if (err)  addHeight += err.offsetHeight;
+        windowHeight = (window.outerHeight - (headerHeight + addHeight));
         main.style.height = windowHeight + "px";
         main.style.paddingBottom = headerHeight + "px";
     }
 
     onMount(async () => {
-        initialize();
+        await initialize();
+        // run resize again for good measure
         resize();
     });
 </script>
@@ -285,16 +291,18 @@
         title={"Refresh view"}
         {disabled}
     />
-    <IconButton
-        on:click={toggleExtension}
-        icon={iconPower}
+    <Toggle
+        checked={active}
         title={"Toggle injection"}
-        color={active ? "var(--color-green)" : "var(--color-red)"}
+        on:click={toggleExtension}
         {disabled}
     />
 </div>
+{#if !active}
+    <div class="warn" bind:this={warn}>Injection disabled</div>
+{/if}
 {#if error}
-    <div class="error">
+    <div class="error" bind:this={err}>
         {error}
         <IconButton
             icon={iconClear}
@@ -370,7 +378,12 @@
         transform: scale(0.9);
     }
 
-    .error {
+    .header :global(label) {
+        font-size: 1.25rem !important;
+    }
+
+    .error,
+    .warn {
         background-color: var(--color-red);
         color: var(--color-bg-secondary);
         font: var(--text-small);
@@ -388,11 +401,14 @@
     }
 
     .error :global(button svg) {
-        width: 50%;
+        transform: scale(0.5);
+    }
+
+    .warn {
+        background-color: var(--color-yellow);
     }
 
     .main {
-        /* max-height: 20rem; */
         min-height: 12.5rem;
         overflow-y: auto;
         position: relative;
