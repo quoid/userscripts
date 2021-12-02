@@ -1314,10 +1314,14 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     let manifest = getManifest()
     guard
         var matches = getPopupMatches(url, subframeUrls),
-        let active = manifest.settings["active"]
+        let active = manifest.settings["active"],
+        let showCount = manifest.settings["showCount"]
     else {
         err("getPopupBadgeCount failed at (1)")
         return nil
+    }
+    if showCount == "false" {
+        return 0
     }
     if let parts = getUrlProps(url), let ptcl = parts["protocol"], let host = parts["host"], let path = parts["pathname"] {
         for pattern in manifest.blacklist {

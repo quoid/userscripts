@@ -247,13 +247,13 @@
                     on:click={() => update("active", !$settings.active)}
                 />
             </div>
-            <!-- <div class="modal__row">
+            <div class="modal__row">
                 <div>Show Toolbar Count</div>
                 <Toggle
                     checked={$settings.showCount}
                     on:click={() => update("showCount", !$settings.showCount)}
                 />
-            </div> -->
+            </div>
             <div class="modal__row saveLocation">
                 <div>Save Location</div>
                 <div

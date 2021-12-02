@@ -18999,8 +18999,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function create_fragment$b(ctx) {
-    	let div28;
-    	let div27;
+    	let div30;
+    	let div29;
     	let div14;
     	let div1;
     	let div0;
@@ -19039,7 +19039,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let option0;
     	let option1;
     	let t22;
-    	let div24;
+    	let div26;
     	let div16;
     	let t24;
     	let div18;
@@ -19047,45 +19047,50 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let t26;
     	let toggle5;
     	let t27;
-    	let div21;
+    	let div20;
     	let div19;
     	let t29;
-    	let div20;
-    	let t30_value = /*$settings*/ ctx[3].saveLocation + "";
+    	let toggle6;
     	let t30;
-    	let t31;
-    	let iconbutton1;
-    	let t32;
     	let div23;
+    	let div21;
+    	let t32;
     	let div22;
-    	let span;
+    	let t33_value = /*$settings*/ ctx[3].saveLocation + "";
+    	let t33;
     	let t34;
+    	let iconbutton1;
     	let t35;
+    	let div25;
+    	let div24;
+    	let span;
+    	let t37;
+    	let t38;
     	let textarea;
     	let textarea_disabled_value;
-    	let t36;
-    	let div26;
-    	let div25;
-    	let t38;
-    	let p;
     	let t39;
-    	let t40_value = /*$settings*/ ctx[3].version + "";
-    	let t40;
+    	let div28;
+    	let div27;
+    	let t41;
+    	let p;
+    	let t42;
+    	let t43_value = /*$settings*/ ctx[3].version + "";
+    	let t43;
     	let br0;
     	let br1;
-    	let t41;
+    	let t44;
     	let a0;
     	let br2;
     	let br3;
-    	let t43;
+    	let t46;
     	let a1;
-    	let t45;
+    	let t48;
     	let a2;
-    	let t47;
-    	let div27_intro;
-    	let div27_outro;
-    	let div28_intro;
-    	let div28_outro;
+    	let t50;
+    	let div29_intro;
+    	let div29_outro;
+    	let div30_intro;
+    	let div30_outro;
     	let current;
     	let mounted;
     	let dispose;
@@ -19134,6 +19139,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	toggle5.$on("click", /*click_handler_6*/ ctx[15]);
 
+    	toggle6 = new Toggle({
+    			props: { checked: /*$settings*/ ctx[3].showCount }
+    		});
+
+    	toggle6.$on("click", /*click_handler_7*/ ctx[16]);
+
     	iconbutton1 = new IconButton({
     			props: {
     				icon: iconEdit,
@@ -19146,8 +19157,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	return {
     		c() {
-    			div28 = element("div");
-    			div27 = element("div");
+    			div30 = element("div");
+    			div29 = element("div");
     			div14 = element("div");
     			div1 = element("div");
     			div0 = element("div");
@@ -19195,7 +19206,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			option1 = element("option");
     			option1.textContent = "4";
     			t22 = space();
-    			div24 = element("div");
+    			div26 = element("div");
     			div16 = element("div");
     			div16.innerHTML = `<div class="svelte-1ibrghz">General Settings</div>`;
     			t24 = space();
@@ -19205,45 +19216,51 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t26 = space();
     			create_component(toggle5.$$.fragment);
     			t27 = space();
-    			div21 = element("div");
-    			div19 = element("div");
-    			div19.textContent = "Save Location";
-    			t29 = space();
     			div20 = element("div");
-    			t30 = text(t30_value);
-    			t31 = space();
-    			create_component(iconbutton1.$$.fragment);
-    			t32 = space();
+    			div19 = element("div");
+    			div19.textContent = "Show Toolbar Count";
+    			t29 = space();
+    			create_component(toggle6.$$.fragment);
+    			t30 = space();
     			div23 = element("div");
+    			div21 = element("div");
+    			div21.textContent = "Save Location";
+    			t32 = space();
     			div22 = element("div");
+    			t33 = text(t33_value);
+    			t34 = space();
+    			create_component(iconbutton1.$$.fragment);
+    			t35 = space();
+    			div25 = element("div");
+    			div24 = element("div");
     			span = element("span");
     			span.textContent = "Global Blacklist";
-    			t34 = space();
+    			t37 = space();
     			if (if_block) if_block.c();
-    			t35 = space();
-    			textarea = element("textarea");
-    			t36 = space();
-    			div26 = element("div");
-    			div25 = element("div");
-    			div25.textContent = "Information";
     			t38 = space();
+    			textarea = element("textarea");
+    			t39 = space();
+    			div28 = element("div");
+    			div27 = element("div");
+    			div27.textContent = "Information";
+    			t41 = space();
     			p = element("p");
-    			t39 = text("Userscripts Safari Version ");
-    			t40 = text(t40_value);
+    			t42 = text("Userscripts Safari Version ");
+    			t43 = text(t43_value);
     			br0 = element("br");
     			br1 = element("br");
-    			t41 = text("You can review the documentation, report bugs and get more information about this extension by visiting ");
+    			t44 = text("You can review the documentation, report bugs and get more information about this extension by visiting ");
     			a0 = element("a");
     			a0.textContent = "the code repository.";
     			br2 = element("br");
     			br3 = element("br");
-    			t43 = text("If you enjoy using this extension, please consider ");
+    			t46 = text("If you enjoy using this extension, please consider ");
     			a1 = element("a");
     			a1.textContent = "leaving a review";
-    			t45 = text(" on the App Store or ");
+    			t48 = text(" on the App Store or ");
     			a2 = element("a");
     			a2.textContent = "supporting the project";
-    			t47 = text(".");
+    			t50 = text(".");
     			attr(div0, "class", "svelte-1ibrghz");
     			attr(div1, "class", "modal__title svelte-1ibrghz");
     			attr(div2, "class", "svelte-1ibrghz");
@@ -19269,29 +19286,31 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			toggle_class(div17, "red", !/*$settings*/ ctx[3].active);
     			attr(div18, "class", "modal__row svelte-1ibrghz");
     			attr(div19, "class", "svelte-1ibrghz");
-    			attr(div20, "class", "truncate svelte-1ibrghz");
-    			attr(div21, "class", "modal__row saveLocation svelte-1ibrghz");
-    			attr(div22, "class", "blacklist svelte-1ibrghz");
+    			attr(div20, "class", "modal__row svelte-1ibrghz");
+    			attr(div21, "class", "svelte-1ibrghz");
+    			attr(div22, "class", "truncate svelte-1ibrghz");
+    			attr(div23, "class", "modal__row saveLocation svelte-1ibrghz");
+    			attr(div24, "class", "blacklist svelte-1ibrghz");
     			attr(textarea, "placeholder", "Comma separated domain patterns");
     			attr(textarea, "spellcheck", "false");
     			textarea.value = /*blacklisted*/ ctx[2];
     			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[1];
     			attr(textarea, "class", "svelte-1ibrghz");
-    			attr(div23, "class", "modal__row modal__row--wrap svelte-1ibrghz");
-    			attr(div24, "class", "modal__section");
-    			attr(div25, "class", "modal__title svelte-1ibrghz");
+    			attr(div25, "class", "modal__row modal__row--wrap svelte-1ibrghz");
+    			attr(div26, "class", "modal__section");
+    			attr(div27, "class", "modal__title svelte-1ibrghz");
     			attr(a0, "href", "https://github.com/quoid/userscripts");
     			attr(a1, "href", "https://apps.apple.com/us/app/userscripts/id1463298887");
     			attr(a2, "href", "https://github.com/quoid/userscripts#support-development");
     			attr(p, "class", "svelte-1ibrghz");
-    			attr(div26, "class", "modal__section");
-    			attr(div27, "class", "modal svelte-1ibrghz");
-    			attr(div28, "class", "settings svelte-1ibrghz");
+    			attr(div28, "class", "modal__section");
+    			attr(div29, "class", "modal svelte-1ibrghz");
+    			attr(div30, "class", "settings svelte-1ibrghz");
     		},
     		m(target, anchor) {
-    			insert(target, div28, anchor);
-    			append(div28, div27);
-    			append(div27, div14);
+    			insert(target, div30, anchor);
+    			append(div30, div29);
+    			append(div29, div14);
     			append(div14, div1);
     			append(div1, div0);
     			append(div1, t1);
@@ -19329,58 +19348,63 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			append(select, option0);
     			append(select, option1);
     			select_option(select, /*$settings*/ ctx[3].tabSize);
-    			append(div27, t22);
-    			append(div27, div24);
-    			append(div24, div16);
-    			append(div24, t24);
-    			append(div24, div18);
+    			append(div29, t22);
+    			append(div29, div26);
+    			append(div26, div16);
+    			append(div26, t24);
+    			append(div26, div18);
     			append(div18, div17);
     			append(div18, t26);
     			mount_component(toggle5, div18, null);
-    			append(div24, t27);
-    			append(div24, div21);
-    			append(div21, div19);
-    			append(div21, t29);
-    			append(div21, div20);
-    			append(div20, t30);
-    			append(div21, t31);
-    			mount_component(iconbutton1, div21, null);
-    			append(div24, t32);
-    			append(div24, div23);
+    			append(div26, t27);
+    			append(div26, div20);
+    			append(div20, div19);
+    			append(div20, t29);
+    			mount_component(toggle6, div20, null);
+    			append(div26, t30);
+    			append(div26, div23);
+    			append(div23, div21);
+    			append(div23, t32);
     			append(div23, div22);
-    			append(div22, span);
-    			append(div22, t34);
-    			if (if_block) if_block.m(div22, null);
-    			append(div23, t35);
-    			append(div23, textarea);
-    			/*textarea_binding*/ ctx[16](textarea);
-    			append(div27, t36);
-    			append(div27, div26);
+    			append(div22, t33);
+    			append(div23, t34);
+    			mount_component(iconbutton1, div23, null);
+    			append(div26, t35);
     			append(div26, div25);
-    			append(div26, t38);
-    			append(div26, p);
-    			append(p, t39);
-    			append(p, t40);
+    			append(div25, div24);
+    			append(div24, span);
+    			append(div24, t37);
+    			if (if_block) if_block.m(div24, null);
+    			append(div25, t38);
+    			append(div25, textarea);
+    			/*textarea_binding*/ ctx[17](textarea);
+    			append(div29, t39);
+    			append(div29, div28);
+    			append(div28, div27);
+    			append(div28, t41);
+    			append(div28, p);
+    			append(p, t42);
+    			append(p, t43);
     			append(p, br0);
     			append(p, br1);
-    			append(p, t41);
+    			append(p, t44);
     			append(p, a0);
     			append(p, br2);
     			append(p, br3);
-    			append(p, t43);
+    			append(p, t46);
     			append(p, a1);
-    			append(p, t45);
+    			append(p, t48);
     			append(p, a2);
-    			append(p, t47);
+    			append(p, t50);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
     					listen(select, "change", /*select_change_handler*/ ctx[13]),
     					listen(select, "blur", /*blur_handler*/ ctx[14]),
-    					listen(div20, "click", openSaveLocation),
+    					listen(div22, "click", openSaveLocation),
     					listen(textarea, "blur", /*saveBlacklist*/ ctx[5]),
-    					listen(div28, "click", self$1(/*click_handler_7*/ ctx[17]))
+    					listen(div30, "click", self$1(/*click_handler_8*/ ctx[18]))
     				];
 
     				mounted = true;
@@ -19414,7 +19438,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			const toggle5_changes = {};
     			if (dirty & /*$settings*/ 8) toggle5_changes.checked = /*$settings*/ ctx[3].active;
     			toggle5.$set(toggle5_changes);
-    			if ((!current || dirty & /*$settings*/ 8) && t30_value !== (t30_value = /*$settings*/ ctx[3].saveLocation + "")) set_data(t30, t30_value);
+    			const toggle6_changes = {};
+    			if (dirty & /*$settings*/ 8) toggle6_changes.checked = /*$settings*/ ctx[3].showCount;
+    			toggle6.$set(toggle6_changes);
+    			if ((!current || dirty & /*$settings*/ 8) && t33_value !== (t33_value = /*$settings*/ ctx[3].saveLocation + "")) set_data(t33, t33_value);
 
     			if (/*blacklistSaving*/ ctx[1]) {
     				if (if_block) {
@@ -19422,7 +19449,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				} else {
     					if_block = create_if_block$6();
     					if_block.c();
-    					if_block.m(div22, null);
+    					if_block.m(div24, null);
     				}
     			} else if (if_block) {
     				if_block.d(1);
@@ -19437,7 +19464,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				textarea.disabled = textarea_disabled_value;
     			}
 
-    			if ((!current || dirty & /*$settings*/ 8) && t40_value !== (t40_value = /*$settings*/ ctx[3].version + "")) set_data(t40, t40_value);
+    			if ((!current || dirty & /*$settings*/ 8) && t43_value !== (t43_value = /*$settings*/ ctx[3].version + "")) set_data(t43, t43_value);
     		},
     		i(local) {
     			if (current) return;
@@ -19448,18 +19475,19 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			transition_in(toggle3.$$.fragment, local);
     			transition_in(toggle4.$$.fragment, local);
     			transition_in(toggle5.$$.fragment, local);
+    			transition_in(toggle6.$$.fragment, local);
     			transition_in(iconbutton1.$$.fragment, local);
 
     			add_render_callback(() => {
-    				if (div27_outro) div27_outro.end(1);
-    				if (!div27_intro) div27_intro = create_in_transition(div27, fly, { y: 50, duration: 150, delay: 75 });
-    				div27_intro.start();
+    				if (div29_outro) div29_outro.end(1);
+    				if (!div29_intro) div29_intro = create_in_transition(div29, fly, { y: 50, duration: 150, delay: 75 });
+    				div29_intro.start();
     			});
 
     			add_render_callback(() => {
-    				if (div28_outro) div28_outro.end(1);
-    				if (!div28_intro) div28_intro = create_in_transition(div28, fade, { duration: 150 });
-    				div28_intro.start();
+    				if (div30_outro) div30_outro.end(1);
+    				if (!div30_intro) div30_intro = create_in_transition(div30, fade, { duration: 150 });
+    				div30_intro.start();
     			});
 
     			current = true;
@@ -19472,15 +19500,16 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			transition_out(toggle3.$$.fragment, local);
     			transition_out(toggle4.$$.fragment, local);
     			transition_out(toggle5.$$.fragment, local);
+    			transition_out(toggle6.$$.fragment, local);
     			transition_out(iconbutton1.$$.fragment, local);
-    			if (div27_intro) div27_intro.invalidate();
-    			div27_outro = create_out_transition(div27, fly, { y: 50, duration: 150, delay: 0 });
-    			if (div28_intro) div28_intro.invalidate();
-    			div28_outro = create_out_transition(div28, fade, { duration: 150, delay: 75 });
+    			if (div29_intro) div29_intro.invalidate();
+    			div29_outro = create_out_transition(div29, fly, { y: 50, duration: 150, delay: 0 });
+    			if (div30_intro) div30_intro.invalidate();
+    			div30_outro = create_out_transition(div30, fade, { duration: 150, delay: 75 });
     			current = false;
     		},
     		d(detaching) {
-    			if (detaching) detach(div28);
+    			if (detaching) detach(div30);
     			destroy_component(iconbutton0);
     			destroy_component(toggle0);
     			destroy_component(toggle1);
@@ -19488,11 +19517,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			destroy_component(toggle3);
     			destroy_component(toggle4);
     			destroy_component(toggle5);
+    			destroy_component(toggle6);
     			destroy_component(iconbutton1);
     			if (if_block) if_block.d();
-    			/*textarea_binding*/ ctx[16](null);
-    			if (detaching && div27_outro) div27_outro.end();
-    			if (detaching && div28_outro) div28_outro.end();
+    			/*textarea_binding*/ ctx[17](null);
+    			if (detaching && div29_outro) div29_outro.end();
+    			if (detaching && div30_outro) div30_outro.end();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -19564,6 +19594,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	const blur_handler = () => update("tabSize", $settings.tabSize);
     	const click_handler_6 = () => update("active", !$settings.active);
+    	const click_handler_7 = () => update("showCount", !$settings.showCount);
 
     	function textarea_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
@@ -19572,7 +19603,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		});
     	}
 
-    	const click_handler_7 = () => {
+    	const click_handler_8 = () => {
     		state.remove("settings");
     	};
 
@@ -19602,8 +19633,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		select_change_handler,
     		blur_handler,
     		click_handler_6,
+    		click_handler_7,
     		textarea_binding,
-    		click_handler_7
+    		click_handler_8
     	];
     }
 
