@@ -1846,139 +1846,90 @@
     	return child_ctx;
     }
 
-    // (47:27) 
-    function create_if_block_4(ctx) {
-    	let div1;
-    	let html_tag;
-    	let t0;
-    	let div0;
-    	let t2;
-    	let p;
-    	let t3;
-    	let t4;
-
-    	return {
-    		c() {
-    			div1 = element("div");
-    			t0 = space();
-    			div0 = element("div");
-    			div0.textContent = "The usercript can not be installed.";
-    			t2 = space();
-    			p = element("p");
-    			t3 = text("Error: ");
-    			t4 = text(/*installError*/ ctx[1]);
-    			html_tag = new HtmlTag(t0);
-    			attr(p, "class", "svelte-21jyi6");
-    			attr(div1, "class", "install__error svelte-21jyi6");
-    		},
-    		m(target, anchor) {
-    			insert(target, div1, anchor);
-    			html_tag.m(iconError, div1);
-    			append(div1, t0);
-    			append(div1, div0);
-    			append(div1, t2);
-    			append(div1, p);
-    			append(p, t3);
-    			append(p, t4);
-    		},
-    		p(ctx, dirty) {
-    			if (dirty & /*installError*/ 2) set_data(t4, /*installError*/ ctx[1]);
-    		},
-    		d(detaching) {
-    			if (detaching) detach(div1);
-    		}
-    	};
-    }
-
-    // (10:4) {#if userscript}
-    function create_if_block$4(ctx) {
+    // (16:25) 
+    function create_if_block_1(ctx) {
     	let ul;
-    	let li0;
+    	let li;
     	let t0_value = /*userscript*/ ctx[0].name + "";
     	let t0;
     	let t1;
-    	let li1;
-    	let t2_value = /*userscript*/ ctx[0].description + "";
     	let t2;
     	let t3;
     	let t4;
     	let t5;
-    	let t6;
     	let div2;
     	let div0;
-    	let t7;
+    	let t6;
     	let div1;
-    	let t9;
+    	let t8;
     	let div3;
     	let button0;
-    	let t11;
+    	let t10;
     	let button1;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*userscript*/ ctx[0].match && create_if_block_3(ctx);
-    	let if_block1 = /*userscript*/ ctx[0].require && create_if_block_2(ctx);
-    	let if_block2 = /*userscript*/ ctx[0].grant && create_if_block_1(ctx);
+    	let if_block0 = /*userscript*/ ctx[0].description && create_if_block_5(ctx);
+    	let if_block1 = /*userscript*/ ctx[0].match && create_if_block_4(ctx);
+    	let if_block2 = /*userscript*/ ctx[0].require && create_if_block_3(ctx);
+    	let if_block3 = /*userscript*/ ctx[0].grant && create_if_block_2(ctx);
 
     	return {
     		c() {
     			ul = element("ul");
-    			li0 = element("li");
+    			li = element("li");
     			t0 = text(t0_value);
     			t1 = space();
-    			li1 = element("li");
-    			t2 = text(t2_value);
-    			t3 = space();
     			if (if_block0) if_block0.c();
-    			t4 = space();
+    			t2 = space();
     			if (if_block1) if_block1.c();
-    			t5 = space();
+    			t3 = space();
     			if (if_block2) if_block2.c();
-    			t6 = space();
+    			t4 = space();
+    			if (if_block3) if_block3.c();
+    			t5 = space();
     			div2 = element("div");
     			div0 = element("div");
-    			t7 = space();
+    			t6 = space();
     			div1 = element("div");
     			div1.textContent = "Be sure you trust the author before installing. Nefarious code can exploit your security and privacy.";
-    			t9 = space();
+    			t8 = space();
     			div3 = element("div");
     			button0 = element("button");
     			button0.textContent = "Cancel";
-    			t11 = space();
+    			t10 = space();
     			button1 = element("button");
     			button1.textContent = "Install";
-    			attr(li0, "class", "svelte-21jyi6");
-    			attr(li1, "class", "svelte-21jyi6");
-    			attr(ul, "class", "svelte-21jyi6");
-    			attr(div0, "class", "badge--icon svelte-21jyi6");
-    			attr(div1, "class", "badge--text svelte-21jyi6");
-    			attr(div2, "class", "badge svelte-21jyi6");
-    			attr(button0, "class", "cancel svelte-21jyi6");
-    			attr(button1, "class", "install svelte-21jyi6");
-    			attr(div3, "class", "buttons svelte-21jyi6");
+    			attr(li, "class", "userscript--name svelte-410gky");
+    			attr(ul, "class", "svelte-410gky");
+    			attr(div0, "class", "badge--icon svelte-410gky");
+    			attr(div1, "class", "badge--text svelte-410gky");
+    			attr(div2, "class", "badge svelte-410gky");
+    			attr(button0, "class", "cancel svelte-410gky");
+    			attr(button1, "class", "install svelte-410gky");
+    			attr(div3, "class", "buttons svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, ul, anchor);
-    			append(ul, li0);
-    			append(li0, t0);
+    			append(ul, li);
+    			append(li, t0);
     			append(ul, t1);
-    			append(ul, li1);
-    			append(li1, t2);
-    			append(ul, t3);
     			if (if_block0) if_block0.m(ul, null);
-    			append(ul, t4);
+    			append(ul, t2);
     			if (if_block1) if_block1.m(ul, null);
-    			append(ul, t5);
+    			append(ul, t3);
     			if (if_block2) if_block2.m(ul, null);
-    			insert(target, t6, anchor);
+    			append(ul, t4);
+    			if (if_block3) if_block3.m(ul, null);
+    			insert(target, t5, anchor);
     			insert(target, div2, anchor);
     			append(div2, div0);
     			div0.innerHTML = iconWarn;
-    			append(div2, t7);
+    			append(div2, t6);
     			append(div2, div1);
-    			insert(target, t9, anchor);
+    			insert(target, t8, anchor);
     			insert(target, div3, anchor);
     			append(div3, button0);
-    			append(div3, t11);
+    			append(div3, t10);
     			append(div3, button1);
 
     			if (!mounted) {
@@ -1997,45 +1948,57 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			if (dirty & /*userscript*/ 1 && t0_value !== (t0_value = /*userscript*/ ctx[0].name + "")) set_data(t0, t0_value);
-    			if (dirty & /*userscript*/ 1 && t2_value !== (t2_value = /*userscript*/ ctx[0].description + "")) set_data(t2, t2_value);
 
-    			if (/*userscript*/ ctx[0].match) {
+    			if (/*userscript*/ ctx[0].description) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_3(ctx);
+    					if_block0 = create_if_block_5(ctx);
     					if_block0.c();
-    					if_block0.m(ul, t4);
+    					if_block0.m(ul, t2);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
     				if_block0 = null;
     			}
 
-    			if (/*userscript*/ ctx[0].require) {
+    			if (/*userscript*/ ctx[0].match) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block_2(ctx);
+    					if_block1 = create_if_block_4(ctx);
     					if_block1.c();
-    					if_block1.m(ul, t5);
+    					if_block1.m(ul, t3);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
     			}
 
-    			if (/*userscript*/ ctx[0].grant) {
+    			if (/*userscript*/ ctx[0].require) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
-    					if_block2 = create_if_block_1(ctx);
+    					if_block2 = create_if_block_3(ctx);
     					if_block2.c();
-    					if_block2.m(ul, null);
+    					if_block2.m(ul, t4);
     				}
     			} else if (if_block2) {
     				if_block2.d(1);
     				if_block2 = null;
+    			}
+
+    			if (/*userscript*/ ctx[0].grant) {
+    				if (if_block3) {
+    					if_block3.p(ctx, dirty);
+    				} else {
+    					if_block3 = create_if_block_2(ctx);
+    					if_block3.c();
+    					if_block3.m(ul, null);
+    				}
+    			} else if (if_block3) {
+    				if_block3.d(1);
+    				if_block3 = null;
     			}
     		},
     		d(detaching) {
@@ -2043,9 +2006,10 @@
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
-    			if (detaching) detach(t6);
+    			if (if_block3) if_block3.d();
+    			if (detaching) detach(t5);
     			if (detaching) detach(div2);
-    			if (detaching) detach(t9);
+    			if (detaching) detach(t8);
     			if (detaching) detach(div3);
     			mounted = false;
     			run_all(dispose);
@@ -2053,8 +2017,70 @@
     	};
     }
 
-    // (14:12) {#if userscript.match}
-    function create_if_block_3(ctx) {
+    // (10:4) {#if installError}
+    function create_if_block$4(ctx) {
+    	let div1;
+    	let html_tag;
+    	let t0;
+    	let div0;
+    	let t2;
+    	let p;
+
+    	return {
+    		c() {
+    			div1 = element("div");
+    			t0 = space();
+    			div0 = element("div");
+    			div0.textContent = "The usercript can not be installed.";
+    			t2 = space();
+    			p = element("p");
+    			p.textContent = "Error: OK GO";
+    			html_tag = new HtmlTag(t0);
+    			attr(p, "class", "svelte-410gky");
+    			attr(div1, "class", "install__error svelte-410gky");
+    		},
+    		m(target, anchor) {
+    			insert(target, div1, anchor);
+    			html_tag.m(iconError, div1);
+    			append(div1, t0);
+    			append(div1, div0);
+    			append(div1, t2);
+    			append(div1, p);
+    		},
+    		p: noop,
+    		d(detaching) {
+    			if (detaching) detach(div1);
+    		}
+    	};
+    }
+
+    // (19:12) {#if userscript.description}
+    function create_if_block_5(ctx) {
+    	let li;
+    	let t_value = /*userscript*/ ctx[0].description + "";
+    	let t;
+
+    	return {
+    		c() {
+    			li = element("li");
+    			t = text(t_value);
+    			attr(li, "class", "userscript--description svelte-410gky");
+    		},
+    		m(target, anchor) {
+    			insert(target, li, anchor);
+    			append(li, t);
+    		},
+    		p(ctx, dirty) {
+    			if (dirty & /*userscript*/ 1 && t_value !== (t_value = /*userscript*/ ctx[0].description + "")) set_data(t, t_value);
+    		},
+    		d(detaching) {
+    			if (detaching) detach(li);
+    		}
+    	};
+    }
+
+    // (22:12) {#if userscript.match}
+    function create_if_block_4(ctx) {
     	let li;
     	let div;
     	let t1;
@@ -2076,8 +2102,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-21jyi6");
-    			attr(li, "class", "svelte-21jyi6");
+    			attr(div, "class", "svelte-410gky");
+    			attr(li, "class", "userscript--field svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2119,7 +2145,7 @@
     	};
     }
 
-    // (17:20) {#each userscript.match as match}
+    // (25:20) {#each userscript.match as match}
     function create_each_block_2(ctx) {
     	let div;
     	let t_value = /*match*/ ctx[10] + "";
@@ -2129,7 +2155,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-21jyi6");
+    			attr(div, "class", "truncate svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2144,8 +2170,8 @@
     	};
     }
 
-    // (22:12) {#if userscript.require}
-    function create_if_block_2(ctx) {
+    // (30:12) {#if userscript.require}
+    function create_if_block_3(ctx) {
     	let li;
     	let div;
     	let t1;
@@ -2167,8 +2193,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-21jyi6");
-    			attr(li, "class", "svelte-21jyi6");
+    			attr(div, "class", "svelte-410gky");
+    			attr(li, "class", "userscript--field svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2210,7 +2236,7 @@
     	};
     }
 
-    // (25:20) {#each userscript.require as require}
+    // (33:20) {#each userscript.require as require}
     function create_each_block_1(ctx) {
     	let div;
     	let t_value = /*require*/ ctx[7] + "";
@@ -2220,7 +2246,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-21jyi6");
+    			attr(div, "class", "truncate svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2235,8 +2261,8 @@
     	};
     }
 
-    // (30:12) {#if userscript.grant}
-    function create_if_block_1(ctx) {
+    // (38:12) {#if userscript.grant}
+    function create_if_block_2(ctx) {
     	let li;
     	let div;
     	let t1;
@@ -2258,8 +2284,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-21jyi6");
-    			attr(li, "class", "svelte-21jyi6");
+    			attr(div, "class", "svelte-410gky");
+    			attr(li, "class", "userscript--field svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2301,7 +2327,7 @@
     	};
     }
 
-    // (33:20) {#each userscript.grant as grant}
+    // (41:20) {#each userscript.grant as grant}
     function create_each_block$1(ctx) {
     	let div;
     	let t_value = /*grant*/ ctx[4] + "";
@@ -2311,7 +2337,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "svelte-21jyi6");
+    			attr(div, "class", "svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2330,8 +2356,8 @@
     	let div;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*userscript*/ ctx[0]) return create_if_block$4;
-    		if (/*installError*/ ctx[1]) return create_if_block_4;
+    		if (/*installError*/ ctx[1]) return create_if_block$4;
+    		if (/*userscript*/ ctx[0]) return create_if_block_1;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -2341,7 +2367,7 @@
     		c() {
     			div = element("div");
     			if (if_block) if_block.c();
-    			attr(div, "class", "view--install svelte-21jyi6");
+    			attr(div, "class", "view--install svelte-410gky");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2610,7 +2636,7 @@
     }
 
     // (405:28) 
-    function create_if_block_5(ctx) {
+    function create_if_block_5$1(ctx) {
     	let div;
     	let t0;
     	let span;
@@ -3048,7 +3074,7 @@
     	const if_block_creators = [
     		create_if_block_3$1,
     		create_if_block_4$1,
-    		create_if_block_5,
+    		create_if_block_5$1,
     		create_if_block_6,
     		create_else_block$2
     	];

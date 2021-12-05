@@ -7,12 +7,20 @@
     export let installConfirmClick;
 </script>
 <div class="view--install">
-    {#if userscript}
+    {#if installError}
+        <div class="install__error">
+            {@html iconError}
+            <div>The usercript can not be installed.</div>
+            <p>Error: OK GO</p>
+        </div>
+    {:else if userscript}
         <ul>
-            <li>{userscript.name}</li>
-            <li>{userscript.description}</li>
+            <li class="userscript--name">{userscript.name}</li>
+            {#if userscript.description}
+                <li class="userscript--description">{userscript.description}</li>
+            {/if}
             {#if userscript.match}
-                <li>
+                <li class="userscript--field">
                     <div>@match</div>
                     {#each userscript.match as match}
                         <div class="truncate">{match}</div>
@@ -20,7 +28,7 @@
                 </li>
             {/if}
             {#if userscript.require}
-                <li>
+                <li class="userscript--field">
                     <div>@require</div>
                     {#each userscript.require as require}
                         <div class="truncate">{require}</div>
@@ -28,7 +36,7 @@
                 </li>
             {/if}
             {#if userscript.grant}
-                <li>
+                <li class="userscript--field">
                     <div>@grant</div>
                     {#each userscript.grant as grant}
                         <div>{grant}</div>
@@ -44,50 +52,12 @@
             <button class="cancel" on:click={installCancelClick}>Cancel</button>
             <button class="install" on:click={installConfirmClick}>Install</button>
         </div>
-    {:else if installError}
-        <div class="install__error">
-            {@html iconError}
-            <div>The usercript can not be installed.</div>
-            <p>Error: {installError}</p>
-        </div>
     {/if}
 </div>
 <style>
     .view--install {
         color: var(--text-color-secondary);
         padding: 0 1rem;
-    }
-
-    ul {
-        padding: 1rem 0;
-        text-align: left;
-    }
-
-    ul > li:nth-child(1) {
-        color: var(--text-color-primary);
-        font: var(--text-default);
-        font-weight: bold;
-        letter-spacing: var(--letter-spacing-default);
-    }
-
-    ul > li:nth-child(2) {
-        font: var(--text-small);
-        letter-spacing: var(--letter-spacing-small);
-    }
-
-    ul > li:nth-child(n + 3) {
-        font: var(--text-small);
-        letter-spacing: var(--letter-spacing-small);
-        margin-top: 1rem;
-    }
-
-    ul > li:nth-child(n + 3) > div:nth-child(1) {
-        color: var(--text-color-disabled);
-    }
-
-    ul > li:nth-child(n + 3) > div:nth-child(n + 2) {
-        color: var(--text-color-secondary);
-        font-family: var(--editor-font);
     }
 
     .install__error {
@@ -102,12 +72,44 @@
         width: 4rem;
     }
 
-    p {
+    .install__error p {
         color: var(--text-color-primary);
         font: var(--text-small);
         font-family: var(--editor-font);
         letter-spacing: var(--letter-spacing-small);
         margin-top: 1rem;
+    }
+
+    ul {
+        padding: 1rem 0;
+        text-align: left;
+    }
+
+    .userscript--name {
+        color: var(--text-color-primary);
+        font: var(--text-default);
+        font-weight: bold;
+        letter-spacing: var(--letter-spacing-default);
+    }
+
+    .userscript--description {
+        font: var(--text-small);
+        letter-spacing: var(--letter-spacing-small);
+    }
+
+    .userscript--field {
+        font: var(--text-small);
+        letter-spacing: var(--letter-spacing-small);
+        margin-top: 1rem;
+    }
+
+    .userscript--field > div:nth-child(1) {
+        color: var(--text-color-disabled);
+    }
+
+    .userscript--field > div:nth-child(n + 2) {
+        color: var(--text-color-secondary);
+        font-family: var(--editor-font);
     }
 
     .badge {
@@ -140,6 +142,8 @@
     }
 
     button {
+        /* ffffffa6 is -text-color-secondary */
+        background-color: #ffffffa6;
         border-radius: var(--border-radius);
         color: var(--color-bg-primary);
         flex-grow: 1;
@@ -147,7 +151,6 @@
     }
 
     button:nth-child(1) {
-        background-color: var(--text-color-secondary);
         margin-right: 0.5rem;
     }
 
