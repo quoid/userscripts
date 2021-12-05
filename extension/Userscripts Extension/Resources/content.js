@@ -55,6 +55,11 @@ function injectJS(filename, code, scope, grants) {
         } else if (grant === "GM.listValues" || grant === "listValues") {
             api += `\n${listValues}`;
             gmVals.push("listValues: listValues");
+        } else if (grant === "GM_addStyle" || grant === "addStyleSync") {
+            api += `\n${addStyleSync}\nconst GM_addStyle = addStyleSync;`;
+        } else if (grant === "GM.addStyle" || grant === "addStyle") {
+            api += `\n${addStyle}\n`;
+            gmVals.push("addStyle: addStyle");
         }
     });
     // create api aliases
@@ -306,6 +311,31 @@ function deleteValue(key) {
     });
 }
 
+function addStyleSync(css) {
+    try {
+        const tag = document.createElement("style");
+        tag.textContent = css;
+        document.head.appendChild(tag);
+        return tag;
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function addStyle(css) {
+    return new Promise(resolve => {
+        const callback = e => {
+            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+            if (e.data.id != uid || e.data.name !== "RESP_ADD_STYLE") return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+        window.postMessage({id: uid, name: "API_ADD_STYLE", css: css});
+    });
+}
+
 // listen for messages from background, popup, etc...
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.name === "CONTEXT_RUN") {
@@ -384,6 +414,15 @@ window.addEventListener("message", e => {
         browser.runtime.sendMessage(message, response => {
             window.postMessage({id: e.data.id, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
         });
+    } else if (e.data.name === "API_ADD_STYLE") {
+        try {
+            const tag = document.createElement("style");
+            tag.textContent = e.data.css;
+            document.head.appendChild(tag);
+            window.postMessage({id: e.data.id, name: "RESP_ADD_STYLE", response: e.data.css});
+        } catch (e) {
+            console.log(e);
+        }
     }
 });
 
