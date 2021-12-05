@@ -122,6 +122,17 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         })();
         return true;
+    } else if (
+        request.name === "USERSCRIPT_INSTALL_00"
+        || request.name === "USERSCRIPT_INSTALL_01"
+        || request.name === "USERSCRIPT_INSTALL_02"
+    ) {
+        const message = {name: request.name, content: request.content};
+        browser.runtime.sendNativeMessage(message, response => {
+            console.log(response);
+            sendResponse(response);
+        });
+        return true;
     }
 });
 

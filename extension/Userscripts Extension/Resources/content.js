@@ -307,7 +307,7 @@ function deleteValue(key) {
 }
 
 // listen for messages from background, popup, etc...
-browser.runtime.onMessage.addListener(request => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.name === "CONTEXT_RUN") {
         // only run context menu script in top window
         if (window != window.top) return;
@@ -336,6 +336,17 @@ browser.runtime.onMessage.addListener(request => {
             }
             if (found) break;
         }
+    } else if (
+        request.name === "USERSCRIPT_INSTALL_00"
+        || request.name === "USERSCRIPT_INSTALL_01"
+        || request.name === "USERSCRIPT_INSTALL_02"
+    ) {
+        const content = document.body.innerText;
+        browser.runtime.sendMessage({name: request.name, content: content}, response => {
+            console.log(response);
+            sendResponse(response);
+        });
+        return true;
     }
 });
 

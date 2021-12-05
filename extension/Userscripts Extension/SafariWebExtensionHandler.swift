@@ -167,6 +167,30 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 response.userInfo = [SFExtensionMessageKey: ["success": true]]
             }
         }
+        else if name == "USERSCRIPT_INSTALL_00" {
+            if
+                let content = message?["content"] as? String,
+                let reply = installCheck(content)
+            {
+                response.userInfo = [SFExtensionMessageKey: reply]
+            }
+        }
+        else if name == "USERSCRIPT_INSTALL_01" {
+            if
+                let content = message?["content"] as? String,
+                let reply = installParse(content)
+            {
+                response.userInfo = [SFExtensionMessageKey: reply]
+            }
+        }
+        else if name == "USERSCRIPT_INSTALL_02" {
+            if
+                let content = message?["content"] as? String,
+                let reply = installUserscript(content)
+            {
+                response.userInfo = [SFExtensionMessageKey: reply]
+            }
+        }
         else if name == "PAGE_INIT_DATA" {
             #if os(macOS)
                 if let settings = getInitData() {

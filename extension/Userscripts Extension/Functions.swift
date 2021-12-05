@@ -1523,7 +1523,6 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
     
     return response
-    
 }
 
 func trashFile(_ item: [String: Any]) -> Bool {
@@ -1610,7 +1609,6 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
     return ["content": remoteContent]
 }
 
-// ios
 func popupInit() -> [String: String]? {
     // check the default directories
     let checkDefaultDirectories = checkDefaultDirectories()
@@ -1669,47 +1667,108 @@ func popupInit() -> [String: String]? {
     ]
 }
 
-func popupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
-    var matches = [[String: Any]]()
-    // if the url doesn't start with http/s return empty array
-    if !url.starts(with: "http://") && !url.starts(with: "https://") {
-        return matches
-    }
-    // get all the files saved to manifest that match the passed url
-    let matched = getMatchedFiles(url)
-    // get all the files at the save location
+// userscript install
+func installCheck(_ content: String) -> [String: String]? {
+    // this func checks a userscript's metadata to determine if it's already installed
+    
     guard let files = getAllFiles() else {
-        err("popupMatches failed at (1)")
+        err("installCheck failed at (1)")
         return nil
     }
-    // filter out the files that are present in both files and matched
-    // force unwrap filename to string since getAllFiles always returns it
-    matches = files.filter{matched.contains($0["filename"] as! String)}
     
-    // get the subframe url matches
-    var frameUrlsMatched = [[String: Any]]()
-    var frameUrlsMatches = [String]()
-    // filter out the top page url from the frame urls
-    let frameUrls = subframeUrls.filter{$0 != url}
-    // for each url just pushed to frameUrls, get all the files saved to manifest that match their url
-    for frameUrl in frameUrls {
-        let frameMatches = getMatchedFiles(frameUrl)
-        for frameMatch in frameMatches {
-            if !matched.contains(frameMatch) {
-                frameUrlsMatches.append(frameMatch)
-            }
-        }
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let newName = metadata["name"]?[0]
+    else {
+        return ["error": "userscript metadata is invalid"]
     }
-    // filter out the files that are present in both files and frameUrlsMatches
-    // force unwrap filename to string since getAllFiles always returns it
-    frameUrlsMatched = files.filter{frameUrlsMatches.contains($0["filename"] as! String)}
-    // loop through frameUrlsMatched and add subframe key/val
-    for (index, var frameUrlsMatch) in frameUrlsMatched.enumerated() {
-        frameUrlsMatch["subframe"] = true
-        frameUrlsMatched[index] = frameUrlsMatch
+    
+    // loop through all files nad get their names and filenames
+    // we will check the new name/filename to see if this is a unique userscript
+    // or if it will overwrite an existing userscript
+    var names = [String]()
+    for file in files {
+        // can be force unwrapped because getAllFiles didn't return nil
+        let name = file["name"] as! String
+        
+        // populate array
+        names.append(name)
     }
-    // add frameUrlsMatched to matches array
-    matches.append(contentsOf: frameUrlsMatched)
-
-    return matches
+    
+    if names.contains(newName) {
+        return ["success": "Click to re-install"]
+    }
+    
+    return ["success": "Click to install"];
 }
+
+func installParse(_ content: String) -> [String: Any]? {
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]]
+    else {
+        return ["error": "userscript metadata is invalid"]
+    }
+    return metadata
+}
+
+func installUserscript(_ content: String) -> [String: Any]? {
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let n = metadata["name"]?[0],
+        let name = sanitize(n)
+    else {
+        err("installUserscript failed at (1)")
+        return nil
+    }
+    let filename = "\(name).js"
+    
+    let saved = saveFile(["filename": filename, "type": "js"], content)
+    return saved
+}
+//func popupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+//    var matches = [[String: Any]]()
+//    // if the url doesn't start with http/s return empty array
+//    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+//        return matches
+//    }
+//    // get all the files saved to manifest that match the passed url
+//    let matched = getMatchedFiles(url)
+//    // get all the files at the save location
+//    guard let files = getAllFiles() else {
+//        err("popupMatches failed at (1)")
+//        return nil
+//    }
+//    // filter out the files that are present in both files and matched
+//    // force unwrap filename to string since getAllFiles always returns it
+//    matches = files.filter{matched.contains($0["filename"] as! String)}
+//
+//    // get the subframe url matches
+//    var frameUrlsMatched = [[String: Any]]()
+//    var frameUrlsMatches = [String]()
+//    // filter out the top page url from the frame urls
+//    let frameUrls = subframeUrls.filter{$0 != url}
+//    // for each url just pushed to frameUrls, get all the files saved to manifest that match their url
+//    for frameUrl in frameUrls {
+//        let frameMatches = getMatchedFiles(frameUrl)
+//        for frameMatch in frameMatches {
+//            if !matched.contains(frameMatch) {
+//                frameUrlsMatches.append(frameMatch)
+//            }
+//        }
+//    }
+//    // filter out the files that are present in both files and frameUrlsMatches
+//    // force unwrap filename to string since getAllFiles always returns it
+//    frameUrlsMatched = files.filter{frameUrlsMatches.contains($0["filename"] as! String)}
+//    // loop through frameUrlsMatched and add subframe key/val
+//    for (index, var frameUrlsMatch) in frameUrlsMatched.enumerated() {
+//        frameUrlsMatch["subframe"] = true
+//        frameUrlsMatched[index] = frameUrlsMatch
+//    }
+//    // add frameUrlsMatched to matches array
+//    matches.append(contentsOf: frameUrlsMatched)
+//
+//    return matches
+//}

@@ -1,4 +1,5 @@
 const _browser = {
+    delay: 200,
     runtime: {
         getURL() {
             return "https://www.example.com/";
@@ -145,33 +146,57 @@ const _browser = {
                 window.open("https://github.com/quoid/userscripts");
             }
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), 500));
+                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, 1000);
+            }, this.delay);
         }
     },
     tabs: {
         query(message, responseCallback) {
-            const response = [{url: "https://www.filmgarb.com/"}];
+            const response = [{url: "https://www.filmgarb.com/foo.user.js", id: 101}];
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), 500));
+                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, 500);
+            }, this.delay);
+        },
+        sendMessage(tabId, message, responseCallback) {
+            console.log(`Tab ${tabId} got message: ${message.name}`);
+            let response = {};
+            if (message.name === "USERSCRIPT_INSTALL_00") {
+                response = {success: "Click to install"};
+                //response.error = "something went wrong";
+            } else if (message.name === "USERSCRIPT_INSTALL_01") {
+                //response = {error: "a userscript with this @name value already exists, @name needs to be unique"};
+                response = {
+                    description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
+                    grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
+                    match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
+                    name: "Test Install Userscript",
+                    require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
+                    source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
+                };
+            }
+            if (!responseCallback) {
+                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
+            }
+            setTimeout(() => {
+                responseCallback(response);
+            }, this.delay);
         }
     },
     webNavigation: {
         getAllFrames(message, responseCallback) {
             const response = [];
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), 500));
+                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, 500);
+            }, this.delay);
         }
     }
 };

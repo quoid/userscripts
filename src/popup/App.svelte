@@ -4,7 +4,9 @@
     import Toggle from "../shared/Components/Toggle.svelte";
     import Loader from "../shared/Components/Loader.svelte";
     import PopupItem from "./Components/PopupItem.svelte";
+    import View from "./Components/View.svelte";
     import UpdateView from "./Components/UpdateView.svelte";
+    import InstallView from "./Components/InstallView.svelte";
     import iconOpen from "../shared/img/icon-open.svg";
     import iconUpdate from "../shared/img/icon-update.svg";
     import iconClear from "../shared/img/icon-clear.svg";
@@ -26,6 +28,10 @@
     let header;
     let warn;
     let err;
+    let showInstallPrompt;
+    let showInstall;
+    let installViewUserscript;
+    let installViewUserscriptError;
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -119,6 +125,17 @@
             }
             disabled = false;
         });
+    }
+
+    function refreshView() {
+        error = undefined;
+        loading = true;
+        disabled = true;
+        items = [];
+        showUpdates = false;
+        updates = [];
+        inactive = false;
+        initialize();
     }
 
     async function openExtensionPage() {
@@ -236,6 +253,28 @@
         } else {
             updates = updatesResponse.updates;
         }
+
+        // check if current page url is a userscript
+        if (url.endsWith(".user.js")) {
+            // if it does, send message to content script
+            // content script will get dom content, and send it to the bg page
+            // the bg page will send the content to the swift side for parsing
+            // when swift side parses and returns, the bg page will send a response to the content script
+            // then the content script will send response to the popup
+            // Content scripts that are injected into web content cannot send messages to the native app
+            // https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
+            const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_00"});
+            if (response.error) {
+                console.log("Error checking .user.js url: " + response.error);
+            } else {
+                // the response will contain the string to display
+                // ex: {success: "Click to install"}
+                console.log(response);
+                let prompt = response.success;
+                showInstallPrompt = prompt;
+            }
+        }
+
         loading = false;
         disabled = false;
     }
@@ -253,6 +292,56 @@
         windowHeight = (window.outerHeight - (headerHeight + addHeight));
         main.style.height = windowHeight + "px";
         main.style.paddingBottom = headerHeight + "px";
+    }
+
+    async function showInstallView() {
+        // disable all buttons
+        disabled = true;
+        // show the install view
+        showInstall = true;
+        // get the active tab
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        // send content script a message on the active tab
+        const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_01"});
+        // when above message is sent, content script will get active tab's stringified dom content
+        // and then send that content and a message to the bg page
+        // the bg page will send a message and the content to the swift side for parsing
+        // swift side will parse then send a response to the bg page
+        // the bg page will then send the response to the content script
+        // the content script will then send a response here
+
+        // if the response includes an error, display it in the view
+        if (response.error) {
+            console.log("Can not install userscript: " + response.error);
+            installViewUserscriptError = response.error;
+        } else {
+            console.log(response);
+            installViewUserscript = response;
+        }
+        disabled = false;
+    }
+
+    async function installConfirm() {
+        // disabled all buttons
+        disabled = true;
+        // show loading element
+        loading = true;
+        // go back to main view
+        showInstall = false;
+        // get the active tab
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        // send content script a message on the active tab, which will start the install process
+        const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_02"});
+        if (response.error) {
+            error = response.error;
+            disabled = false;
+            loading = false;
+            return;
+        } else {
+            // if response did not have an error, userscript installed successfully
+            // refresh popup
+            refreshView();
+        }
     }
 
     onMount(async () => {
@@ -278,16 +367,7 @@
     />
     <IconButton
         icon={iconRefresh}
-        on:click={() => {
-            error = undefined;
-            loading = true;
-            disabled = true;
-            items = [];
-            showUpdates = false;
-            updates = [];
-            inactive = false;
-            initialize();
-        }}
+        on:click={refreshView}
         title={"Refresh view"}
         {disabled}
     />
@@ -299,7 +379,12 @@
     />
 </div>
 {#if !active}
-    <div class="warn" bind:this={warn}>Injection disabled</div>
+    <!-- <div class="warn" bind:this={warn}>Injection disabled</div> -->
+{/if}
+{#if showInstallPrompt}
+    <div class="warn" bind:this={warn}>
+        Userscript Detected: <span on:click={showInstallView}>{showInstallPrompt}</span>
+    </div>
 {/if}
 {#if error}
     <div class="error" bind:this={err}>
@@ -344,16 +429,32 @@
     </div>
 {/if}
 {#if showUpdates}
-    <UpdateView
-        closeClick={() => showUpdates = false}
-        updateClick={updateAll}
-        checkClick={checkForUpdates}
+    <View
+        headerTitle={"Updates"}
         loading={disabled}
-        updates={updates}
-        updateSingleClick={updateItem}
-    />
+        closeClick={() => showUpdates = false}
+    >
+        <UpdateView
+            checkClick={checkForUpdates}
+            updateClick={updateAll}
+            updateSingleClick={updateItem}
+            {updates}
+        />
+    </View>
+{:else if showInstall}
+    <View
+        headerTitle={"Install Userscript"}
+        loading={disabled}
+        closeClick={() => showInstall = false}
+    >
+        <InstallView
+            userscript={installViewUserscript}
+            installError={installViewUserscriptError}
+            installCancelClick={() => showInstall = false}
+            installConfirmClick={installConfirm}
+        />
+    </View>
 {/if}
-
 <style>
     .header {
         align-items: center;
@@ -406,6 +507,16 @@
 
     .warn {
         background-color: var(--color-yellow);
+    }
+
+    .warn span {
+        border-bottom: 1px dotted var(--color-bg-secondary);
+    }
+
+    @media (hover: hover) {
+        .warn span {
+            cursor: pointer;
+        }
     }
 
     .main {
