@@ -1,6 +1,6 @@
 <script>
-    import iconWarn from "../../shared/img/icon-warn.svg";
-    import iconError from "../../shared/img/icon-error.svg";
+    import iconWarn from "../../../shared/img/icon-warn.svg";
+    import iconError from "../../../shared/img/icon-error.svg";
     export let userscript;
     export let installError;
     export let installCancelClick;

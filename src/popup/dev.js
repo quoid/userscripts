@@ -1,5 +1,6 @@
 const _browser = {
     delay: 200,
+    platform: "ios",
     runtime: {
         getURL() {
             return "https://www.example.com/";
@@ -137,31 +138,61 @@ const _browser = {
                     ]
                 };
             } else if (message.name === "REQ_PLATFORM") {
-                response = {platform: "macos"};
+                response = {platform: _browser.platform};
             } else if (message.name === "TOGGLE_ITEM") {
-                response = {error: "Failed to toggle item"};
-                //response = {success: true};
+                //response = {error: "Failed to toggle item"};
+                response = {success: true};
             } else if (message.name === "POPUP_OPEN_EXTENSION_PAGE") {
                 response = {error: "Failed to get page url"};
                 window.open("https://github.com/quoid/userscripts");
+            } else if (message.name === "OPEN_SAVE_LOCATION") {
+                if (_browser.platform === "macos") {
+                    response = {success: true};
+                } else {
+                    response = {
+                        items: [
+                            {
+                                name: "Google Images Restored",
+                                filename: "Google Images Restored.js",
+                                disabled: false,
+                                type: "js",
+                                metadata: []
+                            },
+                            {
+                                name: "Subframe Script Managerial Staffing Company",
+                                filename: "Subframe Script.js",
+                                disabled: false,
+                                type: "css",
+                                metadata: []
+                            },
+                            {
+                                name: "Another Script from Managerial Staffing Company",
+                                filename: "Cool Script.js",
+                                disabled: false,
+                                type: "js",
+                                metadata: []
+                            }
+                        ]
+                    };
+                }
             }
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
+                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, this.delay);
+            }, _browser.delay);
         }
     },
     tabs: {
         query(message, responseCallback) {
             const response = [{url: "https://www.filmgarb.com/foo.user.js", id: 101}];
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
+                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, this.delay);
+            }, _browser.delay);
         },
         sendMessage(tabId, message, responseCallback) {
             console.log(`Tab ${tabId} got message: ${message.name}`);
@@ -181,22 +212,22 @@ const _browser = {
                 };
             }
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
+                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, this.delay);
+            }, _browser.delay);
         }
     },
     webNavigation: {
         getAllFrames(message, responseCallback) {
             const response = [];
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), this.delay));
+                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
             }
             setTimeout(() => {
                 responseCallback(response);
-            }, this.delay);
+            }, _browser.delay);
         }
     }
 };

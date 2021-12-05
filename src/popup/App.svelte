@@ -5,8 +5,9 @@
     import Loader from "../shared/Components/Loader.svelte";
     import PopupItem from "./Components/PopupItem.svelte";
     import View from "./Components/View.svelte";
-    import UpdateView from "./Components/UpdateView.svelte";
-    import InstallView from "./Components/InstallView.svelte";
+    import UpdateView from "./Components/Views/UpdateView.svelte";
+    import InstallView from "./Components/Views/InstallView.svelte";
+    import AllItemsView from "./Components/Views/AllItemsView.svelte";
     import iconOpen from "../shared/img/icon-open.svg";
     import iconUpdate from "../shared/img/icon-update.svg";
     import iconClear from "../shared/img/icon-clear.svg";
@@ -32,6 +33,8 @@
     let showInstall;
     let installViewUserscript;
     let installViewUserscriptError;
+    let showAll;
+    let allItems = [];
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -106,8 +109,10 @@
                 error = response.error;
             } else {
                 const i = items.findIndex(el => el === item);
+                const j = allItems.findIndex(el => el === item);
                 item.disabled = !item.disabled;
                 items[i] = item;
+                if (j >= 0) allItems[j] = item;
             }
             disabled = false;
         });
@@ -153,8 +158,20 @@
     }
 
     async function openSaveLocation() {
-        await browser.runtime.sendNativeMessage({name: "OPEN_SAVE_LOCATION"});
-        window.close();
+        disabled = true;
+        loading = true;
+        const response = await browser.runtime.sendNativeMessage({name: "OPEN_SAVE_LOCATION"});
+        if (response.success) {
+            window.close();
+        } else if (response.items) {
+            showAll = true;
+            allItems = response.items;
+        } else if (response.error) {
+            console.log("Error opening save location: " + response.error);
+            error = response.error;
+        }
+        disabled = false;
+        loading = false;
     }
 
     async function initialize() {
@@ -266,6 +283,7 @@
             const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_00"});
             if (response.error) {
                 console.log("Error checking .user.js url: " + response.error);
+                error = response.error;
             } else {
                 // the response will contain the string to display
                 // ex: {success: "Click to install"}
@@ -356,7 +374,7 @@
         icon={iconOpen}
         title={"Open save location"}
         on:click={openSaveLocation}
-        disabled={disabled || platform !== "macos"}
+        disabled={disabled}
     />
     <IconButton
         icon={iconUpdate}
@@ -452,6 +470,17 @@
             installError={installViewUserscriptError}
             installCancelClick={() => showInstall = false}
             installConfirmClick={installConfirm}
+        />
+    </View>
+{:else if showAll}
+    <View
+        headerTitle={"All Userscripts"}
+        loading={disabled}
+        closeClick={() => {showAll = false; refreshView()}}
+    >
+        <AllItemsView
+            allItems={allItems}
+            allItemsToggleItem={toggleItem}
         />
     </View>
 {/if}

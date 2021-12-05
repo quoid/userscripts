@@ -163,9 +163,17 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
         }
         else if name == "OPEN_SAVE_LOCATION" {
-            if openSaveLocation() {
-                response.userInfo = [SFExtensionMessageKey: ["success": true]]
-            }
+            #if os(macOS)
+                if openSaveLocation() {
+                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
+                }
+            #elseif os(iOS)
+                if let files = getAllFiles() {
+                    response.userInfo = [SFExtensionMessageKey: ["items": files]]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to get all files"]]
+                }
+            #endif
         }
         else if name == "USERSCRIPT_INSTALL_00" {
             if

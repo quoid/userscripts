@@ -1,5 +1,5 @@
 <script>
-    import iconUpdate from "../../shared/img/icon-update.svg";
+    import iconUpdate from "../../../shared/img/icon-update.svg";
 
     export let updates = [];
     export let updateClick;
