@@ -21,7 +21,7 @@ body {
     }
 
     body {
-        width: 100%;
+        width: 100vw;
     }
 }
 
@@ -42,7 +42,7 @@ body.ipados {
 }
 
 body.ios {
-    width: 100%;
+    width: 100vw;
 }
 
 noscript {
