@@ -1696,11 +1696,18 @@ func installCheck(_ content: String) -> [String: String]? {
         names.append(name)
     }
     
+    var directive = ""
+    #if os(macOS)
+        directive = "Click"
+    #elseif os(iOS)
+        directive = "Tap"
+    #endif
+    
     if names.contains(newName) {
-        return ["success": "Click to re-install"]
+        return ["success": "\(directive) to re-install"]
     }
     
-    return ["success": "Click to install"];
+    return ["success": "\(directive) to install"];
 }
 
 func installParse(_ content: String) -> [String: Any]? {
