@@ -12,6 +12,7 @@
         ],
         "indentation": 4,
         "no-descending-specificity": null,
+        "selector-class-pattern": null,
         "selector-pseudo-class-no-unknown": [
             true,
             {
