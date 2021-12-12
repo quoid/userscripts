@@ -272,7 +272,9 @@
         }
 
         // check if current page url is a userscript
-        if (url.endsWith(".user.js")) {
+        // strip fragments and query params
+        const strippedUrl = url.split(/[?#]/)[0];
+        if (strippedUrl.endsWith(".user.js")) {
             // if it does, send message to content script
             // content script will get dom content, and send it to the bg page
             // the bg page will send the content to the swift side for parsing
