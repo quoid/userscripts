@@ -3,6 +3,7 @@
 // it'll also be used to know if a specific url already has active context menu items
 let contextMenuItems = [];
 let platformGlobal;
+let xhrs = [];
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // content script listening seems to be the most reliable way to trigger injection
@@ -122,6 +123,45 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         })();
         return true;
+    } else if (request.name === "API_XHR_CS") {
+        // https://jsonplaceholder.typicode.com/posts
+        // get tab id and respond only to the content script that sent message
+        const tab = sender.tab.id;
+        const details = request.details;
+        const method = details.method ? details.method : "GET";
+        const user = details.user || null;
+        const password = details.password || null;
+        let body = details.data || null;
+        if (body && details.binary) body = new Blob([body], {type: "text/plain"});
+        const xhr = new XMLHttpRequest();
+        // push to global scoped array so it can be aborted
+        xhrs.push({xhr: xhr, xhrId: request.xhrId});
+        xhr.withCredentials = (details.user && details.password);
+        xhr.timeout = details.timeout || 0;
+        if (details.overrideMimeType) xhr.overrideMimeType(details.overrideMimeType);
+        xhrAddListeners(xhr, tab, request.xhrId, details);
+        xhr.open(method, details.url, true, user, password);
+        xhr.responseType = details.responseType || "";
+        if (details.headers) {
+            for (const key in details.headers) {
+                const val = details.headers[key];
+                xhr.setRequestHeader(key, val);
+            }
+        }
+        xhr.send(body);
+        // remove xhr from global scope when completed
+        xhr.onloadend = progressEvent => xhrs = xhrs.filter(x => x.xhrId !== request.xhrId);
+        // sendResponse({details: details});
+    } else if (request.name === "API_XHR_ABORT_CS") {
+        // get the xhrId from request
+        const xhrId = request.xhrId;
+        const match = xhrs.find(x => x.xhrId === xhrId);
+        if (match) {
+            match.xhr.abort();
+            // sendResponse(match);
+        } else {
+            console.log(`abort message recieved for ${xhrId}, but it couldn't be found`);
+        }
     } else if (
         request.name === "USERSCRIPT_INSTALL_00"
         || request.name === "USERSCRIPT_INSTALL_01"
@@ -129,12 +169,56 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     ) {
         const message = {name: request.name, content: request.content};
         browser.runtime.sendNativeMessage(message, response => {
-            console.log(response);
             sendResponse(response);
         });
         return true;
     }
 });
+
+function xhrHandleEvent(e, xhr, tab, xhrId) {
+    const name = `RESP_API_XHR_BG_${e.type.toUpperCase()}`;
+    const x = {
+        readyState: xhr.readyState,
+        response: xhr.response,
+        responseHeaders: xhr.getAllResponseHeaders(),
+        responseType: xhr.responseType,
+        responseURL: xhr.responseURL,
+        status: xhr.status,
+        statusText: xhr.statusText,
+        timeout: xhr.timeout,
+        withCredentials: xhr.withCredentials
+    };
+    // only include responseText when applicable
+    if (["", "text"].includes(xhr.responseType)) x.responseText = xhr.responseText;
+    browser.tabs.sendMessage(tab, {name: name, xhrId: xhrId, response: x});
+}
+
+function xhrAddListeners(xhr, tab, xhrId, details) {
+    if (details.onabort) {
+        xhr.addEventListener("abort", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.onerror) {
+        xhr.addEventListener("error", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.onload) {
+        xhr.addEventListener("load", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.onloadend) {
+        xhr.addEventListener("loadend", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.onloadstart) {
+        xhr.addEventListener("loadstart", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.onprogress) {
+        xhr.addEventListener("progress", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.onreadystatechange) {
+        xhr.addEventListener("readystatechange", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+    if (details.ontimeout) {
+        xhr.addEventListener("timeout", e => xhrHandleEvent(e, xhr, tab, xhrId));
+    }
+}
 
 function contextClick(info, tab) {
     browser.tabs.query({currentWindow: true, active: true}, tabs => {

@@ -60,6 +60,9 @@ function injectJS(filename, code, scope, grants) {
         } else if (grant === "GM.addStyle" || grant === "addStyle") {
             api += `\n${addStyle}\n`;
             gmVals.push("addStyle: addStyle");
+        } else if (grant === "GM_xmlhttpRequest" || grant === "GM.xmlHttpRequest") {
+            api += `\n${xhr}\nconst GM_xmlhttpRequest = xhr;\n`;
+            gmVals.push("xmlHttpRequest: xhr");
         }
     });
     // create api aliases
@@ -336,6 +339,65 @@ function addStyle(css) {
     });
 }
 
+// when xhr is called it sends a message to the content script
+// and adds it's own event listener to get responses from content script
+// each xhr has a unique id so it won't respond to different xhr
+// the content script sends the xhr details to the background script
+// the background script sends messages back to the content script for all xhr events
+// the content script relays these messages back to the context where xhr was called
+// if xhr was called with event handler functions they will be executed when those relays come in
+function xhr(details) {
+    // if details didn't include url, do nothing
+    if (!details.url) return;
+    // create unique id for the xhr
+    const xhrId = Math.random().toString(36).substring(1, 9);
+    // strip out functions from details, kind of hacky
+    const detailsParsed = JSON.parse(JSON.stringify(details));
+    // check which functions are included in the original details object
+    // add a bool to indicate if event listeners should be attached
+    if (details.onabort) detailsParsed.onabort = true;
+    if (details.onerror) detailsParsed.onerror = true;
+    if (details.onload) detailsParsed.onload = true;
+    if (details.onloadend) detailsParsed.onloadend = true;
+    if (details.onloadstart) detailsParsed.onloadstart = true;
+    if (details.onprogress) detailsParsed.onprogress = true;
+    if (details.onreadystatechange) detailsParsed.onreadystatechange = true;
+    if (details.ontimeout) detailsParsed.ontimeout = true;
+    // abort function gets returned when this function is called
+    const abort = () => {
+        window.postMessage({id: uid, name: "API_XHR_ABORT_INJ", xhrId: xhrId});
+    };
+    const callback = e => {
+        const name = e.data.name;
+        const response = e.data.response;
+        if (!name.startsWith("RESP_API_XHR_CS") || e.data.xhrId !== xhrId) return;
+        if (name === "RESP_API_XHR_CS") {
+            //
+        } else if (name.includes("ABORT") && details.onabort) {
+            details.onabort(response);
+        } else if (name.includes("ERROR") && details.onerror) {
+            details.onerror(response);
+        } else if (name === "RESP_API_XHR_CS_LOAD" && details.onload) {
+            details.onload(response);
+        } else if (name.includes("LOADEND") && details.onloadend) {
+            details.onloadend(response);
+            // remove event listener when xhr is complete
+            window.removeEventListener("message", callback);
+        } else if (name.includes("LOADSTART") && details.onloadstart) {
+            details.onloadtstart(response);
+        } else if (name.includes("PROGRESS") && details.onprogress) {
+            details.onprogress(response);
+        } else if (name.includes("READYSTATECHANGE") && details.onreadystatechange) {
+            details.onreadystatechange(response);
+        } else if (name.includes("TIMEOUT") && details.ontimeout) {
+            details.ontimeout(response);
+        }
+    };
+    window.addEventListener("message", callback);
+    window.postMessage({id: uid, name: "API_XHR_INJ", details: detailsParsed, xhrId: xhrId});
+    return {abort: abort};
+}
+
 // listen for messages from background, popup, etc...
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.name === "CONTEXT_RUN") {
@@ -366,6 +428,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
             if (found) break;
         }
+    } else if (request.name.startsWith("RESP_API_XHR_BG_")) {
+        const name = request.name.replace("_BG_", "_CS_");
+        window.postMessage({name: name, response: request.response, xhrId: request.xhrId});
     } else if (
         request.name === "USERSCRIPT_INSTALL_00"
         || request.name === "USERSCRIPT_INSTALL_01"
@@ -373,7 +438,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     ) {
         const content = document.body.innerText;
         browser.runtime.sendMessage({name: request.name, content: content}, response => {
-            console.log(response);
             sendResponse(response);
         });
         return true;
@@ -423,6 +487,14 @@ window.addEventListener("message", e => {
         } catch (e) {
             console.log(e);
         }
+    } else if (e.data.name === "API_XHR_INJ") {
+        message = {name: "API_XHR_CS", details: e.data.details, xhrId: e.data.xhrId};
+        browser.runtime.sendMessage(message, response => {
+            window.postMessage({id: e.data.id, name: "RESP_API_XHR_CS", response: response, xhrId: e.data.xhrId});
+        });
+    } else if (e.data.name === "API_XHR_ABORT_INJ") {
+        message = {name: "API_XHR_ABORT_CS", xhrId: e.data.xhrId};
+        browser.runtime.sendMessage(message);
     }
 });
 
