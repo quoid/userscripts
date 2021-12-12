@@ -39,6 +39,7 @@
             }
         ],
         "dot-notation": "error",
+        "eqeqeq": ["error", "smart"],
         "indent": [
             "error",
             4,
@@ -63,6 +64,15 @@
                 "args": "none"
             }
         ],
+        "no-use-before-define": [
+            "error",
+            {
+                "classes": true,
+                "functions": false,
+                "variables": true
+            }
+        ],
+        "no-var": "error",
         "object-curly-spacing": [
             "error",
             "never"
@@ -75,6 +85,7 @@
             "error",
             "before"
         ],
+        "prefer-const": "error",
         "quotes": [
             "error",
             "double"
