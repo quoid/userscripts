@@ -681,8 +681,14 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
     }
     // loop through resource urls and attempt to fetch it
     for resourceUrlString in resources {
+        // get the path of the url string
+        guard let resourceUrlPath = URLComponents(string: resourceUrlString)?.path else {
+            // if path can not be obtained, skip and log
+            logText("failed to get path on \(filename) for \(resourceUrlString)")
+            continue
+        }
         // skip urls pointing to files of different types
-        if resourceUrlString.hasSuffix(fileType) {
+        if resourceUrlPath.hasSuffix(fileType) {
             guard let resourceFilename = sanitize(resourceUrlString) else {return false}
             let fileURL = directory.appendingPathComponent(resourceFilename)
             // only attempt to get resource if it does not yet exist
