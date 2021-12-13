@@ -8,15 +8,17 @@ class ViewController: NSViewController {
     @IBOutlet weak var enabledText: NSTextField!
     @IBOutlet weak var enabledIcon: NSView!
 
-    let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+    let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     let hostID = Bundle.main.bundleIdentifier!
+    let foo = Bundle.main.bundleIdentifier
     let extensionID = "com.userscripts.macos.Userscripts-Extension"
     let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
 
     override func viewDidLoad() {
         super.viewDidLoad()
         let location = documentsDirectory.replacingOccurrences(of: hostID, with: extensionID)
-        self.appName.stringValue = "Userscripts Safari Version \(appVersion)"
+        self.appName.stringValue = "Userscripts Safari Version \(appVersion) (\(buildNumber))"
         setExtensionState()
         NotificationCenter.default.addObserver(
             self, selector: #selector(setExtensionState), name: NSApplication.didBecomeActiveNotification, object: nil
