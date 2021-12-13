@@ -27,6 +27,14 @@
                     {/each}
                 </li>
             {/if}
+            {#if userscript.include}
+                <li class="userscript--field">
+                    <div>@include</div>
+                    {#each userscript.include as include}
+                        <div class="truncate">{include}</div>
+                    {/each}
+                </li>
+            {/if}
             {#if userscript.require}
                 <li class="userscript--field">
                     <div>@require</div>
@@ -142,8 +150,7 @@
     }
 
     button {
-        /* ffffffa6 is -text-color-secondary */
-        background-color: #ffffffa6;
+        background-color: #ffffffa6; /* -text-color-secondary */
         border-radius: var(--border-radius);
         color: var(--color-bg-primary);
         flex-grow: 1;

@@ -1846,6 +1846,12 @@
     	return child_ctx;
     }
 
+    function get_each_context_3(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[13] = list[i];
+    	return child_ctx;
+    }
+
     // (16:25) 
     function create_if_block_1(ctx) {
     	let ul;
@@ -1857,21 +1863,23 @@
     	let t3;
     	let t4;
     	let t5;
+    	let t6;
     	let div2;
     	let div0;
-    	let t6;
+    	let t7;
     	let div1;
-    	let t8;
+    	let t9;
     	let div3;
     	let button0;
-    	let t10;
+    	let t11;
     	let button1;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*userscript*/ ctx[0].description && create_if_block_5(ctx);
-    	let if_block1 = /*userscript*/ ctx[0].match && create_if_block_4(ctx);
-    	let if_block2 = /*userscript*/ ctx[0].require && create_if_block_3(ctx);
-    	let if_block3 = /*userscript*/ ctx[0].grant && create_if_block_2(ctx);
+    	let if_block0 = /*userscript*/ ctx[0].description && create_if_block_6(ctx);
+    	let if_block1 = /*userscript*/ ctx[0].match && create_if_block_5(ctx);
+    	let if_block2 = /*userscript*/ ctx[0].include && create_if_block_4(ctx);
+    	let if_block3 = /*userscript*/ ctx[0].require && create_if_block_3(ctx);
+    	let if_block4 = /*userscript*/ ctx[0].grant && create_if_block_2(ctx);
 
     	return {
     		c() {
@@ -1887,26 +1895,28 @@
     			t4 = space();
     			if (if_block3) if_block3.c();
     			t5 = space();
+    			if (if_block4) if_block4.c();
+    			t6 = space();
     			div2 = element("div");
     			div0 = element("div");
-    			t6 = space();
+    			t7 = space();
     			div1 = element("div");
     			div1.textContent = "Be sure you trust the author before installing. Nefarious code can exploit your security and privacy.";
-    			t8 = space();
+    			t9 = space();
     			div3 = element("div");
     			button0 = element("button");
     			button0.textContent = "Cancel";
-    			t10 = space();
+    			t11 = space();
     			button1 = element("button");
     			button1.textContent = "Install";
-    			attr(li, "class", "userscript--name svelte-410gky");
-    			attr(ul, "class", "svelte-410gky");
-    			attr(div0, "class", "badge--icon svelte-410gky");
-    			attr(div1, "class", "badge--text svelte-410gky");
-    			attr(div2, "class", "badge svelte-410gky");
-    			attr(button0, "class", "cancel svelte-410gky");
-    			attr(button1, "class", "install svelte-410gky");
-    			attr(div3, "class", "buttons svelte-410gky");
+    			attr(li, "class", "userscript--name svelte-tdpz3j");
+    			attr(ul, "class", "svelte-tdpz3j");
+    			attr(div0, "class", "badge--icon svelte-tdpz3j");
+    			attr(div1, "class", "badge--text svelte-tdpz3j");
+    			attr(div2, "class", "badge svelte-tdpz3j");
+    			attr(button0, "class", "cancel svelte-tdpz3j");
+    			attr(button1, "class", "install svelte-tdpz3j");
+    			attr(div3, "class", "buttons svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, ul, anchor);
@@ -1920,16 +1930,18 @@
     			if (if_block2) if_block2.m(ul, null);
     			append(ul, t4);
     			if (if_block3) if_block3.m(ul, null);
-    			insert(target, t5, anchor);
+    			append(ul, t5);
+    			if (if_block4) if_block4.m(ul, null);
+    			insert(target, t6, anchor);
     			insert(target, div2, anchor);
     			append(div2, div0);
     			div0.innerHTML = iconWarn;
-    			append(div2, t6);
+    			append(div2, t7);
     			append(div2, div1);
-    			insert(target, t8, anchor);
+    			insert(target, t9, anchor);
     			insert(target, div3, anchor);
     			append(div3, button0);
-    			append(div3, t10);
+    			append(div3, t11);
     			append(div3, button1);
 
     			if (!mounted) {
@@ -1953,7 +1965,7 @@
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_5(ctx);
+    					if_block0 = create_if_block_6(ctx);
     					if_block0.c();
     					if_block0.m(ul, t2);
     				}
@@ -1966,7 +1978,7 @@
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block_4(ctx);
+    					if_block1 = create_if_block_5(ctx);
     					if_block1.c();
     					if_block1.m(ul, t3);
     				}
@@ -1975,11 +1987,11 @@
     				if_block1 = null;
     			}
 
-    			if (/*userscript*/ ctx[0].require) {
+    			if (/*userscript*/ ctx[0].include) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
-    					if_block2 = create_if_block_3(ctx);
+    					if_block2 = create_if_block_4(ctx);
     					if_block2.c();
     					if_block2.m(ul, t4);
     				}
@@ -1988,17 +2000,30 @@
     				if_block2 = null;
     			}
 
-    			if (/*userscript*/ ctx[0].grant) {
+    			if (/*userscript*/ ctx[0].require) {
     				if (if_block3) {
     					if_block3.p(ctx, dirty);
     				} else {
-    					if_block3 = create_if_block_2(ctx);
+    					if_block3 = create_if_block_3(ctx);
     					if_block3.c();
-    					if_block3.m(ul, null);
+    					if_block3.m(ul, t5);
     				}
     			} else if (if_block3) {
     				if_block3.d(1);
     				if_block3 = null;
+    			}
+
+    			if (/*userscript*/ ctx[0].grant) {
+    				if (if_block4) {
+    					if_block4.p(ctx, dirty);
+    				} else {
+    					if_block4 = create_if_block_2(ctx);
+    					if_block4.c();
+    					if_block4.m(ul, null);
+    				}
+    			} else if (if_block4) {
+    				if_block4.d(1);
+    				if_block4 = null;
     			}
     		},
     		d(detaching) {
@@ -2007,9 +2032,10 @@
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
     			if (if_block3) if_block3.d();
-    			if (detaching) detach(t5);
+    			if (if_block4) if_block4.d();
+    			if (detaching) detach(t6);
     			if (detaching) detach(div2);
-    			if (detaching) detach(t8);
+    			if (detaching) detach(t9);
     			if (detaching) detach(div3);
     			mounted = false;
     			run_all(dispose);
@@ -2036,8 +2062,8 @@
     			p = element("p");
     			p.textContent = "Error: OK GO";
     			html_tag = new HtmlTag(t0);
-    			attr(p, "class", "svelte-410gky");
-    			attr(div1, "class", "install__error svelte-410gky");
+    			attr(p, "class", "svelte-tdpz3j");
+    			attr(div1, "class", "install__error svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -2055,7 +2081,7 @@
     }
 
     // (19:12) {#if userscript.description}
-    function create_if_block_5(ctx) {
+    function create_if_block_6(ctx) {
     	let li;
     	let t_value = /*userscript*/ ctx[0].description + "";
     	let t;
@@ -2064,7 +2090,7 @@
     		c() {
     			li = element("li");
     			t = text(t_value);
-    			attr(li, "class", "userscript--description svelte-410gky");
+    			attr(li, "class", "userscript--description svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2080,15 +2106,15 @@
     }
 
     // (22:12) {#if userscript.match}
-    function create_if_block_4(ctx) {
+    function create_if_block_5(ctx) {
     	let li;
     	let div;
     	let t1;
-    	let each_value_2 = /*userscript*/ ctx[0].match;
+    	let each_value_3 = /*userscript*/ ctx[0].match;
     	let each_blocks = [];
 
-    	for (let i = 0; i < each_value_2.length; i += 1) {
-    		each_blocks[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
+    	for (let i = 0; i < each_value_3.length; i += 1) {
+    		each_blocks[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
     	}
 
     	return {
@@ -2102,8 +2128,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-410gky");
-    			attr(li, "class", "userscript--field svelte-410gky");
+    			attr(div, "class", "svelte-tdpz3j");
+    			attr(li, "class", "userscript--field svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2116,7 +2142,98 @@
     		},
     		p(ctx, dirty) {
     			if (dirty & /*userscript*/ 1) {
-    				each_value_2 = /*userscript*/ ctx[0].match;
+    				each_value_3 = /*userscript*/ ctx[0].match;
+    				let i;
+
+    				for (i = 0; i < each_value_3.length; i += 1) {
+    					const child_ctx = get_each_context_3(ctx, each_value_3, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_3(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(li, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_3.length;
+    			}
+    		},
+    		d(detaching) {
+    			if (detaching) detach(li);
+    			destroy_each(each_blocks, detaching);
+    		}
+    	};
+    }
+
+    // (25:20) {#each userscript.match as match}
+    function create_each_block_3(ctx) {
+    	let div;
+    	let t_value = /*match*/ ctx[13] + "";
+    	let t;
+
+    	return {
+    		c() {
+    			div = element("div");
+    			t = text(t_value);
+    			attr(div, "class", "truncate svelte-tdpz3j");
+    		},
+    		m(target, anchor) {
+    			insert(target, div, anchor);
+    			append(div, t);
+    		},
+    		p(ctx, dirty) {
+    			if (dirty & /*userscript*/ 1 && t_value !== (t_value = /*match*/ ctx[13] + "")) set_data(t, t_value);
+    		},
+    		d(detaching) {
+    			if (detaching) detach(div);
+    		}
+    	};
+    }
+
+    // (30:12) {#if userscript.include}
+    function create_if_block_4(ctx) {
+    	let li;
+    	let div;
+    	let t1;
+    	let each_value_2 = /*userscript*/ ctx[0].include;
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
+    	}
+
+    	return {
+    		c() {
+    			li = element("li");
+    			div = element("div");
+    			div.textContent = "@include";
+    			t1 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr(div, "class", "svelte-tdpz3j");
+    			attr(li, "class", "userscript--field svelte-tdpz3j");
+    		},
+    		m(target, anchor) {
+    			insert(target, li, anchor);
+    			append(li, div);
+    			append(li, t1);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(li, null);
+    			}
+    		},
+    		p(ctx, dirty) {
+    			if (dirty & /*userscript*/ 1) {
+    				each_value_2 = /*userscript*/ ctx[0].include;
     				let i;
 
     				for (i = 0; i < each_value_2.length; i += 1) {
@@ -2145,24 +2262,24 @@
     	};
     }
 
-    // (25:20) {#each userscript.match as match}
+    // (33:20) {#each userscript.include as include}
     function create_each_block_2(ctx) {
     	let div;
-    	let t_value = /*match*/ ctx[10] + "";
+    	let t_value = /*include*/ ctx[10] + "";
     	let t;
 
     	return {
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-410gky");
+    			attr(div, "class", "truncate svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
     			append(div, t);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*userscript*/ 1 && t_value !== (t_value = /*match*/ ctx[10] + "")) set_data(t, t_value);
+    			if (dirty & /*userscript*/ 1 && t_value !== (t_value = /*include*/ ctx[10] + "")) set_data(t, t_value);
     		},
     		d(detaching) {
     			if (detaching) detach(div);
@@ -2170,7 +2287,7 @@
     	};
     }
 
-    // (30:12) {#if userscript.require}
+    // (38:12) {#if userscript.require}
     function create_if_block_3(ctx) {
     	let li;
     	let div;
@@ -2193,8 +2310,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-410gky");
-    			attr(li, "class", "userscript--field svelte-410gky");
+    			attr(div, "class", "svelte-tdpz3j");
+    			attr(li, "class", "userscript--field svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2236,7 +2353,7 @@
     	};
     }
 
-    // (33:20) {#each userscript.require as require}
+    // (41:20) {#each userscript.require as require}
     function create_each_block_1(ctx) {
     	let div;
     	let t_value = /*require*/ ctx[7] + "";
@@ -2246,7 +2363,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-410gky");
+    			attr(div, "class", "truncate svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2261,7 +2378,7 @@
     	};
     }
 
-    // (38:12) {#if userscript.grant}
+    // (46:12) {#if userscript.grant}
     function create_if_block_2(ctx) {
     	let li;
     	let div;
@@ -2284,8 +2401,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-410gky");
-    			attr(li, "class", "userscript--field svelte-410gky");
+    			attr(div, "class", "svelte-tdpz3j");
+    			attr(li, "class", "userscript--field svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2327,7 +2444,7 @@
     	};
     }
 
-    // (41:20) {#each userscript.grant as grant}
+    // (49:20) {#each userscript.grant as grant}
     function create_each_block$1(ctx) {
     	let div;
     	let t_value = /*grant*/ ctx[4] + "";
@@ -2337,7 +2454,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "svelte-410gky");
+    			attr(div, "class", "svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2367,7 +2484,7 @@
     		c() {
     			div = element("div");
     			if (if_block) if_block.c();
-    			attr(div, "class", "view--install svelte-410gky");
+    			attr(div, "class", "view--install svelte-tdpz3j");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2717,12 +2834,12 @@
     	return child_ctx;
     }
 
-    // (401:0) {#if !active}
+    // (399:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (404:0) {#if showInstallPrompt}
+    // (402:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2764,7 +2881,7 @@
     	};
     }
 
-    // (409:0) {#if error}
+    // (407:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2814,7 +2931,7 @@
     	};
     }
 
-    // (431:8) {:else}
+    // (429:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -2887,7 +3004,7 @@
     	};
     }
 
-    // (429:35) 
+    // (427:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -2909,8 +3026,8 @@
     	};
     }
 
-    // (425:28) 
-    function create_if_block_6(ctx) {
+    // (423:28) 
+    function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
     	let span;
@@ -2947,7 +3064,7 @@
     	};
     }
 
-    // (423:8) {#if inactive}
+    // (421:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -2969,7 +3086,7 @@
     	};
     }
 
-    // (420:4) {#if loading}
+    // (418:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -2999,7 +3116,7 @@
     	};
     }
 
-    // (433:16) {#each list as item (item.filename)}
+    // (431:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3058,7 +3175,7 @@
     	};
     }
 
-    // (446:0) {#if !inactive && platform === "macos"}
+    // (444:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3091,7 +3208,7 @@
     	};
     }
 
-    // (477:18) 
+    // (475:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3140,7 +3257,7 @@
     	};
     }
 
-    // (464:22) 
+    // (462:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3189,7 +3306,7 @@
     	};
     }
 
-    // (451:0) {#if showUpdates}
+    // (449:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3238,7 +3355,7 @@
     	};
     }
 
-    // (478:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}     >
+    // (476:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3278,7 +3395,7 @@
     	};
     }
 
-    // (465:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}     >
+    // (463:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3322,7 +3439,7 @@
     	};
     }
 
-    // (452:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}     >
+    // (450:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -3437,7 +3554,7 @@
     	const if_block_creators = [
     		create_if_block_4$1,
     		create_if_block_5$1,
-    		create_if_block_6,
+    		create_if_block_6$1,
     		create_if_block_7,
     		create_else_block$3
     	];
@@ -3817,7 +3934,7 @@
     			$$invalidate(0, error = response.error);
     			$$invalidate(5, showUpdates = false);
     		} else {
-    			$$invalidate(6, updates = updates.filter(e => e.filename != item.filename));
+    			$$invalidate(6, updates = updates.filter(e => e.filename !== item.filename));
     			$$invalidate(4, items = response.items);
     		}
 
@@ -4017,9 +4134,8 @@
     			} else {
     				// the response will contain the string to display
     				// ex: {success: "Click to install"}
-    				console.log(response);
+    				const prompt = response.success;
 
-    				let prompt = response.success;
     				$$invalidate(15, showInstallPrompt = prompt);
     			}
     		}
@@ -4029,7 +4145,7 @@
     	}
 
     	function resize() {
-    		if (platform != "ios") return;
+    		if (platform !== "ios") return;
 
     		// on ios programmatically set the height of the scrollable container
     		// first get the header height
@@ -4071,7 +4187,6 @@
     			console.log("Can not install userscript: " + response.error);
     			$$invalidate(18, installViewUserscriptError = response.error);
     		} else {
-    			console.log(response);
     			$$invalidate(17, installViewUserscript = response);
     		}
 
@@ -4167,7 +4282,7 @@
     		if ($$self.$$.dirty[0] & /*list*/ 2097152) {
     			 if (list.length > 1 && list.length % 2 === 0) {
     				$$invalidate(8, rowColors = "even");
-    			} else if (list.length > 1 && list.length % 2 != 0) {
+    			} else if (list.length > 1 && list.length % 2 !== 0) {
     				$$invalidate(8, rowColors = "odd");
     			} else {
     				$$invalidate(8, rowColors = undefined);
