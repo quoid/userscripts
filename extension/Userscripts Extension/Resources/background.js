@@ -7,12 +7,13 @@ let xhrs = [];
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // content script listening seems to be the most reliable way to trigger injection
-    if (request.name === "REQ_USERSCRIPTS") {
+    const name = request.name;
+    if (name === "REQ_USERSCRIPTS") {
         const url = sender.url;
         // use frameId to determine if request came from top level window
         const isTop = sender.frameId === 0 ? true : false;
         // ask swift layer to provide code for current url(s)
-        const message = {name: request.name, url: url, isTop: isTop};
+        const message = {name: name, url: url, isTop: isTop};
         browser.runtime.sendNativeMessage(message, response => {
             // send code back to content script for parsing and injection
             // could use tabs.executeScript(sender.tab.id) for content context injection
@@ -25,7 +26,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
         return true;
-    } else if (request.name === "CONTEXT_CREATE") {
+    } else if (name === "CONTEXT_CREATE") {
         const menuItemId = request.menuItemId;
         const menuObj = {
             contexts: ["all"],
@@ -52,38 +53,38 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // the user could have edited the userscript since the first application
         if (contextMenuItems.includes(menuItemId)) {
             browser.contextMenus.remove(menuItemId, () => {
-                contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
+                contextMenuItems = contextMenuItems.filter(a => a !== menuItemId);
                 browser.contextMenus.create(menuObj, onCreate);
             });
         } else {
             browser.contextMenus.create(menuObj, onCreate);
         }
         return true;
-    } else if (request.name === "CONTEXT_REMOVE") {
+    } else if (name === "CONTEXT_REMOVE") {
         // tab closes events dispatch remove request with a menuItemId
         // remove the context menu item associated with the menuItemId when that event comes in
         // if tabs with the same url exist, the context menu item will be recreated on right click
         const menuItemId = request.menuItemId;
         browser.contextMenus.remove(menuItemId, () => {
-            contextMenuItems = contextMenuItems.filter(a => a != menuItemId);
+            contextMenuItems = contextMenuItems.filter(a => a !== menuItemId);
             purgeContextMenus();
         });
-    } else if (request.name === "API_OPEN_TAB") {
-        const active = (request.active == true) ? true : false;
+    } else if (name === "API_OPEN_TAB") {
+        const active = (request.active === true) ? true : false;
         browser.tabs.create({active: active, index: sender.tab.index + 1, url: request.url}, response => {
             sendResponse(response);
         });
         return true;
-    } else if (request.name === "API_CLOSE_TAB") {
+    } else if (name === "API_CLOSE_TAB") {
         browser.tabs.remove(sender.tab.id, response => {/* */});
-    } else if (request.name === "API_SET_VALUE") {
+    } else if (name === "API_SET_VALUE") {
         const item = {};
         item[request.filename + "---" + request.key] = request.value;
         browser.storage.local.set(item, response => {
             sendResponse({success: true});
         });
         return true;
-    } else if (request.name === "API_GET_VALUE") {
+    } else if (name === "API_GET_VALUE") {
         const key = request.filename + "---" + request.key;
         browser.storage.local.get(key, item => {
             if (Object.keys(item).length === 0 && request.defaultValue) {
@@ -93,13 +94,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         });
         return true;
-    } else if (request.name === "API_DELETE_VALUE") {
+    } else if (name === "API_DELETE_VALUE") {
         const key = request.filename + "---" + request.key;
         browser.storage.local.remove(key, response => {
             sendResponse({success: true});
         });
         return true;
-    } else if (request.name === "API_LIST_VALUES") {
+    } else if (name === "API_LIST_VALUES") {
         const prefix = request.filename + "---";
         const keys = [];
         browser.storage.local.get().then(items => {
@@ -112,7 +113,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse(keys);
         });
         return true;
-    } else if (request.name === "REQ_PLATFORM") {
+    } else if (name === "REQ_PLATFORM") {
         (async () => {
             try {
                 const p = await getPlatform();
@@ -123,7 +124,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         })();
         return true;
-    } else if (request.name === "API_XHR_CS") {
+    } else if (name === "API_XHR_CS") {
         // https://jsonplaceholder.typicode.com/posts
         // get tab id and respond only to the content script that sent message
         const tab = sender.tab.id;
@@ -152,7 +153,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // remove xhr from global scope when completed
         xhr.onloadend = progressEvent => xhrs = xhrs.filter(x => x.xhrId !== request.xhrId);
         // sendResponse({details: details});
-    } else if (request.name === "API_XHR_ABORT_CS") {
+    } else if (name === "API_XHR_ABORT_CS") {
         // get the xhrId from request
         const xhrId = request.xhrId;
         const match = xhrs.find(x => x.xhrId === xhrId);
@@ -162,12 +163,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         } else {
             console.log(`abort message recieved for ${xhrId}, but it couldn't be found`);
         }
-    } else if (
-        request.name === "USERSCRIPT_INSTALL_00"
-        || request.name === "USERSCRIPT_INSTALL_01"
-        || request.name === "USERSCRIPT_INSTALL_02"
-    ) {
-        const message = {name: request.name, content: request.content};
+    } else if (["USERSCRIPT_INSTALL_00", "USERSCRIPT_INSTALL_01", "USERSCRIPT_INSTALL_02"].includes(name)) {
+        const message = {name: name, content: request.content};
         browser.runtime.sendNativeMessage(message, response => {
             sendResponse(response);
         });
@@ -255,7 +252,7 @@ function purgeContextMenus() {
 async function setBadgeCount() {
     // only set badge on macOS
     const platform = await getPlatform();
-    if (platform != "macos") return;
+    if (platform !== "macos") return;
 
     const tabs = await new Promise(resolve => {
         browser.tabs.query({currentWindow: true, active: true}, tabs => {

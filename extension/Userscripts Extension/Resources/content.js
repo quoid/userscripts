@@ -13,11 +13,11 @@ let platform;
 browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
     // save code to data var so cspFallback can be attempted
     data = response.code;
-    if (Object.keys(data).length != 0) parseCode(data);
+    if (Object.keys(data).length !== 0) parseCode(data);
 });
 
 function sortByWeight(o) {
-    let sorted = {};
+    const sorted = {};
     Object.keys(o).sort((a, b) => o[b].weight - o[a].weight).forEach(key => sorted[key] = o[key]);
     return sorted;
 }
@@ -35,7 +35,7 @@ function injectJS(filename, code, scope, grants) {
     console.info(`Injecting ${filename}`);
     // include api methods
     let api = "";
-    let gmVals = [];
+    const gmVals = [];
     if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
     grants.forEach(grant => {
         if (grant === "GM.openInTab" || grant === "openInTab") {
@@ -66,9 +66,9 @@ function injectJS(filename, code, scope, grants) {
         }
     });
     // create api aliases
-    let GM = `const GM = {${gmVals.join(",")}};`;
+    const GM = `const GM = {${gmVals.join(",")}};`;
     code = `(function() {\n${api}\n${GM}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
-    if (scope != "content") {
+    if (scope !== "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
         document.body.appendChild(tag);
@@ -143,7 +143,7 @@ function parseCode(data, fallback = false) {
                 timings.forEach(timing => {
                     // get the nested timing objects, separated by filename, skip if empty
                     const timingObject = scopeObject[timing];
-                    if (Object.keys(timingObject).length != 0) {
+                    if (Object.keys(timingObject).length !== 0) {
                         sorted = sortByWeight(timingObject);
                         for (const filename in sorted) {
                             const code = sorted[filename].code;
@@ -172,8 +172,8 @@ function cspFallback(e) {
         // get all "auto" code
         // since other extensions can trigger a security policy violation event
         // make sure data var is not undefined before attempting fallback
-        if (data && Object.keys(data.js.auto).length != 0 && cspFallbackAttempted < 1) {
-            let n = {"js": {"auto": {}}};
+        if (data && Object.keys(data.js.auto).length !== 0 && cspFallbackAttempted < 1) {
+            const n = {"js": {"auto": {}}};
             n.js.auto = data.js.auto;
             parseCode(n, true);
         }
@@ -183,7 +183,7 @@ function cspFallback(e) {
 
 async function processJSContextMenuItems() {
     // if not top window, stop execution
-    if (window != window.top) return;
+    if (window !== window.top) return;
     // context menu injection is macOS exclusive
     // check if platform is stored
     if (!platform) {
@@ -192,7 +192,7 @@ async function processJSContextMenuItems() {
         if (response.platform) platform = response.platform;
     }
     // if not macOS, stop execution
-    if (platform != "macos") return;
+    if (platform !== "macos") return;
     const contextMenuCodeObject = data.js["context-menu"];
     for (const scope in contextMenuCodeObject) {
         const scopeObject = contextMenuCodeObject[scope];
@@ -244,7 +244,7 @@ function addContextMenuItem(filename, name) {
 function openInTab(url, openInBackground) {
     return new Promise(resolve => {
         const callback = e => {
-            if (e.data.id != uid || e.data.name !== "RESP_OPEN_TAB") return;
+            if (e.data.id !== uid || e.data.name !== "RESP_OPEN_TAB") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
@@ -262,7 +262,7 @@ function setValue(key, value) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id != uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename != filename) return;
+            if (e.data.id !== uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
@@ -276,7 +276,7 @@ function getValue(key, defaultValue) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id != uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename != filename) return;
+            if (e.data.id !== uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
@@ -290,7 +290,7 @@ function listValues() {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id != uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename != filename) return;
+            if (e.data.id !== uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
@@ -304,7 +304,7 @@ function deleteValue(key) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id != uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename != filename) return;
+            if (e.data.id !== uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
@@ -329,7 +329,7 @@ function addStyle(css) {
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id != uid || e.data.name !== "RESP_ADD_STYLE") return;
+            if (e.data.id !== uid || e.data.name !== "RESP_ADD_STYLE") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
@@ -400,9 +400,10 @@ function xhr(details) {
 
 // listen for messages from background, popup, etc...
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.name === "CONTEXT_RUN") {
+    const name = request.name;
+    if (name === "CONTEXT_RUN") {
         // only run context menu script in top window
-        if (window != window.top) return;
+        if (window !== window.top) return;
         // get the filename from the menuItemId sent with the request
         const filename = request.menuItemId.split("&$&")[1];
         // clone the context menu scripts object from the data var
@@ -428,16 +429,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
             if (found) break;
         }
-    } else if (request.name.startsWith("RESP_API_XHR_BG_")) {
-        const name = request.name.replace("_BG_", "_CS_");
-        window.postMessage({name: name, response: request.response, xhrId: request.xhrId});
-    } else if (
-        request.name === "USERSCRIPT_INSTALL_00"
-        || request.name === "USERSCRIPT_INSTALL_01"
-        || request.name === "USERSCRIPT_INSTALL_02"
-    ) {
+    } else if (name.startsWith("RESP_API_XHR_BG_")) {
+        const n = name.replace("_BG_", "_CS_");
+        window.postMessage({name: n, response: request.response, xhrId: request.xhrId});
+    } else if (["USERSCRIPT_INSTALL_00", "USERSCRIPT_INSTALL_01", "USERSCRIPT_INSTALL_02"].includes(name)) {
         const content = document.body.innerText;
-        browser.runtime.sendMessage({name: request.name, content: content}, response => {
+        browser.runtime.sendMessage({name: name, content: content}, response => {
             sendResponse(response);
         });
         return true;
@@ -447,52 +444,54 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // listen for message from api
 window.addEventListener("message", e => {
     // only respond to messages that have matching unique id and have a name value
-    if (e.data.id != uid || !e.data.name) return;
+    if (e.data.id !== uid || !e.data.name) return;
+    const id = e.data.id;
+    const name = e.data.name;
     let message;
-    if (e.data.name === "API_OPEN_TAB") {
+    if (name === "API_OPEN_TAB") {
         // ignore requests that don't supply a url
         if (!e.data.url) return;
         message = {name: "API_OPEN_TAB", url: e.data.url, active: e.data.active};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: e.data.id, name: "RESP_OPEN_TAB", response: response});
+            window.postMessage({id: id, name: "RESP_OPEN_TAB", response: response});
         });
-    } else if (e.data.name === "API_CLOSE_TAB") {
+    } else if (name === "API_CLOSE_TAB") {
         browser.runtime.sendMessage({name: "API_CLOSE_TAB"}, response => {});
-    } else if (e.data.name === "API_SET_VALUE") {
+    } else if (name === "API_SET_VALUE") {
         message = {name: "API_SET_VALUE", filename: e.data.filename, key: e.data.key, value: e.data.value};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: e.data.id, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
         });
-    } else if (e.data.name === "API_GET_VALUE") {
+    } else if (name === "API_GET_VALUE") {
         message = {name: "API_GET_VALUE", filename: e.data.filename, key: e.data.key, defaultValue: e.data.defaultValue};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: e.data.id, name: "RESP_GET_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, name: "RESP_GET_VALUE", filename: e.data.filename, response: response});
         });
-    } else if (e.data.name === "API_DELETE_VALUE") {
+    } else if (name === "API_DELETE_VALUE") {
         message = {name: "API_DELETE_VALUE", filename: e.data.filename, key: e.data.key};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: e.data.id, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
         });
-    } else if (e.data.name === "API_LIST_VALUES") {
+    } else if (name === "API_LIST_VALUES") {
         message = {name: "API_LIST_VALUES", filename: e.data.filename};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: e.data.id, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
+            window.postMessage({id: id, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
         });
-    } else if (e.data.name === "API_ADD_STYLE") {
+    } else if (name === "API_ADD_STYLE") {
         try {
             const tag = document.createElement("style");
             tag.textContent = e.data.css;
             document.head.appendChild(tag);
-            window.postMessage({id: e.data.id, name: "RESP_ADD_STYLE", response: e.data.css});
+            window.postMessage({id: id, name: "RESP_ADD_STYLE", response: e.data.css});
         } catch (e) {
             console.log(e);
         }
-    } else if (e.data.name === "API_XHR_INJ") {
+    } else if (name === "API_XHR_INJ") {
         message = {name: "API_XHR_CS", details: e.data.details, xhrId: e.data.xhrId};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: e.data.id, name: "RESP_API_XHR_CS", response: response, xhrId: e.data.xhrId});
+            window.postMessage({id: id, name: "RESP_API_XHR_CS", response: response, xhrId: e.data.xhrId});
         });
-    } else if (e.data.name === "API_XHR_ABORT_INJ") {
+    } else if (name === "API_XHR_ABORT_INJ") {
         message = {name: "API_XHR_ABORT_CS", xhrId: e.data.xhrId};
         browser.runtime.sendMessage(message);
     }
