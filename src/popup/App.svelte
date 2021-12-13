@@ -40,7 +40,7 @@
 
     $: if (list.length > 1 && list.length % 2 === 0) {
         rowColors = "even";
-    } else if (list.length > 1 && list.length % 2 != 0) {
+    } else if (list.length > 1 && list.length % 2 !== 0) {
         rowColors = "odd";
     } else {
         rowColors = undefined;
@@ -96,7 +96,7 @@
             error = response.error;
             showUpdates = false;
         } else {
-            updates = updates.filter(e => e.filename != item.filename);
+            updates = updates.filter(e => e.filename !== item.filename);
             items = response.items;
         }
         disabled = false;
@@ -289,8 +289,7 @@
             } else {
                 // the response will contain the string to display
                 // ex: {success: "Click to install"}
-                console.log(response);
-                let prompt = response.success;
+                const prompt = response.success;
                 showInstallPrompt = prompt;
             }
         }
@@ -300,7 +299,7 @@
     }
 
     function resize() {
-        if (platform != "ios") return;
+        if (platform !== "ios") return;
         // on ios programmatically set the height of the scrollable container
         // first get the header height
         const headerHeight = header.offsetHeight;
@@ -335,7 +334,6 @@
             console.log("Can not install userscript: " + response.error);
             installViewUserscriptError = response.error;
         } else {
-            console.log(response);
             installViewUserscript = response;
         }
         disabled = false;
