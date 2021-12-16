@@ -36,33 +36,41 @@ function injectJS(filename, code, scope, grants) {
     // include api methods
     let api = "";
     const gmVals = [];
+    const includedFunctions = [];
     if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
     grants.forEach(grant => {
-        if (grant === "GM.openInTab" || grant === "openInTab") {
+        if (grant === "GM.openInTab") {
             api += `\n${openInTab}`;
             gmVals.push("openInTab: openInTab");
         } else if (grant === "closeTab") {
             api += `\n${closeTab}`;
-        } else if (grant === "GM.setValue" || grant === "setValue") {
+        } else if (grant === "GM.setValue") {
             api += `\n${setValue}`;
             gmVals.push("setValue: setValue");
-        } else if (grant === "GM.getValue" || grant === "getValue") {
+        } else if (grant === "GM.getValue") {
             api += `\n${getValue}`;
             gmVals.push("getValue: getValue");
-        } else if (grant === "GM.deleteValue"|| grant === "deleteValue") {
+        } else if (grant === "GM.deleteValue") {
             api += `\n${deleteValue}`;
             gmVals.push("deleteValue: deleteValue");
-        } else if (grant === "GM.listValues" || grant === "listValues") {
+        } else if (grant === "GM.listValues") {
             api += `\n${listValues}`;
             gmVals.push("listValues: listValues");
-        } else if (grant === "GM_addStyle" || grant === "addStyleSync") {
+        } else if (grant === "GM_addStyle") {
             api += `\n${addStyleSync}\nconst GM_addStyle = addStyleSync;`;
-        } else if (grant === "GM.addStyle" || grant === "addStyle") {
+        } else if (grant === "GM.addStyle") {
             api += `\n${addStyle}\n`;
             gmVals.push("addStyle: addStyle");
         } else if (grant === "GM_xmlhttpRequest" || grant === "GM.xmlHttpRequest") {
-            api += `\n${xhr}\nconst GM_xmlhttpRequest = xhr;\n`;
-            gmVals.push("xmlHttpRequest: xhr");
+            if (!includedFunctions.includes(xhr.name)) {
+                api += `\n${xhr}`;
+                includedFunctions.push(xhr.name);
+            }
+            if (grant === "GM_xmlhttpRequest") {
+                api += "\nconst GM_xmlhttpRequest = xhr;\n";
+            } else if (grant === "GM.xmlHttpRequest") {
+                gmVals.push("xmlHttpRequest: xhr");
+            }
         }
     });
     // create api aliases
