@@ -259,6 +259,7 @@ async function setBadgeCount() {
             resolve(tabs);
         });
     });
+    if (!tabs) return;
     const url = tabs[0].url;
     const message = {name: "POPUP_BADGE_COUNT", url: url, frameUrls: []};
     if (url) {
