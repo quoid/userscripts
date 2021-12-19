@@ -144,6 +144,23 @@ func validateUrl(_ urlString: String) -> Bool {
     return true
 }
 
+func isVersionNewer(_ oldVersion: String, _ newVersion: String) -> Bool {
+    let oldVersions = oldVersion.components(separatedBy: ".")
+    let newVersions = newVersion.components(separatedBy: ".")
+    for (index, version) in newVersions.enumerated() {
+        let a = Int(version) ?? 0
+        let oldVersionValue  = oldVersions.indices.contains(index) ? oldVersions[index] : "0"
+        let b = Int(oldVersionValue) ?? 0
+        if a > b {
+            return true
+        }
+        if a < b {
+            return false
+        }
+    }
+    return false
+}
+
 // parser
 func parse(_ content: String) -> [String: Any]? {
     // returns structured data from content of file
@@ -748,7 +765,8 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
                 err("failed to parse remote file contents in checkForRemoteUpdates")
                 return nil
             }
-            if remoteVersion > currentVersion {
+            let remoteVersionNewer = isVersionNewer(currentVersion, remoteVersion)
+            if remoteVersionNewer {
                 hasUpdates.append(["name": name, "filename": filename, "type": type, "url": updateUrl])
             }
         }
