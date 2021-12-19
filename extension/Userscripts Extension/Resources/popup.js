@@ -1298,8 +1298,8 @@
 
     function create_else_block(ctx) {
     	let current;
-    	const default_slot_template = /*#slots*/ ctx[5].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[4], null);
+    	const default_slot_template = /*#slots*/ ctx[6].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[5], null);
     	const default_slot_or_fallback = default_slot || fallback_block();
 
     	return {
@@ -1315,8 +1315,8 @@
     		},
     		p(ctx, dirty) {
     			if (default_slot) {
-    				if (default_slot.p && dirty & /*$$scope*/ 16) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[4], dirty, null, null);
+    				if (default_slot.p && dirty & /*$$scope*/ 32) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[5], dirty, null, null);
     				}
     			}
     		},
@@ -1335,7 +1335,7 @@
     	};
     }
 
-    // (30:8) {#if loading}
+    // (31:8) {#if loading && showLoaderOnDisabled}
     function create_if_block$2(ctx) {
     	let loader;
     	let current;
@@ -1370,7 +1370,7 @@
     	};
     }
 
-    // (33:18) <div>
+    // (34:18) <div>
     function fallback_block(ctx) {
     	let div;
 
@@ -1413,7 +1413,7 @@
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*loading*/ ctx[0]) return 0;
+    		if (/*loading*/ ctx[0] && /*showLoaderOnDisabled*/ ctx[3]) return 0;
     		return 1;
     	}
 
@@ -1478,7 +1478,7 @@
     			transition_in(if_block);
 
     			add_render_callback(() => {
-    				if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[3], {}, true);
+    				if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[4], {}, true);
     				div2_transition.run(1);
     			});
 
@@ -1487,7 +1487,7 @@
     		o(local) {
     			transition_out(iconbutton.$$.fragment, local);
     			transition_out(if_block);
-    			if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[3], {}, false);
+    			if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[4], {}, false);
     			div2_transition.run(0);
     			current = false;
     		},
@@ -1505,6 +1505,7 @@
     	let { loading = false } = $$props;
     	let { headerTitle = "View Header" } = $$props;
     	let { closeClick } = $$props;
+    	let { showLoaderOnDisabled = true } = $$props;
 
     	function slide(node, params) {
     		return {
@@ -1519,10 +1520,11 @@
     		if ("loading" in $$props) $$invalidate(0, loading = $$props.loading);
     		if ("headerTitle" in $$props) $$invalidate(1, headerTitle = $$props.headerTitle);
     		if ("closeClick" in $$props) $$invalidate(2, closeClick = $$props.closeClick);
-    		if ("$$scope" in $$props) $$invalidate(4, $$scope = $$props.$$scope);
+    		if ("showLoaderOnDisabled" in $$props) $$invalidate(3, showLoaderOnDisabled = $$props.showLoaderOnDisabled);
+    		if ("$$scope" in $$props) $$invalidate(5, $$scope = $$props.$$scope);
     	};
 
-    	return [loading, headerTitle, closeClick, slide, $$scope, slots];
+    	return [loading, headerTitle, closeClick, showLoaderOnDisabled, slide, $$scope, slots];
     }
 
     class View extends SvelteComponent {
@@ -1532,7 +1534,8 @@
     		init(this, options, instance$5, create_fragment$5, safe_not_equal, {
     			loading: 0,
     			headerTitle: 1,
-    			closeClick: 2
+    			closeClick: 2,
+    			showLoaderOnDisabled: 3
     		});
     	}
     }
@@ -2800,7 +2803,7 @@
     		if ($$self.$$.dirty & /*list*/ 8) {
     			 if (list.length > 1 && list.length % 2 === 0) {
     				$$invalidate(2, rowColorsAll = "even--all");
-    			} else if (list.length > 1 && list.length % 2 != 0) {
+    			} else if (list.length > 1 && list.length % 2 !== 0) {
     				$$invalidate(2, rowColorsAll = "odd--all");
     			} else {
     				$$invalidate(2, rowColorsAll = undefined);
@@ -2834,12 +2837,12 @@
     	return child_ctx;
     }
 
-    // (399:0) {#if !active}
+    // (400:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (402:0) {#if showInstallPrompt}
+    // (403:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2881,7 +2884,7 @@
     	};
     }
 
-    // (407:0) {#if error}
+    // (408:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2931,7 +2934,7 @@
     	};
     }
 
-    // (429:8) {:else}
+    // (430:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3004,7 +3007,7 @@
     	};
     }
 
-    // (427:35) 
+    // (428:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3026,7 +3029,7 @@
     	};
     }
 
-    // (423:28) 
+    // (424:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3064,7 +3067,7 @@
     	};
     }
 
-    // (421:8) {#if inactive}
+    // (422:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3086,7 +3089,7 @@
     	};
     }
 
-    // (418:4) {#if loading}
+    // (419:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3116,7 +3119,7 @@
     	};
     }
 
-    // (431:16) {#each list as item (item.filename)}
+    // (432:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3175,7 +3178,7 @@
     	};
     }
 
-    // (444:0) {#if !inactive && platform === "macos"}
+    // (445:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3208,7 +3211,7 @@
     	};
     }
 
-    // (475:18) 
+    // (478:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3218,6 +3221,7 @@
     				headerTitle: "All Userscripts",
     				loading: /*disabled*/ ctx[3],
     				closeClick: /*func_3*/ ctx[43],
+    				showLoaderOnDisabled: false,
     				$$slots: { default: [create_default_slot_2] },
     				$$scope: { ctx }
     			}
@@ -3257,7 +3261,7 @@
     	};
     }
 
-    // (462:22) 
+    // (464:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3267,6 +3271,7 @@
     				headerTitle: "Install Userscript",
     				loading: /*disabled*/ ctx[3],
     				closeClick: /*func_2*/ ctx[42],
+    				showLoaderOnDisabled: true,
     				$$slots: { default: [create_default_slot_1] },
     				$$scope: { ctx }
     			}
@@ -3306,7 +3311,7 @@
     	};
     }
 
-    // (449:0) {#if showUpdates}
+    // (450:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3316,6 +3321,7 @@
     				headerTitle: "Updates",
     				loading: /*disabled*/ ctx[3],
     				closeClick: /*func*/ ctx[40],
+    				showLoaderOnDisabled: true,
     				$$slots: { default: [create_default_slot] },
     				$$scope: { ctx }
     			}
@@ -3355,7 +3361,7 @@
     	};
     }
 
-    // (476:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}     >
+    // (479:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3395,7 +3401,7 @@
     	};
     }
 
-    // (463:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}     >
+    // (465:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3439,7 +3445,7 @@
     	};
     }
 
-    // (450:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}     >
+    // (451:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -3942,6 +3948,7 @@
     	}
 
     	function toggleItem(item) {
+    		if (disabled) return;
     		$$invalidate(3, disabled = true);
 
     		browser.runtime.sendNativeMessage({ name: "TOGGLE_ITEM", item }, response => {

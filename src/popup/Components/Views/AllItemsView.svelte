@@ -10,7 +10,7 @@
 
     $: if (list.length > 1 && list.length % 2 === 0) {
         rowColorsAll = "even--all";
-    } else if (list.length > 1 && list.length % 2 != 0) {
+    } else if (list.length > 1 && list.length % 2 !== 0) {
         rowColorsAll = "odd--all";
     } else {
         rowColorsAll = undefined;

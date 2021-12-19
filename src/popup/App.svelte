@@ -103,6 +103,7 @@
     }
 
     function toggleItem(item) {
+        if (disabled) return;
         disabled = true;
         browser.runtime.sendNativeMessage({name: "TOGGLE_ITEM", item: item}, response => {
             if (response.error) {
@@ -451,6 +452,7 @@
         headerTitle={"Updates"}
         loading={disabled}
         closeClick={() => showUpdates = false}
+        showLoaderOnDisabled={true}
     >
         <UpdateView
             checkClick={checkForUpdates}
@@ -464,6 +466,7 @@
         headerTitle={"Install Userscript"}
         loading={disabled}
         closeClick={() => showInstall = false}
+        showLoaderOnDisabled={true}
     >
         <InstallView
             userscript={installViewUserscript}
@@ -477,6 +480,7 @@
         headerTitle={"All Userscripts"}
         loading={disabled}
         closeClick={() => {showAll = false; refreshView()}}
+        showLoaderOnDisabled={false}
     >
         <AllItemsView
             allItems={allItems}
