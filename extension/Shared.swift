@@ -20,7 +20,9 @@ func err(_ message: String) {
 
 func logText(_ message: String) {
     // create helper log func to easily disable logging
-    NSLog(message)
+    // NSLog(message)
+    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "general")
+    os_log("%{public}@", log: log, type: .default, message)
 }
 
 func getDocumentsDirectory() -> URL {
