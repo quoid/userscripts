@@ -2837,12 +2837,12 @@
     	return child_ctx;
     }
 
-    // (398:0) {#if !active}
+    // (404:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (401:0) {#if showInstallPrompt}
+    // (407:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2884,7 +2884,7 @@
     	};
     }
 
-    // (406:0) {#if error}
+    // (412:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2934,7 +2934,7 @@
     	};
     }
 
-    // (428:8) {:else}
+    // (434:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3007,7 +3007,7 @@
     	};
     }
 
-    // (426:35) 
+    // (432:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3029,7 +3029,7 @@
     	};
     }
 
-    // (422:28) 
+    // (428:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3067,7 +3067,7 @@
     	};
     }
 
-    // (420:8) {#if inactive}
+    // (426:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3089,7 +3089,7 @@
     	};
     }
 
-    // (417:4) {#if loading}
+    // (423:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3119,7 +3119,7 @@
     	};
     }
 
-    // (430:16) {#each list as item (item.filename)}
+    // (436:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3178,7 +3178,7 @@
     	};
     }
 
-    // (443:0) {#if !inactive && platform === "macos"}
+    // (449:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3211,7 +3211,7 @@
     	};
     }
 
-    // (476:18) 
+    // (482:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3261,7 +3261,7 @@
     	};
     }
 
-    // (462:22) 
+    // (468:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3311,7 +3311,7 @@
     	};
     }
 
-    // (448:0) {#if showUpdates}
+    // (454:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3361,7 +3361,7 @@
     	};
     }
 
-    // (477:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
+    // (483:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3401,7 +3401,7 @@
     	};
     }
 
-    // (463:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (469:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3445,7 +3445,7 @@
     	};
     }
 
-    // (449:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
+    // (455:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -4150,7 +4150,9 @@
     	}
 
     	function resize() {
-    		if (platform !== "ios") return;
+    		if (!platform || platform === "macos" || platform === "ipados" && window.matchMedia("(min-width: 600px)").matches) {
+    			return;
+    		}
 
     		// on ios programmatically set the height of the scrollable container
     		// first get the header height

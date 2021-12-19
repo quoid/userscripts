@@ -298,7 +298,13 @@
     }
 
     function resize() {
-        if (platform !== "ios") return;
+        if (
+            !platform
+            || platform === "macos"
+            || (platform === "ipados" && window.matchMedia("(min-width: 600px)").matches))
+        {
+            return;
+        }
         // on ios programmatically set the height of the scrollable container
         // first get the header height
         const headerHeight = header.offsetHeight;

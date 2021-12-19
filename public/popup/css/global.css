@@ -38,7 +38,13 @@ body {
 }
 
 body.ipados {
-    width: 18rem;
+    width: 100vw;
+}
+
+@media screen and (min-device-width: 600px) {
+    body.ipados {
+        width: 18rem;
+    }
 }
 
 body.ios {
