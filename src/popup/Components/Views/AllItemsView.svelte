@@ -33,6 +33,7 @@
 {/if}
 <style>
     .items {
+        padding-bottom: 60px;
         text-align: left;
     }
 

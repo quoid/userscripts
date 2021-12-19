@@ -11,7 +11,7 @@ const _browser = {
             if (message.name === "POPUP_TOGGLE_EXTENSION") {
                 //response = {error: "Failed toggle extension"};
                 response = {success: true};
-            } else if (message.name === "POPUP_UPDATE_ALL") {
+            } else if (message.name === "POPUP_UPDATE_ALL" || message.name === "POPUP_UPDATE_SINGLE") {
                 response = {error: "Failed refresh scripts"};
                 response = {
                     items: [
@@ -55,9 +55,6 @@ const _browser = {
                     ],
                     updates: []
                 };
-            } else if (message.name === "POPUP_UPDATE_SINGLE") {
-                // response = {error: "Failed to updated item"};
-                response = {success: true};
             } else if (message.name === "POPUP_CHECK_UPDATES") {
                 response = {
                     updates: [

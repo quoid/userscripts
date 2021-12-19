@@ -62,7 +62,6 @@
         showUpdates = false;
         disabled = true;
         loading = true;
-        main.style.height = main.offsetHeight + "px";
         browser.runtime.sendNativeMessage({name: "POPUP_UPDATE_ALL"}, response => {
             if (response.error) {
                 error = response.error;
@@ -70,7 +69,6 @@
                 if (response.items) items = response.items;
                 updates = response.updates;
             }
-            main.removeAttribute("style");
             disabled = false;
             loading = false;
         });
@@ -311,7 +309,7 @@
         if (err)  addHeight += err.offsetHeight;
         windowHeight = (window.outerHeight - (headerHeight + addHeight));
         main.style.height = windowHeight + "px";
-        main.style.paddingBottom = headerHeight + "px";
+        main.style.paddingBottom = (headerHeight + addHeight) + "px";
     }
 
     async function showInstallView() {
