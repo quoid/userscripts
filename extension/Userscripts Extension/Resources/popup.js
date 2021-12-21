@@ -2833,16 +2833,16 @@
 
     function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[46] = list[i];
+    	child_ctx[47] = list[i];
     	return child_ctx;
     }
 
-    // (411:0) {#if !active}
+    // (416:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (414:0) {#if showInstallPrompt}
+    // (419:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2884,7 +2884,7 @@
     	};
     }
 
-    // (419:0) {#if error}
+    // (424:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2934,14 +2934,14 @@
     	};
     }
 
-    // (441:8) {:else}
+    // (446:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
     	let each_value = /*list*/ ctx[21];
-    	const get_key = ctx => /*item*/ ctx[46].filename;
+    	const get_key = ctx => /*item*/ ctx[47].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$3(ctx, each_value, i);
@@ -3007,7 +3007,7 @@
     	};
     }
 
-    // (439:35) 
+    // (444:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3029,7 +3029,7 @@
     	};
     }
 
-    // (435:28) 
+    // (440:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3067,7 +3067,7 @@
     	};
     }
 
-    // (433:8) {#if inactive}
+    // (438:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3089,7 +3089,7 @@
     	};
     }
 
-    // (430:4) {#if loading}
+    // (435:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3119,22 +3119,22 @@
     	};
     }
 
-    // (443:16) {#each list as item (item.filename)}
+    // (448:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_3(...args) {
-    		return /*click_handler_3*/ ctx[38](/*item*/ ctx[46], ...args);
+    		return /*click_handler_3*/ ctx[38](/*item*/ ctx[47], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[46].disabled,
-    				name: /*item*/ ctx[46].name,
-    				subframe: /*item*/ ctx[46].subframe,
-    				type: /*item*/ ctx[46].type
+    				enabled: !/*item*/ ctx[47].disabled,
+    				name: /*item*/ ctx[47].name,
+    				subframe: /*item*/ ctx[47].subframe,
+    				type: /*item*/ ctx[47].type
     			}
     		});
 
@@ -3156,10 +3156,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.enabled = !/*item*/ ctx[46].disabled;
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.name = /*item*/ ctx[46].name;
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.subframe = /*item*/ ctx[46].subframe;
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.type = /*item*/ ctx[46].type;
+    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.enabled = !/*item*/ ctx[47].disabled;
+    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.name = /*item*/ ctx[47].name;
+    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.subframe = /*item*/ ctx[47].subframe;
+    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.type = /*item*/ ctx[47].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -3178,7 +3178,7 @@
     	};
     }
 
-    // (456:0) {#if !inactive && platform === "macos"}
+    // (461:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3211,7 +3211,7 @@
     	};
     }
 
-    // (489:18) 
+    // (494:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3240,7 +3240,7 @@
     			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
     			if (dirty[0] & /*showAll*/ 524288) view_changes.closeClick = /*func_3*/ ctx[43];
 
-    			if (dirty[0] & /*allItems*/ 1048576 | dirty[1] & /*$$scope*/ 262144) {
+    			if (dirty[0] & /*allItems*/ 1048576 | dirty[1] & /*$$scope*/ 524288) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3261,7 +3261,7 @@
     	};
     }
 
-    // (475:22) 
+    // (480:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3290,7 +3290,7 @@
     			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
     			if (dirty[0] & /*showInstall*/ 65536) view_changes.closeClick = /*func_2*/ ctx[42];
 
-    			if (dirty[0] & /*installViewUserscript, installViewUserscriptError, showInstall*/ 458752 | dirty[1] & /*$$scope*/ 262144) {
+    			if (dirty[0] & /*installViewUserscript, installViewUserscriptError, showInstall*/ 458752 | dirty[1] & /*$$scope*/ 524288) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3311,7 +3311,7 @@
     	};
     }
 
-    // (461:0) {#if showUpdates}
+    // (466:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3340,7 +3340,7 @@
     			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
     			if (dirty[0] & /*showUpdates*/ 32) view_changes.closeClick = /*func*/ ctx[40];
 
-    			if (dirty[0] & /*updates*/ 64 | dirty[1] & /*$$scope*/ 262144) {
+    			if (dirty[0] & /*updates*/ 64 | dirty[1] & /*$$scope*/ 524288) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3361,7 +3361,7 @@
     	};
     }
 
-    // (490:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
+    // (495:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3401,7 +3401,7 @@
     	};
     }
 
-    // (476:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (481:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3445,7 +3445,7 @@
     	};
     }
 
-    // (462:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
+    // (467:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -3884,6 +3884,7 @@
     	let installViewUserscriptError;
     	let showAll;
     	let allItems = [];
+    	let resizeTimer;
 
     	function toggleExtension(e) {
     		e.preventDefault(); // prevent check state from changing on click
@@ -4149,37 +4150,47 @@
     		$$invalidate(3, disabled = false);
     	}
 
-    	function resize() {
+    	async function resize() {
     		if (!platform || platform === "macos") return;
 
     		// special styling for ipados and split views
-    		if (platform === "ipados") {
-    			if (window.matchMedia("(max-width: 360px)").matches) {
-    				// the popup window is no greater than 360px
-    				// ensure body & main element have no leftover styling
-    				main.removeAttribute("style");
+    		clearTimeout(resizeTimer);
 
-    				document.body.removeAttribute("style");
-    				return;
-    			} else {
-    				document.body.style.width = "100vw";
-    			}
-    		}
+    		resizeTimer = setTimeout(
+    			async () => {
+    				if (platform === "ipados") {
+    					if (window.matchMedia("(max-width: 360px)").matches) {
+    						// the popup window is no greater than 360px
+    						// ensure body & main element have no leftover styling
+    						main.removeAttribute("style");
 
-    		// on ios and ipados (split view) programmatically set the height of the scrollable container
-    		// first get the header height
-    		const headerHeight = header.offsetHeight;
+    						document.body.removeAttribute("style");
+    						return;
+    					} else {
+    						$$invalidate(7, main.style.maxHeight = "unset", main);
+    						document.body.style.width = "100vw";
+    					}
+    				}
 
-    		// then check if a warning or error is visible (ie. taking up height)
-    		let addHeight = 0;
+    				console.log("rs");
 
-    		// if warn or error elements visible, also subtract that from applied height
-    		if (warn) addHeight += warn.offsetHeight;
+    				// on ios and ipados (split view) programmatically set the height of the scrollable container
+    				// first get the header height
+    				const headerHeight = header.offsetHeight;
 
-    		if (err) addHeight += err.offsetHeight;
-    		windowHeight = window.outerHeight - (headerHeight + addHeight);
-    		$$invalidate(7, main.style.height = windowHeight + "px", main);
-    		$$invalidate(7, main.style.paddingBottom = headerHeight + addHeight + "px", main);
+    				// then check if a warning or error is visible (ie. taking up height)
+    				let addHeight = 0;
+
+    				// if warn or error elements visible, also subtract that from applied height
+    				if (warn) addHeight += warn.offsetHeight;
+
+    				if (err) addHeight += err.offsetHeight;
+    				windowHeight = window.outerHeight - (headerHeight + addHeight);
+    				$$invalidate(7, main.style.height = windowHeight + "px", main);
+    				$$invalidate(7, main.style.paddingBottom = headerHeight + addHeight + "px", main);
+    			},
+    			25
+    		);
     	}
 
     	async function showInstallView() {

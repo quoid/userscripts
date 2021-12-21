@@ -35,6 +35,7 @@
     let installViewUserscriptError;
     let showAll;
     let allItems = [];
+    let resizeTimer;
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -297,32 +298,36 @@
         disabled = false;
     }
 
-    function resize() {
+    async function resize() {
         if (!platform || platform === "macos") return;
         // special styling for ipados and split views
-        if (platform === "ipados") {
-            if (window.matchMedia("(max-width: 360px)").matches) {
-                // the popup window is no greater than 360px
-                // ensure body & main element have no leftover styling
-                main.removeAttribute("style");
-                document.body.removeAttribute("style");
-                return;
-            } else {
-                document.body.style.width = "100vw";
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(async () => {
+            if (platform === "ipados") {
+                if (window.matchMedia("(max-width: 360px)").matches) {
+                    // the popup window is no greater than 360px
+                    // ensure body & main element have no leftover styling
+                    main.removeAttribute("style");
+                    document.body.removeAttribute("style");
+                    return;
+                } else {
+                    main.style.maxHeight = "unset";
+                    document.body.style.width = "100vw";
+                }
             }
-        }
-
-        // on ios and ipados (split view) programmatically set the height of the scrollable container
-        // first get the header height
-        const headerHeight = header.offsetHeight;
-        // then check if a warning or error is visible (ie. taking up height)
-        let addHeight = 0;
-        // if warn or error elements visible, also subtract that from applied height
-        if (warn) addHeight += warn.offsetHeight;
-        if (err)  addHeight += err.offsetHeight;
-        windowHeight = (window.outerHeight - (headerHeight + addHeight));
-        main.style.height = windowHeight + "px";
-        main.style.paddingBottom = (headerHeight + addHeight) + "px";
+            console.log("rs");
+            // on ios and ipados (split view) programmatically set the height of the scrollable container
+            // first get the header height
+            const headerHeight = header.offsetHeight;
+            // then check if a warning or error is visible (ie. taking up height)
+            let addHeight = 0;
+            // if warn or error elements visible, also subtract that from applied height
+            if (warn) addHeight += warn.offsetHeight;
+            if (err)  addHeight += err.offsetHeight;
+            windowHeight = (window.outerHeight - (headerHeight + addHeight));
+            main.style.height = windowHeight + "px";
+            main.style.paddingBottom = (headerHeight + addHeight) + "px";
+        }, 25);
     }
 
     async function showInstallView() {
