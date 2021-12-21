@@ -551,7 +551,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
@@ -592,7 +592,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
@@ -631,7 +631,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
@@ -664,7 +664,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
