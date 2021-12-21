@@ -298,14 +298,21 @@
     }
 
     function resize() {
-        if (
-            !platform
-            || platform === "macos"
-            || (platform === "ipados" && window.matchMedia("(min-width: 600px)").matches))
-        {
-            return;
+        if (!platform || platform === "macos") return;
+        // special styling for ipados and split views
+        if (platform === "ipados") {
+            if (window.matchMedia("(max-width: 360px)").matches) {
+                // the popup window is no greater than 360px
+                // ensure body & main element have no leftover styling
+                main.removeAttribute("style");
+                document.body.removeAttribute("style");
+                return;
+            } else {
+                document.body.style.width = "100vw";
+            }
         }
-        // on ios programmatically set the height of the scrollable container
+
+        // on ios and ipados (split view) programmatically set the height of the scrollable container
         // first get the header height
         const headerHeight = header.offsetHeight;
         // then check if a warning or error is visible (ie. taking up height)

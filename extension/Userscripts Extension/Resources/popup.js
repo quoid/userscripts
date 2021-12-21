@@ -2837,12 +2837,12 @@
     	return child_ctx;
     }
 
-    // (404:0) {#if !active}
+    // (411:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (407:0) {#if showInstallPrompt}
+    // (414:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2884,7 +2884,7 @@
     	};
     }
 
-    // (412:0) {#if error}
+    // (419:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2934,7 +2934,7 @@
     	};
     }
 
-    // (434:8) {:else}
+    // (441:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3007,7 +3007,7 @@
     	};
     }
 
-    // (432:35) 
+    // (439:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3029,7 +3029,7 @@
     	};
     }
 
-    // (428:28) 
+    // (435:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3067,7 +3067,7 @@
     	};
     }
 
-    // (426:8) {#if inactive}
+    // (433:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3089,7 +3089,7 @@
     	};
     }
 
-    // (423:4) {#if loading}
+    // (430:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3119,7 +3119,7 @@
     	};
     }
 
-    // (436:16) {#each list as item (item.filename)}
+    // (443:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3178,7 +3178,7 @@
     	};
     }
 
-    // (449:0) {#if !inactive && platform === "macos"}
+    // (456:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3211,7 +3211,7 @@
     	};
     }
 
-    // (482:18) 
+    // (489:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3261,7 +3261,7 @@
     	};
     }
 
-    // (468:22) 
+    // (475:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3311,7 +3311,7 @@
     	};
     }
 
-    // (454:0) {#if showUpdates}
+    // (461:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3361,7 +3361,7 @@
     	};
     }
 
-    // (483:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
+    // (490:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3401,7 +3401,7 @@
     	};
     }
 
-    // (469:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (476:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3445,7 +3445,7 @@
     	};
     }
 
-    // (455:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
+    // (462:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -4150,11 +4150,23 @@
     	}
 
     	function resize() {
-    		if (!platform || platform === "macos" || platform === "ipados" && window.matchMedia("(min-width: 600px)").matches) {
-    			return;
+    		if (!platform || platform === "macos") return;
+
+    		// special styling for ipados and split views
+    		if (platform === "ipados") {
+    			if (window.matchMedia("(max-width: 360px)").matches) {
+    				// the popup window is no greater than 360px
+    				// ensure body & main element have no leftover styling
+    				main.removeAttribute("style");
+
+    				document.body.removeAttribute("style");
+    				return;
+    			} else {
+    				document.body.style.width = "100vw";
+    			}
     		}
 
-    		// on ios programmatically set the height of the scrollable container
+    		// on ios and ipados (split view) programmatically set the height of the scrollable container
     		// first get the header height
     		const headerHeight = header.offsetHeight;
 
