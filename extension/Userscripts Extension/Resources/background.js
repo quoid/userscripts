@@ -76,7 +76,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     } else if (name === "API_CLOSE_TAB") {
-        browser.tabs.remove(sender.tab.id, response => {/* */});
+        const tabId = request.tabId !== undefined ? request.tabId : sender.tab.id;
+        browser.tabs.remove(tabId, () => {
+            sendResponse({success: true});
+        });
+        return true;
     } else if (name === "API_SET_VALUE") {
         const item = {};
         item[request.filename + "---" + request.key] = request.value;

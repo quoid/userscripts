@@ -36,14 +36,16 @@ function injectJS(filename, code, scope, grants) {
     // include api methods
     let api = "";
     const gmVals = [];
+    const usVals = [];
     const includedFunctions = [];
     if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
     grants.forEach(grant => {
         if (grant === "GM.openInTab") {
             api += `\n${openInTab}`;
             gmVals.push("openInTab: openInTab");
-        } else if (grant === "closeTab") {
+        } else if (grant === "US.closeTab") {
             api += `\n${closeTab}`;
+            usVals.push("closeTab: closeTab");
         } else if (grant === "GM.setValue") {
             api += `\n${setValue}`;
             gmVals.push("setValue: setValue");
@@ -75,7 +77,8 @@ function injectJS(filename, code, scope, grants) {
     });
     // create api aliases
     const GM = `const GM = {${gmVals.join(",")}};`;
-    code = `(function() {\n${api}\n${GM}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
+    const US = `const US = {${usVals.join(",")}};`;
+    code = `(function() {\n${api}\n${GM}\n${US}\n${code}\n//# sourceURL=${filename.replace(/\s/g, "-")}\n})();`;
     if (scope !== "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
@@ -262,8 +265,16 @@ function openInTab(url, openInBackground) {
     });
 }
 
-function closeTab() {
-    window.postMessage({id: uid, name: "API_CLOSE_TAB"});
+function closeTab(tabId) {
+    return new Promise(resolve => {
+        const callback = e => {
+            if (e.data.id !== uid || e.data.name !== "RESP_CLOSE_TAB") return;
+            resolve(e.data.response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        window.postMessage({id: uid, name: "API_CLOSE_TAB", tabId: tabId});
+    });
 }
 
 function setValue(key, value) {
@@ -466,7 +477,9 @@ window.addEventListener("message", e => {
             window.postMessage({id: id, name: "RESP_OPEN_TAB", response: response});
         });
     } else if (name === "API_CLOSE_TAB") {
-        browser.runtime.sendMessage({name: "API_CLOSE_TAB"}, response => {});
+        browser.runtime.sendMessage({name: "API_CLOSE_TAB", tabId: e.data.tabId}, response => {
+            window.postMessage({id: id, name: "RESP_CLOSE_TAB", response: response});
+        });
     } else if (name === "API_SET_VALUE") {
         message = {name: "API_SET_VALUE", filename: e.data.filename, key: e.data.key, value: e.data.value};
         browser.runtime.sendMessage(message, response => {
