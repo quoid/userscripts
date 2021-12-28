@@ -80,7 +80,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (name === "API_SET_VALUE") {
         const item = {};
         item[request.filename + "---" + request.key] = request.value;
-        browser.storage.local.set(item, response => {
+        browser.storage.local.set(item, () => {
             sendResponse({success: true});
         });
         return true;
@@ -111,6 +111,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
             }
             sendResponse(keys);
+        });
+        return true;
+    } else if (name === "API_ADD_STYLE" || name === "API_ADD_STYLE_SYNC") {
+        const tabId = sender.tab.id;
+        browser.tabs.insertCSS(tabId, {code: request.css}, () => {
+            if (name === "API_ADD_STYLE") sendResponse(request.css);
         });
         return true;
     } else if (name === "REQ_PLATFORM") {

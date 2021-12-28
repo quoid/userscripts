@@ -323,14 +323,16 @@ function deleteValue(key) {
 }
 
 function addStyleSync(css) {
-    try {
-        const tag = document.createElement("style");
-        tag.textContent = css;
-        document.head.appendChild(tag);
-        return tag;
-    } catch (e) {
-        console.log(e);
-    }
+    browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: css});
+    return css;
+    // try {
+    //     const tag = document.createElement("style");
+    //     tag.textContent = css;
+    //     document.head.appendChild(tag);
+    //     return css;
+    // } catch (e) {
+    //     console.log(e);
+    // }
 }
 
 function addStyle(css) {
@@ -487,10 +489,10 @@ window.addEventListener("message", e => {
         });
     } else if (name === "API_ADD_STYLE") {
         try {
-            const tag = document.createElement("style");
-            tag.textContent = e.data.css;
-            document.head.appendChild(tag);
-            window.postMessage({id: id, name: "RESP_ADD_STYLE", response: e.data.css});
+            message = {name: "API_ADD_STYLE", css: e.data.css};
+            browser.runtime.sendMessage(message, response => {
+                window.postMessage({id: id, name: "RESP_ADD_STYLE", response: response});
+            });
         } catch (e) {
             console.log(e);
         }
