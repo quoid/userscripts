@@ -13,7 +13,7 @@ An open-source userscript editor for Safari.
     * [Popover](#popover)
 * [Metadata](#metadata)
 * [API](#api)
-* [Save Location](#save-location)
+* [Scripts Directory / Save Location](#scripts-directory)
 * [FAQs](#faqs)
 * [Contributing](#contributing)
 * [Support](#support)
