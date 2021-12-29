@@ -12,6 +12,7 @@ An open-source userscript editor for Safari.
     * [Settings Modal](#settings-modal)
     * [Popover](#popover)
 * [Metadata](#metadata)
+* [Metadata](#api)
 * [Save Location](#save-location)
 * [FAQs](#faqs)
 * [Contributing](#contributing)
