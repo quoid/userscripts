@@ -58,6 +58,8 @@
                 "before": true
             }
         ],
+        "no-bitwise": "error",
+        "no-mixed-operators": "error",
         "no-unused-vars": [
             "error",
             {
