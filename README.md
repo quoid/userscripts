@@ -23,15 +23,25 @@ An open-source userscript editor for Safari.
 
 Userscripts is available for iOS (+ipadOS) and macOS. For all versions, installation is done through [Apple's App Store](https://itunes.apple.com/us/app/userscripts/id1463298887). On macOS, versions prior to `4.x` were made available to download and install directly from the repository, but due to [changes in the way Apple allows developers to distribute apps built with the WebExtension API](https://github.com/quoid/userscripts/issues/154), that is no longer an option.
 
-**[App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
+To run Userscripts on iOS you should be on iOS 15.1 or higher.
 
+To run Userscripts on macOS you should running macOS 12 or higher, along with Safari 14.1 or higher.
+
+**[iOS App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
+
+**[macOS App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
 
 ## Getting Help
 
-If you encounter a problem while using this app/extension or are in need of some assistance, please open an issue here in the repository. When doing so, please provide as much detail as possible. This includes listing you system specs and what website and script you are trying to execute. *Please follow the issue template!*
+If you encounter a problem while using this app/extension or are in need of some assistance, please open an issue here in the repository. When doing so, please provide as much detail as possible. This includes listing system specs and what website and script you are trying to execute. *Please follow the issue template!*
 
 
-## UI Overview
+## Usage & Overview
+
+It's recommend to read this documentation and, if you have time, watch the following video overviews to familiarize yourself with the app and extension.
+
+[**iOS Video Overview**]()
+[**macOS Video Overview**]()
 
 ### Browser Page:
 
@@ -77,12 +87,17 @@ If you encounter a problem while using this app/extension or are in need of some
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
 - **Global Blacklist** - all domain patterns listed here will be *globally* ignored for script injection
 
-### Popover:
+### Popup:
 
-![Userscripts Safari Settings Window](/etc/popover.png)
+![Userscripts Popup](/etc/popover.png)
 
-10. **Open button** - opens the extension browser page
-11. **Enable Injection toggle** - turns on/off page script inject (on/off switch)
+10. **Open Page Link** - *macOS only*, opens the extension browser page 
+11. **Enable Injection toggle** - turns on/off page script injection (on/off switch)
+12. **Refresh View** - refreshes the popup view
+13. **Available Updates View** - the extension periodically checks all userscripts in your save location for updates and when an update is found, it is shown in this view
+14. **Folder Button** - on **macOS** this button opens your save location directory in Finder, on **iOS** this button displays the "all scripts view" where you can see every script that found in your save location directory, the "all scripts view" allows you to toggle individual userscript scripts on/off regardless of the current page being displayed in the browser
+15. **Install Prompt** - when a userscript is displayed in the browser, this prompt displays giving the user the option of install the userscript into their save location directory, tapping the prompt will take them through the install steps
+16. **Matched Userscripts List** - this list shows the currently matched userscripts relative to the current page being displayed in the browser, all userscripts that match to the domain will be showed, whether they are active or not. Users can click/tap the userscript to the toggle them on/off. If a userscript is active for the domain through a subframe a **sub** tag will be show next the to the file type indicator
 
 ## Metadata
 
@@ -97,7 +112,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@exclude` - Functions in a similar way as `@include` but rather than injecting, a match against this key's value will prevent injection
 - `@inject-into` - allows the user to choose which context to inject the script into
     - allows the user to choose which context to inject the script into
-    - values: auto (default), content, page
+    - values: `auto` (default), `content`, `page`
     - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
 - `@run-at`
     - allows the user to choose the injection timing
@@ -135,14 +150,82 @@ Userscripts Safari currently supports the following userscript metadata:
     
 **All userscripts need at least 1 `@match` or `@include` to run!**
 
+## API
+
+Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.** Further, most methods do not require their respective prefix when calling. For example, `GM.setValue` can be called as `GM.setValue(...)` or with simply by `setValue(...)`.
+
+- `GM.addStyle(css)`
+    - `css: String`
+    - on success returns a promise resolved with the css string argument provided
+- `GM_addStyle(css)`
+    - `css: String`
+    - **synchronous**
+    - returns the css string argument provided *without regard to success*
+- `GM.setValue(key, value)`
+    - `key: String`, `value: Any`
+    - on success returns a promise resolved with an object indicating success
+- `GM.getValue(key, defaultValue)`
+    - `key: String`, `defaultValue: Any`
+    - on success returns a promise resolved with the value that was set or default value provided
+- `GM.deleteValue(key)`
+    - `key: String`
+    - on success returns a promise resolved with an object indicating success
+- `GM.listValues()`
+    - on success returns a promise resolved with an array of the key names of **presently set** values
+- `GM.openInTab(url, openInBackground)`
+    - `url: String`, `openInBackground: Bool`
+    - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened
+- `US.closeTab(tabId)`
+    - `tabId: Int`
+    - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
+    - on success returns a promise resolved with an object indicating success
+- `GM.xmlHttpRequest(details)`
+    - `details: Object`
+    - the `details` object accepts the following properties
+        - `url` - `String` - **required**
+        - `method` - `String` - defaults to `GET`
+        - `user` - `String`
+        - `password` - `String`
+        - `headers` - `Object`
+        - `overrideMimeType`
+        - `timeout` - `Int`
+        - `binary` - `Bool`
+        - `data` - `String`
+        - `responseType` - `String`
+        - read more about [XMLHttpRequests here](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
+    - event handlers:
+        - `onabort` - `function`
+        - `onerror` - `function`
+        - `onload` - `function`
+        - `onloadend` - `function`
+        - `onloadstart` - `function`
+        - `onprogress` - `function`
+        - `onreadystatechange` - `function`
+        - `ontimeout` - `function`
+        - the response object passed to the event handlers has the following properties:
+            - `readyState`
+            - `response`
+            - `responseHeaders`
+            - `responseType`
+            - `responseURL`
+            - `status`
+            - `statusText`
+            - `timeout`
+            - `withCredentials`
+            - `responseText` (when `responseType` is `text`)
+    - returns an object with a single property, `abort`, which is a `function`
+        - usage: `const foo = GM.xmlHttpRequest({...});` ... `foo.abort()` to abort the request
+- `GM_xmlhttpRequest(details)`
+    - an alias for `GM.xmlHttpRequest`, works exactly the same
+
 ## Scripts Directory
 
-On macOS this is the directory where the app/extension will read from and write to (if working with the included code editor). For both iOS and macOS this directory is changed by opening the **containing app** and clicking the respective "change location" button (verbiage may vary).
-
+This is the directory where the app/extension will read from and write to (if working with the included code editor). This directory is changed by opening the **containing app** and clicking the respective "change location" button.
 
 **Script Directory Notes**
 
 - Close all instances of the extension UI (browser app and/or popup) before changing the scripts directory
+- After files are added, removed or edited, you will need to open the popup at least 1 time to see those changes reflected in your browsing experience
 - **On macOS**, after a directory outside of the default is selected, if you rename or move that selected directory, the extension will continue to read/write to that directory - the only way to remove the “link” is by trashing the folder or selecting a new save location
 
 ## FAQs
