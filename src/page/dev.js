@@ -52,6 +52,111 @@ let files = [
         filename: "Example JS Userscript.js",
         lastModified: 1605862023000
     },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript2.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript3.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript4.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript5.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript6.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript7.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript8.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript9.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript10.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript11.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript12.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript13.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript14.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript15.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript16.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript17.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript18.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript19.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript20.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript21.js",
+        lastModified: 1605862023000
+    },
+    {
+        content: exampleJSContent,
+        filename: "Example JS Userscript22.js",
+        lastModified: 1605862023000
+    },
 ];
 
 function saveFile(content, lastMod, newFilename, oldName) {
@@ -114,8 +219,8 @@ const _browser = {
                     response.push(scriptData);
                 });
             } else if (name === "TOGGLE_ITEM") {
-                // response = {success: true};
-                response = {error: true};
+                response = {success: true};
+                //response = {error: true};
             } else if (name === "PAGE_UPDATE_SETTINGS") {
                 response = {success: true};
             } else if (name === "PAGE_UPDATE_BLACKLIST") {
