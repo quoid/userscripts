@@ -315,7 +315,6 @@
                     document.body.style.width = "100vw";
                 }
             }
-            console.log("rs");
             // on ios and ipados (split view) programmatically set the height of the scrollable container
             // first get the header height
             const headerHeight = header.offsetHeight;
