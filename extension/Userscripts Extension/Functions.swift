@@ -777,7 +777,13 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
 
 func getRemoteFileContents(_ url: String) -> String? {
     logText("getRemoteFileContents for \(url) start")
-    guard let solidURL = URL(string: url) else {return nil}
+    // if url is http change to https
+    var urlChecked = url
+    if urlChecked.hasPrefix("http:") {
+        urlChecked = urlChecked.replacingOccurrences(of: "http:", with: "https:")
+        logText("\(url) is using insecure http, attempt to fetch remote content with https")
+    }
+    guard let solidURL = URL(string: urlChecked) else {return nil}
     var contents = ""
     // get remote file contents, synchronously
     let semaphore = DispatchSemaphore(value: 0)
