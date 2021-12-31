@@ -90,7 +90,9 @@ It's recommend to read this documentation and, if you have time, watch the follo
 
 ### Popup:
 
-![Userscripts Popup](/etc/popover.png)
+<!-- ![Userscripts Popup](/etc/popover.png)-->
+
+<img src="/etc/popover.png" width="50%" height="50%">
 
 10. **Open Page Link** - *macOS only*, opens the extension browser page 
 11. **Enable Injection toggle** - turns on/off page script injection (on/off switch)
