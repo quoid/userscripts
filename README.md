@@ -221,7 +221,7 @@ Userscripts currently supports the following api methods. All methods are asynch
 
 ## Scripts Directory
 
-This is the directory where the app/extension will read from and write to (if working with the included code editor). This directory is changed by opening the **containing app** and clicking the respective "change location" button.
+This is the directory where the app/extension will read from and write to. This directory is changed by opening the **containing app** and clicking the respective "change location" button.
 
 **Script Directory Notes**
 
@@ -245,7 +245,7 @@ This is the directory where the app/extension will read from and write to (if wo
 
 **What are the keyboard shortcuts?**
 
-> While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
+> Whilst using the included editor, clicking `⌘ + s` will save the file. While working the editor, clicking `⌘ + f` will bring up the search bar and `esc` will hide it.
 
 **When I use `@require`, where are the required files stored?**
 
@@ -261,7 +261,7 @@ Further, any issue marked "help wanted" is actively seeking assistance. Please r
 Please ensure your contributions align with the project's license before committing anything.
 
 ## Support
-The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see it improve in the future. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
+The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see future improvements. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
 
 The second best way to help out is to sign up to beta test new versions of the app. Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
 
