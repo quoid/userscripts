@@ -99,7 +99,7 @@ It's recommend to read this documentation and, if you have time, watch the follo
 12. **Refresh View** - refreshes the popup view
 13. **Available Updates View** - the extension periodically checks all userscripts in your save location for updates and when an update is found, it is shown in this view
 14. **Folder Button** - on **macOS** this button opens your save location directory in Finder, on **iOS** this button displays the "all scripts view" where you can see every script that found in your save location directory, the "all scripts view" allows you to toggle individual userscript scripts on/off regardless of the current page being displayed in the browser
-15. **Install Prompt** - when a userscript is displayed in the browser, this prompt displays giving the user the option of install the userscript into their save location directory, tapping the prompt will take them through the install steps
+15. **Install Prompt** - when a userscript is displayed in the browser, this alert displays, giving the user the option to install the userscript into their save location directory, tapping the prompt will take them through the installation steps
 16. **Matched Userscripts List** - this list shows the currently matched userscripts relative to the current page being displayed in the browser, all userscripts that match to the domain will be showed, whether they are active or not. Users can click/tap the userscript to the toggle them on/off. If a userscript is active for the domain through a subframe a **sub** tag will be show next the to the file type indicator
 
 ## Metadata
@@ -276,6 +276,6 @@ Userscripts does not collect any data from its users nor monitor activities or a
 
 ## License
 
-Copyright (c) 2021 Justin Wasack
+Copyright (c) 2022 Justin Wasack
 
 Licensed under the [GNU General Public License v3.0](/LICENSE) license for all open source applications. A commercial license is required for all other applications.
