@@ -6,7 +6,7 @@ An open-source userscript editor for Safari.
 
 ## Table of Contents
 * [Installation](#installation)
-* [Usage](/#usage)
+* [Usage](#usage)
 * [UI Overview](#ui-overview)
     * [Browser Page](#browser-page)
     * [Settings Modal](#settings-modal)
@@ -41,14 +41,14 @@ Once the app is downloaded and installed the following steps should be taken:
 
 **iOS**
 - Go to `Settings > Extensions > Userscripts`
-- Turn Userscripts on
-- For the optimal experience it is recommended that you allow Userscripts for All Websites
+- Turn Userscripts `on`
+- For optimal experience it's recommended that you allow Userscripts for `All Websites`
 - Once the above is complete **open the containing app**
 - Click the "Set Userscripts Directory" button and select the directory, *within the Files.app*, where your userscripts are located and where you wish newly installed userscripts to be placed
     - **Tip:** for optimal cross platform experience it's a good idea to use an iCloud folder for syncing between macOS and iOS
     - **Note:** syncing between macOS and iOS is not immediate, it is sometimes necessary to open Files.app in order to applying changes made in macOS to be reflected in iOS - that includes userscript deletions, additions and edits
 - Once the directory is set you can close the containing app and open Safari.app
-- It **may be necessary** to apply further permissions and is once again recommended to "Always Allow" Userscripts for "All Websites:
+- It **may be necessary** to apply further permissions and it's to `Always Allow` Userscripts for `All Websites`
 
 **macOS**
 
@@ -261,7 +261,7 @@ If you encounter a problem while using this app/extension or are in need of some
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
 
-> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are properly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open by clicking the extension button in Safari.
+> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are properly formatted, they should be injected. However, you **must open the extension popup** beforehand. That means, if you create a new or edit an existing userscript with an external editor and save it to the save location, before injection will occur properly, the extension popup must be opened and the popup must load completely.
 
 **What are the keyboard shortcuts?**
 
