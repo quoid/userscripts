@@ -1,2 +1,5 @@
-public/index.html linguist-vendored
-index.html linguist-vendored
+public/page/codemirror/* linguist-vendored
+extension/Userscripts Extension/Resources/page.html -linguist-generated
+extension/Userscripts Extension/Resources/popup.html -linguist-generated
+extension/Userscripts-iOS/Base.lproj/Main.html -linguist-generated
+/index.html -linguist-generated
