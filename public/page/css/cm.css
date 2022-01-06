@@ -1,0 +1,214 @@
+.CodeMirror {
+    background-color: transparent;
+    color: var(--editor-default);
+    font-family: var(--editor-font);
+    font-size: var(--editor-font-size);
+    font-weight: 400;
+    height: 100%;
+    line-height: var(--editor-line-height);
+    text-rendering: unset;
+    -webkit-font-smoothing: antialiased;
+}
+
+.CodeMirror-gutters {
+    background-color: transparent;
+    border-right: 0;
+}
+
+.CodeMirror-activeline-background,
+.CodeMirror-activeline-gutter {
+    background-color: var(--editor-active-line);
+}
+
+.CodeMirror-linenumber {
+    color: var(--text-color-primary);
+    font-size: var(--editor-font-size);
+    opacity: 0.25;
+}
+
+.CodeMirror-activeline .CodeMirror-linenumber {
+    opacity: 0.5;
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid var(--text-color-secondary); /* check */
+}
+
+.CodeMirror-hints {
+    background-color: var(--color-black);
+    border: 1px solid black;
+    box-shadow: var(--box-shadow);
+    font: var(--text-small);
+    font-family: var(--editor-font);
+    line-height: 1.5rem;
+}
+
+.CodeMirror-hint {
+    color: var(--text-color-secondary);
+}
+
+li.CodeMirror-hint-active {
+    background-color: var(--color-blue);
+    color: var(--color-black);
+}
+
+.cm-s-default .CodeMirror-selected {
+    background-color: var(--editor-selected-bg);
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+    color: var(--editor-matching-bracket-color);
+    border-bottom: 2px solid var(--editor-matching-bracket-border);
+}
+
+div.CodeMirror span.CodeMirror-nonmatchingbracket {
+    color: var(--editor-non-matching-bracket);
+}
+
+.CodeMirror .CodeMirror-placeholder,
+.cm-s-default .cm-comment {
+    color: var(--editor-comment);
+}
+
+.cm-s-default .cm-keyword {
+    color: var(--editor-keyword);
+}
+
+.cm-s-default .cm-def {
+    color: var(--editor-def);
+}
+
+.cm-s-default .cm-variable,
+.cm-s-default .cm-variable-2 {
+    color: inherit;
+}
+
+.cm-s-default .cm-operator {
+    color: var(--editor-operator);
+}
+
+.cm-s-default .cm-property {
+    color: var(--editor-property);
+}
+
+.cm-s-default .cm-string {
+    color: var(--editor-string);
+}
+
+.cm-s-default .cm-string-2 {
+    color: var(--editor-string-2);
+}
+
+.cm-s-default .cm-number {
+    color: var(--editor-number);
+}
+
+.cm-s-default .cm-atom {
+    color: var(--editor-atom);
+}
+
+.cm-s-default .cm-error {
+    color: var(--color-red);
+}
+
+.CodeMirror .cm-whitespace::before,
+.CodeMirror .CodeMirror-line > span::after,
+.CodeMirror .CodeMirror-code > div > pre > span::after {
+    color: var(--editor-invisible);
+}
+
+.cm-s-default .cm-variable-3,
+.cm-s-default .cm-builtin,
+.cm-s-default .cm-qualifier,
+.cm-s-default .cm-tag {
+    color: var(--editor-def);
+}
+
+.cm-s-default .cm-searching {
+    background-color: var(--editor-search-highlight);
+    padding: 3px 0;
+}
+
+.cm-s-default .cm-search-mark {
+    border-bottom: 2px solid var(--editor-matching-bracket-border);
+}
+
+/*
+.cm-s-default .cm-matchhighlight {
+    background-color: var(--editor-matched-highlight);
+}
+*/
+
+.CodeMirror-lint-markers {
+    width: 8px;
+}
+
+.CodeMirror-lint-marker {
+    border-radius: 50%;
+    cursor: default;
+    height: 0.375rem;
+    left: 0.25rem;
+    position: relative;
+    width: 0.375rem;
+}
+
+.CodeMirror-lint-marker-error,
+.CodeMirror-lint-marker-warning {
+    background: var(--color-yellow);
+    top: -1px;
+}
+
+.CodeMirror-lint-marker-error {
+    background-color: var(--editor-error);
+}
+
+.CodeMirror-lint-marker-multiple {
+    background: var(--editor-def);
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.CodeMirror-lint-mark-warning {
+    background: none;
+    border-bottom: 2px solid var(--color-yellow);
+}
+
+.CodeMirror-lint-mark-error {
+    background: none;
+    border-bottom: 2px solid var(--editor-error);
+}
+
+.CodeMirror-lint-tooltip {
+    background-color: var(--color-black);
+    border: 1px solid black;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    color: var(--text-color-secondary);
+    font: var(--text-small);
+    padding: 0.5rem;
+    transition: opacity 200ms;
+}
+
+.CodeMirror-lint-message-error,
+.CodeMirror-lint-message-warning {
+    background: none;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.CodeMirror-lint-message-error::before,
+.CodeMirror-lint-message-warning::before {
+    background-color: var(--color-yellow);
+    border-radius: 50%;
+    content: "";
+    height: 0.5rem;
+    left: 0;
+    position: absolute;
+    top: 0.25rem;
+    width: 0.5rem;
+}
+
+.CodeMirror-lint-message-error::before {
+    background-color: var(--editor-error);
+}

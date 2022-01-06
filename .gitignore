@@ -8,7 +8,7 @@ ehthumbs.db
 Thumbs.db
 
 /node_modules/
-/public/build/
+/public/*/build/
 /temp/
 
 # xcode

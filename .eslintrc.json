@@ -19,8 +19,8 @@
         }
     ],
     "globals": {
-        "safari": "writable",
-        "_safari": "readonly"
+        "_browser": "writable",
+        "browser": "readonly"
     },
     "rules": {
         "array-bracket-spacing": [
@@ -39,6 +39,7 @@
             }
         ],
         "dot-notation": "error",
+        "eqeqeq": ["error", "smart"],
         "indent": [
             "error",
             4,
@@ -57,12 +58,23 @@
                 "before": true
             }
         ],
+        "no-bitwise": "error",
+        "no-mixed-operators": "error",
         "no-unused-vars": [
             "error",
             {
                 "args": "none"
             }
         ],
+        "no-use-before-define": [
+            "error",
+            {
+                "classes": true,
+                "functions": false,
+                "variables": true
+            }
+        ],
+        "no-var": "error",
         "object-curly-spacing": [
             "error",
             "never"
@@ -75,6 +87,7 @@
             "error",
             "before"
         ],
+        "prefer-const": "error",
         "quotes": [
             "error",
             "double"
@@ -86,12 +99,14 @@
                 "omitLastInOneLineBlock": true
             }
         ],
+        "space-before-function-paren": ["error", {
+            "anonymous": "never",
+            "named": "never",
+            "asyncArrow": "never"
+        }],
         "space-in-parens": [
             "error",
             "never"
-        ],
-        "require-jsdoc": [
-            "off"
         ],
         "jsx-a11y/a11y-missing-attribute": "off"
     }

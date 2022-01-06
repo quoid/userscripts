@@ -4,28 +4,32 @@ const inline = require("gulp-inline-source");
 const postcss = require("gulp-postcss");
 const autoprefixer = require("autoprefixer");
 const htmlmin = require("gulp-html-minifier-terser");
+const dom = require("gulp-dom");
+const rename = require("gulp-rename");
 
-// will be building from a clone of the public directory
-// if not for this, the global stylesheets would get prefixed which are used in development
+const directory =  process.env.NODE_ENV === "popup" ? "popup" : "page";
+
+const copyLocation = "./temp";
+const destLocation = "./extension/Userscripts Extension/Resources";
+
+// clone public directory to avoid prefixing development assets
 function copy() {
-    return src("./public/**/*")
-        .pipe(dest("./temp"));
+    return src("./public/" + directory + "/**/*")
+        .pipe(dest(copyLocation));
 }
 
 // autoprefix select stylesheets and overwrite in place
 function autoprefix() {
-    return src(["./temp/build/bundle.css", "./temp/css/global.css"])
+    return src([copyLocation + "/build/bundle.css", copyLocation + "/css/global.css"])
         .pipe(postcss([
-            autoprefixer({overrideBrowserslist: ["last 4 version"]})
+            autoprefixer({overrideBrowserslist: ["safari >= 13"]})
         ]))
         .pipe(dest(file => file.base));
 }
 
-// conditionally inline dev.js if bundling a demo page based on env var set in package.json
-// inline the rest of the asset for a monolithic html file
-function bundle() {
-    const d = process.env.NODE_ENV === "demo" ? "./" : "./extension/Userscripts Extension";
-    return src("./temp/index.html")
+// inline assets
+function inlineAssets() {
+    return src(`${copyLocation}/index.html`)
         .pipe(inline({
             attribute: false,
             compress: false,
@@ -34,16 +38,48 @@ function bundle() {
         .pipe(htmlmin({
             collapseWhitespace: true,
             minifyCSS: true,
-            minifyJS: true,
+            minifyJS: false,
             removeComments: true
         }))
-        .pipe(dest(d));
+        .pipe(dest(file => file.base));
+}
+
+// remove the inlined javascript and save to singular js file
+function bundleJS() {
+    return src(`${copyLocation}/index.html`)
+        .pipe(dom(function() {
+            const scripts = this.querySelectorAll("script");
+            let result = "";
+            scripts.forEach(function(script) {
+                result += script.innerHTML;
+            });
+            return result;
+        }, false))
+        .pipe(rename(directory + ".js"))
+        .pipe(dest(destLocation));
+}
+
+// remove the scripts tags from source file and move/rename html file
+function removeTags() {
+    return src(`${copyLocation}/index.html`)
+        .pipe(dom(function() {
+            const scripts = this.querySelectorAll("script");
+            scripts.forEach(function(script) {
+                const parent = script.parentNode;
+                parent.removeChild(script);
+            });
+            const f = this.createElement("script");
+            f.setAttribute("src", directory + ".js");
+            this.body.appendChild(f);
+            return this;
+        }, false))
+        .pipe(rename(directory + ".html"))
+        .pipe(dest(destLocation));
 }
 
 // remove the temp folder
 function clean() {
-    return del("./temp");
+    return del(copyLocation);
 }
 
-exports.demo = series(copy, autoprefix, bundle, clean);
-exports.build = series(copy, autoprefix, bundle, clean);
+exports.build = series(copy, autoprefix, inlineAssets, bundleJS, removeTags, clean);

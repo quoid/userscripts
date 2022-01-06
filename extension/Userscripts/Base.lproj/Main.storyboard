@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -109,6 +109,9 @@
                                     </textField>
                                     <button horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WiE-Qy-xne">
                                         <rect key="frame" x="129" y="-7" width="69" height="27"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="57" id="KfI-LD-AaS"/>
+                                        </constraints>
                                         <buttonCell key="cell" type="push" title="Change" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="JmD-P7-oeo">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="message" size="11"/>
@@ -200,11 +203,9 @@
                     </view>
                     <connections>
                         <outlet property="appName" destination="gGD-M9-Dwj" id="WOi-mP-IbI"/>
-                        <outlet property="appNameLabel" destination="gGD-M9-Dwj" id="gkb-AM-mGp"/>
                         <outlet property="enabledIcon" destination="i4K-xO-vlx" id="M8i-Qj-l6w"/>
                         <outlet property="enabledText" destination="v0r-qO-55O" id="wNQ-gC-2zf"/>
                         <outlet property="saveLocation" destination="6k5-Oz-mOV" id="pgz-od-dyH"/>
-                        <outlet property="saveLocationLabel" destination="6k5-Oz-mOV" id="hVb-Ga-kTU"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

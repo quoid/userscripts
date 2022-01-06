@@ -1,0 +1,51 @@
+:root {
+    --border-radius: 0.188rem;
+    --box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.25);
+    --color-bg-primary: #323639;
+    --color-bg-secondary: #2f3337;
+    --color-script-highlighted: #364049; /* rgba(116, 178, 235, 0.1); */
+    --color-black: #1d2023;
+    --color-blue: #74b1eb;
+    --color-green: #60f36c;
+    --color-grey: rgba(255, 255, 255, 0.15);
+    --color-red: #ff453a;
+    --color-yellow: #e4f360;
+    --letter-spacing-large: -0.031rem;
+    --letter-spacing-default: -0.029rem;
+    --letter-spacing-medium: -0.018rem;
+    --letter-spacing-small: -0.008rem;
+    --opacity-disabled: 0.3;
+    --text-color-primary: rgb(255, 255, 255);
+    --text-color-secondary: rgba(255, 255, 255, 0.65);
+    --text-color-disabled: rgba(255, 255, 255, 0.4);
+    --font-family: system-ui, -apple-system, "Helvetica Neue", "Helvetica", sans-serif;
+    --text-default: 1rem/1.5rem var(--font-family);
+    --text-large: 1.25rem/1.5rem var(--font-family);
+    --text-medium: 0.875rem/1.313rem var(--font-family);
+    --text-small: 0.719rem/1rem var(--font-family);
+
+    /* editor variables */
+    --editor-font: monaco, monospace;
+    --editor-font-size: 14px;
+    --editor-line-height: 24px;
+    --editor-invisible: rgba(255, 255, 255, 0.15);
+    --editor-active-line: var(--color-bg-secondary);
+    --editor-selected-bg: rgba(116, 178, 235, 0.35);
+    --editor-matched-highlight: rgba(116, 178, 235, 0.2);
+    --editor-search-highlight: rgba(255, 166, 0, 0.3);
+    --editor-number: #77e26a;
+    --editor-comment: rgba(255, 255, 255, 0.35);
+    --editor-def: #efc371;
+    --editor-default: #cdcfd1;
+    --editor-keyword: #96c3ed;
+    --editor-atom: #59ebf5;
+    --editor-operator: #8c99a7;
+    --editor-property: #e86c8a;
+    --editor-string: #f5eea2;
+    --editor-string-2: #cdabff;
+    --editor-error: var(--color-red);
+    --editor-cursor: #e3e7eb;
+    --editor-matching-bracket-color: #fff;
+    --editor-matching-bracket-border: var(--editor-number);
+    --editor-non-matching-bracket: var(--editor-error);
+}

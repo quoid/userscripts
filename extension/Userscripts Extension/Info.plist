@@ -15,7 +15,7 @@
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
-	<string>XPC!</string>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
@@ -25,32 +25,9 @@
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.Safari.extension</string>
+		<string>com.apple.Safari.web-extension</string>
 		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).SafariExtensionHandler</string>
-		<key>SFSafariContentScript</key>
-		<array>
-			<dict>
-				<key>Script</key>
-				<string>UserscriptsSafari.js</string>
-			</dict>
-		</array>
-		<key>SFSafariToolbarItem</key>
-		<dict>
-			<key>Action</key>
-			<string>Popover</string>
-			<key>Identifier</key>
-			<string>Button</string>
-			<key>Image</key>
-			<string>ToolbarItemIcon.pdf</string>
-			<key>Label</key>
-			<string>Userscripts</string>
-		</dict>
-		<key>SFSafariWebsiteAccess</key>
-		<dict>
-			<key>Level</key>
-			<string>All</string>
-		</dict>
+		<string>$(PRODUCT_MODULE_NAME).SafariWebExtensionHandler</string>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2021 Justin Wasack. All rights reserved.</string>

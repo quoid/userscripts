@@ -2,100 +2,9 @@ import Foundation
 import SafariServices
 
 // helpers
-func getSaveLocation() -> URL? {
-    let standardDefaults = UserDefaults.standard
-    let userSaveLocationKey = "userSaveLocation"
-    var defaultSaveLocation:URL
-
-    // get the default save location, if key doesn't exist write it to user defaults
-    if let dsl = standardDefaults.url(forKey: "saveLocation") {
-        defaultSaveLocation = dsl
-    } else {
-        NSLog("default save location not set, writing to user defaults")
-        let u = getDocumentsDirectory().appendingPathComponent("scripts")
-        UserDefaults.standard.set(u, forKey: "saveLocation")
-        defaultSaveLocation = u
-    }
-
-    // check if sharedBookmark data exists
-    // check if can get bookmark URL (won't be able to if directory permanently deleted or in trash)
-    guard
-        let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-        let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
-        directoryExists(path: sharedBookmark.path)
-    else {
-        // sharedBookmark removed, or in trash, use default location and ensure shared will not be used
-        UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-        NSLog("removed sharedbookmark because it was either permanently deleted or exists in trash")
-        return defaultSaveLocation
-    }
-
-    // at this point, it's known sharedbookmark exists
-    // check local bookmark exists, can read url from bookmark, if bookmark url == shared bookmark url
-    // no need to check if directoryExists for local bookmark (if local bookmark is exists)
-    // can not think of instance where shared bookmark directory exists, yet local bookmark directory does not
-    if
-        let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
-        let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
-        sharedBookmark == userSaveLocation
-    {
-        return userSaveLocation
-    }
-
-    // at this point one of the following conditions met
-    // local bookmark data doesn't exist
-    // for some reason can't get url from local bookmark data
-    // local bookmark url != shared bookmark url (user updated update location)
-    // create new local bookmark
-    if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
-        // return newly created local bookmark url
-        guard
-            let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
-            let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
-        else {
-            err("reading after saveBookmark failed in getSaveLocation")
-            return nil
-        }
-        return localBookmarkUrl
-    } else {
-        err("could not save local version of shared bookmark")
-        return nil
-    }
-}
-
 func getRequireLocation() -> URL {
+    // simple helper in case required code save directory needs to change
     return getDocumentsDirectory().appendingPathComponent("require")
-}
-
-func closeExtensionHTMLPages() {
-    // this function attempts to close all instances of the extension's app page
-    // unfortunately there is no good api for managing extension bundled html pages
-    // this hack looks at all pages, sees if they are "active", if not, closes them
-    // what "active" means in terms of the api is unclear
-    // every page that is open and not a top sites page, favorites page or an extension bundled html page will return true
-    // this enables differentiation of bundled html pages in a way
-    SFSafariApplication.getAllWindows { (windows) in
-        for window in windows {
-            window.getAllTabs{ (tabs) in
-                for tab in tabs {
-                    tab.getPagesWithCompletionHandler { (pages) in
-                        if pages != nil {
-                            for page in pages! {
-                                page.getPropertiesWithCompletionHandler({ props in
-                                    let isActive = props?.isActive ?? false
-                                    if !isActive {
-                                        page.getContainingTab(completionHandler: { tab in
-                                            tab.close()
-                                        })
-                                    }
-                                })
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 func dateToMilliseconds(_ date: Date) -> Int {
@@ -103,27 +12,22 @@ func dateToMilliseconds(_ date: Date) -> Int {
     return Int(since1970 * 1000)
 }
 
-func santize(_ str: String) -> String? {
+func sanitize(_ str: String) -> String? {
     // removes dubious characters from strings (filenames)
-    var santized = str
-    if santized.first == "." {
-        santized = "%2" + str.dropFirst()
+    var sanitized = str
+    if sanitized.first == "." {
+        sanitized = "%2" + str.dropFirst()
     }
     let allowedCharacterSet = (CharacterSet(charactersIn: "/:\\").inverted)
-    return santized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
-}
-
-func isSanitzed(_ str: String) -> Bool {
-    return str.removingPercentEncoding != str
+    return sanitized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
 }
 
 func unsanitize(_ str: String) -> String {
     var s = str
-    // un-santized name
     if s.hasPrefix("%2") && !s.hasPrefix("%2F") {
         s = "." + s.dropFirst(2)
     }
-    if isSanitzed(s) {
+    if s.removingPercentEncoding != s {
         s = s.removingPercentEncoding ?? s
     }
     return s
@@ -143,23 +47,121 @@ func normalizeWeight(_ weight: String) -> String {
     }
 }
 
+func getSaveLocation() -> URL? {
+    #if os(iOS)
+        if
+            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+            let bookmarkUrl = readBookmark(data: sharedBookmarkData, isSecure: true)
+        {
+            return bookmarkUrl
+        } else {
+            return nil
+        }
+    #elseif os(macOS)
+        let standardDefaults = UserDefaults.standard
+        let userSaveLocationKey = "userSaveLocation"
+        var defaultSaveLocation:URL
+
+        // get the default save location, if key doesn't exist write it to user defaults
+        if let saveLocationValue = standardDefaults.url(forKey: "saveLocation") {
+            defaultSaveLocation = saveLocationValue
+        } else {
+            logText("default save location not set, writing to user defaults")
+            let url = getDocumentsDirectory().appendingPathComponent("scripts")
+            UserDefaults.standard.set(url, forKey: "saveLocation")
+            defaultSaveLocation = url
+        }
+
+        // check if shared bookmark data exists
+        // check if can get shared bookmark url
+        // won't be able to if directory trashed
+        guard
+            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
+            let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
+            directoryExists(path: sharedBookmark.path)
+        else {
+            // can't get shared bookmark, use default location and remove shared bookmark key from shared user defaults
+            UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
+            logText("removed sharedbookmark because it was either permanently deleted or in trash")
+            return defaultSaveLocation
+        }
+
+        // at this point, it's known sharedbookmark exists
+        // check local bookmark exists, can read url from bookmark and if bookmark url == shared bookmark url
+        // if local bookmark exists, no need to check if directory exists for it
+        // can't think of an instance where shared bookmark directory exists (checked above), yet local bookmark directory does not
+        if
+            let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
+            let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
+            sharedBookmark == userSaveLocation
+        {
+            return userSaveLocation
+        }
+
+        // at this point one of the following conditions met
+        // - local bookmark data doesn't exist
+        // - for some reason can't get url from local bookmark data
+        // - local bookmark url != shared bookmark url (user updated save location)
+        // when any of those conditions are met, create new local bookmark from shared bookmark
+        if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
+            // read the newly saved bookmark and return it
+            guard
+                let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
+                let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
+            else {
+                err("reading local bookmark in getSaveLocation failed")
+                return nil
+            }
+            return localBookmarkUrl
+        } else {
+            err("could not save local version of shared bookmark")
+            return nil
+        }
+    #endif
+}
+
 func openSaveLocation() -> Bool {
-    guard let saveLocation = getSaveLocation() else {
-        return false
-    }
-    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
-    }
-    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: saveLocation.path)
+    #if os(macOS)
+        guard let saveLocation = getSaveLocation() else {
+            return false
+        }
+        let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+        }
+        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: saveLocation.path)
+    #endif
     return true
 }
 
-func openDocumentsDirectory() {
-    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: getDocumentsDirectory().path)
+func validateUrl(_ urlString: String) -> Bool {
+    if
+        (!urlString.hasPrefix("https://") && !urlString.hasPrefix("http://"))
+        || (!urlString.hasSuffix(".css") && !urlString.hasSuffix(".js"))
+    {
+        return false
+    }
+    return true
 }
 
-// parse
+func isVersionNewer(_ oldVersion: String, _ newVersion: String) -> Bool {
+    let oldVersions = oldVersion.components(separatedBy: ".")
+    let newVersions = newVersion.components(separatedBy: ".")
+    for (index, version) in newVersions.enumerated() {
+        let a = Int(version) ?? 0
+        let oldVersionValue  = oldVersions.indices.contains(index) ? oldVersions[index] : "0"
+        let b = Int(oldVersionValue) ?? 0
+        if a > b {
+            return true
+        }
+        if a < b {
+            return false
+        }
+    }
+    return false
+}
+
+// parser
 func parse(_ content: String) -> [String: Any]? {
     // returns structured data from content of file
     // will fail to parse if metablock or required @name key missing
@@ -192,6 +194,7 @@ func parse(_ content: String) -> [String: Any]? {
     if let metas = Range(match.range(at: g2), in: content) {
         // split metadatas by new line
         let metaArray = content[metas].split(whereSeparator: \.isNewline)
+        // loop through metadata lines and populate metadata dictionary
         for meta in metaArray {
             let p = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)"#
             // this pattern checks for specific keys that won't have values
@@ -263,26 +266,6 @@ let defaultSettings = [
     "tabSize": "4"
 ]
 
-func getManifestKeys() -> Manifest? {
-    let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
-    // if manifest doesn't exist, create new one
-    if !FileManager.default.fileExists(atPath: url.path) {
-        let manifest = Manifest(blacklist: [], disabled: [], exclude: [:], excludeMatch: [:], include: [:], match: [:], require: [:], settings: [:])
-        _ = updateManifest(with: manifest)
-    }
-    guard
-        let content = try? String(contentsOf: url, encoding: .utf8),
-        let data = content.data(using: .utf8),
-        let decoded = try? JSONDecoder().decode(Manifest.self, from: Data(data))
-    else {
-        // manifest missing, improperly formatted or key missing
-        err("failed to read manifest")
-        return nil
-    }
-
-    return decoded
-}
-
 func updateManifest(with data: Manifest) -> Bool {
     let content = data
     let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
@@ -294,448 +277,371 @@ func updateManifest(with data: Manifest) -> Bool {
         try fileContent.write(to: url, atomically: false, encoding: .utf8)
         return true
     } catch {
-        err(error.localizedDescription)
+        err("Failed to update manifest: \(error.localizedDescription)")
         return false
     }
 }
 
-func updateBlacklist(_ patterns: [String]) -> Bool {
-    guard var manifestKeys = getManifestKeys() else {
-        err("failed to get manifest keys when attempting to update blacklist")
-        return false
+func getManifest() -> Manifest {
+    let url = getDocumentsDirectory().appendingPathComponent("manifest.json")
+    if
+        let content = try? String(contentsOf: url, encoding: .utf8),
+        let data = content.data(using: .utf8),
+        let decoded = try? JSONDecoder().decode(Manifest.self, from: Data(data))
+    {
+        return decoded
+    } else {
+        // manifest missing, improperly formatted or missing key
+        // create new manifest with default key/vals
+        let manifest = Manifest(
+            blacklist: [],
+            disabled: [],
+            exclude: [:],
+            excludeMatch: [:],
+            include: [:],
+            match: [:],
+            require: [:],
+            settings: defaultSettings
+        )
+        _ = updateManifest(with: manifest)
+        return manifest
     }
-    manifestKeys.blacklist = patterns
-    if updateManifest(with: manifestKeys) == true {
-        return true
-    }
-    return false
 }
 
-func toggleFile(_ filename: String,_ action: String) -> Bool {
-    guard var manifestKeys = getManifestKeys() else {
-        err("failed to get manifest keys when attempting to toggle file")
-        return false
+func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("updateManifestMatches started")
+    // only get all files if files were not provided
+    var files = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        guard let getFiles = getAllFiles() else {return false}
+        files = getFiles
+    } else {
+        files = optionalFilesArray
     }
-    // if file is already disabled or enabled
-    if (action == "disable" && manifestKeys.disabled.contains(filename)) ||  (action == "enable" && !manifestKeys.disabled.contains(filename)) {
-        return true
-    }
+    var manifest = getManifest()
+    for file in files {
+        // can be force unwrapped because getAllFiles didn't return nil
+        let metadata = file["metadata"] as! [String: [String]]
+        let filename = file["filename"] as! String
+        // populate excludes & matches
+        var excludeMatched = [String]()
+        var matched = [String]()
+        var excluded = [String]()
+        var included = [String]()
+        if metadata["exclude-match"] != nil {
+            excludeMatched.append(contentsOf: metadata["exclude-match"]!)
+        }
+        if metadata["match"] != nil {
+            matched.append(contentsOf: metadata["match"]!)
+        }
+        if metadata["include"] != nil {
+            included.append(contentsOf: metadata["include"]!)
+        }
+        if metadata["exclude"] != nil {
+            excluded.append(contentsOf: metadata["exclude"]!)
+        }
 
-    // add filename to disabled array
-    if (action == "disable") {
-        manifestKeys.disabled.append(filename)
-    }
+        // update manifest values
+        manifest.excludeMatch = updatePatternDict(filename, excludeMatched, manifest.excludeMatch)
+        manifest.match = updatePatternDict(filename, matched, manifest.match)
+        manifest.exclude = updatePatternDict(filename, excluded, manifest.exclude)
+        manifest.include = updatePatternDict(filename, included, manifest.include)
 
-    // remove filename from disabled array
-    if (action == "enable") {
-        guard let index = manifestKeys.disabled.firstIndex(of: filename) else {
-            err("failed to get file index when attempting to enable file")
+        if !updateManifest(with: manifest) {
+            err("failed to update manifest matches")
             return false
         }
-        manifestKeys.disabled.remove(at: index)
     }
-
-    // update manifest
-    if updateManifest(with: manifestKeys) != true {
-        err("failed to \(action) file with name, \(filename)")
-        return false
-    }
-
+    logText("updateManifestMatches complete")
     return true
 }
 
-func updateExcludesAndMatches(_ filename: String,_ excludeMatchPatterns: [String],_ matchPatterns: [String],_ excludePatterns: [String],_ includePatterns: [String]) -> Bool {
-    guard var manifestKeys = getManifestKeys() else {
-        err("failed to get manifest keys when attempting to update excludes and matches")
-        return false
-    }
-
-    // will hold the exclude/match patterns in file's metadata
-    var patternsInFile = [String]()
+func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestKeys: [String: [String]]) -> [String: [String]] {
     // will hold the exclude/match patterns in manifest that have file name as value
     var patternsInManifestForFile = [String]()
-
-    func updatePatternDict(_ manifestExcludesOrMatches: [String: [String]]) -> [String: [String]] {
-        // clear at every func run
-        patternsInManifestForFile.removeAll()
-        // new var from func argument, so it can be manipulated
-        var returnDictionary = manifestExcludesOrMatches
-        // exclude-match & match keys (url patterns) from manifest
-        let keys = returnDictionary.keys
-
-        // determine what patterns already have this filename as a value
-        for key in keys {
-            // key is an array of filenames
-            guard let filenames = returnDictionary[key] else {
-                err("failed to get values for manifest key, \(key)")
-                continue
-            }
-            for name in filenames {
-                // name is a single filename
-
-                // if name is same as filename, file already added for this pattern
-                // add it to patternsInManifestForFile for later comparison
-                if name == filename {
-                    patternsInManifestForFile.append(key)
-                }
+    // new var from func argument, so it can be manipulated
+    var returnDictionary = manifestKeys
+    // patterns from manifest
+    let keys = returnDictionary.keys
+    // determine what patterns already have this filename as a value
+    for key in keys {
+        // key is an array of filenames
+        guard let filenames = returnDictionary[key] else {
+            err("failed to get values for manifest key, \(key)")
+            continue
+        }
+        for name in filenames {
+            // name is a single filename
+            // if name is same as filename, file already added for this pattern
+            // add it to patternsInManifestForFile for later comparison
+            if name == filename {
+                patternsInManifestForFile.append(key)
             }
         }
+    }
+    // patterns in file metadata and patterns in manifest that have filename as a value
+    // filename already present in manifest for these patterns, do nothing with these
+    // let common = filePatterns.filter{patternsInManifestForFile.contains($0)}
+    // patterns in file metadata, but don't have the filename as a value within the manifest
+    // these are the manifest patterns that the filename needs to be added to
+    let addFilenameTo = filePatterns.filter{!patternsInManifestForFile.contains($0)}
 
-        // patterns in file metadata and patterns in manifest that have filename as a value
-        // filename already present in manifest for these patterns, do nothing with these
-        // let common = patternsInFile.filter{patternsInManifestForFile.contains($0)}
+    // the patterns that have the filename as a value, but not present in file metadata
+    // ie. these are the manifest patterns we need to remove the filename from
+    let removeFilenameFrom = patternsInManifestForFile.filter{!filePatterns.contains($0)}
 
-        // patterns in file metadata, but don't have the filename as a value within the manifest
-        // these are the manifest patterns that the filename needs to be added to
-        let addFilenameTo = patternsInFile.filter{!patternsInManifestForFile.contains($0)}
-
-        // the patterns that have the filename as a value, but not present in file metadata
-        // ie. these are the manifest patterns we need to remove the filename from
-        let removeFilenameFrom = patternsInManifestForFile.filter{!patternsInFile.contains($0)}
-
-        // check if filename needs to be added or new key/val needs to be created
-        for pattern in addFilenameTo {
-            if returnDictionary[pattern] != nil {
-                returnDictionary[pattern]?.append(filename)
-            } else {
-                returnDictionary[pattern] = [filename]
-            }
+    // check if filename needs to be added or new key/val needs to be created
+    for pattern in addFilenameTo {
+        if returnDictionary[pattern] != nil {
+            returnDictionary[pattern]?.append(filename)
+        } else {
+            returnDictionary[pattern] = [filename]
         }
-
-        for pattern in removeFilenameFrom {
-            // get the index of the filename within the array
-            let ind = returnDictionary[pattern]?.firstIndex(of: filename)
-            // remove filename from array by index
-            returnDictionary[pattern]?.remove(at: ind!)
-            // if filename was the last item in array, remove the url pattern from dictionary
-            if returnDictionary[pattern]!.count < 1 {
-                returnDictionary.removeValue(forKey: pattern)
-            }
-        }
-        // clear after every func run
-        patternsInFile.removeAll()
-        return returnDictionary
     }
 
-    // get updated data for exclude-match and match
-    patternsInFile = excludeMatchPatterns
-    manifestKeys.excludeMatch = updatePatternDict(manifestKeys.excludeMatch)
-    patternsInFile = matchPatterns
-    manifestKeys.match = updatePatternDict(manifestKeys.match)
-    patternsInFile = excludePatterns
-    manifestKeys.exclude = updatePatternDict(manifestKeys.exclude)
-    patternsInFile = includePatterns
-    manifestKeys.include = updatePatternDict(manifestKeys.include)
-
-    // save updated data to manifest
-    if updateManifest(with: manifestKeys) != true {
-        err("failed to update manifest when attempting to update excludes and matches")
-        return false
+    for pattern in removeFilenameFrom {
+        // get the index of the filename within the array
+        let ind = returnDictionary[pattern]?.firstIndex(of: filename)
+        // remove filename from array by index
+        returnDictionary[pattern]?.remove(at: ind!)
+        // if filename was the last item in array, remove the url pattern from dictionary
+        if returnDictionary[pattern]!.count < 1 {
+            returnDictionary.removeValue(forKey: pattern)
+        }
     }
 
+    return returnDictionary
+}
+
+func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("updateManifestRequired started")
+    // only get all files if files were not provided
+    var files = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        guard let getFiles = getAllFiles() else {
+            logText("updateManifestRequired count not get files")
+            return false
+        }
+        files = getFiles
+    } else {
+        files = optionalFilesArray
+    }
+    logText("updateManifestRequired will loop through \(files.count)")
+    var manifest = getManifest()
+    for file in files {
+        // can be force unwrapped because getAllFiles didn't return nil
+        let filename = file["filename"] as! String
+        let metadata = file["metadata"] as! [String: [String]]
+        let type = file["type"] as! String
+        let required = metadata["require"] ?? []
+        logText("updateManifestRequired start \(filename)")
+        // get required resources for file, if fail, skip updating manifest
+        if !getRequiredCode(filename, required, type) {
+            err("couldn't fetch remote content for \(filename) in updateManifestRequired")
+            continue
+        }
+
+        // create filenames from sanitized resource urls
+        // getRequiredCode does the same thing when saving to disk
+        // populate array with entries for manifest
+        var r = [String]()
+        for resource in required {
+            if let sanitizedResourceName = sanitize(resource) {
+                r.append(sanitizedResourceName)
+            }
+        }
+
+        // if there are values, write them to manifest
+        // if failed to write to manifest, continue to next file & log error
+        if r.count > 0 && r != manifest.require[filename] {
+            manifest.require[filename] = r
+            if !updateManifest(with: manifest) {
+                err("couldn't update manifest when getting required resources")
+            }
+        }
+        logText("updateManifestRequired end \(filename)")
+    }
+    logText("updateManifestRequired complete")
     return true
 }
 
-func purgeManifest() -> Bool {
-    var allSaveLocationFilenames = [String]() // stores the filtered filenames from the save location
-    var update = false // determines whether to rewrite manifest
-    guard
-        var manifestKeys = getManifestKeys(),
-        let saveLocation = getSaveLocation()
-    else {
-        err("failed to get manifest keys or save location when attempting to purge manifest")
-        return false
+func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("purgeManifest started")
+    // purge all manifest keys of any stale entries
+    var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
+    // only get all files if files were not provided
+    var allFiles = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        // if getAllFiles fails to return, ignore and pass an empty array
+        let getFiles = getAllFiles() ?? []
+        allFiles = getFiles
+    } else {
+        allFiles = optionalFilesArray
     }
-    // security scope
-    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
-    }
-    guard
-        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
-    else {
-        err("failed to get all file urls when attempting to purge manifest")
-        return false
-    }
-
-    // populate allSaveLocationFilenames array with files of the correct type in save location
-    for fileUrl in allFilesUrls {
-        let filename = fileUrl.lastPathComponent
-        if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
-            continue
+    // populate array with filenames
+    for file in allFiles {
+        if let filename = file["filename"] as? String {
+            allSaveLocationFilenames.append(filename)
         }
-        allSaveLocationFilenames.append(filename)
     }
-
-    // iterate through manifest matches
-    // if no file exists for value, remove it from manifest
-    for (pattern, filenames) in manifestKeys.match {
+    // loop through manifest keys, if no file exists for value, remove value from manifest
+    // if there are no more filenames in pattern, remove pattern from manifest
+    for (pattern, filenames) in manifest.match {
         for filename in filenames {
             if !allSaveLocationFilenames.contains(filename) {
-                if let index = manifestKeys.match[pattern]?.firstIndex(of: filename) {
-                    manifestKeys.match[pattern]?.remove(at: index)
+                if let index = manifest.match[pattern]?.firstIndex(of: filename) {
+                    manifest.match[pattern]?.remove(at: index)
                     update = true
-                    NSLog("Could not find \(filename) in save location, removed from match pattern - \(pattern)")
+                    logText("Could not find \(filename) in save location, removed from match pattern - \(pattern)")
                 }
             }
         }
-        // if there are no more filenames in pattern, remove pattern from manifest
-        if let length = manifestKeys.match[pattern]?.count {
-            if length < 1, let ind = manifestKeys.match.index(forKey: pattern) {
-                manifestKeys.match.remove(at: ind)
-                NSLog("No more files for \(pattern) match pattern, removed from manifest")
+        if let length = manifest.match[pattern]?.count {
+            if length < 1, let ind = manifest.match.index(forKey: pattern) {
+                manifest.match.remove(at: ind)
+                logText("No more files for \(pattern) match pattern, removed from manifest")
             }
         }
     }
-
-    // iterate through manifest excludeMatch patterns
-    for (pattern, filenames) in manifestKeys.excludeMatch {
+    for (pattern, filenames) in manifest.excludeMatch {
         for filename in filenames {
             if !allSaveLocationFilenames.contains(filename) {
-                if let index = manifestKeys.excludeMatch[pattern]?.firstIndex(of: filename) {
-                    manifestKeys.excludeMatch[pattern]?.remove(at: index)
+                if let index = manifest.excludeMatch[pattern]?.firstIndex(of: filename) {
+                    manifest.excludeMatch[pattern]?.remove(at: index)
                     update = true
-                    NSLog("Could not find \(filename) in save location, removed from exclude-match pattern - \(pattern)")
+                    logText("Could not find \(filename) in save location, removed from exclude-match pattern - \(pattern)")
                 }
             }
         }
-        // if there are no more filenames in pattern, remove pattern from manifest
-        if let length = manifestKeys.excludeMatch[pattern]?.count {
-            if length < 1, let ind = manifestKeys.excludeMatch.index(forKey: pattern) {
-                manifestKeys.excludeMatch.remove(at: ind)
-                NSLog("No more files for \(pattern) exclude-match pattern, removed from manifest")
+        if let length = manifest.excludeMatch[pattern]?.count {
+            if length < 1, let ind = manifest.excludeMatch.index(forKey: pattern) {
+                manifest.excludeMatch.remove(at: ind)
+                logText("No more files for \(pattern) exclude-match pattern, removed from manifest")
             }
         }
     }
-
-    // iterate through manifest exclude patterns
-    for (pattern, filenames) in manifestKeys.exclude {
+    for (pattern, filenames) in manifest.exclude {
         for filename in filenames {
             if !allSaveLocationFilenames.contains(filename) {
-                if let index = manifestKeys.exclude[pattern]?.firstIndex(of: filename) {
-                    manifestKeys.exclude[pattern]?.remove(at: index)
+                if let index = manifest.exclude[pattern]?.firstIndex(of: filename) {
+                    manifest.exclude[pattern]?.remove(at: index)
                     update = true
-                    NSLog("Could not find \(filename) in save location, removed from exclude pattern - \(pattern)")
+                    logText("Could not find \(filename) in save location, removed from exclude pattern - \(pattern)")
                 }
             }
         }
-        // if there are no more filenames in pattern, remove pattern from manifest
-        if let length = manifestKeys.exclude[pattern]?.count {
-            if length < 1, let ind = manifestKeys.exclude.index(forKey: pattern) {
-                manifestKeys.exclude.remove(at: ind)
-                NSLog("No more files for \(pattern) exclude pattern, removed from manifest")
+        if let length = manifest.exclude[pattern]?.count {
+            if length < 1, let ind = manifest.exclude.index(forKey: pattern) {
+                manifest.exclude.remove(at: ind)
+                logText("No more files for \(pattern) exclude pattern, removed from manifest")
             }
         }
     }
-
-    // iterate through manifest include patterns
-    for (pattern, filenames) in manifestKeys.include {
+    for (pattern, filenames) in manifest.include {
         for filename in filenames {
             if !allSaveLocationFilenames.contains(filename) {
-                if let index = manifestKeys.include[pattern]?.firstIndex(of: filename) {
-                    manifestKeys.include[pattern]?.remove(at: index)
+                if let index = manifest.include[pattern]?.firstIndex(of: filename) {
+                    manifest.include[pattern]?.remove(at: index)
                     update = true
-                    NSLog("Could not find \(filename) in save location, removed from exclude pattern - \(pattern)")
+                    logText("Could not find \(filename) in save location, removed from exclude pattern - \(pattern)")
                 }
             }
         }
-        // if there are no more filenames in pattern, remove pattern from manifest
-        if let length = manifestKeys.include[pattern]?.count {
-            if length < 1, let ind = manifestKeys.include.index(forKey: pattern) {
-                manifestKeys.include.remove(at: ind)
-                NSLog("No more files for \(pattern) exclude pattern, removed from manifest")
+        if let length = manifest.include[pattern]?.count {
+            if length < 1, let ind = manifest.include.index(forKey: pattern) {
+                manifest.include.remove(at: ind)
+                logText("No more files for \(pattern) exclude pattern, removed from manifest")
             }
         }
     }
-
-    // iterate through manifest required
-    for (filename, _) in manifestKeys.require {
+    // loop through manifest required
+    for (filename, _) in manifest.require {
         if !allSaveLocationFilenames.contains(filename) {
-            if let index = manifestKeys.require.index(forKey: filename) {
-                manifestKeys.require.remove(at: index)
+            if let index = manifest.require.index(forKey: filename) {
+                manifest.require.remove(at: index)
                 // remove associated resources
                 if !getRequiredCode(filename, [], (filename as NSString).pathExtension) {
                     err("failed to remove required resources when purging \(filename) from manifest required records")
                 }
                 update = true
-                NSLog("No more required resources for \(filename), removed from manifest along with resource folder")
+                logText("No more required resources for \(filename), removed from manifest along with resource folder")
             }
         }
     }
-
-    // iterate through manifest disabled
-    for filename in manifestKeys.disabled {
+    // loop through manifest disabled
+    for filename in manifest.disabled {
         if !allSaveLocationFilenames.contains(filename) {
-            if let index = manifestKeys.disabled.firstIndex(of: filename) {
-                manifestKeys.disabled.remove(at: index)
+            if let index = manifest.disabled.firstIndex(of: filename) {
+                manifest.disabled.remove(at: index)
                 update = true
-                NSLog("Could not find \(filename) in save location, removed from disabled")
+                logText("Could not find \(filename) in save location, removed from disabled")
             }
         }
     }
-
     // remove obsolete settings
-    for setting in manifestKeys.settings {
+    for setting in manifest.settings {
         if !defaultSettings.keys.contains(setting.key) {
-            manifestKeys.settings.removeValue(forKey: setting.key)
+            manifest.settings.removeValue(forKey: setting.key)
             update = true
-            NSLog("Removed obsolete setting - \(setting.key)")
+            logText("Removed obsolete setting - \(setting.key)")
         }
     }
-
-    // update manifest
-    if update, updateManifest(with: manifestKeys) != true {
+    if update, !updateManifest(with: manifest) {
         err("failed to purge manifest")
+        return false
+    }
+    logText("purgeManifest complete")
+    return true
+}
+
+// settings
+func checkSettings() -> Bool {
+    // iterate over default settings and individually check if each present
+    // if missing add setting to manifest about to be returned
+    // missing keys will occur when new settings introduced
+    var manifest = getManifest()
+    var update = false
+    for (key, value) in defaultSettings {
+        if manifest.settings[key] == nil {
+            manifest.settings[key] = value
+            update = true
+        }
+    }
+    if update, !updateManifest(with: manifest) {
+        err("failed to update manifest settings")
         return false
     }
     return true
 }
 
 func updateSettings(_ settings: [String: String]) -> Bool {
-    guard var manifestKeys = getManifestKeys() else {
-        err("failed to get manifest keys when attempting to update settings")
-        return false
-    }
-    manifestKeys.settings = settings
-    if updateManifest(with: manifestKeys) != true {
+    var manifest = getManifest()
+    manifest.settings = settings
+    if updateManifest(with: manifest) != true {
         err("failed to update settings")
         return false
     }
     return true
 }
 
-func updateManifestRequires(_ filename: String, _ resources: [String]) -> Bool {
-    guard var manifestKeys = getManifestKeys() else {
-        return false
-    }
-
-    // file has no required resources but the key is in manifest
-    if resources.count < 1 && manifestKeys.require[filename] != nil, let index = manifestKeys.require.index(forKey: filename) {
-        manifestKeys.require.remove(at: index)
-        NSLog("No more required resources for \(filename), removed from manifest")
-        if updateManifest(with: manifestKeys) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    // file has required resources
-    // santize all resource names
-    var r = [String]()
-    for resource in resources {
-        if let santizedResourceName = santize(resource) {
-            r.append(santizedResourceName)
-        } else {
-            return false
-        }
-    }
-
-    // only write if current manifest differs from resources
-    if r.count > 0 && r != manifestKeys.require[filename] {
-        manifestKeys.require[filename] = r
-        if !updateManifest(with: manifestKeys) {
-            return false
-        }
-    }
-
-    return true
-}
-
-// init
-func getInitData() -> [String: Any]? {
-    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
-    let requireLocation = getRequireLocation()
-    var update = false // determines whether to rewrite manifest
-    guard let saveLocation = getSaveLocation() else {
-        err("failed to get save location when attempting to get init data")
-        return nil
-    }
-
-    // check if default save location directory exists, if not create it
-    if !FileManager.default.fileExists(atPath: defaultSaveLocation.path) {
-        do {
-            try FileManager.default.createDirectory(at: defaultSaveLocation, withIntermediateDirectories: false)
-        } catch {
-            // could not create the save location directory, show error
-            err("failed to create save location directory while getting init data")
-            return nil
-        }
-    }
-
-    // check if default require location directory exists, if not create it
-    if !FileManager.default.fileExists(atPath: requireLocation.path) {
-        do {
-            try FileManager.default.createDirectory(at: requireLocation, withIntermediateDirectories: false)
-        } catch {
-            // could not create the save location directory, show error
-            err("failed to create save location directory while getting init data")
-            return nil
-        }
-    }
-
-    // get manifest data
-    var manifestKeys = getManifestKeys()
-    // if manifest missing, improperly formatted or key missing it will be nil, create new manifest
-    if manifestKeys == nil {
-        manifestKeys = Manifest(blacklist: [], disabled: [], exclude: [:], excludeMatch: [:], include: [:], match: [:], require: [:], settings: [:])
-        if !updateManifest(with: manifestKeys!) { // force unwrap since it was assigned in above line
-            err("manifest had issues that could not be resolved while getting init data")
-            return nil
-        }
-    }
-
-    // get settings from manifest
-    // can force unwrap all instances of manifestKeys since nil check is done above
-
-    // iterate over default settings and individually check if each present
-    // missing keys will occur when new settings introduced
-    for (key, value) in defaultSettings {
-        if manifestKeys!.settings[key] == nil {
-            manifestKeys!.settings[key] = value
-            update = true
-        }
-    }
-
-    // if flagged, update manifest
-    if update, updateManifest(with: manifestKeys!) != true {
-        err("failed to update manifest while getting init data")
-        return nil
-    }
-
-    // purge manifest every init, if it fails, log error and continue since failed purges don't break functionality
-    if !purgeManifest() {
-        err("purge manifest failed while getting init data")
-    }
-
-    var data:[String: Any] = manifestKeys!.settings
-    data["blacklist"] = manifestKeys!.blacklist
-    data["saveLocation"] = saveLocation.path
-    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-
-    return data
-}
-
 // files
-func getAllFilesData() -> [[String: Any]]? {
-    var files = [[String: Any]]() // this will be returned
+func getAllFiles() -> [[String: Any]]? {
+    // returns all files of proper type with filenames, metadata & more
+    var files = [[String: Any]]()
     let fm = FileManager.default
+    let manifest = getManifest()
     guard let saveLocation = getSaveLocation() else {
-        err("failed to get save location when attempting to get all files data")
-        return nil
-    }
-    guard  let manifestKeys = getManifestKeys() else {
-        err("failed to get manifest keys when attempting to get all files data")
+        err("getAllFiles failed at (1)")
         return nil
     }
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
     }
-    // get all file urls within directory
+    // get all file urls within save location
     guard let urls = try? fm.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])  else {
-        err("couldn't read directory contents")
+        err("getAllFiles failed at (2)")
         return nil
     }
     for url in urls {
@@ -753,565 +659,256 @@ func getAllFilesData() -> [[String: Any]]? {
             let metadata = parsed["metadata"] as? [String: [String]],
             let type = filename.split(separator: ".").last
         else {
-            NSLog("ignoring \(filename), file missing or metadata missing from file contents")
+            logText("ignoring \(filename), file missing or metadata missing from file contents")
             continue
         }
         fileData["canUpdate"] = false
         fileData["content"] = content
-        fileData["disabled"] = false
+        fileData["disabled"] = manifest.disabled.contains(filename)
         fileData["filename"] = filename
         fileData["lastModified"] = dateToMilliseconds(dateMod)
-        fileData["name"] =  metadata["name"]![0] // can force, parser ensures name exists
-        fileData["type"] = type
+        fileData["metadata"] = metadata
+        // for unwrap name since parse ensure it exists
+        fileData["name"] = metadata["name"]![0]
+        fileData["type"] = "\(type)"
+        if metadata["description"] != nil {
+            fileData["description"] = metadata["description"]![0]
+        }
         if metadata["version"] != nil && metadata["updateURL"] != nil {
             fileData["canUpdate"] = true
         }
-        if metadata["description"] != nil {
-            fileData["description"] = metadata["description"]![0] // can force
-        }
-        if manifestKeys.disabled.contains(filename) {
-            fileData["disabled"] = true
-        }
-        // update excludes & matches
-        var excludeMatched = [String]()
-        var matched = [String]()
-        var excluded = [String]()
-        var included = [String]()
-        if metadata["exclude-match"] != nil {
-            excludeMatched.append(contentsOf: metadata["exclude-match"]!)
-        }
-        if metadata["match"] != nil {
-            matched.append(contentsOf: metadata["match"]!)
-        }
-        if metadata["include"] != nil {
-            included.append(contentsOf: metadata["include"]!)
-        }
-        if metadata["exclude"] != nil {
-            excluded.append(contentsOf: metadata["exclude"]!)
-        }
-        if !updateExcludesAndMatches(filename, excludeMatched, matched, excluded, included) {
-            err("error updating excludes & matches while getting all files data")
-        }
-
-        // check for require keys, run even if metadata["require"] is nil to remove stale required resources
-        let required = metadata["require"] ?? []
-        if !getRequiredCode(filename, required, "\(type)") {
-            err("error updating required resources while getting all files data")
-        }
-
+        fileData["noframes"] = metadata["noframes"] != nil ? true : false
         files.append(fileData)
     }
+    logText("getAllFiles completed")
     return files
-}
-
-func getFileContentsParsed(_ url: URL) -> [String: Any]? {
-    guard let saveLocation = getSaveLocation() else {
-        err("failed to get savelocation in getFileContents")
-        return nil
-    }
-    // security scope
-    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
-    }
-    // check that url is a valid path to a directory or single file
-    guard
-        FileManager.default.fileExists(atPath: url.path),
-        let content = try? String(contentsOf: url, encoding: .utf8),
-        let parsed = parse(content)
-    else {
-        return nil
-    }
-    return parsed
-}
-
-func saveFile(_ data: [String: Any]) -> [String: Any] {
-    // lots of unique guard statements to try to better track down failures when they occur
-    guard let saveLocation = getSaveLocation() else {
-        return ["error": "failed to get save location when attempting to save"]
-    }
-    guard
-        let newContent = data["new"] as? String,
-        let current = data["current"] as? [String: Any],
-        let oldFilename = current["filename"] as? String,
-        let type = current["type"] as? String
-    else {
-        err("invalid save object")
-        return ["error": "invalid argument in save function"]
-    }
-    guard
-        let parsed = parse(newContent),
-        let metadata = parsed["metadata"] as? [String: [String]],
-        let n = metadata["name"]?[0],
-        var name = santize(n)
-    else {
-        return ["error": "failed to parse argument in save function"]
-    }
-
-    // construct new file name
-    let newFilename = "\(name).\(type)"
-
-    // security scope
-    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
-    }
-    guard
-        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
-    else {
-        return ["error": "failed to read save urls in save function"]
-    }
-
-    // validate file before save
-    var allFilenames:[String] = [] // stores the indv. filenames for later comparison
-    // old and new filenames are equal, overwriting and can skip
-    if oldFilename.lowercased() != newFilename.lowercased() {
-        // loop through all the file urls in the save location and save filename to var
-        for fileUrl in allFilesUrls {
-            // skip file if it is not of the proper type
-            let filename = fileUrl.lastPathComponent
-            if (!filename.hasSuffix(type)) {
-                continue
-            }
-            // if file is of the proper type, add it to the allFilenames array
-            allFilenames.append(filename.lowercased())
-        }
-    }
-
-    if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
-        // filename taken or too long
-        return ["error": "filename validation failed in save function"]
-    }
-
-    // file passed validation
-
-    // check for require keys
-    let required = metadata["require"] ?? []
-    if !getRequiredCode(newFilename, required, type) {
-        return ["error": "failed to get required resources"]
-    }
-
-    // attempt to save to disk
-    let newFileUrl = saveLocation.appendingPathComponent(newFilename)
-    do {
-        try newContent.write(to: newFileUrl, atomically: false, encoding: .utf8)
-    } catch {
-        return ["error": "failed to write file to disk"]
-    }
-
-    // saved to disk successfully
-
-    // get the file last modified date
-    guard
-        let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
-    else {
-        return ["error": "failed to read modified date in save function"]
-    }
-
-    // remove old file if it exists and manifest records for old file if they exist
-    if oldFilename != newFilename {
-        // if user changed the filename, remove file with old filename
-        let oldFileUrl = saveLocation.appendingPathComponent(oldFilename)
-        // however, when creating a new file, if user changes the temp given name by app...
-        // oldFilename (the temp name in activeItem) and newFilename (@name in file contents) will differ
-        // the file with oldFilename will not be on the filesystem and can not be deleted
-        // for that edge case, using try? rather than try(!) to allow failures
-        try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
-
-        // updateExcludesAndMatches for old file
-        _ = updateExcludesAndMatches(oldFilename, [], [], [], [])
-    }
-
-    // update new excludes and matches for new file
-    let excludeMatches = metadata["exclude-match"] ?? []
-    let matches = metadata["match"] ?? []
-    let includes = metadata["include"] ?? []
-    let excludes = metadata["exclude"] ?? []
-    _ = updateExcludesAndMatches(newFilename, excludeMatches, matches, excludes, includes)
-
-    // un-santized name
-    name = unsanitize(name)
-
-    var response = [String: Any]()
-    response["canUpdate"] = false
-    response["content"] = newContent
-    response["filename"] = newFilename
-    response["lastModified"] = dateToMilliseconds(dateMod)
-    response["name"] = name
-
-    if metadata["description"] != nil {
-        response["description"] = metadata["description"]![0]
-    }
-    if metadata["version"] != nil && metadata["updateURL"] != nil {
-        response["canUpdate"] = true
-    }
-    return response
-}
-
-func trashFile(_ filename: String) -> Bool {
-    // remove file from manifest
-    guard
-        toggleFile(filename, "enable"),
-        updateExcludesAndMatches(filename, [], [], [], []),
-        let type = filename.components(separatedBy: ".").last,
-        getRequiredCode(filename, [], type),
-        let saveLocation = getSaveLocation()
-    else {
-        err("failed to remove script from manifest or get save location")
-        return false
-    }
-    // security scope
-    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-    defer {
-        if didStartAccessing { saveLocation.stopAccessingSecurityScopedResource() }
-    }
-    let url = saveLocation.appendingPathComponent(filename)
-    // if file is already removed from path, assume it was removed by user and return true
-    if (FileManager.default.fileExists(atPath: url.path)) {
-        do {
-            try FileManager.default.trashItem(at: url, resultingItemURL: nil)
-        } catch {
-            err(error.localizedDescription)
-            return false
-        }
-    }
-    return true
-}
-
-func getRemoteFile(_ url: String, _ callback: @escaping (String, Error?) -> Void) -> Bool {
-    guard let solidURL = URL(string: url) else {
-        return false
-    }
-    let request = URLRequest(url: solidURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
-    URLSession.shared.dataTask(with: request) { data, _, error in
-        guard
-            let solidData = data,
-            let solidCode = String(data: solidData, encoding: .utf8)
-        else {
-            callback("", error)
-            return
-        }
-        callback(solidCode, nil)
-        return
-    }
-    .resume()
-    return true
 }
 
 func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
     let directory = getRequireLocation().appendingPathComponent(filename)
-
     // if file requires no resource but directory exists, trash it
     if resources.count < 1 && FileManager.default.fileExists(atPath: directory.path) {
         do {
             try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
         } catch {
-            // failing to trash item won't break functonality, so log error and move on
-            err(error.localizedDescription)
+            // failing to trash item won't break functionality, so log error and move on
+            err("failed to trash directory in getRequiredCode \(error.localizedDescription)")
             return true
         }
     }
-
-    for resourceURLString in resources {
-        // skip invalid urls or urls pointing to files of different types
-        if let url = URL(string: resourceURLString), url.path.hasSuffix(fileType) {
-            guard let resourceFilename = santize(resourceURLString) else {
-                return false
-            }
+    // loop through resource urls and attempt to fetch it
+    for resourceUrlString in resources {
+        // get the path of the url string
+        guard let resourceUrlPath = URLComponents(string: resourceUrlString)?.path else {
+            // if path can not be obtained, skip and log
+            logText("failed to get path on \(filename) for \(resourceUrlString)")
+            continue
+        }
+        // skip urls pointing to files of different types
+        if resourceUrlPath.hasSuffix(fileType) {
+            guard let resourceFilename = sanitize(resourceUrlString) else {return false}
             let fileURL = directory.appendingPathComponent(resourceFilename)
-            var contents = ""
             // only attempt to get resource if it does not yet exist
-            if FileManager.default.fileExists(atPath: fileURL.path) {
-                continue
-            }
-
-            // get remote file contents, synchronously
-            let semaphore = DispatchSemaphore(value: 0)
-            var task: URLSessionDataTask?
-            task = URLSession.shared.dataTask(with: url) { data, response, error in
-                if let r = response as? HTTPURLResponse, data != nil, error == nil {
-                    if r.statusCode == 200 {
-                        contents = String(data: data!, encoding: .utf8) ?? ""
-                    }
-                }
-                semaphore.signal()
-            }
-            task?.resume()
-            // wait 10 seconds before timing out
-            if semaphore.wait(timeout: .now() + 10) == .timedOut {
-                task?.cancel()
-            }
-
-            // if we made it to this point and contents is still an empty string, something went wrong with the request
-            if contents.count < 1 {
-                continue
-            }
-
+            if FileManager.default.fileExists(atPath: fileURL.path) {continue}
+            // get the remote file contents
+            guard let contents = getRemoteFileContents(resourceUrlString) else {continue}
             // check if file specific folder exists at requires directory
             if !FileManager.default.fileExists(atPath: directory.path) {
                 guard ((try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)) != nil) else {
+                    logText("failed to create required code directory for \(filename)")
                     return false
                 }
             }
-
+            // finally write file to directory
             guard ((try? contents.write(to: fileURL, atomically: false, encoding: .utf8)) != nil) else {
+                logText("failed to write content to file for \(filename) from \(resourceUrlString)")
                 return false
             }
         }
     }
-
-    // remove unused files, if any exist
-    var all = [String]()
-    if let allResourceFilenamesSaved = try? FileManager.default.contentsOfDirectory(atPath: directory.path) {
-        for savedResourceFilename in allResourceFilenamesSaved {
-            if !resources.contains(unsanitize(savedResourceFilename)) {
-                try? FileManager.default.trashItem(at: directory.appendingPathComponent(savedResourceFilename), resultingItemURL: nil)
-            } else {
-                all.append(savedResourceFilename)
-            }
-        }
-    }
-
-    if !updateManifestRequires(filename, all) {
-        return false
-    }
-
     return true
 }
 
-// injection
-func getMatchedFiles(_ location: [String: Any]) -> [String]? {
-    // get the manifest data
-    guard
-        let manifestKeys = getManifestKeys(),
-        let active = manifestKeys.settings["active"]
-    else {
-        err("could not read manifest when attempting to get matched files")
-        return nil
-    }
-    // get the protocol, host, pathname
-    guard
-        let ptcl = location["protocol"] as? String,
-        let host = location["host"] as? String,
-        let path = location["pathname"] as? String,
-        let href = location["href"] as? String
-    else {
-        err("could not get values from location object when attempting to get matched files")
-        return nil
-    }
-
-    // domains where loading is excluded for file
-    var excludedFilenames:[String] = []
-    // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
-    var matchedFilenames:[String] = []
-    // all exclude-match patterns from manifest
-    let excludeMatchPatterns = manifestKeys.excludeMatch.keys
-    // all match patterns from manifest
-    let matchPatterns = manifestKeys.match.keys
-    // all include patterns from manifest
-    let includeExpressions = manifestKeys.include.keys
-    // all exclude patterns from manifest
-    let excludeExpressions = manifestKeys.exclude.keys
-
-    // if injection is disabled, return empty array
-    if active != "true" {
-        return matchedFilenames
-    }
-
-    // url matches a pattern in blacklist
-    // essentially all scripts are disabled, there are 0 active scripts for url
-    for pattern in manifestKeys.blacklist {
-        if match(ptcl, host, path, pattern) {
-            return matchedFilenames
+func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[String: String]]? {
+    // only get all files if files were not provided
+    var files = [[String: Any]]()
+    if optionalFilesArray.count < 1 {
+        guard let getFiles = getAllFiles() else {
+            err("checkForRemoteUpdates failed at (1)")
+            return nil
         }
+        files = getFiles
+    } else {
+        files = optionalFilesArray
     }
 
-    // add disabled script filenames to excludePatterns
-    excludedFilenames.append(contentsOf: manifestKeys.disabled)
-
-    // loop through exclude patterns and see if any match against page url
-    for pattern in excludeMatchPatterns {
-        // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
-        if match(ptcl, host, path, pattern) {
-            guard let filenames = manifestKeys.excludeMatch[pattern] else {
-                err("error parsing manifest.keys when attempting to get code for injected script")
-                continue
+    var hasUpdates = [[String: String]]()
+    for file in files {
+        // can be force unwrapped because getAllFiles didn't return nil
+        let filename = file["filename"] as! String
+        let canUpdate = file["canUpdate"] as! Bool
+        let metadata = file["metadata"] as! [String: [String]]
+        let type = file["type"] as! String
+        let name = metadata["name"]![0]
+        logText("Checking for remote updates for \(filename)")
+        if canUpdate {
+            let currentVersion = metadata["version"]![0]
+            let updateUrl = metadata["updateURL"]![0]
+            // before fetching remote contents, ensure it points to a file of the same type
+            if !updateUrl.hasSuffix(type) {continue}
+            guard
+                let remoteFileContents = getRemoteFileContents(updateUrl),
+                let remoteFileContentsParsed = parse(remoteFileContents),
+                let remoteMetadata = remoteFileContentsParsed["metadata"] as? [String: [String]],
+                let remoteVersion = remoteMetadata["version"]?[0]
+            else {
+                err("failed to parse remote file contents in checkForRemoteUpdates")
+                return nil
             }
-            for filename in filenames {
-                if !excludedFilenames.contains(filename) {
-                    excludedFilenames.append(filename)
-                }
+            let remoteVersionNewer = isVersionNewer(currentVersion, remoteVersion)
+            if remoteVersionNewer {
+                hasUpdates.append(["name": name, "filename": filename, "type": type, "url": updateUrl])
             }
         }
     }
-
-    // loop through exclude expressions and check for matches
-    for exp in excludeExpressions {
-        if include(href, exp) {
-            guard let filenames = manifestKeys.exclude[exp] else {
-                err("error parsing manifest when attempting to get code, excludeExpressions")
-                continue
-            }
-            for filename in filenames {
-                if !excludedFilenames.contains(filename) {
-                    excludedFilenames.append(filename)
-                }
-            }
-        }
-    }
-
-    // loop through all match patterns from manifest to see if they match against the current page url
-    for pattern in matchPatterns {
-        if match(ptcl, host, path, pattern) {
-            // the filenames listed for the pattern that match page url
-            guard let filenames = manifestKeys.match[pattern] else {
-                err("error parsing manifestKets.match when attempting to get code for injected script")
-                continue
-            }
-            // loop through matched filenames and populate matchedFilenames array
-            for filename in filenames {
-                // don't push to array if filename is in excludes or filename already exists in matchedFilenames array (to avoid duplication)
-                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
-                    matchedFilenames.append(filename)
-                }
-            }
-
-        }
-    }
-
-    // loop through include expressions and check for matches
-    for exp in includeExpressions {
-        if include(href, exp) {
-            guard let filenames = manifestKeys.include[exp] else {
-                err("error parsing manifest when attempting to get code, includeExpressions")
-                continue
-            }
-            for filename in filenames {
-                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
-                    matchedFilenames.append(filename)
-                }
-            }
-        }
-    }
-
-    return matchedFilenames
+    logText("Finished checking for remote updates for \(files.count) files")
+    return hasUpdates
 }
 
-func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
-    var allFiles = [String: [String: [String: Any]]]()
-    var cssFiles = [String:[String:String]]()
-    var jsFiles = [String: [String: [String: [String: String]]]]()
-    jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    var auto_docStart = [String: [String: String]]()
-    var auto_docEnd = [String: [String: String]]()
-    var auto_docIdle = [String: [String: String]]()
-    var content_docStart = [String: [String: String]]()
-    var content_docEnd = [String: [String: String]]()
-    var content_docIdle = [String: [String: String]]()
-    var page_docStart = [String: [String: String]]()
-    var page_docEnd = [String: [String: String]]()
-    var page_docIdle = [String: [String: String]]()
+func getRemoteFileContents(_ url: String) -> String? {
+    logText("getRemoteFileContents for \(url) start")
+    // if url is http change to https
+    var urlChecked = url
+    if urlChecked.hasPrefix("http:") {
+        urlChecked = urlChecked.replacingOccurrences(of: "http:", with: "https:")
+        logText("\(url) is using insecure http, attempt to fetch remote content with https")
+    }
+    guard let solidURL = URL(string: urlChecked) else {return nil}
+    var contents = ""
+    // get remote file contents, synchronously
+    let semaphore = DispatchSemaphore(value: 0)
+    var task: URLSessionDataTask?
+    task = URLSession.shared.dataTask(with: solidURL) { data, response, error in
+        if let r = response as? HTTPURLResponse, data != nil, error == nil {
+            if r.statusCode == 200 {
+                contents = String(data: data!, encoding: .utf8) ?? ""
+            }
+        }
+        semaphore.signal()
+    }
+    task?.resume()
+    // wait 30 seconds before timing out
+    if semaphore.wait(timeout: .now() + 30) == .timedOut {
+        task?.cancel()
+    }
 
-    for filename in filenames {
+    // if made it to this point and contents still an empty string, something went wrong with the request
+    if contents.count < 1 {
+        logText("something went wrong while trying to fetch remote file contents \(url)")
+        return nil
+    }
+    logText("getRemoteFileContents for \(url) end")
+    return contents
+}
+
+func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    // get names of all files with updates available
+    guard
+        let filesWithUpdates = checkForRemoteUpdates(optionalFilesArray),
+        let saveLocation = getSaveLocation()
+    else {
+        err("failed to update files (1)")
+        return false
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+    }
+    for file in filesWithUpdates {
+        // can be force unwrapped because checkForRemoteUpdates didn't return nil
+        let filename = file["filename"]!
+        let fileUrl = saveLocation.appendingPathComponent(filename)
         guard
-            let saveLocation = getSaveLocation(),
-            let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
-            var code = contents["code"] as? String,
-            let type = filename.split(separator: ".").last
+            let content = try? String(contentsOf: fileUrl, encoding: .utf8),
+            let parsed = parse(content),
+            let metadata = parsed["metadata"] as? [String: [String]],
+            let updateUrl = metadata["updateURL"]?[0]
         else {
-            // if guard fails, log error continue to next file
-            err("could not get file contents for \(filename)")
+            err("failed to update files (2)")
             continue
         }
-        // can force unwrap b/c getFileContentsParsed ensures metadata exists
-        let metadata = contents["metadata"] as! [String: [String]]
-
-        // if metadata has noframes option and the url is not the top window, don't load
-        if (metadata["noframes"] != nil && !isTop) {
+        let downloadUrl = metadata["downloadURL"] != nil ? metadata["downloadURL"]![0] : updateUrl
+        guard
+            let remoteFileContents = getRemoteFileContents(downloadUrl),
+            ((try? remoteFileContents.write(to: fileUrl, atomically: false, encoding: .utf8)) != nil)
+        else {
+            err("failed to update files (3)")
             continue
         }
+        logText("updated \(filename) with contents fetched from \(downloadUrl)")
+    }
+    return true
+}
 
-        // normalize weight
-        var weight = metadata["weight"]?[0] ?? "1"
-        weight = normalizeWeight(weight)
-
-        // attempt to get require resource from disk
-        // if required resource is inaccessible, log error and continue
-        if let required = metadata["require"] {
-            for require in required {
-                let sanitizedName = santize(require) ?? ""
-                let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
-                if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
-                    code = "\(requiredContent)\n\(code)"
-                } else {
-                    err("could not get required resource from disk \(requiredFileURL)")
-                }
-            }
+func toggleFile(_ filename: String,_ action: String) -> Bool {
+    // if file doesn't exist return false
+    guard let saveLocation = getSaveLocation() else {
+        err("toggleFile failed at (1)")
+        return false
+    }
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+    }
+    let path = saveLocation.appendingPathComponent(filename).path
+    if !FileManager.default.fileExists(atPath: path) {
+        err("toggleFile failed at (2)")
+        return false
+    }
+    var manifest = getManifest()
+    // if file is already disabled
+    if action == "disable" && manifest.disabled.contains(filename) || action == "enabled" && !manifest.disabled.contains(filename) {
+        return true
+    }
+    // add filename to disabled array if disabling
+    if (action == "disable") {manifest.disabled.append(filename)}
+    // remove filename from disabled array if enabling
+    if (action == "enable") {
+        guard let index = manifest.disabled.firstIndex(of: filename) else {
+            err("toggleFile failed at (3)")
+            return false
         }
+        manifest.disabled.remove(at: index)
+    }
+    if !updateManifest(with: manifest) {
+        err("toggleFile failed at (4)")
+        return false
+    }
+    return true
+}
 
-        if type == "css" {
-            cssFiles[filename] = ["code": code, "weight": weight]
-        } else if type == "js" {
-            var injectInto = metadata["inject-into"]?[0] ?? "auto"
-            var runAt = metadata["run-at"]?[0] ?? "document-end"
-
-            let injectVals = ["auto", "content", "page"]
-            let runAtVals = ["document-start", "document-end", "document-idle"]
-            // if inject/runAt values are not valid, use default
-            if !injectVals.contains(injectInto) {
-                injectInto = "page"
-            }
-            if !runAtVals.contains(runAt) {
-                runAt = "document-end"
-            }
-
-            let data = ["code": code, "weight": weight]
-            // add file data to appropiate dict
-            if injectInto == "auto" && runAt == "document-start" {
-                auto_docStart[filename] = data
-            } else if injectInto == "auto" && runAt == "document-end" {
-                auto_docEnd[filename] = data
-            } else if injectInto == "auto" && runAt == "document-idle" {
-                auto_docIdle[filename] = data
-            } else if injectInto == "content" && runAt == "document-start" {
-                content_docStart[filename] = data
-            } else if injectInto == "content" && runAt == "document-end" {
-                content_docEnd[filename] = data
-            } else if injectInto == "content" && runAt == "document-idle" {
-                content_docIdle[filename] = data
-            } else if injectInto == "page" && runAt == "document-start" {
-                page_docStart[filename] = data
-            } else if injectInto == "page" && runAt == "document-end" {
-                page_docEnd[filename] = data
-            } else if injectInto == "page" && runAt == "document-idle" {
-                page_docIdle[filename] = data
+func checkDefaultDirectories() -> Bool {
+    let defaultSaveLocation = getDocumentsDirectory().appendingPathComponent("scripts")
+    let requireLocation = getRequireLocation()
+    let urls = [defaultSaveLocation, requireLocation]
+    for url in urls {
+        if !FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
+            } catch {
+                // could not create the save location directory, show error
+                err("checkDefaultDirectories failed at (1) - \(url) - \(error.localizedDescription)")
+                return false
             }
         }
     }
-
-    // construct the js specific dictionaries
-    jsFiles["auto"]!["document-start"] = auto_docStart
-    jsFiles["auto"]!["document-end"] = auto_docEnd
-    jsFiles["auto"]!["document-idle"] = auto_docIdle
-    jsFiles["content"]!["document-start"] = content_docStart
-    jsFiles["content"]!["document-end"] = content_docEnd
-    jsFiles["content"]!["document-idle"] = content_docIdle
-    jsFiles["page"]!["document-start"] = page_docStart
-    jsFiles["page"]!["document-end"] = page_docEnd
-    jsFiles["page"]!["document-idle"] = page_docIdle
-
-    // construct the returned dictionary
-    allFiles["css"] = cssFiles
-    allFiles["js"] = jsFiles
-
-    return allFiles
+    return true
 }
 
 // matching
-func getURLProps(_ url: String) -> [String: String]? {
-    let pattern = #"^(.*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+))(\/.*)?$"#
+func getUrlProps(_ url: String) -> [String: String]? {
+    let pattern = #"^(.*:)\/\/((?:\*\.)?(?:[a-z0-9-:]+\.?)+(?:[a-z0-9]+))(\/.*)?$"#
     let regex = try! NSRegularExpression(pattern: pattern, options: .caseInsensitive)
     guard
         let result = regex.firstMatch(in: url, options: [], range: NSMakeRange(0, url.utf16.count)),
@@ -1364,7 +961,7 @@ func match(_ ptcl: String,_ host: String,_ path: String,_ matchPattern: String) 
         err("invalid host regex")
         return false
     }
-    // contruct path regex from matchPattern
+    // construct path regex from matchPattern
     let matchPatternPath = matchPattern[Range(parts.range(at: 3), in: matchPattern)!]
     guard let pathRegEx = stringToRegex(String(matchPatternPath)) else {
         err("invalid path regex")
@@ -1402,37 +999,813 @@ func include(_ url: String,_ pattern: String) -> Bool {
     return true
 }
 
-// popover
-func updateBadgeCount(_ frames: [[String : Any]]) {
+func getMatchedFiles(_ url: String) -> [String] {
+    logText("Getting matched files for \(url)")
+    let manifest = getManifest()
     guard
-        let manifestKeys = getManifestKeys(),
-        let active = manifestKeys.settings["active"],
-        let showCount = manifestKeys.settings["showCount"]
+        let parts = getUrlProps(url),
+        let ptcl = parts["protocol"],
+        let host = parts["host"],
+        let path = parts["pathname"],
+        let href = parts["href"]
     else {
-        err("failed on update badge count")
-        return
+        err("getMatchedFiles failed at (1) for \(url)")
+        return [String]()
     }
-    var urls = [String]()
-    var matched = [String]()
-    for frame in frames {
-        guard let url = frame["url"] as? String else { return }
-        urls.append(url)
-    }
-    for url in urls {
-        guard
-            let parts = getURLProps(url),
-            let m = getMatchedFiles(parts)
-        else {
-            return
-        }
-        // add values not already present in the matched array
-        matched.append(contentsOf: m.filter{!matched.contains($0)})
-    }
-    if matched.count > 0 && active == "true" && showCount == "true" {
-        SFSafariApplication.getActiveWindow { window in
-            window?.getToolbarItem { toolbarItem in
-                toolbarItem?.setBadgeText(String(matched.count))
+    // domains where loading is excluded for file
+    var excludedFilenames:[String] = []
+    // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
+    var matchedFilenames:[String] = []
+    // all exclude-match patterns from manifest
+    let excludeMatchPatterns = manifest.excludeMatch.keys
+    // all match patterns from manifest
+    let matchPatterns = manifest.match.keys
+    // all include patterns from manifest
+    let includeExpressions = manifest.include.keys
+    // all exclude patterns from manifest
+    let excludeExpressions = manifest.exclude.keys
+
+    // loop through exclude patterns and see if any match against page url
+    for pattern in excludeMatchPatterns {
+        // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
+        if match(ptcl, host, path, pattern) {
+            guard let filenames = manifest.excludeMatch[pattern] else {
+                err("getMatchedFiles failed at (2)")
+                continue
+            }
+            for filename in filenames {
+                if !excludedFilenames.contains(filename) {
+                    excludedFilenames.append(filename)
+                }
             }
         }
     }
+    // loop through exclude expressions and check for matches
+    for exp in excludeExpressions {
+        if include(href, exp) {
+            guard let filenames = manifest.exclude[exp] else {
+                err("getMatchedFiles failed at (3)")
+                continue
+            }
+            for filename in filenames {
+                if !excludedFilenames.contains(filename) {
+                    excludedFilenames.append(filename)
+                }
+            }
+        }
+    }
+    // loop through all match patterns from manifest to see if they match against the current page url
+    for pattern in matchPatterns {
+        if match(ptcl, host, path, pattern) {
+            // the filenames listed for the pattern that match page url
+            guard let filenames = manifest.match[pattern] else {
+                err("getMatchedFiles failed at (4)")
+                continue
+            }
+            // loop through matched filenames and populate matchedFilenames array
+            for filename in filenames {
+                // don't push to array if filename is in excludes or filename already exists in matchedFilenames array (to avoid duplication)
+                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
+                    matchedFilenames.append(filename)
+                }
+            }
+        }
+    }
+    // loop through include expressions and check for matches
+    for exp in includeExpressions {
+        if include(href, exp) {
+            guard let filenames = manifest.include[exp] else {
+                err("getMatchedFiles failed at (5)")
+                continue
+            }
+            for filename in filenames {
+                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
+                    matchedFilenames.append(filename)
+                }
+            }
+        }
+    }
+    logText("Got \(matchedFilenames.count) matched files for \(url)")
+    return matchedFilenames
 }
+
+// injection
+func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
+    var allFiles = [String: [String: [String: Any]]]()
+    var cssFiles = [String:[String:String]]()
+    var jsFiles = [String: [String: [String: [String: Any]]]]()
+    jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
+    jsFiles["context-menu"] = ["auto": [:], "content": [:], "page": [:]]
+    var auto_docStart = [String: [String: Any]]()
+    var auto_docEnd = [String: [String: Any]]()
+    var auto_docIdle = [String: [String: Any]]()
+    var content_docStart = [String: [String: Any]]()
+    var content_docEnd = [String: [String: Any]]()
+    var content_docIdle = [String: [String: Any]]()
+    var page_docStart = [String: [String: Any]]()
+    var page_docEnd = [String: [String: Any]]()
+    var page_docIdle = [String: [String: Any]]()
+
+    var auto_context_scripts = [String: [String: Any]]()
+    var content_context_scripts = [String: [String: Any]]()
+    var page_context_scripts = [String: [String: Any]]()
+
+    guard let saveLocation = getSaveLocation() else {
+        err("getCode failed at (1)")
+        return nil
+    }
+
+    for filename in filenames {
+        guard
+            let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
+            var code = contents["code"] as? String,
+            let type = filename.split(separator: ".").last
+        else {
+            // if guard fails, log error continue to next file
+            err("getCode failed at (2) for \(filename)")
+            continue
+        }
+        // can force unwrap b/c getFileContentsParsed ensures metadata exists
+        let metadata = contents["metadata"] as! [String: [String]]
+        let name = metadata["name"]![0]
+
+        // if metadata has noframes option and the url is not the top window, don't load
+        if (metadata["noframes"] != nil && !isTop) {
+            continue
+        }
+
+        // normalize weight
+        var weight = metadata["weight"]?[0] ?? "1"
+        weight = normalizeWeight(weight)
+
+        // attempt to get require resource from disk
+        // if required resource is inaccessible, log error and continue
+        if let required = metadata["require"] {
+            // reverse required metadata
+            // if required is ["A", "B", "C"], C gets added above B which is above A, etc..
+            // the reverse of that is desired
+            for require in required.reversed() {
+                let sanitizedName = sanitize(require) ?? ""
+                let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
+                if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
+                    code = "\(requiredContent)\n\(code)"
+                } else {
+                    err("getCode failed at (3) for \(requiredFileURL)")
+                }
+            }
+        }
+
+        // attempt to get all @grant value
+        var grants = metadata["grant"] ?? []
+        // remove duplicates, if any exist
+        grants = Array(Set(grants))
+
+        if type == "css" {
+            cssFiles[filename] = ["code": code, "weight": weight]
+        } else if type == "js" {
+            var injectInto = metadata["inject-into"]?[0] ?? "auto"
+            var runAt = metadata["run-at"]?[0] ?? "document-end"
+
+            let injectVals = ["auto", "content", "page"]
+            let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
+            // if inject/runAt values are not valid, use default
+            if !injectVals.contains(injectInto) {
+                injectInto = "page"
+            }
+            if !runAtVals.contains(runAt) {
+                runAt = "document-end"
+            }
+
+            let data = ["code": code, "weight": weight, "grant": grants] as [String : Any]
+            // add file data to appropriate dict
+            if injectInto == "auto" && runAt == "document-start" {
+                auto_docStart[filename] = data
+            } else if injectInto == "auto" && runAt == "document-end" {
+                auto_docEnd[filename] = data
+            } else if injectInto == "auto" && runAt == "document-idle" {
+                auto_docIdle[filename] = data
+            } else if injectInto == "content" && runAt == "document-start" {
+                content_docStart[filename] = data
+            } else if injectInto == "content" && runAt == "document-end" {
+                content_docEnd[filename] = data
+            } else if injectInto == "content" && runAt == "document-idle" {
+                content_docIdle[filename] = data
+            } else if injectInto == "page" && runAt == "document-start" {
+                page_docStart[filename] = data
+            } else if injectInto == "page" && runAt == "document-end" {
+                page_docEnd[filename] = data
+            } else if injectInto == "page" && runAt == "document-idle" {
+                page_docIdle[filename] = data
+            }
+
+            if runAt == "context-menu" && injectInto == "auto" {
+                auto_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+            }
+            if runAt == "context-menu" && injectInto == "content" {
+                content_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+            }
+            if runAt == "context-menu" && injectInto == "page" {
+                page_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+            }
+        }
+    }
+
+    // construct the js specific dictionaries
+    jsFiles["auto"]!["document-start"] = auto_docStart
+    jsFiles["auto"]!["document-end"] = auto_docEnd
+    jsFiles["auto"]!["document-idle"] = auto_docIdle
+    jsFiles["content"]!["document-start"] = content_docStart
+    jsFiles["content"]!["document-end"] = content_docEnd
+    jsFiles["content"]!["document-idle"] = content_docIdle
+    jsFiles["page"]!["document-start"] = page_docStart
+    jsFiles["page"]!["document-end"] = page_docEnd
+    jsFiles["page"]!["document-idle"] = page_docIdle
+    // the context-menu dictionaries are constructed differently
+    // they will need to be handled in a unique way on the JS side
+    jsFiles["context-menu"]!["auto"] = auto_context_scripts
+    jsFiles["context-menu"]!["content"] = content_context_scripts
+    jsFiles["context-menu"]!["page"] = page_context_scripts
+
+    // construct the returned dictionary
+    allFiles["css"] = cssFiles
+    allFiles["js"] = jsFiles
+
+    return allFiles
+}
+
+func getFileContentsParsed(_ url: URL) -> [String: Any]? {
+    guard let saveLocation = getSaveLocation() else {
+        err("getFileContentsParsed failed at (1)")
+        return nil
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+    }
+    // check that url is a valid path to a directory or single file
+    guard
+        FileManager.default.fileExists(atPath: url.path),
+        let content = try? String(contentsOf: url, encoding: .utf8),
+        let parsed = parse(content)
+    else {
+        return nil
+    }
+    return parsed
+}
+
+func getInjectionFilenames(_ url: String) -> [String]? {
+    var filenames = [String]()
+    let manifest = getManifest()
+    let matched = getMatchedFiles(url)
+    guard
+        let active = manifest.settings["active"],
+        let parts = getUrlProps(url),
+        let ptcl = parts["protocol"],
+        let host = parts["host"],
+        let path = parts["pathname"]
+    else {
+        err("getInjectionFilenames failed at (1)")
+        return nil
+    }
+    // if injection is disabled return empty array
+    if active != "true" {
+        return filenames
+    }
+    // url matches a pattern in blacklist, no injection for this url
+    // return empty array
+    for pattern in manifest.blacklist {
+        if match(ptcl, host, path, pattern) {
+            return filenames
+        }
+    }
+    // filter out all disabled files
+    filenames = matched.filter{!manifest.disabled.contains($0)}
+    return filenames
+}
+
+// popup
+func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+    var matches = [[String: Any]]()
+    // if the url doesn't start with http/s return empty array
+    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+        return matches
+    }
+    // get all the files saved to manifest that match the passed url
+    let matched = getMatchedFiles(url)
+    // get all the files at the save location
+    guard
+        let files = getAllFiles()
+    else {
+        err("getPopupMatches failed at (1)")
+        return nil
+    }
+    // filter out the files that are present in both files and matched
+    // force unwrap filename to string since getAllFiles always returns it
+    matches = files.filter{matched.contains($0["filename"] as! String)}
+
+    // get the subframe url matches
+    var frameUrlsMatched = [[String: Any]]()
+    var frameUrlsMatches = [String]()
+    // filter out the top page url from the frame urls
+    let frameUrls = subframeUrls.filter{$0 != url}
+    // for each url just pushed to frameUrls, get all the files saved to manifest that match their url
+    for frameUrl in frameUrls {
+        let frameMatches = getMatchedFiles(frameUrl)
+        for frameMatch in frameMatches {
+            // for the match against the frameUrl, see if it has @noframes
+            // if so, it should not be appended to frameUrlsMatches
+            // filter all files for the first one that matches the frameMatch filename
+            // can force unwrap filename b/c getAllFiles always returns it
+            let frameMatchMetadata = files.filter{$0["filename"] as! String == frameMatch}.first
+            // can force unwrap noframes b/c getAllFiles always returns it
+            let noFrames = frameMatchMetadata!["noframes"] != nil ? true : false
+            if !matched.contains(frameMatch) && !noFrames {
+                frameUrlsMatches.append(frameMatch)
+            }
+        }
+    }
+
+    // filter out the files that are present in both files and frameUrlsMatches
+    // force unwrap filename to string since getAllFiles always returns it
+    frameUrlsMatched = files.filter{frameUrlsMatches.contains($0["filename"] as! String)}
+    // loop through frameUrlsMatched and add subframe key/val
+    for (index, var frameUrlsMatch) in frameUrlsMatched.enumerated() {
+        frameUrlsMatch["subframe"] = true
+        frameUrlsMatched[index] = frameUrlsMatch
+    }
+    // add frameUrlsMatched to matches array
+    matches.append(contentsOf: frameUrlsMatched)
+    return matches
+}
+
+func popupUpdateAll() -> Bool {
+    guard
+        let files = getAllFiles(),
+        updateAllFiles(files),
+        updateManifestMatches(files),
+        updateManifestRequired(files),
+        purgeManifest(files)
+    else {
+        return false
+    }
+    return true
+}
+
+func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
+    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+        return 0
+    }
+    let manifest = getManifest()
+    guard
+        var matches = getPopupMatches(url, subframeUrls),
+        let active = manifest.settings["active"],
+        let showCount = manifest.settings["showCount"]
+    else {
+        err("getPopupBadgeCount failed at (1)")
+        return nil
+    }
+    if showCount == "false" {
+        return 0
+    }
+    if let parts = getUrlProps(url), let ptcl = parts["protocol"], let host = parts["host"], let path = parts["pathname"] {
+        for pattern in manifest.blacklist {
+            if match(ptcl, host, path, pattern) {
+                return 0
+            }
+        }
+    } else {
+        return 0
+    }
+    if active != "true" {
+        return 0
+    }
+    matches = matches.filter{!manifest.disabled.contains($0["filename"] as! String)}
+    return matches.count
+}
+
+func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+    guard let saveLocation = getSaveLocation() else {
+        err("updateSingleItem failed at (1)")
+        return nil
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+    }
+    let fileUrl = saveLocation.appendingPathComponent(filename)
+    guard
+        let content = try? String(contentsOf: fileUrl, encoding: .utf8),
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let updateUrl = metadata["updateURL"]?[0]
+    else {
+        err("updateSingleItem failed at (2)")
+        return nil
+    }
+    let downloadUrl = metadata["downloadURL"] != nil ? metadata["downloadURL"]![0] : updateUrl
+    guard
+        let remoteFileContents = getRemoteFileContents(downloadUrl),
+        ((try? remoteFileContents.write(to: fileUrl, atomically: false, encoding: .utf8)) != nil)
+    else {
+        err("updateSingleItem failed at (3)")
+        return nil
+    }
+    guard
+        let files = getAllFiles(),
+        updateManifestMatches(files),
+        updateManifestRequired(files),
+        purgeManifest(files),
+        let matches = getPopupMatches(url, subframeUrls)
+    else {
+        err("updateSingleItem failed at (4)")
+        return nil
+    }
+    return matches
+}
+
+// page
+func getInitData() -> [String: Any]? {
+    let manifest = getManifest()
+    guard let saveLocation = getSaveLocation() else {
+        err("getInitData failed at (1)")
+        return nil
+    }
+    var data:[String: Any] = manifest.settings
+    data["blacklist"] = manifest.blacklist
+    data["saveLocation"] = saveLocation.path
+    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    return data
+}
+
+func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
+    var response = [String: Any]()
+    let newContent = content
+    guard let saveLocation = getSaveLocation() else {
+        err("saveFile failed at (1)")
+        return ["error": "failed to get save location when attempting to save"]
+    }
+    guard
+        let oldFilename = item["filename"] as? String,
+        let type = item["type"] as? String
+    else {
+        return ["error": "invalid argument in save function"]
+    }
+    guard
+        let parsed = parse(newContent),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let n = metadata["name"]?[0],
+        var name = sanitize(n)
+    else {
+        return ["error": "failed to parse argument in save function"]
+    }
+
+    // construct new file name
+    let newFilename = "\(name).\(type)"
+
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+    }
+    guard
+        let allFilesUrls = try? FileManager.default.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])
+    else {
+        return ["error": "failed to read save urls in save function"]
+    }
+
+    // validate file before save
+    var allFilenames:[String] = [] // stores the indv filenames for later comparison
+    // old and new filenames are equal, overwriting and can skip
+    if oldFilename.lowercased() != newFilename.lowercased() {
+        // loop through all the file urls in the save location and save filename to var
+        for fileUrl in allFilesUrls {
+            // skip file if it is not of the proper type
+            let filename = fileUrl.lastPathComponent
+            if (!filename.hasSuffix(type)) {
+                continue
+            }
+            // if file is of the proper type, add it to the allFilenames array
+            allFilenames.append(filename.lowercased())
+        }
+    }
+
+    if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
+        // filename taken or too long
+        return ["error": "filename validation failed in save function"]
+    }
+
+    // file passed validation
+
+    // attempt to save to disk
+    let newFileUrl = saveLocation.appendingPathComponent(newFilename)
+    do {
+        try newContent.write(to: newFileUrl, atomically: false, encoding: .utf8)
+    } catch {
+        err("saveFile failed at (2)")
+        return ["error": "failed to write file to disk"]
+    }
+
+    // saved to disk successfully
+
+    // get the file last modified date
+    guard
+        let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
+    else {
+        err("saveFile failed at (3)")
+        return ["error": "failed to read modified date in save function"]
+    }
+
+    // remove old file and manifest records for old file if they exist
+    if oldFilename != newFilename {
+        // if user changed the filename, remove file with old filename
+        let oldFileUrl = saveLocation.appendingPathComponent(oldFilename)
+        // however, when creating a new file, if user changes the temp given name by app...
+        // oldFilename (the temp name in activeItem) and newFilename (@name in file contents) will differ
+        // the file with oldFilename will not be on the filesystem and can not be deleted
+        // for that edge case, using try? rather than try(!) to allow failures
+        try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
+    }
+
+    // update manifest for new file and purge anything from old file
+    guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
+        err("saveFile failed at (4)")
+        return ["error": "file save but manifest couldn't be updated"]
+    }
+
+    // un-santized name
+    name = unsanitize(name)
+
+    // build response dict
+    response["canUpdate"] = false
+    response["content"] = newContent
+    response["filename"] = newFilename
+    response["lastModified"] = dateToMilliseconds(dateMod)
+    response["name"] = name
+    if metadata["description"] != nil {
+        response["description"] = metadata["description"]![0]
+    }
+    if metadata["version"] != nil && metadata["updateURL"] != nil {
+        response["canUpdate"] = true
+    }
+
+    return response
+}
+
+func trashFile(_ item: [String: Any]) -> Bool {
+    guard
+        let saveLocation = getSaveLocation(),
+        let filename = item["filename"] as? String
+    else {
+        err("trashFile failed at (1)")
+        return false
+    }
+    // security scope
+    let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
+    defer {
+        if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
+    }
+    let url = saveLocation.appendingPathComponent(filename)
+    // if file is already removed from path, assume it was removed by user and return true
+    if (FileManager.default.fileExists(atPath: url.path)) {
+        do {
+            try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+        } catch {
+            err(error.localizedDescription)
+            return false
+        }
+    }
+    // update manifest
+    guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
+        err("trashFile failed at (2)")
+        return false
+    }
+    return true;
+}
+
+func getFileRemoteUpdate(_ content: String) -> [String: String] {
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]]
+    else {
+        // can't parse editor contents
+        return ["error": "Update failed, metadata missing"]
+    }
+    // editor contents missing version value
+    guard let version = metadata["version"]?[0] else {
+        return ["error": "Update failed, version value required"]
+    }
+    // editor contents missing updateURL
+    guard let updateURL = metadata["updateURL"]?[0] else {
+        return ["error": "Update failed, update url required"]
+    }
+    // set download url
+    let downloadURL = (metadata["downloadURL"] != nil) ? metadata["downloadURL"]![0] : updateURL
+    // basic url validation
+    guard validateUrl(updateURL) else {
+        return ["error": "Update failed, invalid updateURL"]
+    }
+    guard validateUrl(downloadURL) else {
+        return ["error": "Update failed, invalid downloadURL"]
+    }
+    // get the remote file contents for checking version
+    guard var remoteContent = getRemoteFileContents(updateURL) else {
+        return ["error": "Update failed, updateURL unreachable"]
+    }
+    // parse remote file contents
+    guard
+        let remoteParsed = parse(remoteContent),
+        let remoteMetadata = remoteParsed["metadata"] as? [String: [String]],
+        let remoteVersion = remoteMetadata["version"]?[0]
+    else {
+        // can't parse editor contents
+        return ["error": "Update failed, couldn't parse remote file contents"]
+    }
+    // check if update is needed
+    if version >= remoteVersion {
+        return ["info": "No updates found"]
+    }
+    // at this point it is known an update is available, get new code from downloadURL
+    // is there's a specific downloadURL overwrite remoteContents with code from downloadURL
+    if updateURL != downloadURL {
+        guard let remoteDownloadContent = getRemoteFileContents(downloadURL) else {
+            return ["error": "Update failed, downloadURL unreachable"]
+        }
+        remoteContent = remoteDownloadContent
+    }
+    return ["content": remoteContent]
+}
+
+func popupInit() -> [String: String]? {
+    // check the default directories
+    let checkDefaultDirectories = checkDefaultDirectories()
+    // check the settings
+    let checkSettings = checkSettings()
+    // get all files to pass as arguments to function below
+    guard let allFiles = getAllFiles() else {
+        err("Failed to getAllFiles in popupInit")
+        return nil
+    }
+    // purge the manifest of old records
+    let purgeManifest = purgeManifest(allFiles)
+    // update matches in manifest
+    let updateManifestMatches = updateManifestMatches(allFiles)
+    // update the required resources
+    let updateManifestRequired = updateManifestRequired(allFiles)
+    // verbose error checking
+    if !checkDefaultDirectories {
+        err("Failed to checkDefaultDirectories in popupInit")
+        return nil
+    }
+    if !checkSettings {
+        err("Failed to checkSettings in popupInit")
+        return nil
+    }
+    if !purgeManifest {
+        err("Failed to purgeManifest in popupInit")
+        return nil
+    }
+    if !updateManifestMatches {
+        err("Failed to updateManifestMatches in popupInit")
+        return nil
+    }
+    if !updateManifestRequired {
+        err("Failed to updateManifestRequired in popupInit")
+        return nil
+    }
+    let manifest = getManifest()
+    guard let active = manifest.settings["active"] else {
+        err("Failed at getManifest active in popupInit")
+        return nil
+    }
+    // pass some info in response
+    guard let saveLocation = getSaveLocation() else {
+        err("Failed at getSaveLocation in popupInit")
+        return nil
+    }
+    let documentsDirectory = getDocumentsDirectory()
+    let requireLocation = getRequireLocation()
+
+    return [
+        "active": active,
+        "saveLocation": saveLocation.absoluteString,
+        "documentsDirectory": documentsDirectory.absoluteString,
+        "requireLocation": requireLocation.absoluteString
+    ]
+}
+
+// userscript install
+func installCheck(_ content: String) -> [String: String]? {
+    // this func checks a userscript's metadata to determine if it's already installed
+
+    guard let files = getAllFiles() else {
+        err("installCheck failed at (1)")
+        return nil
+    }
+
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let newName = metadata["name"]?[0]
+    else {
+        return ["error": "userscript metadata is invalid"]
+    }
+
+    // loop through all files nad get their names and filenames
+    // we will check the new name/filename to see if this is a unique userscript
+    // or if it will overwrite an existing userscript
+    var names = [String]()
+    for file in files {
+        // can be force unwrapped because getAllFiles didn't return nil
+        let name = file["name"] as! String
+
+        // populate array
+        names.append(name)
+    }
+
+    var directive = ""
+    #if os(macOS)
+        directive = "Click"
+    #elseif os(iOS)
+        directive = "Tap"
+    #endif
+
+    if names.contains(newName) {
+        return ["success": "\(directive) to re-install"]
+    }
+
+    return ["success": "\(directive) to install"];
+}
+
+func installParse(_ content: String) -> [String: Any]? {
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]]
+    else {
+        return ["error": "userscript metadata is invalid"]
+    }
+    return metadata
+}
+
+func installUserscript(_ content: String) -> [String: Any]? {
+    guard
+        let parsed = parse(content),
+        let metadata = parsed["metadata"] as? [String: [String]],
+        let n = metadata["name"]?[0],
+        let name = sanitize(n)
+    else {
+        err("installUserscript failed at (1)")
+        return nil
+    }
+    let filename = "\(name).js"
+
+    let saved = saveFile(["filename": filename, "type": "js"], content)
+    return saved
+}
+//func popupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+//    var matches = [[String: Any]]()
+//    // if the url doesn't start with http/s return empty array
+//    if !url.starts(with: "http://") && !url.starts(with: "https://") {
+//        return matches
+//    }
+//    // get all the files saved to manifest that match the passed url
+//    let matched = getMatchedFiles(url)
+//    // get all the files at the save location
+//    guard let files = getAllFiles() else {
+//        err("popupMatches failed at (1)")
+//        return nil
+//    }
+//    // filter out the files that are present in both files and matched
+//    // force unwrap filename to string since getAllFiles always returns it
+//    matches = files.filter{matched.contains($0["filename"] as! String)}
+//
+//    // get the subframe url matches
+//    var frameUrlsMatched = [[String: Any]]()
+//    var frameUrlsMatches = [String]()
+//    // filter out the top page url from the frame urls
+//    let frameUrls = subframeUrls.filter{$0 != url}
+//    // for each url just pushed to frameUrls, get all the files saved to manifest that match their url
+//    for frameUrl in frameUrls {
+//        let frameMatches = getMatchedFiles(frameUrl)
+//        for frameMatch in frameMatches {
+//            if !matched.contains(frameMatch) {
+//                frameUrlsMatches.append(frameMatch)
+//            }
+//        }
+//    }
+//    // filter out the files that are present in both files and frameUrlsMatches
+//    // force unwrap filename to string since getAllFiles always returns it
+//    frameUrlsMatched = files.filter{frameUrlsMatches.contains($0["filename"] as! String)}
+//    // loop through frameUrlsMatched and add subframe key/val
+//    for (index, var frameUrlsMatch) in frameUrlsMatched.enumerated() {
+//        frameUrlsMatch["subframe"] = true
+//        frameUrlsMatched[index] = frameUrlsMatch
+//    }
+//    // add frameUrlsMatched to matches array
+//    matches.append(contentsOf: frameUrlsMatched)
+//
+//    return matches
+//}

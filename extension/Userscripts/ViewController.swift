@@ -8,38 +8,54 @@ class ViewController: NSViewController {
     @IBOutlet weak var enabledText: NSTextField!
     @IBOutlet weak var enabledIcon: NSView!
 
-    let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+    let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     let hostID = Bundle.main.bundleIdentifier!
+    let foo = Bundle.main.bundleIdentifier
     let extensionID = "com.userscripts.macos.Userscripts-Extension"
     let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
 
     override func viewDidLoad() {
         super.viewDidLoad()
         let location = documentsDirectory.replacingOccurrences(of: hostID, with: extensionID)
-        self.appName.stringValue = "Userscripts Safari Version \(appVersion)"
+        self.appName.stringValue = "Userscripts Safari Version \(appVersion) (\(buildNumber))"
         setExtensionState()
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(setExtensionState), name: NSApplication.didBecomeActiveNotification, object: nil
+        )
+        // set the save location url to default location
+        self.saveLocation.stringValue = location
         // check if bookmark data exists
         guard
-            let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-            let url = readBookmark(data: sharedBookmark, isSecure: false),
-            directoryExists(path: url.path)
+            let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName)
         else {
+            // bookmark data doesn't exist, no need to update url
+            return
+        }
+        // at this point it's known bookmark data does exist, try to read it
+        guard let url = readBookmark(data: sharedBookmark, isSecure: false) else {
+            // bookmark data does exist, but it can not be read, log an error
+            err("shared bookmark data exists, but it can not be read")
+            return
+        }
+        // shared bookmark data does exist and it can be read, check if the directory where it leads to exists
+        guard directoryExists(path: url.path) else {
             // sharedBookmark removed, or in trash
             // renamed directories retain association
             // moved directories retain association
             UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-            NSLog("removed sharedbookmark because it is non-existent, permanently deleted or exists in trash")
-            self.saveLocation.stringValue = location
+            NSLog("removed shared bookmark because it's directory is non-existent, permanently deleted or in trash")
             return
         }
+        // shared bookmark can be read and directory exists, update url
         self.saveLocation.stringValue = url.absoluteString
-        NotificationCenter.default.addObserver(self, selector: #selector(setExtensionState), name: NSApplication.didBecomeActiveNotification, object: nil)
     }
 
     @objc func setExtensionState() {
         SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionID) { (state, error) in
             guard let state = state, error == nil else {
                 self.enabledText.stringValue = "Safari Extension State Unknown"
+                err(error?.localizedDescription ?? "couldn't get safari extension state in containing app")
                 return
             }
             DispatchQueue.main.async {

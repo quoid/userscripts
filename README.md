@@ -6,13 +6,15 @@ An open-source userscript editor for Safari.
 
 ## Table of Contents
 * [Installation](#installation)
-* [Getting Help](#getting-help)
+* [Usage](#usage)
 * [UI Overview](#ui-overview)
     * [Browser Page](#browser-page)
     * [Settings Modal](#settings-modal)
     * [Popover](#popover)
 * [Metadata](#metadata)
-* [Save Location](#save-location)
+* [API](#api)
+* [Scripts Directory / Save Location](#scripts-directory)
+* [Getting Help](#getting-help)
 * [FAQs](#faqs)
 * [Contributing](#contributing)
 * [Support](#support)
@@ -21,13 +23,38 @@ An open-source userscript editor for Safari.
 
 ## Installation
 
-Install via [Mac App Store](https://itunes.apple.com/us/app/userscripts/id1463298887) or clone the project and build with Xcode. Alternatively, you can download the most current version for the [releases page](https://github.com/quoid/userscripts/releases).
+Userscripts is available for iOS (+ipadOS) and macOS. For all versions, installation is done through [Apple's App Store](https://itunes.apple.com/us/app/userscripts/id1463298887). On macOS, versions prior to `4.x` were made available to download and install directly from the repository, but due to [changes in the way Apple allows developers to distribute apps built with the WebExtension API](https://github.com/quoid/userscripts/issues/154), that is no longer an option.
 
-## Getting Help
+To run Userscripts on iOS you should be on iOS 15.1 or higher.
 
-If you encounter a problem or need some assistance, please open an issue and *provide some system specs*. The specs requested are `macOS version`, `Safari version` and `Userscripts Safari version`. You can find the extension version by opening the contain app or by viewing the "Information" section within the settings modal of the extension's browser page.
+To run Userscripts on macOS you should running macOS 12 or higher, along with Safari 14.1 or higher.
 
-If you encounter an issue with a specific website, *please provide the website address and the userscript that is presenting the issue*. It can be a slimmed down version of the userscript that can demonstrate the issue.
+**[iOS App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
+
+**[macOS App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
+
+## Usage
+
+It's recommend to read this documentation and, if you have time, watch the following video overviews to familiarize yourself with the app and extension.
+
+Once the app is downloaded and installed the following steps should be taken:
+
+**iOS**
+- Go to `Settings > Extensions > Userscripts`
+- Turn Userscripts `on`
+- For optimal experience it's recommended that you allow Userscripts for `All Websites`
+- Once the above is complete **open the containing app**
+- Click the "Set Userscripts Directory" button and select the directory, *within the Files.app*, where your userscripts are located and where you wish newly installed userscripts to be placed
+    - **Tip:** for optimal cross platform experience it's a good idea to use an iCloud folder for syncing between macOS and iOS
+    - **Note:** syncing between macOS and iOS is not immediate, it is sometimes necessary to open Files.app in order to applying changes made in macOS to be reflected in iOS - that includes userscript deletions, additions and edits
+- Once the directory is set you can close the containing app and open Safari.app
+- It **may be necessary** to apply further permissions and it's to `Always Allow` Userscripts for `All Websites`
+
+**macOS**
+
+After installing Userscripts on macOS, you **do not** need to select a userscripts directory if you do not plan on syncing your userscripts between multiple devices. Instead you can choose to use the default directory, which is located at `~/User/Library/Containers/Userscripts/Data/Documents/scripts` - again, this is default (and automatic) behavior. You only need to select a new location if you want to store your userscripts elsewhere, which is especially useful if you are using an external code editor such as Sublime Text or VSCode.
+
+[**Here's a short clip showing how to easily create/add a userscript in Safari using this extension on macOS**](https://youtu.be/x1r3-L7pdYQ?t=14)
 
 ## UI Overview
 
@@ -75,12 +102,19 @@ If you encounter an issue with a specific website, *please provide the website a
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
 - **Global Blacklist** - all domain patterns listed here will be *globally* ignored for script injection
 
-### Popover:
+### Popup:
 
-![Userscripts Safari Settings Window](/etc/popover.png)
+<!-- ![Userscripts Popup](/etc/popover.png)-->
 
-10. **Open button** - opens the extension browser page
-11. **Enable Injection toggle** - turns on/off page script inject (on/off switch)
+<img src="/etc/popover.png" width="50%" height="50%">
+
+10. **Open Page Link** - *macOS only*, opens the extension browser page 
+11. **Enable Injection toggle** - turns on/off page script injection (on/off switch)
+12. **Refresh View** - refreshes the popup view
+13. **Available Updates View** - the extension periodically checks all userscripts in your save location for updates and when an update is found, it is shown in this view
+14. **Folder Button** - on **macOS** this button opens your save location directory in Finder, on **iOS** this button displays the "all scripts view" where you can see every script that found in your save location directory, the "all scripts view" allows you to toggle individual userscript scripts on/off regardless of the current page being displayed in the browser
+15. **Install Prompt** - when a userscript is displayed in the browser, this alert displays, giving the user the option to install the userscript into their save location directory, tapping the prompt will take them through the installation steps
+16. **Matched Userscripts List** - this list shows the currently matched userscripts relative to the current page being displayed in the browser, all userscripts that match to the domain will be showed, whether they are active or not. Users can click/tap the userscript to the toggle them on/off. If a userscript is active for the domain through a subframe a **sub** tag will be show next the to the file type indicator
 
 ## Metadata
 
@@ -95,7 +129,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@exclude` - Functions in a similar way as `@include` but rather than injecting, a match against this key's value will prevent injection
 - `@inject-into` - allows the user to choose which context to inject the script into
     - allows the user to choose which context to inject the script into
-    - values: auto (default), content, page
+    - values: `auto` (default), `content`, `page`
     - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
 - `@run-at`
     - allows the user to choose the injection timing
@@ -133,17 +167,87 @@ Userscripts Safari currently supports the following userscript metadata:
     
 **All userscripts need at least 1 `@match` or `@include` to run!**
 
-## Save Location
+## API
 
-In order to change the save location, you must either launch `Userscripts.app` as you would any other application, or open the settings modal within the browser extension and click the "settings" icon within the "Save location" row.
+Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.** Further, most methods do not require their respective prefix when calling. For example, `GM.setValue` can be called as `GM.setValue(...)` or with simply by `setValue(...)`.
 
-Once the host app is open, you will see a button called "Change save location". Click this and select the directory where you'd like to save to/load from.
+- `GM.addStyle(css)`
+    - `css: String`
+    - on success returns a promise resolved with the css string argument provided
+- `GM_addStyle(css)`
+    - `css: String`
+    - **synchronous**
+    - returns the css string argument provided *without regard to success*
+- `GM.setValue(key, value)`
+    - `key: String`, `value: Any`
+    - on success returns a promise resolved with an object indicating success
+- `GM.getValue(key, defaultValue)`
+    - `key: String`, `defaultValue: Any`
+    - on success returns a promise resolved with the value that was set or default value provided
+- `GM.deleteValue(key)`
+    - `key: String`
+    - on success returns a promise resolved with an object indicating success
+- `GM.listValues()`
+    - on success returns a promise resolved with an array of the key names of **presently set** values
+- `GM.openInTab(url, openInBackground)`
+    - `url: String`, `openInBackground: Bool`
+    - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened
+- `US.closeTab(tabId)`
+    - `tabId: Int`
+    - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
+    - on success returns a promise resolved with an object indicating success
+- `GM.xmlHttpRequest(details)`
+    - `details: Object`
+    - the `details` object accepts the following properties
+        - `url` - `String` - **required**
+        - `method` - `String` - defaults to `GET`
+        - `user` - `String`
+        - `password` - `String`
+        - `headers` - `Object`
+        - `overrideMimeType`
+        - `timeout` - `Int`
+        - `binary` - `Bool`
+        - `data` - `String`
+        - `responseType` - `String`
+        - read more about [XMLHttpRequests here](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
+    - event handlers:
+        - `onabort` - `function`
+        - `onerror` - `function`
+        - `onload` - `function`
+        - `onloadend` - `function`
+        - `onloadstart` - `function`
+        - `onprogress` - `function`
+        - `onreadystatechange` - `function`
+        - `ontimeout` - `function`
+        - the response object passed to the event handlers has the following properties:
+            - `readyState`
+            - `response`
+            - `responseHeaders`
+            - `responseType`
+            - `responseURL`
+            - `status`
+            - `statusText`
+            - `timeout`
+            - `withCredentials`
+            - `responseText` (when `responseType` is `text`)
+    - returns an object with a single property, `abort`, which is a `function`
+        - usage: `const foo = GM.xmlHttpRequest({...});` ... `foo.abort()` to abort the request
+- `GM_xmlhttpRequest(details)`
+    - an alias for `GM.xmlHttpRequest`, works exactly the same
 
-**Save Location Notes**
+## Scripts Directory
 
-- Close all instances of the extension UI (browser app) before you change the save location. The extension will attempt to do this automatically, but it could fail (if it does, please bug report)
-- Currently, when changing the save location, the app does not copy over userscripts from the previous save/load directory
-- After a new save location is selected, if you rename or move that selected folder, the extension will continue to load/save to that location - the only way to remove the “link” is by trashing the folder or selecting a new save location
+This is the directory where the app/extension will read from and write to. This directory is changed by opening the **containing app** and clicking the respective "change location" button.
+
+**Script Directory Notes**
+
+- Close all instances of the extension UI (browser app and/or popup) before changing the scripts directory
+- After files are added, removed or edited, you will need to open the popup at least 1 time to see those changes reflected in your browsing experience
+- **On macOS**, after a directory outside of the default is selected, if you rename or move that selected directory, the extension will continue to read/write to that directory - the only way to remove the “link” is by trashing the folder or selecting a new save location
+
+## Getting Help
+
+If you encounter a problem while using this app/extension or are in need of some assistance, please open an issue here in the repository. When doing so, please provide as much detail as possible. This includes listing system specs and what website and script you are trying to execute. *Please follow the issue template!*
 
 ## FAQs
 
@@ -157,11 +261,11 @@ Once the host app is open, you will see a button called "Change save location". 
 
 **Do I need to use the extension's editor to create new userscripts or to edit existing?**
 
-> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are properly formatted, they should be injected. However, you **must open the extension page** beforehand. That means, if you create a new userscript and save it to the save location, before injection will occur properly, the extension page must be open by clicking the extension button in Safari.
+> You can use your own editor to update and manage your files. As long as you are saving the files to the save location, and they are properly formatted, they should be injected. However, you **must open the extension popup** beforehand. That means, if you create a new or edit an existing userscript with an external editor and save it to the save location, before injection will occur properly, the extension popup must be opened and the popup must load completely.
 
 **What are the keyboard shortcuts?**
 
-> While editing a file, clicking `Command + S` will save the file. While working the editor, clicking `Command + F` will bring up the search bar.
+> Whilst using the included editor, clicking `⌘ + s` will save the file. While working the editor, clicking `⌘ + f` will bring up the search bar and `esc` will hide it.
 
 **When I use `@require`, where are the required files stored?**
 
@@ -170,20 +274,26 @@ Once the host app is open, you will see a button called "Change save location". 
 > If you move files from the require folder or manually edit the `manifest.json` file, you will likely break app/extension functionality.
 
 ## Contributing
-Code level contributions are welcome. I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
+Code level contributions are welcome. *I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests*. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
 
 Please ensure your contributions align with the project's license before committing anything.
 
 ## Support
-The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see it improve in the future. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
+The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see future improvements. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
 
-Secondly, you can [sign up to be a beta tester](https://forms.gle/QB46uYQHVyCxULue9). Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
+The second best way to help out is to sign up to beta test new versions of the app. Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
+
+**[iOS Beta Sign Up Form](https://forms.gle/QB46uYQHVyCxULue9)**
+
+**[macOS Beta Sign Up Form](https://forms.gle/cUDtKg1ip4Vc9Xhc7)**
 
 ## Privacy Policy
 Userscripts does not collect any data from its users nor monitor activities or actions you perform within the application and extension. This means everything that you do with the application and extension is private to you and is never shared with the developers or third parties. Since there is no data collection, there is no data retention of any kind.
 
 ## License
+
+Copyright (c) 2022 Justin Wasack
 
 Licensed under the [GNU General Public License v3.0](/LICENSE) license for all open source applications. A commercial license is required for all other applications.

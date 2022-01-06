@@ -8,8 +8,9 @@ import multi from "@rollup/plugin-multi-entry";
 
 
 const production = !process.env.ROLLUP_WATCH;
-const demo = process.env.NODE_ENV === "demo";
-const input = (production && !demo) ? "src/main.js" : ["src/dev.js", "src/main.js"];
+const directory =  process.env.NODE_ENV === "popup" ? "popup" : "page";
+let input = ["src/" + directory + "/dev.js", "src/" + directory + "/main.js"];
+if (production) input = "src/" + directory + "/main.js";
 
 function serve() {
     let server;
@@ -21,11 +22,14 @@ function serve() {
     return {
         writeBundle() {
             if (server) return;
-            server = require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
-                stdio: ["ignore", "inherit", "inherit"],
-                shell: true
-            });
-
+            server = require("child_process").spawn(
+                "npm",
+                ["run", "start:" + directory, "--", "--dev"],
+                {
+                    stdio: ["ignore", "inherit", "inherit"],
+                    shell: true
+                }
+            );
             process.on("SIGTERM", toExit);
             process.on("exit", toExit);
         }
@@ -38,12 +42,13 @@ export default {
         sourcemap: !production,
         format: "iife",
         name: "app",
-        file: "public/build/bundle.js"
+        file: "public/" + directory + "/build/bundle.js"
     },
+    inlineDynamicImports: true,
     plugins: [
         multi(),
         css({
-            output: "public/build/lib.css"
+            output: "public/" + directory + "/build/lib.css"
         }),
         inlineSvg({}),
         svelte({
@@ -70,7 +75,9 @@ export default {
         !production && serve(),
         // Watch the `public` directory and refresh the
         // browser on changes when not in production
-        !production && livereload("public"),
+        !production && livereload({
+            watch: ["public/" + directory, "public/shared"]
+        })
     ],
     watch: {
         clearScreen: false

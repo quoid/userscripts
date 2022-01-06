@@ -1,5 +1,8 @@
 {
-    "extends": "stylelint-config-standard",
+    "extends": [
+        "stylelint-config-standard",
+        "stylelint-config-html/svelte"
+    ],
     "rules": {
         "comment-empty-line-before": [
             "always",
@@ -8,6 +11,8 @@
             }
         ],
         "indentation": 4,
+        "no-descending-specificity": null,
+        "selector-class-pattern": null,
         "selector-pseudo-class-no-unknown": [
             true,
             {
