@@ -1107,11 +1107,11 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     var page_docStart = [String: [String: Any]]()
     var page_docEnd = [String: [String: Any]]()
     var page_docIdle = [String: [String: Any]]()
-    
+
     var auto_context_scripts = [String: [String: Any]]()
     var content_context_scripts = [String: [String: Any]]()
     var page_context_scripts = [String: [String: Any]]()
-    
+
     guard let saveLocation = getSaveLocation() else {
         err("getCode failed at (1)")
         return nil
@@ -1156,7 +1156,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
                 }
             }
         }
-        
+
         // attempt to get all @grant value
         var grants = metadata["grant"] ?? []
         // remove duplicates, if any exist
@@ -1199,7 +1199,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             } else if injectInto == "page" && runAt == "document-idle" {
                 page_docIdle[filename] = data
             }
-            
+
             if runAt == "context-menu" && injectInto == "auto" {
                 auto_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
             }
@@ -1462,10 +1462,10 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     else {
         return ["error": "failed to parse argument in save function"]
     }
-    
+
     // construct new file name
     let newFilename = "\(name).\(type)"
-    
+
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
     defer {
@@ -1476,7 +1476,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     else {
         return ["error": "failed to read save urls in save function"]
     }
-    
+
     // validate file before save
     var allFilenames:[String] = [] // stores the indv filenames for later comparison
     // old and new filenames are equal, overwriting and can skip
@@ -1492,14 +1492,14 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
             allFilenames.append(filename.lowercased())
         }
     }
-    
+
     if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
         // filename taken or too long
         return ["error": "filename validation failed in save function"]
     }
-    
+
     // file passed validation
-    
+
     // attempt to save to disk
     let newFileUrl = saveLocation.appendingPathComponent(newFilename)
     do {
@@ -1508,9 +1508,9 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
         err("saveFile failed at (2)")
         return ["error": "failed to write file to disk"]
     }
-    
+
     // saved to disk successfully
-    
+
     // get the file last modified date
     guard
         let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
@@ -1518,7 +1518,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
         err("saveFile failed at (3)")
         return ["error": "failed to read modified date in save function"]
     }
-    
+
     // remove old file and manifest records for old file if they exist
     if oldFilename != newFilename {
         // if user changed the filename, remove file with old filename
@@ -1529,16 +1529,16 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
         // for that edge case, using try? rather than try(!) to allow failures
         try? FileManager.default.trashItem(at: oldFileUrl, resultingItemURL: nil)
     }
-    
+
     // update manifest for new file and purge anything from old file
     guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
         err("saveFile failed at (4)")
         return ["error": "file save but manifest couldn't be updated"]
     }
-    
+
     // un-santized name
     name = unsanitize(name)
-    
+
     // build response dict
     response["canUpdate"] = false
     response["content"] = newContent
@@ -1551,7 +1551,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     if metadata["version"] != nil && metadata["updateURL"] != nil {
         response["canUpdate"] = true
     }
-    
+
     return response
 }
 
@@ -1688,7 +1688,7 @@ func popupInit() -> [String: String]? {
     }
     let documentsDirectory = getDocumentsDirectory()
     let requireLocation = getRequireLocation()
-    
+
     return [
         "active": active,
         "saveLocation": saveLocation.absoluteString,
@@ -1700,12 +1700,12 @@ func popupInit() -> [String: String]? {
 // userscript install
 func installCheck(_ content: String) -> [String: String]? {
     // this func checks a userscript's metadata to determine if it's already installed
-    
+
     guard let files = getAllFiles() else {
         err("installCheck failed at (1)")
         return nil
     }
-    
+
     guard
         let parsed = parse(content),
         let metadata = parsed["metadata"] as? [String: [String]],
@@ -1713,7 +1713,7 @@ func installCheck(_ content: String) -> [String: String]? {
     else {
         return ["error": "userscript metadata is invalid"]
     }
-    
+
     // loop through all files nad get their names and filenames
     // we will check the new name/filename to see if this is a unique userscript
     // or if it will overwrite an existing userscript
@@ -1721,22 +1721,22 @@ func installCheck(_ content: String) -> [String: String]? {
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
         let name = file["name"] as! String
-        
+
         // populate array
         names.append(name)
     }
-    
+
     var directive = ""
     #if os(macOS)
         directive = "Click"
     #elseif os(iOS)
         directive = "Tap"
     #endif
-    
+
     if names.contains(newName) {
         return ["success": "\(directive) to re-install"]
     }
-    
+
     return ["success": "\(directive) to install"];
 }
 
@@ -1761,7 +1761,7 @@ func installUserscript(_ content: String) -> [String: Any]? {
         return nil
     }
     let filename = "\(name).js"
-    
+
     let saved = saveFile(["filename": filename, "type": "js"], content)
     return saved
 }
