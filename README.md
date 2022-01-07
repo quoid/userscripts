@@ -29,9 +29,7 @@ To run Userscripts on iOS you should be on iOS 15.1 or higher.
 
 To run Userscripts on macOS you should running macOS 12 or higher, along with Safari 14.1 or higher.
 
-**[iOS App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
-
-**[macOS App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
+**[App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
 
 ## Usage
 
