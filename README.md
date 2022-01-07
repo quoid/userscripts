@@ -1,6 +1,6 @@
 # Userscripts Safari
 
-An open-source userscript editor for Safari.
+An open-source userscript editor for Safari
 
 ![Userscripts Safari](/etc/screenshot.png)
 
