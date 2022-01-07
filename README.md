@@ -38,6 +38,7 @@ It's recommend to read this documentation and, if you have time, watch the follo
 Once the app is downloaded and installed the following steps should be taken:
 
 **iOS**
+
 - Go to `Settings > Extensions > Userscripts`
 - Turn Userscripts `on`
 - For optimal experience it's recommended that you allow Userscripts for `All Websites`
