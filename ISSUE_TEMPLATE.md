@@ -15,7 +15,7 @@ console.log(`This is a test script - ${window.location.href}`);
 -->
 
 _System Information:_
-> macOS version:
+> macOS or iOS version:
 > Userscripts version:
 > Safari version:
 > Is this issue related to script injection?
