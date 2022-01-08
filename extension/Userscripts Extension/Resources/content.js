@@ -334,16 +334,8 @@ function deleteValue(key) {
 }
 
 function addStyleSync(css) {
-    browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: css});
+    window.postMessage({id: uid, name: "API_ADD_STYLE_SYNC", css: css});
     return css;
-    // try {
-    //     const tag = document.createElement("style");
-    //     tag.textContent = css;
-    //     document.head.appendChild(tag);
-    //     return css;
-    // } catch (e) {
-    //     console.log(e);
-    // }
 }
 
 function addStyle(css) {
@@ -506,6 +498,13 @@ window.addEventListener("message", e => {
             browser.runtime.sendMessage(message, response => {
                 window.postMessage({id: id, name: "RESP_ADD_STYLE", response: response});
             });
+        } catch (e) {
+            console.log(e);
+        }
+    } else if (name === "API_ADD_STYLE_SYNC") {
+        try {
+            message = {name: "API_ADD_STYLE_SYNC", css: e.data.css};
+            browser.runtime.sendMessage(message);
         } catch (e) {
             console.log(e);
         }

@@ -2837,12 +2837,12 @@
     	return child_ctx;
     }
 
-    // (416:0) {#if !active}
+    // (468:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (419:0) {#if showInstallPrompt}
+    // (471:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2884,7 +2884,7 @@
     	};
     }
 
-    // (424:0) {#if error}
+    // (476:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2934,7 +2934,7 @@
     	};
     }
 
-    // (446:8) {:else}
+    // (498:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3007,7 +3007,7 @@
     	};
     }
 
-    // (444:35) 
+    // (496:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3029,7 +3029,7 @@
     	};
     }
 
-    // (440:28) 
+    // (492:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3067,7 +3067,7 @@
     	};
     }
 
-    // (438:8) {#if inactive}
+    // (490:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3089,7 +3089,7 @@
     	};
     }
 
-    // (435:4) {#if loading}
+    // (487:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3119,7 +3119,7 @@
     	};
     }
 
-    // (448:16) {#each list as item (item.filename)}
+    // (500:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3178,7 +3178,7 @@
     	};
     }
 
-    // (461:0) {#if !inactive && platform === "macos"}
+    // (513:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3211,7 +3211,7 @@
     	};
     }
 
-    // (494:18) 
+    // (546:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3261,7 +3261,7 @@
     	};
     }
 
-    // (480:22) 
+    // (532:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3311,7 +3311,7 @@
     	};
     }
 
-    // (466:0) {#if showUpdates}
+    // (518:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3361,7 +3361,7 @@
     	};
     }
 
-    // (495:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
+    // (547:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3401,7 +3401,7 @@
     	};
     }
 
-    // (481:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (533:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3445,7 +3445,7 @@
     	};
     }
 
-    // (467:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
+    // (519:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -3861,6 +3861,62 @@
     	await browser.tabs.create({ url });
     }
 
+    async function shouldCheckForUpdates() {
+    	// if there's no network connectivity, do not check for updates
+    	if (!window || !window.navigator || !window.navigator.onLine) {
+    		console.log("user is offline, not running update check");
+    		return false;
+    	}
+
+    	// when an update check is run, a timestamp is saved to extension storage
+    	// only check for updates every n milliseconds to avoid delaying popup load regularly
+    	const checkInterval = 24 * 60 * 60 * 1000; // 24hr, 86400000
+
+    	const timestampMs = Date.now();
+    	let lastUpdateCheck = 0;
+
+    	// check extension storage for saved key/val
+    	// if there's an issue getting extension storage, skip the check
+    	let lastUpdateCheckObj;
+
+    	try {
+    		lastUpdateCheckObj = await browser.storage.local.get(["lastUpdateCheck"]);
+    	} catch(error) {
+    		console.error("Error checking extension storage " + error);
+    		return false;
+    	}
+
+    	// if extension storage doesn't have key, run the check
+    	// key/val will be saved after the update check runs
+    	if (Object.keys(lastUpdateCheckObj).length === 0) {
+    		console.log("no last check saved, running update check");
+    		return true;
+    	}
+
+    	// if the val is not a number, something went wrong, check anyway
+    	// when update re-runs, new val of the proper type will be saved
+    	if (!Number.isFinite(lastUpdateCheckObj.lastUpdateCheck)) {
+    		console.log("run check saved with wrong type, running update check");
+    		return true;
+    	}
+
+    	// at this point it is known that key exists and value is a number
+    	// update local var with the val saved to extension storage
+    	lastUpdateCheck = lastUpdateCheckObj.lastUpdateCheck;
+
+    	// if less than n milliseconds have passed, don't check
+    	if (timestampMs - lastUpdateCheck < checkInterval) {
+    		console.log("not enough time has passed, not running update check");
+    		return false;
+    	}
+
+    	console.log((timestampMs - lastUpdateCheck) / (1000 * 60 * 60) + " hours have passed");
+    	console.log("running update check");
+
+    	// otherwise run the check
+    	return true;
+    }
+
     function instance$9($$self, $$props, $$invalidate) {
     	let error = undefined;
     	let active = true;
@@ -4100,24 +4156,33 @@
     		}
 
     		// get updates
-    		let updatesResponse;
+    		const checkUpdates = await shouldCheckForUpdates();
 
-    		try {
-    			updatesResponse = await browser.runtime.sendNativeMessage({ name: "POPUP_UPDATES" });
-    		} catch(error) {
-    			console.log("Error for updates promise: " + error);
-    			$$invalidate(11, initError = true);
-    			$$invalidate(2, loading = false);
-    			return;
-    		}
+    		if (checkUpdates) {
+    			let updatesResponse;
 
-    		if (updatesResponse.error) {
-    			$$invalidate(0, error = updatesResponse.error);
-    			$$invalidate(2, loading = false);
-    			$$invalidate(3, disabled = false);
-    			return;
-    		} else {
-    			$$invalidate(6, updates = updatesResponse.updates);
+    			try {
+    				updatesResponse = await browser.runtime.sendNativeMessage({ name: "POPUP_UPDATES" });
+
+    				// save timestamp in ms to extension storage
+    				const timestampMs = Date.now();
+
+    				await browser.storage.local.set({ "lastUpdateCheck": timestampMs });
+    			} catch(error) {
+    				console.log("Error for updates promise: " + error);
+    				$$invalidate(11, initError = true);
+    				$$invalidate(2, loading = false);
+    				return;
+    			}
+
+    			if (updatesResponse.error) {
+    				$$invalidate(0, error = updatesResponse.error);
+    				$$invalidate(2, loading = false);
+    				$$invalidate(3, disabled = false);
+    				return;
+    			} else {
+    				$$invalidate(6, updates = updatesResponse.updates);
+    			}
     		}
 
     		// check if current page url is a userscript
@@ -4171,8 +4236,6 @@
     						document.body.style.width = "100vw";
     					}
     				}
-
-    				console.log("rs");
 
     				// on ios and ipados (split view) programmatically set the height of the scrollable container
     				// first get the header height

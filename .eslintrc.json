@@ -102,7 +102,7 @@
         "space-before-function-paren": ["error", {
             "anonymous": "never",
             "named": "never",
-            "asyncArrow": "never"
+            "asyncArrow": "always"
         }],
         "space-in-parens": [
             "error",
