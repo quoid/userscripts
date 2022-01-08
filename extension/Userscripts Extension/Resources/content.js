@@ -502,7 +502,6 @@ window.addEventListener("message", e => {
             console.log(e);
         }
     } else if (name === "API_ADD_STYLE_SYNC") {
-        console.log("SYNC");
         try {
             message = {name: "API_ADD_STYLE_SYNC", css: e.data.css};
             browser.runtime.sendMessage(message);
