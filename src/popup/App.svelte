@@ -157,6 +157,53 @@
         await browser.tabs.create({url: url});
     }
 
+    async function shouldCheckForUpdates() {
+        // if there's no network connectivity, do not check for updates
+        if (!window || !window.navigator || !window.navigator.onLine) {
+            console.log("user is offline, not running update check");
+            return false;
+        }
+        // when an update check is run, a timestamp is saved to extension storage
+        // only check for updates every n milliseconds to avoid delaying popup load regularly
+        const checkInterval = 24 * 60 * 60 * 1000; // 24hr, 86400000
+        const timestampMs = Date.now();
+        let lastUpdateCheck = 0;
+        // check extension storage for saved key/val
+        // if there's an issue getting extension storage, skip the check
+        let lastUpdateCheckObj;
+        try {
+            lastUpdateCheckObj = await browser.storage.local.get(["lastUpdateCheck"]);
+        } catch (error) {
+            console.error("Error checking extension storage " + error);
+            return false;
+        }
+        // if extension storage doesn't have key, run the check
+        // key/val will be saved after the update check runs
+        if (Object.keys(lastUpdateCheckObj).length === 0) {
+            console.log("no last check saved, running update check");
+            return true;
+        }
+        // if the val is not a number, something went wrong, check anyway
+        // when update re-runs, new val of the proper type will be saved
+        if (!Number.isFinite(lastUpdateCheckObj.lastUpdateCheck)) {
+            console.log("run check saved with wrong type, running update check");
+            return true;
+        }
+        // at this point it is known that key exists and value is a number
+        // update local var with the val saved to extension storage
+        lastUpdateCheck = lastUpdateCheckObj.lastUpdateCheck;
+        // if less than n milliseconds have passed, don't check
+        if ((timestampMs - lastUpdateCheck) < checkInterval) {
+            console.log("not enough time has passed, not running update check");
+            return false;
+        }
+
+        console.log(((timestampMs - lastUpdateCheck) / (1000 * 60 * 60)) + " hours have passed");
+        console.log("running update check");
+        // otherwise run the check
+        return true;
+    }
+
     async function openSaveLocation() {
         disabled = true;
         loading = true;
@@ -253,22 +300,28 @@
         }
 
         // get updates
-        let updatesResponse;
-        try {
-            updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
-        } catch (error) {
-            console.log("Error for updates promise: " + error);
-            initError = true;
-            loading = false;
-            return;
-        }
-        if (updatesResponse.error) {
-            error = updatesResponse.error;
-            loading = false;
-            disabled = false;
-            return;
-        } else {
-            updates = updatesResponse.updates;
+        const checkUpdates = await shouldCheckForUpdates();
+        if (checkUpdates) {
+            let updatesResponse;
+            try {
+                updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
+                // save timestamp in ms to extension storage
+                const timestampMs = Date.now();
+                await browser.storage.local.set({"lastUpdateCheck": timestampMs});
+            } catch (error) {
+                console.log("Error for updates promise: " + error);
+                initError = true;
+                loading = false;
+                return;
+            }
+            if (updatesResponse.error) {
+                error = updatesResponse.error;
+                loading = false;
+                disabled = false;
+                return;
+            } else {
+                updates = updatesResponse.updates;
+            }
         }
 
         // check if current page url is a userscript
