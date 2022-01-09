@@ -2,6 +2,6 @@ public/page/codemirror/** linguist-vendored
 extension/Userscripts-iOS/Base.lproj/Main.html linguist-generated
 /index.html linguist-generated
 **/Resources/page.html linguist-generated
-**/Resources/page.js
+**/Resources/page.js linguist-generated
 **/Resources/popup.html linguist-generated
 **/Resources/popup.js linguist-generated
