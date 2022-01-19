@@ -18,9 +18,9 @@ func sanitize(_ str: String) -> String? {
     if sanitized.first == "." {
         sanitized = "%2" + str.dropFirst()
     }
-    santized = santized.replacingOccurrences(of: "/", with: "%2F")
-    santized = santized.replacingOccurrences(of: ":", with: "%3A")
-    santized = santized.replacingOccurrences(of: "\\", with: "%5C")
+    sanitized = sanitized.replacingOccurrences(of: "/", with: "%2F")
+    sanitized = sanitized.replacingOccurrences(of: ":", with: "%3A")
+    sanitized = sanitized.replacingOccurrences(of: "\\", with: "%5C")
     return sanitized
 }
 
