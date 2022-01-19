@@ -1493,9 +1493,12 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
         }
     }
 
-    if allFilenames.contains(newFilename.lowercased()) || newFilename.count > 250 {
-        // filename taken or too long
-        return ["error": "filename validation failed in save function"]
+    if allFilenames.contains(newFilename.lowercased()) {
+        return ["error": "filename already taken"]
+    }
+
+    if newFilename.count > 250 {
+        return ["error": "filename too long"]
     }
 
     // file passed validation
