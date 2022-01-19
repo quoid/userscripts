@@ -13,13 +13,15 @@ func dateToMilliseconds(_ date: Date) -> Int {
 }
 
 func sanitize(_ str: String) -> String? {
-    // removes dubious characters from strings (filenames)
+    // removes invalid filename characters from strings
     var sanitized = str
     if sanitized.first == "." {
         sanitized = "%2" + str.dropFirst()
     }
-    let allowedCharacterSet = (CharacterSet(charactersIn: "/:\\").inverted)
-    return sanitized.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
+    santized = santized.replacingOccurrences(of: "/", with: "%2F")
+    santized = santized.replacingOccurrences(of: ":", with: "%3A")
+    santized = santized.replacingOccurrences(of: "\\", with: "%5C")
+    return sanitized
 }
 
 func unsanitize(_ str: String) -> String {
