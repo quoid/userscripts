@@ -5,6 +5,23 @@
     // the data that will populate the item contents in sidebar
     export let data = {};
     export let toggleClick;
+    let showTitle = false;
+
+    // if description > 120 characters, truncate and add ellipsis
+    // also trim for instances where an empty space is the last character
+    // this prevents ellipsis from being added next to empty space
+    // when description truncated, add title attr with full description text
+    function formatDescription(str) {
+        if (str && str.length > 120) {
+            showTitle = true;
+            return str.substring(0, 120).trim() + "...";
+        } else {
+            showTitle = false;
+            return str;
+        }
+    }
+
+    $: description = formatDescription(data.description);
 </script>
 <style>
     .item {
@@ -74,5 +91,9 @@
         <div class="item__title truncate">{data.name}</div>
         <Toggle checked={!data.disabled} on:click={toggleClick}/>
     </div>
-    <div class="item__description">{data.description || "No description provided"}</div>
+    {#if description}
+        <div class="item__description" title="{showTitle ? data.description : null}">
+            {description}
+        </div>
+    {/if}
 </div>
