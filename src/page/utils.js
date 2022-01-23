@@ -37,7 +37,7 @@ export function  newScriptDefault(description, name, type) {
 
 export function parse(str) {
     if (typeof str != "string") return null;
-    const blocksReg = /(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))/;
+    const blocksReg = /(?:(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==[ \t]*?\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))/;
     const blocks = str.match(blocksReg);
 
     if (!blocks) return null;
