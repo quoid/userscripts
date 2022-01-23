@@ -12,7 +12,7 @@ func dateToMilliseconds(_ date: Date) -> Int {
     return Int(since1970 * 1000)
 }
 
-func sanitize(_ str: String) -> String? {
+func sanitize(_ str: String) -> String {
     // removes invalid filename characters from strings
     var sanitized = str
     if sanitized.first == "." {
@@ -448,9 +448,8 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
         // populate array with entries for manifest
         var r = [String]()
         for resource in required {
-            if let sanitizedResourceName = sanitize(resource) {
-                r.append(sanitizedResourceName)
-            }
+            let sanitizedResourceName = sanitize(resource)
+            r.append(sanitizedResourceName)
         }
 
         // if there are values, write them to manifest
@@ -708,7 +707,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         }
         // skip urls pointing to files of different types
         if resourceUrlPath.hasSuffix(fileType) {
-            guard let resourceFilename = sanitize(resourceUrlString) else {return false}
+            let resourceFilename = sanitize(resourceUrlString)
             let fileURL = directory.appendingPathComponent(resourceFilename)
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
@@ -1149,7 +1148,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             // if required is ["A", "B", "C"], C gets added above B which is above A, etc..
             // the reverse of that is desired
             for require in required.reversed() {
-                let sanitizedName = sanitize(require) ?? ""
+                let sanitizedName = sanitize(require)
                 let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
                     code = "\(requiredContent)\n\(code)"
@@ -1462,12 +1461,10 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     else {
         return ["error": "failed to parse metadata"]
     }
-    guard
-        let n = metadata["name"]?[0],
-        var name = sanitize(n)
-    else {
+    guard let n = metadata["name"]?[0] else {
         return ["error": "@name not found in metadata"]
     }
+    var name = sanitize(n)
 
     // construct new file name
     let newFilename = "\(name).\(type)"
@@ -1763,12 +1760,12 @@ func installUserscript(_ content: String) -> [String: Any]? {
     guard
         let parsed = parse(content),
         let metadata = parsed["metadata"] as? [String: [String]],
-        let n = metadata["name"]?[0],
-        let name = sanitize(n)
+        let n = metadata["name"]?[0]
     else {
         err("installUserscript failed at (1)")
         return nil
     }
+    let name = sanitize(n)
     let filename = "\(name).js"
 
     let saved = saveFile(["filename": filename, "type": "js"], content)
