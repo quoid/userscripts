@@ -82,7 +82,7 @@ function injectJS(filename, code, scope, grants) {
     if (scope !== "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
-        document.body.appendChild(tag);
+        document.head.appendChild(tag);
     } else {
         eval(code);
     }
