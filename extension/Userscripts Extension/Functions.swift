@@ -202,7 +202,7 @@ func parse(_ content: String) -> [String: Any]? {
             // this pattern checks for specific keys that won't have values
             let p2 = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$"#
             // the individual meta string, ie. // @name File Name
-            let metaString = String(meta)
+            let metaString = String(meta).trimmingCharacters(in: .whitespaces)
             // force try b/c pattern is known to be valid regex
             let re = try! NSRegularExpression(pattern: p, options: [])
             let re2 = try! NSRegularExpression(pattern: p2, options: [])
