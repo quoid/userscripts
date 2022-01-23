@@ -1458,11 +1458,15 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
     guard
         let parsed = parse(newContent),
-        let metadata = parsed["metadata"] as? [String: [String]],
+        let metadata = parsed["metadata"] as? [String: [String]]
+    else {
+        return ["error": "failed to parse metadata"]
+    }
+    guard
         let n = metadata["name"]?[0],
         var name = sanitize(n)
     else {
-        return ["error": "failed to parse argument in save function"]
+        return ["error": "@name not found in metadata"]
     }
 
     // construct new file name
