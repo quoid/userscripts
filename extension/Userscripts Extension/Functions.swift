@@ -1438,7 +1438,8 @@ func getInitData() -> [String: Any]? {
     var data:[String: Any] = manifest.settings
     data["blacklist"] = manifest.blacklist
     data["saveLocation"] = saveLocation.path
-    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    data["version"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    data["build"] = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     return data
 }
 
