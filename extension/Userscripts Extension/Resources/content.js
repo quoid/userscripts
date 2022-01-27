@@ -253,83 +253,90 @@ function addContextMenuItem(filename, name) {
 
 // api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
 function openInTab(url, openInBackground) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
-            if (e.data.id !== uid || e.data.name !== "RESP_OPEN_TAB") return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_OPEN_TAB") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         const active = (openInBackground === true) ? false : true;
-        window.postMessage({id: uid, name: "API_OPEN_TAB", url: url, active: active});
+        window.postMessage({id: uid, pid: pid, name: "API_OPEN_TAB", url: url, active: active});
     });
 }
 
 function closeTab(tabId) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
-            if (e.data.id !== uid || e.data.name !== "RESP_CLOSE_TAB") return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_CLOSE_TAB") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
-        window.postMessage({id: uid, name: "API_CLOSE_TAB", tabId: tabId});
+        window.postMessage({id: uid, pid: pid, name: "API_CLOSE_TAB", tabId: tabId});
     });
 }
 
 function setValue(key, value) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename !== filename) return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_SET_VALUE", filename: filename, key: key, value: value});
+        window.postMessage({id: uid, pid: pid, name: "API_SET_VALUE", filename: filename, key: key, value: value});
     });
 }
 
 function getValue(key, defaultValue) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename !== filename) return;
-            resolve(e.data.response);
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename !== filename) return;
+            const response = e.data.response;
+            resolve(response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_GET_VALUE", filename: filename, key: key, defaultValue: defaultValue});
+        window.postMessage({id: uid, pid: pid, name: "API_GET_VALUE", filename: filename, key: key, defaultValue: defaultValue});
     });
 }
 
 function listValues() {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename !== filename) return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_LIST_VALUES", filename: filename});
+        window.postMessage({id: uid, pid: pid, name: "API_LIST_VALUES", filename: filename});
     });
 }
 
 function deleteValue(key) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename !== filename) return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_DELETE_VALUE", filename: filename, key: key});
+        window.postMessage({id: uid, pid: pid, name: "API_DELETE_VALUE", filename: filename, key: key});
     });
 }
 
@@ -339,16 +346,17 @@ function addStyleSync(css) {
 }
 
 function addStyle(css) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_ADD_STYLE") return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_ADD_STYLE") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_ADD_STYLE", css: css});
+        window.postMessage({id: uid, pid: pid, name: "API_ADD_STYLE", css: css});
     });
 }
 
@@ -460,43 +468,45 @@ window.addEventListener("message", e => {
     if (e.data.id !== uid || !e.data.name) return;
     const id = e.data.id;
     const name = e.data.name;
+    const pid = e.data.pid;
     let message;
     if (name === "API_OPEN_TAB") {
         // ignore requests that don't supply a url
         if (!e.data.url) return;
         message = {name: "API_OPEN_TAB", url: e.data.url, active: e.data.active};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_OPEN_TAB", response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_OPEN_TAB", response: response});
         });
     } else if (name === "API_CLOSE_TAB") {
         browser.runtime.sendMessage({name: "API_CLOSE_TAB", tabId: e.data.tabId}, response => {
-            window.postMessage({id: id, name: "RESP_CLOSE_TAB", response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_CLOSE_TAB", response: response});
         });
     } else if (name === "API_SET_VALUE") {
         message = {name: "API_SET_VALUE", filename: e.data.filename, key: e.data.key, value: e.data.value};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
         });
     } else if (name === "API_GET_VALUE") {
-        message = {name: "API_GET_VALUE", filename: e.data.filename, key: e.data.key, defaultValue: e.data.defaultValue};
+        message = {name: "API_GET_VALUE", filename: e.data.filename, pid: pid, key: e.data.key, defaultValue: e.data.defaultValue};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_GET_VALUE", filename: e.data.filename, response: response});
+            const resp =  response === `undefined--${pid}` ? undefined : response;
+            window.postMessage({id: id, pid: pid, name: "RESP_GET_VALUE", filename: e.data.filename, response: resp});
         });
     } else if (name === "API_DELETE_VALUE") {
         message = {name: "API_DELETE_VALUE", filename: e.data.filename, key: e.data.key};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
         });
     } else if (name === "API_LIST_VALUES") {
         message = {name: "API_LIST_VALUES", filename: e.data.filename};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
         });
     } else if (name === "API_ADD_STYLE") {
         try {
             message = {name: "API_ADD_STYLE", css: e.data.css};
             browser.runtime.sendMessage(message, response => {
-                window.postMessage({id: id, name: "RESP_ADD_STYLE", response: response});
+                window.postMessage({id: id, pid: pid, name: "RESP_ADD_STYLE", response: response});
             });
         } catch (e) {
             console.log(e);

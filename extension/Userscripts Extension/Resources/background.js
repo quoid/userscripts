@@ -91,8 +91,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (name === "API_GET_VALUE") {
         const key = request.filename + "---" + request.key;
         browser.storage.local.get(key, item => {
-            if (Object.keys(item).length === 0 && request.defaultValue) {
-                sendResponse(request.defaultValue);
+            if (Object.keys(item).length === 0) {
+                if (request.defaultValue) {
+                    sendResponse(request.defaultValue);
+                } else {
+                    sendResponse(`undefined--${request.pid}`);
+                }
             } else {
                 sendResponse(Object.values(item)[0]);
             }
