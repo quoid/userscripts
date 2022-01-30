@@ -63,6 +63,11 @@ function injectJS(filename, code, scope, grants) {
         } else if (grant === "GM.addStyle") {
             api += `\n${addStyle}\n`;
             gmVals.push("addStyle: addStyle");
+        } else if (grant === "GM.setClipboard") {
+            api += `\n${us_setClipboard}`;
+            gmVals.push("setClipboard: us_setClipboard");
+        } else if (grant === "GM_setClipboard") {
+            api += `\n${us_setClipboardSync}\nconst GM_setClipboard = us_setClipboardSync;`;
         } else if (grant === "GM_xmlhttpRequest" || grant === "GM.xmlHttpRequest") {
             if (!includedFunctions.includes(xhr.name)) {
                 api += `\n${xhr}`;
@@ -360,6 +365,27 @@ function addStyle(css) {
     });
 }
 
+function us_setClipboard(data, type) {
+    const pid = Math.random().toString(36).substring(1, 9);
+    return new Promise(resolve => {
+        const callback = e => {
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_SET_CLIPBOARD") return;
+            resolve(e.data.response);
+            if (!e.data.response) console.error("clipboard write failed");
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        window.postMessage({id: uid, pid: pid, name: "API_SET_CLIPBOARD", data: data, type: type});
+    });
+}
+
+function us_setClipboardSync(data, type) {
+    // there's actually no sync method since a promise needs to be sent to bg page
+    // however make a dummy sync method for compatibility
+    window.postMessage({id: uid, name: "API_SET_CLIPBOARD", data: data, type: type});
+    return undefined;
+}
+
 // when xhr is called it sends a message to the content script
 // and adds it's own event listener to get responses from content script
 // each xhr has a unique id so it won't respond to different xhr
@@ -509,6 +535,10 @@ window.addEventListener("message", e => {
     } else if (name === "API_CLOSE_TAB") {
         browser.runtime.sendMessage({name: "API_CLOSE_TAB", tabId: e.data.tabId}, response => {
             window.postMessage({id: id, pid: pid, name: "RESP_CLOSE_TAB", response: response});
+        });
+    } else if (name === "API_SET_CLIPBOARD") {
+        browser.runtime.sendMessage({name: "API_SET_CLIPBOARD", data: e.data.data, type: e.data.type}, response => {
+            window.postMessage({id: id, pid: pid, name: "RESP_SET_CLIPBOARD", response: response});
         });
     } else if (name === "API_SET_VALUE") {
         message = {name: "API_SET_VALUE", filename: e.data.filename, key: e.data.key, value: e.data.value};

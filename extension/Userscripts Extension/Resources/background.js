@@ -138,6 +138,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         })();
         return true;
+    } else if (name === "API_SET_CLIPBOARD") {
+        const result = setClipboard(request.data, request.type);
+        sendResponse(result);
     } else if (name === "API_XHR_CS") {
         // https://jsonplaceholder.typicode.com/posts
         // get tab id and respond only to the content script that sent message
@@ -332,6 +335,33 @@ async function getPlatform() {
     }
     platformGlobal = response.platform;
     return response.platform;
+}
+
+function setClipboard(data, type = "text/plain") {
+    // future enhancement?
+    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write
+    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+    const onCopy = e => {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        e.clipboardData.setData(type, data);
+        document.removeEventListener("copy", onCopy, true);
+    };
+
+    const textarea = document.createElement("textarea");
+    textarea.textContent = "<empty clipboard>";
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.addEventListener("copy", onCopy, true);
+    try {
+        return document.execCommand("copy");
+    } catch (error) {
+        console.warn("setClipboard failed", error);
+        document.removeEventListener("copy", onCopy, true);
+        return false;
+    } finally {
+        document.body.removeChild(textarea);
+    }
 }
 
 browser.tabs.onActivated.addListener(setBadgeCount);

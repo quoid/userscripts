@@ -195,6 +195,15 @@ Userscripts currently supports the following api methods. All methods are asynch
     - `tabId: Int`
     - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
     - on success returns a promise resolved with an object indicating success
+- `GM.setClipboard(data, type)`
+    - `data: String` - **required**
+    - `type: String` - **optional** and defaults to `text/plain`
+    - [read more here](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData)
+    - on success returns a promise resolved with a `Bool` indicating success
+- `GM_setClipboard(data, type)`
+    - "synchronous' version of `GM.setClipboard`
+    - the setClipboard function runs in the background script, requires a promise to send message from content script to background to facilitate writing to the clipboard, thus no real synchronous function available
+    - returns `undefined`
 - `GM.xmlHttpRequest(details)`
     - `details: Object`
     - the `details` object accepts the following properties

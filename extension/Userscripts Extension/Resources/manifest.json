@@ -33,6 +33,7 @@
     ],
     "permissions": [
         "<all_urls>",
+        "clipboardWrite",
         "contextMenus",
         "menus",
         "nativeMessaging",
