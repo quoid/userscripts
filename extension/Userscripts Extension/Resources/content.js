@@ -41,28 +41,28 @@ function injectJS(filename, code, scope, grants) {
     if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
     grants.forEach(grant => {
         if (grant === "GM.openInTab") {
-            api += `\n${openInTab}`;
-            gmVals.push("openInTab: openInTab");
+            api += `\n${us_openInTab}`;
+            gmVals.push("openInTab: us_openInTab");
         } else if (grant === "US.closeTab") {
-            api += `\n${closeTab}`;
-            usVals.push("closeTab: closeTab");
+            api += `\n${us_closeTab}`;
+            usVals.push("closeTab: us_closeTab");
         } else if (grant === "GM.setValue") {
-            api += `\n${setValue}`;
-            gmVals.push("setValue: setValue");
+            api += `\n${us_setValue}`;
+            gmVals.push("setValue: us_setValue");
         } else if (grant === "GM.getValue") {
-            api += `\n${getValue}`;
-            gmVals.push("getValue: getValue");
+            api += `\n${us_getValue}`;
+            gmVals.push("getValue: us_getValue");
         } else if (grant === "GM.deleteValue") {
-            api += `\n${deleteValue}`;
-            gmVals.push("deleteValue: deleteValue");
+            api += `\n${us_deleteValue}`;
+            gmVals.push("deleteValue: us_deleteValue");
         } else if (grant === "GM.listValues") {
-            api += `\n${listValues}`;
-            gmVals.push("listValues: listValues");
+            api += `\n${us_listValues}`;
+            gmVals.push("listValues: us_listValues");
         } else if (grant === "GM_addStyle") {
-            api += `\n${addStyleSync}\nconst GM_addStyle = addStyleSync;`;
+            api += `\n${us_addStyleSync}\nconst GM_addStyle = us_addStyleSync;`;
         } else if (grant === "GM.addStyle") {
-            api += `\n${addStyle}\n`;
-            gmVals.push("addStyle: addStyle");
+            api += `\n${us_addStyle}\n`;
+            gmVals.push("addStyle: us_addStyle");
         } else if (grant === "GM.setClipboard") {
             api += `\n${us_setClipboard}`;
             gmVals.push("setClipboard: us_setClipboard");
@@ -257,7 +257,7 @@ function addContextMenuItem(filename, name) {
 }
 
 // api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
-function openInTab(url, openInBackground) {
+function us_openInTab(url, openInBackground) {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
@@ -271,7 +271,7 @@ function openInTab(url, openInBackground) {
     });
 }
 
-function closeTab(tabId) {
+function us_closeTab(tabId) {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
@@ -284,7 +284,7 @@ function closeTab(tabId) {
     });
 }
 
-function setValue(key, value) {
+function us_setValue(key, value) {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
@@ -299,7 +299,7 @@ function setValue(key, value) {
     });
 }
 
-function getValue(key, defaultValue) {
+function us_getValue(key, defaultValue) {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
@@ -315,7 +315,7 @@ function getValue(key, defaultValue) {
     });
 }
 
-function listValues() {
+function us_listValues() {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
@@ -330,7 +330,7 @@ function listValues() {
     });
 }
 
-function deleteValue(key) {
+function us_deleteValue(key) {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
@@ -345,12 +345,12 @@ function deleteValue(key) {
     });
 }
 
-function addStyleSync(css) {
+function us_addStyleSync(css) {
     window.postMessage({id: uid, name: "API_ADD_STYLE_SYNC", css: css});
     return css;
 }
 
-function addStyle(css) {
+function us_addStyle(css) {
     const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
