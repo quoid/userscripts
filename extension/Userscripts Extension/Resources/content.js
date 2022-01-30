@@ -391,9 +391,15 @@ function xhr(details) {
     const callback = e => {
         const name = e.data.name;
         const response = e.data.response;
-        if (!name.startsWith("RESP_API_XHR_CS") || e.data.xhrId !== xhrId) return;
+        // ensure callback is responding to the proper message
+        if (
+            e.data.id !== uid
+            || e.data.xhrId !== xhrId
+            || !name
+            || !name.startsWith("RESP_API_XHR_CS")
+        ) return;
         if (name === "RESP_API_XHR_CS") {
-            //
+            // ignore
         } else if (name.includes("ABORT") && details.onabort) {
             details.onabort(response);
         } else if (name.includes("ERROR") && details.onerror) {
@@ -451,8 +457,31 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (found) break;
         }
     } else if (name.startsWith("RESP_API_XHR_BG_")) {
+        // only respond to messages on the correct content script
+        if (request.id !== uid) return;
+        const resp = request.response;
         const n = name.replace("_BG_", "_CS_");
-        window.postMessage({name: n, response: request.response, xhrId: request.xhrId});
+        // arraybuffer responses had their data converted, convert it back to arraybuffer
+        if (request.response.responseType === "arraybuffer" && resp.response) {
+            try {
+                const r =  new Uint8Array(resp.response).buffer;
+                resp.response = r;
+            } catch (error) {
+                console.error("error parsing xhr arraybuffer response", error);
+            }
+        // blob responses had their data converted, convert it back to blob
+        } else if (request.response.responseType === "blob" && resp.response && resp.response.data) {
+            fetch(request.response.response.data)
+                .then(res => res.blob())
+                .then(b => {
+                    resp.response = b;
+                    window.postMessage({name: n, response: resp, id: request.id, xhrId: request.xhrId});
+                });
+        }
+        // blob response will execute its own postMessage call
+        if (request.response.responseType !== "blob") {
+            window.postMessage({name: n, response: resp, id: request.id, xhrId: request.xhrId});
+        }
     } else if (["USERSCRIPT_INSTALL_00", "USERSCRIPT_INSTALL_01", "USERSCRIPT_INSTALL_02"].includes(name)) {
         const content = document.body.innerText;
         browser.runtime.sendMessage({name: name, content: content}, response => {
@@ -519,7 +548,7 @@ window.addEventListener("message", e => {
             console.log(e);
         }
     } else if (name === "API_XHR_INJ") {
-        message = {name: "API_XHR_CS", details: e.data.details, xhrId: e.data.xhrId};
+        message = {name: "API_XHR_CS", details: e.data.details, id: id, xhrId: e.data.xhrId};
         browser.runtime.sendMessage(message, response => {
             window.postMessage({id: id, name: "RESP_API_XHR_CS", response: response, xhrId: e.data.xhrId});
         });
