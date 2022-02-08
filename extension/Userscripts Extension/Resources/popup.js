@@ -4202,7 +4202,7 @@
     			if (response.error) {
     				console.log("Error checking .user.js url: " + response.error);
     				$$invalidate(0, error = response.error);
-    			} else {
+    			} else if (!response.invalid) {
     				// the response will contain the string to display
     				// ex: {success: "Click to install"}
     				const prompt = response.success;

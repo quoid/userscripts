@@ -507,11 +507,23 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             window.postMessage({name: n, response: resp, id: request.id, xhrId: request.xhrId});
         }
     } else if (["USERSCRIPT_INSTALL_00", "USERSCRIPT_INSTALL_01", "USERSCRIPT_INSTALL_02"].includes(name)) {
-        const content = document.body.innerText;
-        browser.runtime.sendMessage({name: name, content: content}, response => {
-            sendResponse(response);
-        });
-        return true;
+        const types = [
+            "text/plain",
+            "application/ecmascript",
+            "application/javascript",
+            "text/ecmascript",
+            "text/javascript"
+        ];
+        if (!document.contentType || types.indexOf(document.contentType) === -1) {
+            // only allow installation if contentType is in list above
+            sendResponse({invalid: true});
+        } else {
+            const content = document.body.innerText;
+            browser.runtime.sendMessage({name: name, content: content}, response => {
+                sendResponse(response);
+            });
+            return true;
+        }
     }
 });
 

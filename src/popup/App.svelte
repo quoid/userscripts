@@ -329,6 +329,9 @@
         const strippedUrl = url.split(/[?#]/)[0];
         if (strippedUrl.endsWith(".user.js")) {
             // if it does, send message to content script
+            // context script will check the document contentType
+            // if it's not an applicable type, it'll return {invalid: true} response and no install prompt shown
+            // if the contentType is applicable, what is mentioned below happens
             // content script will get dom content, and send it to the bg page
             // the bg page will send the content to the swift side for parsing
             // when swift side parses and returns, the bg page will send a response to the content script
@@ -339,7 +342,7 @@
             if (response.error) {
                 console.log("Error checking .user.js url: " + response.error);
                 error = response.error;
-            } else {
+            } else if (!response.invalid) {
                 // the response will contain the string to display
                 // ex: {success: "Click to install"}
                 const prompt = response.success;
