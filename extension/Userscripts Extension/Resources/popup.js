@@ -1298,8 +1298,8 @@
 
     function create_else_block(ctx) {
     	let current;
-    	const default_slot_template = /*#slots*/ ctx[6].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[5], null);
+    	const default_slot_template = /*#slots*/ ctx[8].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], null);
     	const default_slot_or_fallback = default_slot || fallback_block();
 
     	return {
@@ -1315,8 +1315,8 @@
     		},
     		p(ctx, dirty) {
     			if (default_slot) {
-    				if (default_slot.p && dirty & /*$$scope*/ 32) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[5], dirty, null, null);
+    				if (default_slot.p && dirty & /*$$scope*/ 128) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[7], dirty, null, null);
     				}
     			}
     		},
@@ -1335,14 +1335,16 @@
     	};
     }
 
-    // (31:8) {#if loading && showLoaderOnDisabled}
+    // (33:8) {#if loading && showLoaderOnDisabled}
     function create_if_block$2(ctx) {
     	let loader;
     	let current;
 
     	loader = new Loader({
     			props: {
-    				backgroundColor: "var(--color-bg-primary)"
+    				backgroundColor: "var(--color-bg-primary)",
+    				abortClick: /*abortClick*/ ctx[5],
+    				abort: /*abort*/ ctx[4]
     			}
     		});
 
@@ -1354,7 +1356,12 @@
     			mount_component(loader, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p(ctx, dirty) {
+    			const loader_changes = {};
+    			if (dirty & /*abortClick*/ 32) loader_changes.abortClick = /*abortClick*/ ctx[5];
+    			if (dirty & /*abort*/ 16) loader_changes.abort = /*abort*/ ctx[4];
+    			loader.$set(loader_changes);
+    		},
     		i(local) {
     			if (current) return;
     			transition_in(loader.$$.fragment, local);
@@ -1370,7 +1377,7 @@
     	};
     }
 
-    // (34:18) <div>
+    // (36:18) <div>
     function fallback_block(ctx) {
     	let div;
 
@@ -1478,7 +1485,7 @@
     			transition_in(if_block);
 
     			add_render_callback(() => {
-    				if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[4], {}, true);
+    				if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[6], {}, true);
     				div2_transition.run(1);
     			});
 
@@ -1487,7 +1494,7 @@
     		o(local) {
     			transition_out(iconbutton.$$.fragment, local);
     			transition_out(if_block);
-    			if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[4], {}, false);
+    			if (!div2_transition) div2_transition = create_bidirectional_transition(div2, /*slide*/ ctx[6], {}, false);
     			div2_transition.run(0);
     			current = false;
     		},
@@ -1506,6 +1513,11 @@
     	let { headerTitle = "View Header" } = $$props;
     	let { closeClick } = $$props;
     	let { showLoaderOnDisabled = true } = $$props;
+    	let { abort = false } = $$props;
+
+    	let { abortClick = () => {
+    		
+    	} } = $$props;
 
     	function slide(node, params) {
     		return {
@@ -1521,10 +1533,22 @@
     		if ("headerTitle" in $$props) $$invalidate(1, headerTitle = $$props.headerTitle);
     		if ("closeClick" in $$props) $$invalidate(2, closeClick = $$props.closeClick);
     		if ("showLoaderOnDisabled" in $$props) $$invalidate(3, showLoaderOnDisabled = $$props.showLoaderOnDisabled);
-    		if ("$$scope" in $$props) $$invalidate(5, $$scope = $$props.$$scope);
+    		if ("abort" in $$props) $$invalidate(4, abort = $$props.abort);
+    		if ("abortClick" in $$props) $$invalidate(5, abortClick = $$props.abortClick);
+    		if ("$$scope" in $$props) $$invalidate(7, $$scope = $$props.$$scope);
     	};
 
-    	return [loading, headerTitle, closeClick, showLoaderOnDisabled, slide, $$scope, slots];
+    	return [
+    		loading,
+    		headerTitle,
+    		closeClick,
+    		showLoaderOnDisabled,
+    		abort,
+    		abortClick,
+    		slide,
+    		$$scope,
+    		slots
+    	];
     }
 
     class View extends SvelteComponent {
@@ -1535,7 +1559,9 @@
     			loading: 0,
     			headerTitle: 1,
     			closeClick: 2,
-    			showLoaderOnDisabled: 3
+    			showLoaderOnDisabled: 3,
+    			abort: 4,
+    			abortClick: 5
     		});
     	}
     }
@@ -2833,16 +2859,16 @@
 
     function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[47] = list[i];
+    	child_ctx[48] = list[i];
     	return child_ctx;
     }
 
-    // (468:0) {#if !active}
+    // (487:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (471:0) {#if showInstallPrompt}
+    // (490:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2865,10 +2891,10 @@
     			append(div, t0);
     			append(div, span);
     			append(span, t1);
-    			/*div_binding*/ ctx[34](div);
+    			/*div_binding*/ ctx[35](div);
 
     			if (!mounted) {
-    				dispose = listen(span, "click", /*showInstallView*/ ctx[30]);
+    				dispose = listen(span, "click", /*showInstallView*/ ctx[31]);
     				mounted = true;
     			}
     		},
@@ -2877,14 +2903,14 @@
     		},
     		d(detaching) {
     			if (detaching) detach(div);
-    			/*div_binding*/ ctx[34](null);
+    			/*div_binding*/ ctx[35](null);
     			mounted = false;
     			dispose();
     		}
     	};
     }
 
-    // (476:0) {#if error}
+    // (495:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2896,7 +2922,7 @@
     			props: { icon: iconClear, title: "Clear error" }
     		});
 
-    	iconbutton.$on("click", /*click_handler_1*/ ctx[35]);
+    	iconbutton.$on("click", /*click_handler_1*/ ctx[36]);
 
     	return {
     		c() {
@@ -2911,7 +2937,7 @@
     			append(div, t0);
     			append(div, t1);
     			mount_component(iconbutton, div, null);
-    			/*div_binding_1*/ ctx[36](div);
+    			/*div_binding_1*/ ctx[37](div);
     			current = true;
     		},
     		p(ctx, dirty) {
@@ -2929,19 +2955,19 @@
     		d(detaching) {
     			if (detaching) detach(div);
     			destroy_component(iconbutton);
-    			/*div_binding_1*/ ctx[36](null);
+    			/*div_binding_1*/ ctx[37](null);
     		}
     	};
     }
 
-    // (498:8) {:else}
+    // (517:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	let each_value = /*list*/ ctx[21];
-    	const get_key = ctx => /*item*/ ctx[47].filename;
+    	let each_value = /*list*/ ctx[22];
+    	const get_key = ctx => /*item*/ ctx[48].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$3(ctx, each_value, i);
@@ -2970,8 +2996,8 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*list, toggleItem*/ 35651584) {
-    				const each_value = /*list*/ ctx[21];
+    			if (dirty[0] & /*list, toggleItem*/ 71303168) {
+    				const each_value = /*list*/ ctx[22];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$3, null, get_each_context$3);
     				check_outros();
@@ -3007,7 +3033,7 @@
     	};
     }
 
-    // (496:35) 
+    // (515:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3029,7 +3055,7 @@
     	};
     }
 
-    // (492:28) 
+    // (511:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3052,7 +3078,7 @@
     			append(div, span);
 
     			if (!mounted) {
-    				dispose = listen(span, "click", /*click_handler_2*/ ctx[37]);
+    				dispose = listen(span, "click", /*click_handler_2*/ ctx[38]);
     				mounted = true;
     			}
     		},
@@ -3067,7 +3093,7 @@
     	};
     }
 
-    // (490:8) {#if inactive}
+    // (509:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3089,11 +3115,17 @@
     	};
     }
 
-    // (487:4) {#if loading}
+    // (506:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
-    	loader = new Loader({});
+
+    	loader = new Loader({
+    			props: {
+    				abortClick: abortUpdates,
+    				abort: /*abort*/ ctx[21]
+    			}
+    		});
 
     	return {
     		c() {
@@ -3103,7 +3135,11 @@
     			mount_component(loader, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p(ctx, dirty) {
+    			const loader_changes = {};
+    			if (dirty[0] & /*abort*/ 2097152) loader_changes.abort = /*abort*/ ctx[21];
+    			loader.$set(loader_changes);
+    		},
     		i(local) {
     			if (current) return;
     			transition_in(loader.$$.fragment, local);
@@ -3119,22 +3155,22 @@
     	};
     }
 
-    // (500:16) {#each list as item (item.filename)}
+    // (519:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
     	function click_handler_3(...args) {
-    		return /*click_handler_3*/ ctx[38](/*item*/ ctx[47], ...args);
+    		return /*click_handler_3*/ ctx[39](/*item*/ ctx[48], ...args);
     	}
 
     	popupitem = new PopupItem({
     			props: {
-    				enabled: !/*item*/ ctx[47].disabled,
-    				name: /*item*/ ctx[47].name,
-    				subframe: /*item*/ ctx[47].subframe,
-    				type: /*item*/ ctx[47].type
+    				enabled: !/*item*/ ctx[48].disabled,
+    				name: /*item*/ ctx[48].name,
+    				subframe: /*item*/ ctx[48].subframe,
+    				type: /*item*/ ctx[48].type
     			}
     		});
 
@@ -3156,10 +3192,10 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.enabled = !/*item*/ ctx[47].disabled;
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.name = /*item*/ ctx[47].name;
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.subframe = /*item*/ ctx[47].subframe;
-    			if (dirty[0] & /*list*/ 2097152) popupitem_changes.type = /*item*/ ctx[47].type;
+    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.enabled = !/*item*/ ctx[48].disabled;
+    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.name = /*item*/ ctx[48].name;
+    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.subframe = /*item*/ ctx[48].subframe;
+    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.type = /*item*/ ctx[48].type;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -3178,7 +3214,7 @@
     	};
     }
 
-    // (513:0) {#if !inactive && platform === "macos"}
+    // (532:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3211,7 +3247,7 @@
     	};
     }
 
-    // (546:18) 
+    // (567:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3220,7 +3256,7 @@
     			props: {
     				headerTitle: "All Userscripts",
     				loading: /*disabled*/ ctx[3],
-    				closeClick: /*func_3*/ ctx[43],
+    				closeClick: /*func_3*/ ctx[44],
     				showLoaderOnDisabled: false,
     				$$slots: { default: [create_default_slot_2] },
     				$$scope: { ctx }
@@ -3238,9 +3274,9 @@
     		p(ctx, dirty) {
     			const view_changes = {};
     			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
-    			if (dirty[0] & /*showAll*/ 524288) view_changes.closeClick = /*func_3*/ ctx[43];
+    			if (dirty[0] & /*showAll*/ 524288) view_changes.closeClick = /*func_3*/ ctx[44];
 
-    			if (dirty[0] & /*allItems*/ 1048576 | dirty[1] & /*$$scope*/ 524288) {
+    			if (dirty[0] & /*allItems*/ 1048576 | dirty[1] & /*$$scope*/ 1048576) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3261,7 +3297,7 @@
     	};
     }
 
-    // (532:22) 
+    // (553:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3270,7 +3306,7 @@
     			props: {
     				headerTitle: "Install Userscript",
     				loading: /*disabled*/ ctx[3],
-    				closeClick: /*func_2*/ ctx[42],
+    				closeClick: /*func_2*/ ctx[43],
     				showLoaderOnDisabled: true,
     				$$slots: { default: [create_default_slot_1] },
     				$$scope: { ctx }
@@ -3288,9 +3324,9 @@
     		p(ctx, dirty) {
     			const view_changes = {};
     			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
-    			if (dirty[0] & /*showInstall*/ 65536) view_changes.closeClick = /*func_2*/ ctx[42];
+    			if (dirty[0] & /*showInstall*/ 65536) view_changes.closeClick = /*func_2*/ ctx[43];
 
-    			if (dirty[0] & /*installViewUserscript, installViewUserscriptError, showInstall*/ 458752 | dirty[1] & /*$$scope*/ 524288) {
+    			if (dirty[0] & /*installViewUserscript, installViewUserscriptError, showInstall*/ 458752 | dirty[1] & /*$$scope*/ 1048576) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3311,7 +3347,7 @@
     	};
     }
 
-    // (518:0) {#if showUpdates}
+    // (537:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3320,8 +3356,10 @@
     			props: {
     				headerTitle: "Updates",
     				loading: /*disabled*/ ctx[3],
-    				closeClick: /*func*/ ctx[40],
+    				closeClick: /*func*/ ctx[41],
     				showLoaderOnDisabled: true,
+    				abortClick: abortUpdates,
+    				abort: /*showUpdates*/ ctx[5],
     				$$slots: { default: [create_default_slot] },
     				$$scope: { ctx }
     			}
@@ -3338,9 +3376,10 @@
     		p(ctx, dirty) {
     			const view_changes = {};
     			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
-    			if (dirty[0] & /*showUpdates*/ 32) view_changes.closeClick = /*func*/ ctx[40];
+    			if (dirty[0] & /*showUpdates*/ 32) view_changes.closeClick = /*func*/ ctx[41];
+    			if (dirty[0] & /*showUpdates*/ 32) view_changes.abort = /*showUpdates*/ ctx[5];
 
-    			if (dirty[0] & /*updates*/ 64 | dirty[1] & /*$$scope*/ 524288) {
+    			if (dirty[0] & /*updates*/ 64 | dirty[1] & /*$$scope*/ 1048576) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3361,7 +3400,7 @@
     	};
     }
 
-    // (547:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
+    // (568:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3369,7 +3408,7 @@
     	allitemsview = new AllItemsView({
     			props: {
     				allItems: /*allItems*/ ctx[20],
-    				allItemsToggleItem: /*toggleItem*/ ctx[25]
+    				allItemsToggleItem: /*toggleItem*/ ctx[26]
     			}
     		});
 
@@ -3401,7 +3440,7 @@
     	};
     }
 
-    // (533:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (554:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3410,8 +3449,8 @@
     			props: {
     				userscript: /*installViewUserscript*/ ctx[17],
     				installError: /*installViewUserscriptError*/ ctx[18],
-    				installCancelClick: /*func_1*/ ctx[41],
-    				installConfirmClick: /*installConfirm*/ ctx[31]
+    				installCancelClick: /*func_1*/ ctx[42],
+    				installConfirmClick: /*installConfirm*/ ctx[32]
     			}
     		});
 
@@ -3427,7 +3466,7 @@
     			const installview_changes = {};
     			if (dirty[0] & /*installViewUserscript*/ 131072) installview_changes.userscript = /*installViewUserscript*/ ctx[17];
     			if (dirty[0] & /*installViewUserscriptError*/ 262144) installview_changes.installError = /*installViewUserscriptError*/ ctx[18];
-    			if (dirty[0] & /*showInstall*/ 65536) installview_changes.installCancelClick = /*func_1*/ ctx[41];
+    			if (dirty[0] & /*showInstall*/ 65536) installview_changes.installCancelClick = /*func_1*/ ctx[42];
     			installview.$set(installview_changes);
     		},
     		i(local) {
@@ -3445,16 +3484,16 @@
     	};
     }
 
-    // (519:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}     >
+    // (538:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
 
     	updateview = new UpdateView({
     			props: {
-    				checkClick: /*checkForUpdates*/ ctx[26],
-    				updateClick: /*updateAll*/ ctx[23],
-    				updateSingleClick: /*updateItem*/ ctx[24],
+    				checkClick: /*checkForUpdates*/ ctx[27],
+    				updateClick: /*updateAll*/ ctx[24],
+    				updateSingleClick: /*updateItem*/ ctx[25],
     				updates: /*updates*/ ctx[6]
     			}
     		});
@@ -3521,7 +3560,7 @@
     			}
     		});
 
-    	iconbutton0.$on("click", /*openSaveLocation*/ ctx[28]);
+    	iconbutton0.$on("click", /*openSaveLocation*/ ctx[29]);
 
     	iconbutton1 = new IconButton({
     			props: {
@@ -3532,7 +3571,7 @@
     			}
     		});
 
-    	iconbutton1.$on("click", /*click_handler*/ ctx[32]);
+    	iconbutton1.$on("click", /*click_handler*/ ctx[33]);
 
     	iconbutton2 = new IconButton({
     			props: {
@@ -3542,7 +3581,7 @@
     			}
     		});
 
-    	iconbutton2.$on("click", /*refreshView*/ ctx[27]);
+    	iconbutton2.$on("click", /*refreshView*/ ctx[28]);
 
     	toggle = new Toggle({
     			props: {
@@ -3552,7 +3591,7 @@
     			}
     		});
 
-    	toggle.$on("click", /*toggleExtension*/ ctx[22]);
+    	toggle.$on("click", /*toggleExtension*/ ctx[23]);
     	let if_block0 = !/*active*/ ctx[1] && create_if_block_10();
     	let if_block1 = /*showInstallPrompt*/ ctx[15] && create_if_block_9(ctx);
     	let if_block2 = /*error*/ ctx[0] && create_if_block_8(ctx);
@@ -3628,7 +3667,7 @@
     			mount_component(iconbutton2, div0, null);
     			append(div0, t2);
     			mount_component(toggle, div0, null);
-    			/*div0_binding*/ ctx[33](div0);
+    			/*div0_binding*/ ctx[34](div0);
     			insert(target, t3, anchor);
     			if (if_block0) if_block0.m(target, anchor);
     			insert(target, t4, anchor);
@@ -3638,7 +3677,7 @@
     			insert(target, t6, anchor);
     			insert(target, div1, anchor);
     			if_blocks[current_block_type_index].m(div1, null);
-    			/*div1_binding*/ ctx[39](div1);
+    			/*div1_binding*/ ctx[40](div1);
     			insert(target, t7, anchor);
     			if (if_block4) if_block4.m(target, anchor);
     			insert(target, t8, anchor);
@@ -3651,7 +3690,7 @@
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(window_1, "resize", /*resize*/ ctx[29]);
+    				dispose = listen(window_1, "resize", /*resize*/ ctx[30]);
     				mounted = true;
     			}
     		},
@@ -3819,7 +3858,7 @@
     			destroy_component(iconbutton1);
     			destroy_component(iconbutton2);
     			destroy_component(toggle);
-    			/*div0_binding*/ ctx[33](null);
+    			/*div0_binding*/ ctx[34](null);
     			if (detaching) detach(t3);
     			if (if_block0) if_block0.d(detaching);
     			if (detaching) detach(t4);
@@ -3829,7 +3868,7 @@
     			if (detaching) detach(t6);
     			if (detaching) detach(div1);
     			if_blocks[current_block_type_index].d();
-    			/*div1_binding*/ ctx[39](null);
+    			/*div1_binding*/ ctx[40](null);
     			if (detaching) detach(t7);
     			if (if_block4) if_block4.d(detaching);
     			if (detaching) detach(t8);
@@ -3917,6 +3956,17 @@
     	return true;
     }
 
+    async function abortUpdates() {
+    	// sends message to swift side canceling all URLSession tasks
+    	browser.runtime.sendNativeMessage({ name: "CANCEL_REQUESTS" });
+
+    	// timestamp for checking updates happens right before update fetching
+    	// that means when this function runs the timestamp has already been saved
+    	// reloading the window will essentially skip the update check
+    	// since the subsequent popup load will not check for updates
+    	window.location.reload();
+    }
+
     function instance$9($$self, $$props, $$invalidate) {
     	let error = undefined;
     	let active = true;
@@ -3941,6 +3991,7 @@
     	let showAll;
     	let allItems = [];
     	let resizeTimer;
+    	let abort = false;
 
     	function toggleExtension(e) {
     		e.preventDefault(); // prevent check state from changing on click
@@ -4045,6 +4096,7 @@
     		$$invalidate(5, showUpdates = false);
     		$$invalidate(6, updates = []);
     		$$invalidate(9, inactive = false);
+    		$$invalidate(21, abort = false);
     		initialize();
     	}
 
@@ -4162,16 +4214,17 @@
     			let updatesResponse;
 
     			try {
-    				updatesResponse = await browser.runtime.sendNativeMessage({ name: "POPUP_UPDATES" });
-
     				// save timestamp in ms to extension storage
     				const timestampMs = Date.now();
 
     				await browser.storage.local.set({ "lastUpdateCheck": timestampMs });
+    				$$invalidate(21, abort = true);
+    				updatesResponse = await browser.runtime.sendNativeMessage({ name: "POPUP_UPDATES" });
     			} catch(error) {
-    				console.log("Error for updates promise: " + error);
+    				console.error("Error for updates promise: " + error);
     				$$invalidate(11, initError = true);
     				$$invalidate(2, loading = false);
+    				$$invalidate(21, abort = false);
     				return;
     			}
 
@@ -4179,10 +4232,13 @@
     				$$invalidate(0, error = updatesResponse.error);
     				$$invalidate(2, loading = false);
     				$$invalidate(3, disabled = false);
+    				$$invalidate(21, abort = false);
     				return;
     			} else {
     				$$invalidate(6, updates = updatesResponse.updates);
     			}
+
+    			$$invalidate(21, abort = false);
     		}
 
     		// check if current page url is a userscript
@@ -4191,6 +4247,9 @@
 
     		if (strippedUrl.endsWith(".user.js")) {
     			// if it does, send message to content script
+    			// context script will check the document contentType
+    			// if it's not an applicable type, it'll return {invalid: true} response and no install prompt shown
+    			// if the contentType is applicable, what is mentioned below happens
     			// content script will get dom content, and send it to the bg page
     			// the bg page will send the content to the swift side for parsing
     			// when swift side parses and returns, the bg page will send a response to the content script
@@ -4369,10 +4428,10 @@
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty[0] & /*items*/ 16) {
-    			 $$invalidate(21, list = items.sort((a, b) => a.name.localeCompare(b.name)));
+    			 $$invalidate(22, list = items.sort((a, b) => a.name.localeCompare(b.name)));
     		}
 
-    		if ($$self.$$.dirty[0] & /*list*/ 2097152) {
+    		if ($$self.$$.dirty[0] & /*list*/ 4194304) {
     			 if (list.length > 1 && list.length % 2 === 0) {
     				$$invalidate(8, rowColors = "even");
     			} else if (list.length > 1 && list.length % 2 !== 0) {
@@ -4409,6 +4468,7 @@
     		installViewUserscriptError,
     		showAll,
     		allItems,
+    		abort,
     		list,
     		toggleExtension,
     		updateAll,

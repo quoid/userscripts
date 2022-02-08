@@ -259,6 +259,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                     task.cancel()
                 }
             }
+            response.userInfo = [SFExtensionMessageKey: ["success": true]]
         }
         else if name == "PAGE_NEW_REMOTE" {
             #if os(macOS)
