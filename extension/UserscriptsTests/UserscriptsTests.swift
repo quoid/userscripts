@@ -53,7 +53,41 @@ class UserscriptsTests: XCTestCase {
         // then
         XCTAssert(result.elementsEqual(strs))
     }
-
+    
+    func testEncodedCheck() throws {
+        let urls = [
+            "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect%20外链跳转.user.js",
+            "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js",
+            "https://cdn.frankerfacez.com/static/ffz_injector.user.js",
+            "http://www.k21p.com/example.user.js", // add http protocol
+            "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js"
+        ]
+        var result = [String]()
+        for url in urls {
+            if isEncoded(url) {
+                result.append(url)
+            }
+        }
+        // 2 urls already percent encoded
+        XCTAssert(result.count == 2)
+    }
+    
+    func testGetRemoteFileContents() throws {
+        let urls = [
+            "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect%20外链跳转.user.js",
+            "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js",
+            "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js",
+            "https://cdn.frankerfacez.com/static/ffz_injector.user.js",
+            "http://www.k21p.com/example.user.js" // add http protocol
+        ]
+        var result = [String]()
+        for url in urls {
+            if let contents = getRemoteFileContents(url) {
+                result.append(contents)
+            }
+        }
+        XCTAssert(result.count == urls.count)
+    }
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
