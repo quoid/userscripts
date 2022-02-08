@@ -163,6 +163,10 @@ func isVersionNewer(_ oldVersion: String, _ newVersion: String) -> Bool {
     return false
 }
 
+func isEncoded(_ str: String) -> Bool {
+    return str.removingPercentEncoding != str
+}
+
 // parser
 func parse(_ content: String) -> [String: Any]? {
     // returns structured data from content of file
@@ -784,7 +788,27 @@ func getRemoteFileContents(_ url: String) -> String? {
         urlChecked = urlChecked.replacingOccurrences(of: "http:", with: "https:")
         logText("\(url) is using insecure http, attempt to fetch remote content with https")
     }
-    guard let solidURL = URL(string: urlChecked) else {return nil}
+    // if the url is already encoded, decode it
+    if isEncoded(urlChecked) {
+        if let decodedUrl = urlChecked.removingPercentEncoding {
+            urlChecked = decodedUrl
+        } else {
+            err("getRemoteFileContents failed at (1), couldn't decode url, \(url)")
+            return nil
+        }
+    }
+    // encode all urls strings
+    if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+        urlChecked = encodedUrl
+    } else {
+        err("getRemoteFileContents failed at (2), couldn't percent encode url, \(url)")
+        return nil
+    }
+    // convert url string to url
+    guard let solidURL = URL(string: urlChecked) else {
+        err("getRemoteFileContents failed at (3), couldn't convert string to url, \(url)")
+        return nil
+    }
     var contents = ""
     // get remote file contents, synchronously
     let semaphore = DispatchSemaphore(value: 0)
@@ -805,7 +829,7 @@ func getRemoteFileContents(_ url: String) -> String? {
 
     // if made it to this point and contents still an empty string, something went wrong with the request
     if contents.count < 1 {
-        logText("something went wrong while trying to fetch remote file contents \(url)")
+        logText("getRemoteFileContents failed at (4), contents empty, \(url)")
         return nil
     }
     logText("getRemoteFileContents for \(url) end")
