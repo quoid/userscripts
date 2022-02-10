@@ -31,14 +31,27 @@ function injectCSS(filename, code) {
     document.head.appendChild(tag);
 }
 
-function injectJS(filename, code, scope, grants) {
+function injectJS(filename, code, scope, timing, grants) {
     console.info(`Injecting ${filename}`);
     // include api methods
-    let api = "";
     const gmVals = [];
     const usVals = [];
     const includedFunctions = [];
-    if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
+    const scriptDataKey = data.js[scope][timing][filename];
+    const scriptData = {
+        "script": scriptDataKey.scriptObject,
+        "scriptHandler": data.scriptHandler,
+        "scriptHandlerVersion": data.scriptHandlerVersion,
+        "scriptMetaStr": scriptDataKey.scriptMetaStr
+    };
+    // TODO: use us_info instead of const variables
+    let api = `const uid = "${uid}";\nconst filename = "${filename}";`;
+    const us_info = {filename: filename, info: scriptData, uid: uid};
+    api += `\nconst us_info = ${JSON.stringify(us_info)}`;
+    // all scripts get acces to GM.info and GM_info
+    api += `\n${us_getInfo}`;
+    api += "\nconst GM_info = us_getInfo;\n";
+    gmVals.push("info: us_getInfo");
     grants.forEach(grant => {
         if (grant === "GM.openInTab") {
             api += `\n${us_openInTab}`;
@@ -99,27 +112,27 @@ function processJS(filename, code, scope, timing, grants) {
         if (document.readyState === "loading") {
             document.addEventListener("readystatechange", function() {
                 if (document.readyState === "interactive") {
-                    injectJS(filename, code, scope, grants);
+                    injectJS(filename, code, scope, timing, grants);
                 }
             });
         } else {
-            injectJS(filename, code, scope, grants);
+            injectJS(filename, code, scope, timing, grants);
         }
     } else if (timing === "document-end") {
         if (document.readyState !== "loading") {
-            injectJS(filename, code, scope, grants);
+            injectJS(filename, code, scope, timing, grants);
         } else {
             document.addEventListener("DOMContentLoaded", function() {
-                injectJS(filename, code, scope, grants);
+                injectJS(filename, code, scope, timing, grants);
             });
         }
     } else if (timing === "document-idle") {
         if (document.readyState === "complete") {
-            injectJS(filename, code, scope, grants);
+            injectJS(filename, code, scope, timing, grants);
         } else {
             document.addEventListener("readystatechange", function(e) {
                 if (document.readyState === "complete") {
-                    injectJS(filename, code, scope, grants);
+                    injectJS(filename, code, scope, timing, grants);
                 }
             });
         }
@@ -163,7 +176,7 @@ function parseCode(data, fallback = false) {
                         sorted = sortByWeight(timingObject);
                         for (const filename in sorted) {
                             const code = sorted[filename].code;
-                            const grants = sorted[filename].grant;
+                            const grants = sorted[filename].scriptObject.grants;
                             // when block by csp rules, auto scope script will auto retry injection
                             if (fallback) {
                                 console.warn(`Attempting fallback injection for ${filename}`);
@@ -213,7 +226,7 @@ async function processJSContextMenuItems() {
     for (const scope in contextMenuCodeObject) {
         const scopeObject = contextMenuCodeObject[scope];
         for (const filename in scopeObject) {
-            const name = scopeObject[filename].name;
+            const name = scopeObject[filename].scriptObject.name;
             if (document.readyState === "complete") {
                 addContextMenuItem(filename, name);
             } else {
@@ -377,6 +390,11 @@ function us_setClipboard(data, type) {
     });
 }
 
+function us_getInfo() {
+    // eslint-disable-next-line no-undef -- us_info var accessible to the function at runtime
+    return us_info.info;
+}
+
 function us_setClipboardSync(data, type) {
     // there's actually no sync method since a promise needs to be sent to bg page
     // however make a dummy sync method for compatibility
@@ -466,7 +484,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (fn === filename) {
                     // get code from object and send for injection along with filename & scope
                     const code = contextMenuCodeObject[scope][filename].code;
-                    const grants = contextMenuCodeObject[scope][filename].grant;
+                    const grants = contextMenuCodeObject[scope][filename].scriptObject.grants;
                     // if strict csp already detected change auto scoped scripts to content
                     if (cspFallbackAttempted && scope === "auto") {
                         console.warn(`Attempting fallback injection for ${filename}`);

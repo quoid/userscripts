@@ -168,7 +168,7 @@ Userscripts Safari currently supports the following userscript metadata:
 
 ## API
 
-Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.** Further, most methods do not require their respective prefix when calling. For example, `GM.setValue` can be called as `GM.setValue(...)` or with simply by `setValue(...)`.
+Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.**.
 
 - `GM.addStyle(css)`
     - `css: String`
@@ -204,6 +204,27 @@ Userscripts currently supports the following api methods. All methods are asynch
     - "synchronous' version of `GM.setClipboard`
     - the setClipboard function runs in the background script, requires a promise to send message from content script to background to facilitate writing to the clipboard, thus no real synchronous function available
     - returns `undefined`
+- `GM.info()` && `GM_info()`
+    - both methods are **synchronous**
+    - is available without needing to add it to `@grant`
+    - returns an object containing information about the running userscript
+        - `scriptHandler: String` - returns `Userscripts`
+        - `version: String` - the version of Userscripts
+        - `scriptMetaStr: String` - the metablock for the currently running script
+        - `script: Object` - contains data about the currently running script
+            - `description: String`
+            - `excludeMatches: [String]`
+            - `excludes: [String]`
+            - `grants: [String]`
+            - `includes: [String]`
+            - `injectInto: String`
+            - `matches: [String]`
+            - `name: String`
+            - `namespace: String`
+            - `requires: [String]`
+            - `resources: [String]` - *currently not implemented*
+            - `runAt: String`
+            - `version: String` - *the userscript' version value
 - `GM.xmlHttpRequest(details)`
     - `details: Object`
     - the `details` object accepts the following properties

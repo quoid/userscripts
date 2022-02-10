@@ -238,7 +238,7 @@ func parse(_ content: String) -> [String: Any]? {
     return [
         "code": trimmedCode,
         "content": content,
-        "metablock": metablock,
+        "metablock": String(metablock),
         "metadata": metadata
     ]
 }
@@ -1115,8 +1115,10 @@ func getMatchedFiles(_ url: String) -> [String] {
 }
 
 // injection
-func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
-    var allFiles = [String: [String: [String: Any]]]()
+// func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
+func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
+    //var allFiles = [String: [String: [String: Any]]]()
+    var allFiles = [String: Any]()
     var cssFiles = [String:[String:String]]()
     var jsFiles = [String: [String: [String: [String: Any]]]]()
     jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
@@ -1164,6 +1166,51 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         // normalize weight
         var weight = metadata["weight"]?[0] ?? "1"
         weight = normalizeWeight(weight)
+        
+        // get inject-into and run-at values
+        // if either is missing, use default value
+        var injectInto = metadata["inject-into"]?[0] ?? "auto"
+        var runAt = metadata["run-at"]?[0] ?? "document-end"
+        let injectVals = ["auto", "content", "page"]
+        let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
+        // if either is invalid use default value
+        if !injectVals.contains(injectInto) {
+            injectInto = "auto"
+        }
+        if !runAtVals.contains(runAt) {
+            runAt = "document-end"
+        }
+        
+        // attempt to get all @grant value
+        var grants = metadata["grant"] ?? []
+        // remove duplicates, if any exist
+        grants = Array(Set(grants))
+        
+        // set GM.info data
+        let description = metadata["description"]?[0] ?? ""
+        let excludes = metadata["exclude"] ?? []
+        let excludeMatches = metadata["exclude-match"] ?? []
+        let includes = metadata["include"] ?? []
+        let matches = metadata["match"] ?? []
+        let requires = metadata["require"] ?? []
+        let version = metadata["version"]?[0] ?? ""
+        let scriptObject:[String: Any] = [
+            "description": description,
+            "excludes": excludes,
+            "excludeMatches": excludeMatches,
+            "grants": grants,
+            "includes": includes,
+            "injectInto": injectInto,
+            "matches": matches,
+            "name": name,
+            "namespace": "",
+            "resources": "",
+            "requires": requires,
+            "runAt": runAt,
+            "version": version
+            
+        ]
+        let scriptMetaStr = contents["metablock"] as? String ?? "??"
 
         // attempt to get require resource from disk
         // if required resource is inaccessible, log error and continue
@@ -1182,28 +1229,15 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             }
         }
 
-        // attempt to get all @grant value
-        var grants = metadata["grant"] ?? []
-        // remove duplicates, if any exist
-        grants = Array(Set(grants))
-
         if type == "css" {
             cssFiles[filename] = ["code": code, "weight": weight]
         } else if type == "js" {
-            var injectInto = metadata["inject-into"]?[0] ?? "auto"
-            var runAt = metadata["run-at"]?[0] ?? "document-end"
-
-            let injectVals = ["auto", "content", "page"]
-            let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
-            // if inject/runAt values are not valid, use default
-            if !injectVals.contains(injectInto) {
-                injectInto = "page"
-            }
-            if !runAtVals.contains(runAt) {
-                runAt = "document-end"
-            }
-
-            let data = ["code": code, "weight": weight, "grant": grants] as [String : Any]
+            let data = [
+                "code": code,
+                "weight": weight,
+                "scriptMetaStr": scriptMetaStr,
+                "scriptObject": scriptObject
+            ] as [String : Any]
             // add file data to appropriate dict
             if injectInto == "auto" && runAt == "document-start" {
                 auto_docStart[filename] = data
@@ -1224,15 +1258,14 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             } else if injectInto == "page" && runAt == "document-idle" {
                 page_docIdle[filename] = data
             }
-
             if runAt == "context-menu" && injectInto == "auto" {
-                auto_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+                auto_context_scripts[filename] = data
             }
             if runAt == "context-menu" && injectInto == "content" {
-                content_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+                content_context_scripts[filename] = data
             }
             if runAt == "context-menu" && injectInto == "page" {
-                page_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+                page_context_scripts[filename] = data
             }
         }
     }
@@ -1256,7 +1289,13 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     // construct the returned dictionary
     allFiles["css"] = cssFiles
     allFiles["js"] = jsFiles
-
+    
+    // add global values
+    let scriptHandler = "Userscripts"
+    let scriptHandlerVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    allFiles["scriptHandler"] = scriptHandler
+    allFiles["scriptHandlerVersion"] = scriptHandlerVersion
+    
     return allFiles
 }
 
