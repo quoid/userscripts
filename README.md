@@ -224,7 +224,7 @@ Userscripts currently supports the following api methods. All methods are asynch
             - `requires: [String]`
             - `resources: [String]` - *currently not implemented*
             - `runAt: String`
-            - `version: String` - *the userscript' version value
+            - `version: String` - *userscript version value*
 - `GM.xmlHttpRequest(details)`
     - `details: Object`
     - the `details` object accepts the following properties
