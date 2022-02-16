@@ -31,12 +31,17 @@ function injectCSS(filename, code) {
     document.head.appendChild(tag);
 }
 
-function injectJS(filename, code, scope, timing, grants) {
+function injectJS(filename, code, scope, timing, grants, fallback) {
     console.info(`Injecting ${filename}`);
     // include api methods
     const gmVals = [];
     const usVals = [];
     const includedFunctions = [];
+    // when a csp violation occurs, the scope is set to "content", when previously it's "auto"
+    // if the scope isn't changed back to "auto" pre-injection, the scriptDataKey will be null
+    // and the fallback attempt will fail
+    // this will change back to "content" below
+    scope = fallback ? "auto" : scope;
     const scriptDataKey = data.js[scope][timing][filename];
     const scriptData = {
         "script": scriptDataKey.scriptObject,
@@ -44,6 +49,8 @@ function injectJS(filename, code, scope, timing, grants) {
         "scriptHandlerVersion": data.scriptHandlerVersion,
         "scriptMetaStr": scriptDataKey.scriptMetaStr
     };
+    // change the scope back so it properly inject on fallback attempt
+    if (fallback) scope = "content";
     // TODO: use us_info instead of const variables
     let api = `const uid = "${uid}";\nconst filename = "${filename}";`;
     const us_info = {filename: filename, info: scriptData, uid: uid};
@@ -106,33 +113,33 @@ function injectJS(filename, code, scope, timing, grants) {
     }
 }
 
-function processJS(filename, code, scope, timing, grants) {
+function processJS(filename, code, scope, timing, grants, fallback) {
     // this is about to get ugly
     if (timing === "document-start") {
         if (document.readyState === "loading") {
             document.addEventListener("readystatechange", function() {
                 if (document.readyState === "interactive") {
-                    injectJS(filename, code, scope, timing, grants);
+                    injectJS(filename, code, scope, timing, grants, fallback);
                 }
             });
         } else {
-            injectJS(filename, code, scope, timing, grants);
+            injectJS(filename, code, scope, timing, grants, fallback);
         }
     } else if (timing === "document-end") {
         if (document.readyState !== "loading") {
-            injectJS(filename, code, scope, timing, grants);
+            injectJS(filename, code, scope, timing, grants, fallback);
         } else {
             document.addEventListener("DOMContentLoaded", function() {
-                injectJS(filename, code, scope, timing, grants);
+                injectJS(filename, code, scope, timing, grants, fallback);
             });
         }
     } else if (timing === "document-idle") {
         if (document.readyState === "complete") {
-            injectJS(filename, code, scope, timing, grants);
+            injectJS(filename, code, scope, timing, grants, fallback);
         } else {
             document.addEventListener("readystatechange", function(e) {
                 if (document.readyState === "complete") {
-                    injectJS(filename, code, scope, timing, grants);
+                    injectJS(filename, code, scope, timing, grants, fallback);
                 }
             });
         }
@@ -182,7 +189,7 @@ function parseCode(data, fallback = false) {
                                 console.warn(`Attempting fallback injection for ${filename}`);
                                 scope = "content";
                             }
-                            processJS(filename, code, scope, timing, grants);
+                            processJS(filename, code, scope, timing, grants, fallback);
                         }
                     }
                 });
