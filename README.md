@@ -204,12 +204,11 @@ Userscripts currently supports the following api methods. All methods are asynch
     - "synchronous' version of `GM.setClipboard`
     - the setClipboard function runs in the background script, requires a promise to send message from content script to background to facilitate writing to the clipboard, thus no real synchronous function available
     - returns `undefined`
-- `GM.info()` && `GM_info()`
-    - both methods are **synchronous**
+- `GM.info` && `GM_info`
     - is available without needing to add it to `@grant`
-    - returns an object containing information about the running userscript
+    - an object containing information about the running userscript
         - `scriptHandler: String` - returns `Userscripts`
-        - `version: String` - the version of Userscripts
+        - `version: String` - the version of Userscripts app
         - `scriptMetaStr: String` - the metablock for the currently running script
         - `script: Object` - contains data about the currently running script
             - `description: String`
@@ -224,7 +223,7 @@ Userscripts currently supports the following api methods. All methods are asynch
             - `requires: [String]`
             - `resources: [String]` - *currently not implemented*
             - `runAt: String`
-            - `version: String` - *userscript version value*
+            - `version: String` - *the userscript version value*
 - `GM.xmlHttpRequest(details)`
     - `details: Object`
     - the `details` object accepts the following properties

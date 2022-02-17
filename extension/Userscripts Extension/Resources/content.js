@@ -61,9 +61,8 @@ function injectJS(filename, code, scope, timing, grants, fallback) {
     const us_info = {filename: filename, info: scriptData, uid: uid};
     api += `\nconst us_info = ${JSON.stringify(us_info)}`;
     // all scripts get acces to GM.info and GM_info
-    api += `\n${us_getInfo}`;
-    api += "\nconst GM_info = us_getInfo;\n";
-    gmVals.push("info: us_getInfo");
+    api += "\nconst GM_info = us_info.info;\n";
+    gmVals.push("info: us_info.info");
     grants.forEach(grant => {
         if (grant === "GM.openInTab") {
             api += `\n${us_openInTab}`;
@@ -400,11 +399,6 @@ function us_setClipboard(data, type) {
         window.addEventListener("message", callback);
         window.postMessage({id: uid, pid: pid, name: "API_SET_CLIPBOARD", data: data, type: type});
     });
-}
-
-function us_getInfo() {
-    // eslint-disable-next-line no-undef -- us_info var accessible to the function at runtime
-    return us_info.info;
 }
 
 function us_setClipboardSync(data, type) {
