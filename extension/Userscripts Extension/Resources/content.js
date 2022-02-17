@@ -42,7 +42,12 @@ function injectJS(filename, code, scope, timing, grants, fallback) {
     // and the fallback attempt will fail
     // this will change back to "content" below
     scope = fallback ? "auto" : scope;
-    const scriptDataKey = data.js[scope][timing][filename];
+    let scriptDataKey;
+    if (timing === "context-menu") {
+        scriptDataKey = data.js["context-menu"][scope][filename];
+    } else {
+        scriptDataKey = data.js[scope][timing][filename];
+    }
     const scriptData = {
         "script": scriptDataKey.scriptObject,
         "scriptHandler": data.scriptHandler,
@@ -493,12 +498,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const code = contextMenuCodeObject[scope][filename].code;
                     const grants = contextMenuCodeObject[scope][filename].scriptObject.grants;
                     // if strict csp already detected change auto scoped scripts to content
+                    let fallback = false;
                     if (cspFallbackAttempted && scope === "auto") {
                         console.warn(`Attempting fallback injection for ${filename}`);
                         scope = "content";
+                        fallback = true;
                     }
                     scope = cspFallbackAttempted && scope === "auto" ? "content" : scope;
-                    injectJS(filename, code, scope, grants);
+                    injectJS(filename, code, scope, "context-menu", grants, fallback);
                     found = true;
                     break;
                 }
