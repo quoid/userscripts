@@ -187,7 +187,7 @@ function parseCode(data, fallback = false) {
                         sorted = sortByWeight(timingObject);
                         for (const filename in sorted) {
                             const code = sorted[filename].code;
-                            const grants = sorted[filename].scriptObject.grants;
+                            const grants = sorted[filename].scriptObject.grant;
                             // when block by csp rules, auto scope script will auto retry injection
                             if (fallback) {
                                 console.warn(`Attempting fallback injection for ${filename}`);
@@ -490,7 +490,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (fn === filename) {
                     // get code from object and send for injection along with filename & scope
                     const code = contextMenuCodeObject[scope][filename].code;
-                    const grants = contextMenuCodeObject[scope][filename].scriptObject.grants;
+                    const grants = contextMenuCodeObject[scope][filename].scriptObject.grant;
                     // if strict csp already detected change auto scoped scripts to content
                     let fallback = false;
                     if (cspFallbackAttempted && scope === "auto") {

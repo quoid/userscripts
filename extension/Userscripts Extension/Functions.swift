@@ -1194,22 +1194,42 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         let matches = metadata["match"] ?? []
         let requires = metadata["require"] ?? []
         let version = metadata["version"]?[0] ?? ""
-        let scriptObject:[String: Any] = [
+        let noframes = metadata["noframes"] != nil ? true : false
+        var scriptObject:[String: Any] = [
             "description": description,
             "excludes": excludes,
-            "excludeMatches": excludeMatches,
-            "grants": grants,
+            "exclude-match": excludeMatches,
+            "grant": grants,
             "includes": includes,
-            "injectInto": injectInto,
+            "inject-into": injectInto,
             "matches": matches,
             "name": name,
+            "noframes": noframes,
             "namespace": "",
             "resources": "",
-            "requires": requires,
-            "runAt": runAt,
+            "require": requires,
+            "run-at": runAt,
             "version": version
-            
         ]
+        // certain metadata keys use a different key name then the actual key name
+        // for compatibility keeping this when applicable, although the rationale is not clear to me
+        // for unique keys passed to scriptObject, using the same key name that is present in actual userscript
+        // this key map is used to check for existence of keys in next loop
+        let keyMap = [
+            "exclude": "excludes",
+            "include": "includes",
+            "match": "matches",
+            "resource": "resources",
+        ]
+        for metaline in metadata {
+            let key = keyMap[metaline.key] ?? metaline.key
+            if !scriptObject.keys.contains(key) {
+                let value = metaline.value
+                // metalines without values aren't included in parsed metadata object
+                // the only exception is @noframes
+                scriptObject[key] = value.count > 1 ? value : value[0]
+            }
+        }
         let scriptMetaStr = contents["metablock"] as? String ?? "??"
 
         // attempt to get require resource from disk

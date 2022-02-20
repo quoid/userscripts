@@ -212,17 +212,18 @@ Userscripts currently supports the following api methods. All methods are asynch
         - `scriptMetaStr: String` - the metablock for the currently running script
         - `script: Object` - contains data about the currently running script
             - `description: String`
-            - `excludeMatches: [String]`
+            - `exclude-match: [String]`
             - `excludes: [String]`
-            - `grants: [String]`
+            - `grant: [String]`
             - `includes: [String]`
-            - `injectInto: String`
+            - `inject-into: String`
             - `matches: [String]`
             - `name: String`
             - `namespace: String`
-            - `requires: [String]`
+            - `noframes: Bool`
+            - `require: [String]`
             - `resources: [String]` - *currently not implemented*
-            - `runAt: String`
+            - `run-at: String`
             - `version: String` - *the userscript version value*
 - `GM.xmlHttpRequest(details)`
     - `details: Object`
