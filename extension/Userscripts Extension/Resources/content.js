@@ -22,17 +22,16 @@ function sortByWeight(o) {
     return sorted;
 }
 
-function injectCSS(filename, code) {
+function injectCSS(name, code) {
     // there's no fallback if blocked by CSP
     // future fix?: https://wicg.github.io/construct-stylesheets/
-    console.info(`Injecting ${filename}`);
+    console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
     const tag = document.createElement("style");
     tag.textContent = code;
     document.head.appendChild(tag);
 }
 
 function injectJS(filename, code, scope, timing, grants, fallback) {
-    console.info(`Injecting ${filename}`);
     // include api methods
     const gmVals = [];
     const usVals = [];
@@ -48,6 +47,7 @@ function injectJS(filename, code, scope, timing, grants, fallback) {
     } else {
         scriptDataKey = data.js[scope][timing][filename];
     }
+    console.info(`Injecting ${scriptDataKey.scriptObject.name} %c(js)`, "color: #e4f360");
     const scriptData = {
         "script": scriptDataKey.scriptObject,
         "scriptHandler": data.scriptHandler,
@@ -161,12 +161,13 @@ function parseCode(data, fallback = false) {
             sorted = sortByWeight(codeTypeObject);
             for (const filename in sorted) {
                 const code = sorted[filename].code;
+                const name = sorted[filename].name;
                 // css is only injected into the page scope after DOMContentLoaded event
                 if (document.readyState !== "loading") {
-                    injectCSS(filename, code);
+                    injectCSS(name, code);
                 } else {
                     document.addEventListener("DOMContentLoaded", function() {
-                        injectCSS(filename, code);
+                        injectCSS(name, code);
                     });
                 }
             }
