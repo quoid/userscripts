@@ -31,6 +31,8 @@ To run Userscripts on macOS you should running macOS 12 or higher, along with Sa
 
 **[App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
 
+**[Development Progress](https://github.com/quoid/userscripts/projects)**
+
 ## Usage
 
 It's recommend to read this documentation and, if you have time, watch the following video overviews to familiarize yourself with the app and extension.
