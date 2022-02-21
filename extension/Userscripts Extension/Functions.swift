@@ -1250,7 +1250,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         }
 
         if type == "css" {
-            cssFiles[filename] = ["code": code, "weight": weight]
+            cssFiles[filename] = ["code": code, "weight": weight, "name": name]
         } else if type == "js" {
             let data = [
                 "code": code,
