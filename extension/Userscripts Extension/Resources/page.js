@@ -19377,7 +19377,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			attr(div27, "class", "modal__title svelte-1ibrghz");
     			attr(a0, "href", "https://github.com/quoid/userscripts");
     			attr(a1, "href", "https://apps.apple.com/us/app/userscripts/id1463298887");
-    			attr(a2, "href", "https://github.com/quoid/userscripts#support-development");
+    			attr(a2, "href", "https://github.com/quoid/userscripts#support");
     			attr(p, "class", "svelte-1ibrghz");
     			attr(div28, "class", "modal__section");
     			attr(div29, "class", "modal svelte-1ibrghz");
