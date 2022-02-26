@@ -28,6 +28,8 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+        let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
         var readLocation:String
         if let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName) {
             if let bookmarkUrl = readBookmark(data: sharedBookmarkData, isSecure: true) {
@@ -39,6 +41,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
             readLocation = "Select a directory to load userscripts"
         }
         webView.evaluateJavaScript("printDirectory('\(readLocation)')")
+        webView.evaluateJavaScript("printVersion('v\(appVersion)', '(\(buildNumber))')")
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {

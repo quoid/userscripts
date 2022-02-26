@@ -23,7 +23,7 @@
     // the currently selected range
     let rangesIndex = 0;
     // next/prev marks text, store those marks here for later removal
-    let marks = [];
+    const marks = [];
 
     // the search query
     $: query = inputValue ? inputValue.trim() : "";
@@ -43,6 +43,8 @@
     export async function focusInput() {
         await tick();
         inp.focus();
+        // if text entered, highlight it on focus
+        if (inp.value) inp.setSelectionRange(0, inp.value.length);
     }
 
     function keys(e) {
@@ -66,7 +68,7 @@
                 token: function(stream) {
                     pattern.lastIndex = stream.pos;
                     const match = pattern.exec(stream.string);
-                    if (match && match.index == stream.pos) {
+                    if (match && match.index === stream.pos) {
                         stream.pos += match[0].length || 1;
                         return "searching";
                     } else if (match) {
@@ -119,7 +121,7 @@
             } else {
                 --rangesIndex;
             }
-            let i = rangesIndex - 1;
+            const i = rangesIndex - 1;
             cm.setSelection(ranges[i].anchor, ranges[i].head);
             cm.scrollIntoView({from: ranges[i].anchor, to: ranges[i].head}, 20);
             // mark currently selected element

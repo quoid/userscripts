@@ -25,6 +25,7 @@ class ViewController: NSViewController {
         )
         // set the save location url to default location
         self.saveLocation.stringValue = location
+        self.saveLocation.toolTip = location
         // check if bookmark data exists
         guard
             let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName)
@@ -49,6 +50,7 @@ class ViewController: NSViewController {
         }
         // shared bookmark can be read and directory exists, update url
         self.saveLocation.stringValue = url.absoluteString
+        self.saveLocation.toolTip = url.absoluteString
     }
 
     @objc func setExtensionState() {
@@ -87,6 +89,7 @@ class ViewController: NSViewController {
                         return
                     }
                     self.saveLocation.stringValue = url.absoluteString
+                    self.saveLocation.toolTip = url.absoluteString
                 }
             }
         })

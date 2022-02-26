@@ -31,6 +31,8 @@ To run Userscripts on macOS you should running macOS 12 or higher, along with Sa
 
 **[App Store Link](https://itunes.apple.com/us/app/userscripts/id1463298887)**
 
+**[Development Progress](https://github.com/quoid/userscripts/projects/3)**
+
 ## Usage
 
 It's recommend to read this documentation and, if you have time, watch the following video overviews to familiarize yourself with the app and extension.
@@ -168,7 +170,7 @@ Userscripts Safari currently supports the following userscript metadata:
 
 ## API
 
-Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.** Further, most methods do not require their respective prefix when calling. For example, `GM.setValue` can be called as `GM.setValue(...)` or with simply by `setValue(...)`.
+Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.**.
 
 - `GM.addStyle(css)`
     - `css: String`
@@ -195,6 +197,36 @@ Userscripts currently supports the following api methods. All methods are asynch
     - `tabId: Int`
     - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
     - on success returns a promise resolved with an object indicating success
+- `GM.setClipboard(data, type)`
+    - `data: String` - **required**
+    - `type: String` - **optional** and defaults to `text/plain`
+    - [read more here](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData)
+    - on success returns a promise resolved with a `Bool` indicating success
+- `GM_setClipboard(data, type)`
+    - "synchronous' version of `GM.setClipboard`
+    - the setClipboard function runs in the background script, requires a promise to send message from content script to background to facilitate writing to the clipboard, thus no real synchronous function available
+    - returns `undefined`
+- `GM.info` && `GM_info`
+    - is available without needing to add it to `@grant`
+    - an object containing information about the running userscript
+        - `scriptHandler: String` - returns `Userscripts`
+        - `version: String` - the version of Userscripts app
+        - `scriptMetaStr: String` - the metablock for the currently running script
+        - `script: Object` - contains data about the currently running script
+            - `description: String`
+            - `exclude-match: [String]`
+            - `excludes: [String]`
+            - `grant: [String]`
+            - `includes: [String]`
+            - `inject-into: String`
+            - `matches: [String]`
+            - `name: String`
+            - `namespace: String`
+            - `noframes: Bool`
+            - `require: [String]`
+            - `resources: [String]` - *currently not implemented*
+            - `run-at: String`
+            - `version: String` - *the userscript version value*
 - `GM.xmlHttpRequest(details)`
     - `details: Object`
     - the `details` object accepts the following properties

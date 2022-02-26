@@ -98,7 +98,7 @@ a {
     height: 1.5rem;
 }
 
-.logo span {
+.logo > span {
     margin-left: 0.5rem;
 }
 

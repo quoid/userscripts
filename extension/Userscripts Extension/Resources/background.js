@@ -91,8 +91,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (name === "API_GET_VALUE") {
         const key = request.filename + "---" + request.key;
         browser.storage.local.get(key, item => {
-            if (Object.keys(item).length === 0 && request.defaultValue) {
-                sendResponse(request.defaultValue);
+            if (Object.keys(item).length === 0) {
+                if (request.defaultValue) {
+                    sendResponse(request.defaultValue);
+                } else {
+                    sendResponse(`undefined--${request.pid}`);
+                }
             } else {
                 sendResponse(Object.values(item)[0]);
             }
@@ -134,6 +138,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         })();
         return true;
+    } else if (name === "API_SET_CLIPBOARD") {
+        const result = setClipboard(request.data, request.type);
+        sendResponse(result);
     } else if (name === "API_XHR_CS") {
         // https://jsonplaceholder.typicode.com/posts
         // get tab id and respond only to the content script that sent message
@@ -143,14 +150,21 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const user = details.user || null;
         const password = details.password || null;
         let body = details.data || null;
-        if (body && details.binary) body = new Blob([body], {type: "text/plain"});
+        if (body && details.binary) {
+            const len = body.length;
+            const arr = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                arr[i] = body.charCodeAt(i);
+            }
+            body = new Blob([arr], {type: "text/plain"});
+        }
         const xhr = new XMLHttpRequest();
         // push to global scoped array so it can be aborted
         xhrs.push({xhr: xhr, xhrId: request.xhrId});
         xhr.withCredentials = (details.user && details.password);
         xhr.timeout = details.timeout || 0;
         if (details.overrideMimeType) xhr.overrideMimeType(details.overrideMimeType);
-        xhrAddListeners(xhr, tab, request.xhrId, details);
+        xhrAddListeners(xhr, tab, request.id, request.xhrId, details);
         xhr.open(method, details.url, true, user, password);
         xhr.responseType = details.responseType || "";
         if (details.headers) {
@@ -182,7 +196,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-function xhrHandleEvent(e, xhr, tab, xhrId) {
+function xhrHandleEvent(e, xhr, tab, id, xhrId) {
     const name = `RESP_API_XHR_BG_${e.type.toUpperCase()}`;
     const x = {
         readyState: xhr.readyState,
@@ -197,33 +211,54 @@ function xhrHandleEvent(e, xhr, tab, xhrId) {
     };
     // only include responseText when applicable
     if (["", "text"].includes(xhr.responseType)) x.responseText = xhr.responseText;
-    browser.tabs.sendMessage(tab, {name: name, xhrId: xhrId, response: x});
+    // convert data if response is arraybuffer so sendMessage can pass it
+    if (xhr.responseType === "arraybuffer") {
+        const arr = Array.from(new Uint8Array(xhr.response));
+        x.response = arr;
+    }
+    // convert data if response is blob so sendMessage can pass it
+    if (xhr.responseType === "blob") {
+        const reader = new FileReader();
+        reader.readAsDataURL(xhr.response);
+        reader.onloadend = function() {
+            const base64data = reader.result;
+            x.response = {
+                data: base64data,
+                type: xhr.response.type
+            };
+            browser.tabs.sendMessage(tab, {name: name, id: id, xhrId: xhrId, response: x});
+        };
+    }
+    // blob response will execute its own sendMessage call
+    if (xhr.responseType !== "blob") {
+        browser.tabs.sendMessage(tab, {name: name, id: id, xhrId: xhrId, response: x});
+    }
 }
 
-function xhrAddListeners(xhr, tab, xhrId, details) {
+function xhrAddListeners(xhr, tab, id, xhrId, details) {
     if (details.onabort) {
-        xhr.addEventListener("abort", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("abort", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.onerror) {
-        xhr.addEventListener("error", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("error", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.onload) {
-        xhr.addEventListener("load", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("load", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.onloadend) {
-        xhr.addEventListener("loadend", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("loadend", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.onloadstart) {
-        xhr.addEventListener("loadstart", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("loadstart", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.onprogress) {
-        xhr.addEventListener("progress", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("progress", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.onreadystatechange) {
-        xhr.addEventListener("readystatechange", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("readystatechange", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
     if (details.ontimeout) {
-        xhr.addEventListener("timeout", e => xhrHandleEvent(e, xhr, tab, xhrId));
+        xhr.addEventListener("timeout", e => xhrHandleEvent(e, xhr, tab, id, xhrId));
     }
 }
 
@@ -300,6 +335,33 @@ async function getPlatform() {
     }
     platformGlobal = response.platform;
     return response.platform;
+}
+
+function setClipboard(data, type = "text/plain") {
+    // future enhancement?
+    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write
+    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+    const onCopy = e => {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        e.clipboardData.setData(type, data);
+        document.removeEventListener("copy", onCopy, true);
+    };
+
+    const textarea = document.createElement("textarea");
+    textarea.textContent = "<empty clipboard>";
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.addEventListener("copy", onCopy, true);
+    try {
+        return document.execCommand("copy");
+    } catch (error) {
+        console.warn("setClipboard failed", error);
+        document.removeEventListener("copy", onCopy, true);
+        return false;
+    } finally {
+        document.body.removeChild(textarea);
+    }
 }
 
 browser.tabs.onActivated.addListener(setBadgeCount);

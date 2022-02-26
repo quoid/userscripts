@@ -36,6 +36,7 @@
     let showAll;
     let allItems = [];
     let resizeTimer;
+    let abort = false;
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -140,6 +141,7 @@
         showUpdates = false;
         updates = [];
         inactive = false;
+        abort = false;
         initialize();
     }
 
@@ -304,24 +306,28 @@
         if (checkUpdates) {
             let updatesResponse;
             try {
-                updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
                 // save timestamp in ms to extension storage
                 const timestampMs = Date.now();
                 await browser.storage.local.set({"lastUpdateCheck": timestampMs});
+                abort = true;
+                updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
             } catch (error) {
-                console.log("Error for updates promise: " + error);
+                console.error("Error for updates promise: " + error);
                 initError = true;
                 loading = false;
+                abort = false;
                 return;
             }
             if (updatesResponse.error) {
                 error = updatesResponse.error;
                 loading = false;
                 disabled = false;
+                abort = false;
                 return;
             } else {
                 updates = updatesResponse.updates;
             }
+            abort = false;
         }
 
         // check if current page url is a userscript
@@ -329,6 +335,9 @@
         const strippedUrl = url.split(/[?#]/)[0];
         if (strippedUrl.endsWith(".user.js")) {
             // if it does, send message to content script
+            // context script will check the document contentType
+            // if it's not an applicable type, it'll return {invalid: true} response and no install prompt shown
+            // if the contentType is applicable, what is mentioned below happens
             // content script will get dom content, and send it to the bg page
             // the bg page will send the content to the swift side for parsing
             // when swift side parses and returns, the bg page will send a response to the content script
@@ -339,7 +348,7 @@
             if (response.error) {
                 console.log("Error checking .user.js url: " + response.error);
                 error = response.error;
-            } else {
+            } else if (!response.invalid) {
                 // the response will contain the string to display
                 // ex: {success: "Click to install"}
                 const prompt = response.success;
@@ -349,6 +358,16 @@
 
         loading = false;
         disabled = false;
+    }
+
+    async function abortUpdates() {
+        // sends message to swift side canceling all URLSession tasks
+        browser.runtime.sendNativeMessage({name: "CANCEL_REQUESTS"});
+        // timestamp for checking updates happens right before update fetching
+        // that means when this function runs the timestamp has already been saved
+        // reloading the window will essentially skip the update check
+        // since the subsequent popup load will not check for updates
+        window.location.reload();
     }
 
     async function resize() {
@@ -485,7 +504,7 @@
 {/if}
 <div class="main {rowColors || ""}" bind:this={main}>
     {#if loading}
-        <Loader/>
+        <Loader abortClick={abortUpdates} {abort}/>
     {:else}
         {#if inactive}
             <div class="none">Popup inactive on extension page</div>
@@ -521,6 +540,8 @@
         loading={disabled}
         closeClick={() => showUpdates = false}
         showLoaderOnDisabled={true}
+        abortClick={abortUpdates}
+        abort={showUpdates}
     >
         <UpdateView
             checkClick={checkForUpdates}

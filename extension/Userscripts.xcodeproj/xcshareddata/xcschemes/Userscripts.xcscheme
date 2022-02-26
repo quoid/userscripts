@@ -37,6 +37,16 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4A143AA8279DE6FF0029BFD0"
+               BuildableName = "UserscriptsTests.xctest"
+               BlueprintName = "UserscriptsTests"
+               ReferencedContainer = "container:Userscripts.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

@@ -12,7 +12,7 @@ func dateToMilliseconds(_ date: Date) -> Int {
     return Int(since1970 * 1000)
 }
 
-func sanitize(_ str: String) -> String? {
+func sanitize(_ str: String) -> String {
     // removes invalid filename characters from strings
     var sanitized = str
     if sanitized.first == "." {
@@ -163,11 +163,15 @@ func isVersionNewer(_ oldVersion: String, _ newVersion: String) -> Bool {
     return false
 }
 
+func isEncoded(_ str: String) -> Bool {
+    return str.removingPercentEncoding != str
+}
+
 // parser
 func parse(_ content: String) -> [String: Any]? {
     // returns structured data from content of file
     // will fail to parse if metablock or required @name key missing
-    let pattern = #"(?:(\/\/ ==UserScript==\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
+    let pattern = #"(?:(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==[ \t]*?\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))"#
     // force try b/c pattern is known to be valid regex
     let regex = try! NSRegularExpression(pattern: pattern, options: [])
     let range = NSRange(location: 0, length: content.utf16.count)
@@ -202,7 +206,7 @@ func parse(_ content: String) -> [String: Any]? {
             // this pattern checks for specific keys that won't have values
             let p2 = #"^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$"#
             // the individual meta string, ie. // @name File Name
-            let metaString = String(meta)
+            let metaString = String(meta).trimmingCharacters(in: .whitespaces)
             // force try b/c pattern is known to be valid regex
             let re = try! NSRegularExpression(pattern: p, options: [])
             let re2 = try! NSRegularExpression(pattern: p2, options: [])
@@ -234,7 +238,7 @@ func parse(_ content: String) -> [String: Any]? {
     return [
         "code": trimmedCode,
         "content": content,
-        "metablock": metablock,
+        "metablock": String(metablock),
         "metadata": metadata
     ]
 }
@@ -448,9 +452,8 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
         // populate array with entries for manifest
         var r = [String]()
         for resource in required {
-            if let sanitizedResourceName = sanitize(resource) {
-                r.append(sanitizedResourceName)
-            }
+            let sanitizedResourceName = sanitize(resource)
+            r.append(sanitizedResourceName)
         }
 
         // if there are values, write them to manifest
@@ -708,7 +711,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         }
         // skip urls pointing to files of different types
         if resourceUrlPath.hasSuffix(fileType) {
-            guard let resourceFilename = sanitize(resourceUrlString) else {return false}
+            let resourceFilename = sanitize(resourceUrlString)
             let fileURL = directory.appendingPathComponent(resourceFilename)
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
@@ -785,7 +788,27 @@ func getRemoteFileContents(_ url: String) -> String? {
         urlChecked = urlChecked.replacingOccurrences(of: "http:", with: "https:")
         logText("\(url) is using insecure http, attempt to fetch remote content with https")
     }
-    guard let solidURL = URL(string: urlChecked) else {return nil}
+    // if the url is already encoded, decode it
+    if isEncoded(urlChecked) {
+        if let decodedUrl = urlChecked.removingPercentEncoding {
+            urlChecked = decodedUrl
+        } else {
+            err("getRemoteFileContents failed at (1), couldn't decode url, \(url)")
+            return nil
+        }
+    }
+    // encode all urls strings
+    if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+        urlChecked = encodedUrl
+    } else {
+        err("getRemoteFileContents failed at (2), couldn't percent encode url, \(url)")
+        return nil
+    }
+    // convert url string to url
+    guard let solidURL = URL(string: urlChecked) else {
+        err("getRemoteFileContents failed at (3), couldn't convert string to url, \(url)")
+        return nil
+    }
     var contents = ""
     // get remote file contents, synchronously
     let semaphore = DispatchSemaphore(value: 0)
@@ -806,7 +829,7 @@ func getRemoteFileContents(_ url: String) -> String? {
 
     // if made it to this point and contents still an empty string, something went wrong with the request
     if contents.count < 1 {
-        logText("something went wrong while trying to fetch remote file contents \(url)")
+        logText("getRemoteFileContents failed at (4), contents empty, \(url)")
         return nil
     }
     logText("getRemoteFileContents for \(url) end")
@@ -1092,8 +1115,10 @@ func getMatchedFiles(_ url: String) -> [String] {
 }
 
 // injection
-func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
-    var allFiles = [String: [String: [String: Any]]]()
+// func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
+func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
+    //var allFiles = [String: [String: [String: Any]]]()
+    var allFiles = [String: Any]()
     var cssFiles = [String:[String:String]]()
     var jsFiles = [String: [String: [String: [String: Any]]]]()
     jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
@@ -1141,6 +1166,71 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
         // normalize weight
         var weight = metadata["weight"]?[0] ?? "1"
         weight = normalizeWeight(weight)
+        
+        // get inject-into and run-at values
+        // if either is missing, use default value
+        var injectInto = metadata["inject-into"]?[0] ?? "auto"
+        var runAt = metadata["run-at"]?[0] ?? "document-end"
+        let injectVals = ["auto", "content", "page"]
+        let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
+        // if either is invalid use default value
+        if !injectVals.contains(injectInto) {
+            injectInto = "auto"
+        }
+        if !runAtVals.contains(runAt) {
+            runAt = "document-end"
+        }
+        
+        // attempt to get all @grant value
+        var grants = metadata["grant"] ?? []
+        // remove duplicates, if any exist
+        grants = Array(Set(grants))
+        
+        // set GM.info data
+        let description = metadata["description"]?[0] ?? ""
+        let excludes = metadata["exclude"] ?? []
+        let excludeMatches = metadata["exclude-match"] ?? []
+        let includes = metadata["include"] ?? []
+        let matches = metadata["match"] ?? []
+        let requires = metadata["require"] ?? []
+        let version = metadata["version"]?[0] ?? ""
+        let noframes = metadata["noframes"] != nil ? true : false
+        var scriptObject:[String: Any] = [
+            "description": description,
+            "excludes": excludes,
+            "exclude-match": excludeMatches,
+            "grant": grants,
+            "includes": includes,
+            "inject-into": injectInto,
+            "matches": matches,
+            "name": name,
+            "noframes": noframes,
+            "namespace": "",
+            "resources": "",
+            "require": requires,
+            "run-at": runAt,
+            "version": version
+        ]
+        // certain metadata keys use a different key name then the actual key name
+        // for compatibility keeping this when applicable, although the rationale is not clear to me
+        // for unique keys passed to scriptObject, using the same key name that is present in actual userscript
+        // this key map is used to check for existence of keys in next loop
+        let keyMap = [
+            "exclude": "excludes",
+            "include": "includes",
+            "match": "matches",
+            "resource": "resources",
+        ]
+        for metaline in metadata {
+            let key = keyMap[metaline.key] ?? metaline.key
+            if !scriptObject.keys.contains(key) {
+                let value = metaline.value
+                // metalines without values aren't included in parsed metadata object
+                // the only exception is @noframes
+                scriptObject[key] = value.count > 1 ? value : value[0]
+            }
+        }
+        let scriptMetaStr = contents["metablock"] as? String ?? "??"
 
         // attempt to get require resource from disk
         // if required resource is inaccessible, log error and continue
@@ -1149,7 +1239,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             // if required is ["A", "B", "C"], C gets added above B which is above A, etc..
             // the reverse of that is desired
             for require in required.reversed() {
-                let sanitizedName = sanitize(require) ?? ""
+                let sanitizedName = sanitize(require)
                 let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
                     code = "\(requiredContent)\n\(code)"
@@ -1159,28 +1249,15 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             }
         }
 
-        // attempt to get all @grant value
-        var grants = metadata["grant"] ?? []
-        // remove duplicates, if any exist
-        grants = Array(Set(grants))
-
         if type == "css" {
-            cssFiles[filename] = ["code": code, "weight": weight]
+            cssFiles[filename] = ["code": code, "weight": weight, "name": name]
         } else if type == "js" {
-            var injectInto = metadata["inject-into"]?[0] ?? "auto"
-            var runAt = metadata["run-at"]?[0] ?? "document-end"
-
-            let injectVals = ["auto", "content", "page"]
-            let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
-            // if inject/runAt values are not valid, use default
-            if !injectVals.contains(injectInto) {
-                injectInto = "page"
-            }
-            if !runAtVals.contains(runAt) {
-                runAt = "document-end"
-            }
-
-            let data = ["code": code, "weight": weight, "grant": grants] as [String : Any]
+            let data = [
+                "code": code,
+                "weight": weight,
+                "scriptMetaStr": scriptMetaStr,
+                "scriptObject": scriptObject
+            ] as [String : Any]
             // add file data to appropriate dict
             if injectInto == "auto" && runAt == "document-start" {
                 auto_docStart[filename] = data
@@ -1201,15 +1278,14 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
             } else if injectInto == "page" && runAt == "document-idle" {
                 page_docIdle[filename] = data
             }
-
             if runAt == "context-menu" && injectInto == "auto" {
-                auto_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+                auto_context_scripts[filename] = data
             }
             if runAt == "context-menu" && injectInto == "content" {
-                content_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+                content_context_scripts[filename] = data
             }
             if runAt == "context-menu" && injectInto == "page" {
-                page_context_scripts[filename] = ["code": code, "name": name, "grant": grants]
+                page_context_scripts[filename] = data
             }
         }
     }
@@ -1233,7 +1309,13 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: 
     // construct the returned dictionary
     allFiles["css"] = cssFiles
     allFiles["js"] = jsFiles
-
+    
+    // add global values
+    let scriptHandler = "Userscripts"
+    let scriptHandlerVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    allFiles["scriptHandler"] = scriptHandler
+    allFiles["scriptHandlerVersion"] = scriptHandlerVersion
+    
     return allFiles
 }
 
@@ -1439,7 +1521,8 @@ func getInitData() -> [String: Any]? {
     var data:[String: Any] = manifest.settings
     data["blacklist"] = manifest.blacklist
     data["saveLocation"] = saveLocation.path
-    data["version"] = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    data["version"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    data["build"] = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     return data
 }
 
@@ -1458,12 +1541,14 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
     guard
         let parsed = parse(newContent),
-        let metadata = parsed["metadata"] as? [String: [String]],
-        let n = metadata["name"]?[0],
-        var name = sanitize(n)
+        let metadata = parsed["metadata"] as? [String: [String]]
     else {
-        return ["error": "failed to parse argument in save function"]
+        return ["error": "failed to parse metadata"]
     }
+    guard let n = metadata["name"]?[0] else {
+        return ["error": "@name not found in metadata"]
+    }
+    var name = sanitize(n)
 
     // construct new file name
     let newFilename = "\(name).\(type)"
@@ -1759,12 +1844,12 @@ func installUserscript(_ content: String) -> [String: Any]? {
     guard
         let parsed = parse(content),
         let metadata = parsed["metadata"] as? [String: [String]],
-        let n = metadata["name"]?[0],
-        let name = sanitize(n)
+        let n = metadata["name"]?[0]
     else {
         err("installUserscript failed at (1)")
         return nil
     }
+    let name = sanitize(n)
     let filename = "\(name).js"
 
     let saved = saveFile(["filename": filename, "type": "js"], content)

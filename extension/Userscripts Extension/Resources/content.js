@@ -22,47 +22,76 @@ function sortByWeight(o) {
     return sorted;
 }
 
-function injectCSS(filename, code) {
+function injectCSS(name, code) {
     // there's no fallback if blocked by CSP
     // future fix?: https://wicg.github.io/construct-stylesheets/
-    console.info(`Injecting ${filename}`);
+    console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
     const tag = document.createElement("style");
     tag.textContent = code;
     document.head.appendChild(tag);
 }
 
-function injectJS(filename, code, scope, grants) {
-    console.info(`Injecting ${filename}`);
+function injectJS(filename, code, scope, timing, grants, fallback) {
     // include api methods
-    let api = "";
     const gmVals = [];
     const usVals = [];
     const includedFunctions = [];
-    if (grants.length) api = `const uid = "${uid}";\nconst filename = "${filename}";`;
+    // when a csp violation occurs, the scope is set to "content", when previously it's "auto"
+    // if the scope isn't changed back to "auto" pre-injection, the scriptDataKey will be null
+    // and the fallback attempt will fail
+    // this will change back to "content" below
+    scope = fallback ? "auto" : scope;
+    let scriptDataKey;
+    if (timing === "context-menu") {
+        scriptDataKey = data.js["context-menu"][scope][filename];
+    } else {
+        scriptDataKey = data.js[scope][timing][filename];
+    }
+    console.info(`Injecting ${scriptDataKey.scriptObject.name} %c(js)`, "color: #e4f360");
+    const scriptData = {
+        "script": scriptDataKey.scriptObject,
+        "scriptHandler": data.scriptHandler,
+        "scriptHandlerVersion": data.scriptHandlerVersion,
+        "scriptMetaStr": scriptDataKey.scriptMetaStr
+    };
+    // change the scope back so it properly inject on fallback attempt
+    if (fallback) scope = "content";
+    // TODO: use us_info instead of const variables
+    let api = `const uid = "${uid}";\nconst filename = "${filename}";`;
+    const us_info = {filename: filename, info: scriptData, uid: uid};
+    api += `\nconst us_info = ${JSON.stringify(us_info)}`;
+    // all scripts get acces to GM.info and GM_info
+    api += "\nconst GM_info = us_info.info;\n";
+    gmVals.push("info: us_info.info");
     grants.forEach(grant => {
         if (grant === "GM.openInTab") {
-            api += `\n${openInTab}`;
-            gmVals.push("openInTab: openInTab");
+            api += `\n${us_openInTab}`;
+            gmVals.push("openInTab: us_openInTab");
         } else if (grant === "US.closeTab") {
-            api += `\n${closeTab}`;
-            usVals.push("closeTab: closeTab");
+            api += `\n${us_closeTab}`;
+            usVals.push("closeTab: us_closeTab");
         } else if (grant === "GM.setValue") {
-            api += `\n${setValue}`;
-            gmVals.push("setValue: setValue");
+            api += `\n${us_setValue}`;
+            gmVals.push("setValue: us_setValue");
         } else if (grant === "GM.getValue") {
-            api += `\n${getValue}`;
-            gmVals.push("getValue: getValue");
+            api += `\n${us_getValue}`;
+            gmVals.push("getValue: us_getValue");
         } else if (grant === "GM.deleteValue") {
-            api += `\n${deleteValue}`;
-            gmVals.push("deleteValue: deleteValue");
+            api += `\n${us_deleteValue}`;
+            gmVals.push("deleteValue: us_deleteValue");
         } else if (grant === "GM.listValues") {
-            api += `\n${listValues}`;
-            gmVals.push("listValues: listValues");
+            api += `\n${us_listValues}`;
+            gmVals.push("listValues: us_listValues");
         } else if (grant === "GM_addStyle") {
-            api += `\n${addStyleSync}\nconst GM_addStyle = addStyleSync;`;
+            api += `\n${us_addStyleSync}\nconst GM_addStyle = us_addStyleSync;`;
         } else if (grant === "GM.addStyle") {
-            api += `\n${addStyle}\n`;
-            gmVals.push("addStyle: addStyle");
+            api += `\n${us_addStyle}\n`;
+            gmVals.push("addStyle: us_addStyle");
+        } else if (grant === "GM.setClipboard") {
+            api += `\n${us_setClipboard}`;
+            gmVals.push("setClipboard: us_setClipboard");
+        } else if (grant === "GM_setClipboard") {
+            api += `\n${us_setClipboardSync}\nconst GM_setClipboard = us_setClipboardSync;`;
         } else if (grant === "GM_xmlhttpRequest" || grant === "GM.xmlHttpRequest") {
             if (!includedFunctions.includes(xhr.name)) {
                 api += `\n${xhr}`;
@@ -82,39 +111,39 @@ function injectJS(filename, code, scope, grants) {
     if (scope !== "content") {
         const tag = document.createElement("script");
         tag.textContent = code;
-        document.body.appendChild(tag);
+        document.head.appendChild(tag);
     } else {
         eval(code);
     }
 }
 
-function processJS(filename, code, scope, timing, grants) {
+function processJS(filename, code, scope, timing, grants, fallback) {
     // this is about to get ugly
     if (timing === "document-start") {
         if (document.readyState === "loading") {
             document.addEventListener("readystatechange", function() {
                 if (document.readyState === "interactive") {
-                    injectJS(filename, code, scope, grants);
+                    injectJS(filename, code, scope, timing, grants, fallback);
                 }
             });
         } else {
-            injectJS(filename, code, scope, grants);
+            injectJS(filename, code, scope, timing, grants, fallback);
         }
     } else if (timing === "document-end") {
         if (document.readyState !== "loading") {
-            injectJS(filename, code, scope, grants);
+            injectJS(filename, code, scope, timing, grants, fallback);
         } else {
             document.addEventListener("DOMContentLoaded", function() {
-                injectJS(filename, code, scope, grants);
+                injectJS(filename, code, scope, timing, grants, fallback);
             });
         }
     } else if (timing === "document-idle") {
         if (document.readyState === "complete") {
-            injectJS(filename, code, scope, grants);
+            injectJS(filename, code, scope, timing, grants, fallback);
         } else {
             document.addEventListener("readystatechange", function(e) {
                 if (document.readyState === "complete") {
-                    injectJS(filename, code, scope, grants);
+                    injectJS(filename, code, scope, timing, grants, fallback);
                 }
             });
         }
@@ -132,12 +161,13 @@ function parseCode(data, fallback = false) {
             sorted = sortByWeight(codeTypeObject);
             for (const filename in sorted) {
                 const code = sorted[filename].code;
+                const name = sorted[filename].name;
                 // css is only injected into the page scope after DOMContentLoaded event
                 if (document.readyState !== "loading") {
-                    injectCSS(filename, code);
+                    injectCSS(name, code);
                 } else {
                     document.addEventListener("DOMContentLoaded", function() {
-                        injectCSS(filename, code);
+                        injectCSS(name, code);
                     });
                 }
             }
@@ -158,13 +188,13 @@ function parseCode(data, fallback = false) {
                         sorted = sortByWeight(timingObject);
                         for (const filename in sorted) {
                             const code = sorted[filename].code;
-                            const grants = sorted[filename].grant;
+                            const grants = sorted[filename].scriptObject.grant;
                             // when block by csp rules, auto scope script will auto retry injection
                             if (fallback) {
                                 console.warn(`Attempting fallback injection for ${filename}`);
                                 scope = "content";
                             }
-                            processJS(filename, code, scope, timing, grants);
+                            processJS(filename, code, scope, timing, grants, fallback);
                         }
                     }
                 });
@@ -208,7 +238,7 @@ async function processJSContextMenuItems() {
     for (const scope in contextMenuCodeObject) {
         const scopeObject = contextMenuCodeObject[scope];
         for (const filename in scopeObject) {
-            const name = scopeObject[filename].name;
+            const name = scopeObject[filename].scriptObject.name;
             if (document.readyState === "complete") {
                 addContextMenuItem(filename, name);
             } else {
@@ -252,104 +282,131 @@ function addContextMenuItem(filename, name) {
 }
 
 // api - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#host-page-communication
-function openInTab(url, openInBackground) {
+function us_openInTab(url, openInBackground) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
-            if (e.data.id !== uid || e.data.name !== "RESP_OPEN_TAB") return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_OPEN_TAB") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         const active = (openInBackground === true) ? false : true;
-        window.postMessage({id: uid, name: "API_OPEN_TAB", url: url, active: active});
+        window.postMessage({id: uid, pid: pid, name: "API_OPEN_TAB", url: url, active: active});
     });
 }
 
-function closeTab(tabId) {
+function us_closeTab(tabId) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
-            if (e.data.id !== uid || e.data.name !== "RESP_CLOSE_TAB") return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_CLOSE_TAB") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
-        window.postMessage({id: uid, name: "API_CLOSE_TAB", tabId: tabId});
+        window.postMessage({id: uid, pid: pid, name: "API_CLOSE_TAB", tabId: tabId});
     });
 }
 
-function setValue(key, value) {
+function us_setValue(key, value) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename !== filename) return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_SET_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_SET_VALUE", filename: filename, key: key, value: value});
+        window.postMessage({id: uid, pid: pid, name: "API_SET_VALUE", filename: filename, key: key, value: value});
     });
 }
 
-function getValue(key, defaultValue) {
+function us_getValue(key, defaultValue) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename !== filename) return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_GET_VALUE" || e.data.filename !== filename) return;
+            const response = e.data.response;
+            resolve(response);
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+        window.postMessage({id: uid, pid: pid, name: "API_GET_VALUE", filename: filename, key: key, defaultValue: defaultValue});
+    });
+}
+
+function us_listValues() {
+    const pid = Math.random().toString(36).substring(1, 9);
+    return new Promise(resolve => {
+        const callback = e => {
+            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_GET_VALUE", filename: filename, key: key, defaultValue: defaultValue});
+        window.postMessage({id: uid, pid: pid, name: "API_LIST_VALUES", filename: filename});
     });
 }
 
-function listValues() {
+function us_deleteValue(key) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
             // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_LIST_VALUES" || e.data.filename !== filename) return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename !== filename) return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
         // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_LIST_VALUES", filename: filename});
+        window.postMessage({id: uid, pid: pid, name: "API_DELETE_VALUE", filename: filename, key: key});
     });
 }
 
-function deleteValue(key) {
-    return new Promise(resolve => {
-        const callback = e => {
-            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_DELETE_VALUE" || e.data.filename !== filename) return;
-            resolve(e.data.response);
-            window.removeEventListener("message", callback);
-        };
-        window.addEventListener("message", callback);
-        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_DELETE_VALUE", filename: filename, key: key});
-    });
-}
-
-function addStyleSync(css) {
+function us_addStyleSync(css) {
     window.postMessage({id: uid, name: "API_ADD_STYLE_SYNC", css: css});
     return css;
 }
 
-function addStyle(css) {
+function us_addStyle(css) {
+    const pid = Math.random().toString(36).substring(1, 9);
     return new Promise(resolve => {
         const callback = e => {
-            // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-            if (e.data.id !== uid || e.data.name !== "RESP_ADD_STYLE") return;
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_ADD_STYLE") return;
             resolve(e.data.response);
             window.removeEventListener("message", callback);
         };
         window.addEventListener("message", callback);
-        // eslint-disable-next-line no-undef -- filename var accessible to the function at runtime
-        window.postMessage({id: uid, name: "API_ADD_STYLE", css: css});
+        window.postMessage({id: uid, pid: pid, name: "API_ADD_STYLE", css: css});
     });
+}
+
+function us_setClipboard(data, type) {
+    const pid = Math.random().toString(36).substring(1, 9);
+    return new Promise(resolve => {
+        const callback = e => {
+            if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_SET_CLIPBOARD") return;
+            resolve(e.data.response);
+            if (!e.data.response) console.error("clipboard write failed");
+            window.removeEventListener("message", callback);
+        };
+        window.addEventListener("message", callback);
+        window.postMessage({id: uid, pid: pid, name: "API_SET_CLIPBOARD", data: data, type: type});
+    });
+}
+
+function us_setClipboardSync(data, type) {
+    // there's actually no sync method since a promise needs to be sent to bg page
+    // however make a dummy sync method for compatibility
+    window.postMessage({id: uid, name: "API_SET_CLIPBOARD", data: data, type: type});
+    return undefined;
 }
 
 // when xhr is called it sends a message to the content script
@@ -383,9 +440,15 @@ function xhr(details) {
     const callback = e => {
         const name = e.data.name;
         const response = e.data.response;
-        if (!name.startsWith("RESP_API_XHR_CS") || e.data.xhrId !== xhrId) return;
+        // ensure callback is responding to the proper message
+        if (
+            e.data.id !== uid
+            || e.data.xhrId !== xhrId
+            || !name
+            || !name.startsWith("RESP_API_XHR_CS")
+        ) return;
         if (name === "RESP_API_XHR_CS") {
-            //
+            // ignore
         } else if (name.includes("ABORT") && details.onabort) {
             details.onabort(response);
         } else if (name.includes("ERROR") && details.onerror) {
@@ -428,14 +491,16 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (fn === filename) {
                     // get code from object and send for injection along with filename & scope
                     const code = contextMenuCodeObject[scope][filename].code;
-                    const grants = contextMenuCodeObject[scope][filename].grant;
+                    const grants = contextMenuCodeObject[scope][filename].scriptObject.grant;
                     // if strict csp already detected change auto scoped scripts to content
+                    let fallback = false;
                     if (cspFallbackAttempted && scope === "auto") {
                         console.warn(`Attempting fallback injection for ${filename}`);
                         scope = "content";
+                        fallback = true;
                     }
                     scope = cspFallbackAttempted && scope === "auto" ? "content" : scope;
-                    injectJS(filename, code, scope, grants);
+                    injectJS(filename, code, scope, "context-menu", grants, fallback);
                     found = true;
                     break;
                 }
@@ -443,14 +508,49 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (found) break;
         }
     } else if (name.startsWith("RESP_API_XHR_BG_")) {
+        // only respond to messages on the correct content script
+        if (request.id !== uid) return;
+        const resp = request.response;
         const n = name.replace("_BG_", "_CS_");
-        window.postMessage({name: n, response: request.response, xhrId: request.xhrId});
+        // arraybuffer responses had their data converted, convert it back to arraybuffer
+        if (request.response.responseType === "arraybuffer" && resp.response) {
+            try {
+                const r =  new Uint8Array(resp.response).buffer;
+                resp.response = r;
+            } catch (error) {
+                console.error("error parsing xhr arraybuffer response", error);
+            }
+        // blob responses had their data converted, convert it back to blob
+        } else if (request.response.responseType === "blob" && resp.response && resp.response.data) {
+            fetch(request.response.response.data)
+                .then(res => res.blob())
+                .then(b => {
+                    resp.response = b;
+                    window.postMessage({name: n, response: resp, id: request.id, xhrId: request.xhrId});
+                });
+        }
+        // blob response will execute its own postMessage call
+        if (request.response.responseType !== "blob") {
+            window.postMessage({name: n, response: resp, id: request.id, xhrId: request.xhrId});
+        }
     } else if (["USERSCRIPT_INSTALL_00", "USERSCRIPT_INSTALL_01", "USERSCRIPT_INSTALL_02"].includes(name)) {
-        const content = document.body.innerText;
-        browser.runtime.sendMessage({name: name, content: content}, response => {
-            sendResponse(response);
-        });
-        return true;
+        const types = [
+            "text/plain",
+            "application/ecmascript",
+            "application/javascript",
+            "text/ecmascript",
+            "text/javascript"
+        ];
+        if (!document.contentType || types.indexOf(document.contentType) === -1) {
+            // only allow installation if contentType is in list above
+            sendResponse({invalid: true});
+        } else {
+            const content = document.body.innerText;
+            browser.runtime.sendMessage({name: name, content: content}, response => {
+                sendResponse(response);
+            });
+            return true;
+        }
     }
 });
 
@@ -460,43 +560,49 @@ window.addEventListener("message", e => {
     if (e.data.id !== uid || !e.data.name) return;
     const id = e.data.id;
     const name = e.data.name;
+    const pid = e.data.pid;
     let message;
     if (name === "API_OPEN_TAB") {
         // ignore requests that don't supply a url
         if (!e.data.url) return;
         message = {name: "API_OPEN_TAB", url: e.data.url, active: e.data.active};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_OPEN_TAB", response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_OPEN_TAB", response: response});
         });
     } else if (name === "API_CLOSE_TAB") {
         browser.runtime.sendMessage({name: "API_CLOSE_TAB", tabId: e.data.tabId}, response => {
-            window.postMessage({id: id, name: "RESP_CLOSE_TAB", response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_CLOSE_TAB", response: response});
+        });
+    } else if (name === "API_SET_CLIPBOARD") {
+        browser.runtime.sendMessage({name: "API_SET_CLIPBOARD", data: e.data.data, type: e.data.type}, response => {
+            window.postMessage({id: id, pid: pid, name: "RESP_SET_CLIPBOARD", response: response});
         });
     } else if (name === "API_SET_VALUE") {
         message = {name: "API_SET_VALUE", filename: e.data.filename, key: e.data.key, value: e.data.value};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_SET_VALUE", filename: e.data.filename, response: response});
         });
     } else if (name === "API_GET_VALUE") {
-        message = {name: "API_GET_VALUE", filename: e.data.filename, key: e.data.key, defaultValue: e.data.defaultValue};
+        message = {name: "API_GET_VALUE", filename: e.data.filename, pid: pid, key: e.data.key, defaultValue: e.data.defaultValue};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_GET_VALUE", filename: e.data.filename, response: response});
+            const resp =  response === `undefined--${pid}` ? undefined : response;
+            window.postMessage({id: id, pid: pid, name: "RESP_GET_VALUE", filename: e.data.filename, response: resp});
         });
     } else if (name === "API_DELETE_VALUE") {
         message = {name: "API_DELETE_VALUE", filename: e.data.filename, key: e.data.key};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_DELETE_VALUE", filename: e.data.filename, response: response});
         });
     } else if (name === "API_LIST_VALUES") {
         message = {name: "API_LIST_VALUES", filename: e.data.filename};
         browser.runtime.sendMessage(message, response => {
-            window.postMessage({id: id, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
+            window.postMessage({id: id, pid: pid, name: "RESP_LIST_VALUES", filename: e.data.filename, response: response});
         });
     } else if (name === "API_ADD_STYLE") {
         try {
             message = {name: "API_ADD_STYLE", css: e.data.css};
             browser.runtime.sendMessage(message, response => {
-                window.postMessage({id: id, name: "RESP_ADD_STYLE", response: response});
+                window.postMessage({id: id, pid: pid, name: "RESP_ADD_STYLE", response: response});
             });
         } catch (e) {
             console.log(e);
@@ -509,7 +615,7 @@ window.addEventListener("message", e => {
             console.log(e);
         }
     } else if (name === "API_XHR_INJ") {
-        message = {name: "API_XHR_CS", details: e.data.details, xhrId: e.data.xhrId};
+        message = {name: "API_XHR_CS", details: e.data.details, id: id, xhrId: e.data.xhrId};
         browser.runtime.sendMessage(message, response => {
             window.postMessage({id: id, name: "RESP_API_XHR_CS", response: response, xhrId: e.data.xhrId});
         });

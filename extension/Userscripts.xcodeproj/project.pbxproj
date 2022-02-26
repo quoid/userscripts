@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A143AAC279DE6FF0029BFD0 /* UserscriptsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */; };
+		4A143AB2279DEA170029BFD0 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
+		4A143AB3279DEA370029BFD0 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
 		4A301B2A270A474400C7E9E1 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4A301B2B270A474F00C7E9E1 /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A617268266B30018536B /* _locales */; };
 		4A301B2C270A475200C7E9E1 /* images in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A616268266B30018536B /* images */; };
@@ -49,6 +52,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4A143AAD279DE6FF0029BFD0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4A57B9E4227235CD008A9763 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A57B9EB227235CD008A9763;
+			remoteInfo = Userscripts;
+		};
 		4A4CF6F9270A38BF00111584 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4A57B9E4227235CD008A9763 /* Project object */;
@@ -91,6 +101,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4A143AA9279DE6FF0029BFD0 /* UserscriptsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UserscriptsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserscriptsTests.swift; sourceTree = "<group>"; };
 		4A36A616268266B30018536B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		4A36A617268266B30018536B /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; path = _locales; sourceTree = "<group>"; };
 		4A4CF6DB270A38BD00111584 /* Userscripts-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Userscripts-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -131,6 +143,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4A143AA6279DE6FF0029BFD0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A4CF6D8270A38BD00111584 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -163,6 +182,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A143AAA279DE6FF0029BFD0 /* UserscriptsTests */ = {
+			isa = PBXGroup;
+			children = (
+				4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */,
+			);
+			path = UserscriptsTests;
+			sourceTree = "<group>";
+		};
 		4A4CF6DC270A38BD00111584 /* Userscripts-iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -205,6 +232,7 @@
 				4A57BA06227235CE008A9763 /* Userscripts Extension */,
 				4A4CF6DC270A38BD00111584 /* Userscripts-iOS */,
 				4A4CF6FB270A38BF00111584 /* Userscripts-iOS Extension */,
+				4A143AAA279DE6FF0029BFD0 /* UserscriptsTests */,
 				4A57BA03227235CE008A9763 /* Frameworks */,
 				4A57B9ED227235CD008A9763 /* Products */,
 			);
@@ -217,6 +245,7 @@
 				4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */,
 				4A4CF6DB270A38BD00111584 /* Userscripts-iOS.app */,
 				4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */,
+				4A143AA9279DE6FF0029BFD0 /* UserscriptsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -273,6 +302,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4A143AA8279DE6FF0029BFD0 /* UserscriptsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A143AB1279DE6FF0029BFD0 /* Build configuration list for PBXNativeTarget "UserscriptsTests" */;
+			buildPhases = (
+				4A143AA5279DE6FF0029BFD0 /* Sources */,
+				4A143AA6279DE6FF0029BFD0 /* Frameworks */,
+				4A143AA7279DE6FF0029BFD0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4A143AAE279DE6FF0029BFD0 /* PBXTargetDependency */,
+			);
+			name = UserscriptsTests;
+			productName = UserscriptsTests;
+			productReference = 4A143AA9279DE6FF0029BFD0 /* UserscriptsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		4A4CF6DA270A38BD00111584 /* Userscripts-iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4A4CF717270A38BF00111584 /* Build configuration list for PBXNativeTarget "Userscripts-iOS" */;
@@ -351,10 +398,14 @@
 		4A57B9E4227235CD008A9763 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1300;
+				LastSwiftUpdateCheck = 1320;
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = "Justin Wasack";
 				TargetAttributes = {
+					4A143AA8279DE6FF0029BFD0 = {
+						CreatedOnToolsVersion = 13.2.1;
+						TestTargetID = 4A57B9EB227235CD008A9763;
+					};
 					4A4CF6DA270A38BD00111584 = {
 						CreatedOnToolsVersion = 13.0;
 					};
@@ -391,11 +442,19 @@
 				4A57B9FE227235CE008A9763 /* Userscripts Extension */,
 				4A4CF6DA270A38BD00111584 /* Userscripts-iOS */,
 				4A4CF6F6270A38BF00111584 /* Userscripts-iOS Extension */,
+				4A143AA8279DE6FF0029BFD0 /* UserscriptsTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4A143AA7279DE6FF0029BFD0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A4CF6D9270A38BD00111584 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -450,6 +509,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4A143AA5279DE6FF0029BFD0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A143AB3279DEA370029BFD0 /* Shared.swift in Sources */,
+				4A143AB2279DEA170029BFD0 /* Functions.swift in Sources */,
+				4A143AAC279DE6FF0029BFD0 /* UserscriptsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A4CF6D7270A38BD00111584 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -494,6 +563,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4A143AAE279DE6FF0029BFD0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A57B9EB227235CD008A9763 /* Userscripts */;
+			targetProxy = 4A143AAD279DE6FF0029BFD0 /* PBXContainerItemProxy */;
+		};
 		4A4CF6FA270A38BF00111584 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4A4CF6F6270A38BF00111584 /* Userscripts-iOS Extension */;
@@ -542,6 +616,44 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		4A143AAF279DE6FF0029BFD0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = J74Q8V8V8N;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.UserscriptsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Userscripts.app/Contents/MacOS/Userscripts";
+			};
+			name = Debug;
+		};
+		4A143AB0279DE6FF0029BFD0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = J74Q8V8V8N;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.UserscriptsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Userscripts.app/Contents/MacOS/Userscripts";
+			};
+			name = Release;
+		};
 		4A4CF711270A38BF00111584 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -551,7 +663,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
@@ -567,7 +679,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -592,7 +704,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
@@ -608,7 +720,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -631,7 +743,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
@@ -643,7 +755,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -664,7 +776,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
@@ -676,7 +788,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -817,7 +929,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -827,7 +939,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 4.0.11;
+				MARKETING_VERSION = 4.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -841,7 +953,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
@@ -851,7 +963,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 4.0.11;
+				MARKETING_VERSION = 4.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -868,7 +980,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
@@ -877,7 +989,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 4.0.11;
+				MARKETING_VERSION = 4.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -893,7 +1005,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = J74Q8V8V8N;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Userscripts/Info.plist;
@@ -902,7 +1014,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 4.0.11;
+				MARKETING_VERSION = 4.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -912,6 +1024,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4A143AB1279DE6FF0029BFD0 /* Build configuration list for PBXNativeTarget "UserscriptsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A143AAF279DE6FF0029BFD0 /* Debug */,
+				4A143AB0279DE6FF0029BFD0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4A4CF716270A38BF00111584 /* Build configuration list for PBXNativeTarget "Userscripts-iOS Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
