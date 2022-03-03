@@ -1,3 +1,4 @@
+import fs from "fs";
 import svelte from "rollup-plugin-svelte";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -50,6 +51,8 @@ export default {
         css({
             output: "public/" + directory + "/build/lib.css"
         }),
+        copyAndWatch("./public/shared/variables.css", "variables.css"),
+        copyAndWatch("./public/shared/reset.css", "reset.css"),
         inlineSvg({}),
         svelte({
             // enable run-time checks when not in production
@@ -76,10 +79,27 @@ export default {
         // Watch the `public` directory and refresh the
         // browser on changes when not in production
         !production && livereload({
-            watch: ["public/" + directory, "public/shared"]
+            watch: ["public/" + directory]
         })
     ],
     watch: {
         clearScreen: false
     }
 };
+
+// https://dev.to/lukap/creating-a-rollup-plugin-to-copy-and-watch-a-file-3hi2
+function copyAndWatch(fileIn, fileOut) {
+    return {
+        name: "copy-and-watch",
+        async buildStart() {
+            this.addWatchFile(fileIn);
+        },
+        async generateBundle() {
+            this.emitFile({
+                type: "asset",
+                fileName: fileOut,
+                source: fs.readFileSync(fileIn)
+            });
+        }
+    };
+}
