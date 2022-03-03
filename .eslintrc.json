@@ -22,92 +22,52 @@
         "_browser": "writable",
         "browser": "readonly"
     },
+    "ignorePatterns": ["/node_modules/", "/public/*/build/", "codemirror/"],
     "rules": {
-        "array-bracket-spacing": [
-            "error",
-            "never"
-        ],
-        "arrow-parens": [
-            "error",
-            "as-needed"
-        ],
-        "comma-spacing": [
-            "error",
-            {
-                "before": false,
-                "after": true
-            }
-        ],
+        "array-bracket-spacing": ["error", "never"],
+        "arrow-parens": ["error", "as-needed"],
+        "brace-style": ["error", "1tbs", {"allowSingleLine": false}],
+        "comma-spacing": ["error", {
+            "before": false,
+            "after": true
+        }],
+        "curly": "error",
         "dot-notation": "error",
         "eqeqeq": ["error", "smart"],
-        "indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "keyword-spacing": [
-            "error",
-            {
-                "after": true,
-                "before": true
-            }
-        ],
+        "indent": ["error", 4, {"SwitchCase": 1}],
+        "linebreak-style": ["error","unix"],
+        "keyword-spacing": ["error", {
+            "after": true,
+            "before": true
+        }],
         "no-bitwise": "error",
         "no-mixed-operators": "error",
-        "no-unused-vars": [
-            "error",
-            {
-                "args": "none"
-            }
-        ],
-        "no-use-before-define": [
-            "error",
-            {
-                "classes": true,
-                "functions": false,
-                "variables": true
-            }
-        ],
+        "no-multi-spaces": "error",
+        "no-multi-str": "error",
+        "no-multiple-empty-lines": ["error", {"max": 1}],
+        "no-unused-vars": ["error", {"args": "none"}],
+        "no-useless-concat": "error",
+        "no-use-before-define": ["error", {
+            "classes": true,
+            "functions": false,
+            "variables": true
+        }],
         "no-var": "error",
-        "object-curly-spacing": [
-            "error",
-            "never"
-        ],
-        "operator-assignment": [
-            "error",
-            "always"
-        ],
-        "operator-linebreak": [
-            "error",
-            "before"
-        ],
+        "nonblock-statement-body-position": ["error", "below"],
+        "object-curly-spacing": ["error", "never"],
+        "operator-assignment": ["error", "always"],
+        "operator-linebreak": ["error", "before"],
         "prefer-const": "error",
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always",
-            {
-                "omitLastInOneLineBlock": true
-            }
-        ],
+        "prefer-template": "error",
+        "quotes": ["error", "double"],
+        "semi": ["error", "always", {"omitLastInOneLineBlock": true}],
         "space-before-function-paren": ["error", {
             "anonymous": "never",
             "named": "never",
             "asyncArrow": "always"
         }],
-        "space-in-parens": [
-            "error",
-            "never"
-        ],
+        "space-in-parens": ["error", "never"],
+        "template-curly-spacing": ["error", "never"],
         "jsx-a11y/a11y-missing-attribute": "off"
     }
 }
