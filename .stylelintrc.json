@@ -3,9 +3,9 @@
         "stylelint-config-standard",
         "stylelint-config-html/svelte"
     ],
-    "ignoreFiles": ["**/codemirror/*"],
+    "ignoreFiles": ["**/codemirror/*", "**/reset.css"],
     "rules": {
-        "alpha-value-notation": "percentage",
+        "alpha-value-notation": "number",
         "comment-empty-line-before": ["always",{
             "ignore": ["after-comment", "stylelint-commands"]
         }],
