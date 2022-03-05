@@ -7,25 +7,30 @@ import css from "rollup-plugin-css-only";
 import inlineSvg from "rollup-plugin-inline-svg";
 import multi from "@rollup/plugin-multi-entry";
 
-
 const production = !process.env.ROLLUP_WATCH;
-const directory =  process.env.NODE_ENV === "popup" ? "popup" : "page";
-let input = ["src/" + directory + "/dev.js", "src/" + directory + "/main.js"];
-if (production) input = "src/" + directory + "/main.js";
+const directory = process.env.NODE_ENV === "popup" ? "popup" : "page";
+let input = [`src/${directory}/dev.js`, `src/${directory}/main.js`];
+if (production) {
+    input = `src/${directory}/main.js`;
+}
 
 function serve() {
     let server;
 
     function toExit() {
-        if (server) server.kill(0);
+        if (server) {
+            server.kill(0);
+        }
     }
 
     return {
         writeBundle() {
-            if (server) return;
+            if (server) {
+                return;
+            }
             server = require("child_process").spawn(
                 "npm",
-                ["run", "start:" + directory, "--", "--dev"],
+                ["run", `start:${directory}`, "--", "--dev"],
                 {
                     stdio: ["ignore", "inherit", "inherit"],
                     shell: true
@@ -43,13 +48,13 @@ export default {
         sourcemap: !production,
         format: "iife",
         name: "app",
-        file: "public/" + directory + "/build/bundle.js"
+        file: `public/${directory}/build/bundle.js`
     },
     inlineDynamicImports: true,
     plugins: [
         multi(),
         css({
-            output: "public/" + directory + "/build/lib.css"
+            output: `public/${directory}/build/lib.css`
         }),
         copyAndWatch("./public/shared/variables.css", "variables.css"),
         copyAndWatch("./public/shared/reset.css", "reset.css"),
@@ -79,7 +84,7 @@ export default {
         // Watch the `public` directory and refresh the
         // browser on changes when not in production
         !production && livereload({
-            watch: ["public/" + directory]
+            watch: [`public/${directory}`]
         })
     ],
     watch: {
