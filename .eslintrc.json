@@ -31,7 +31,7 @@
             "before": false,
             "after": true
         }],
-        "curly": "error",
+        "curly": ["error", "multi-line"],
         "dot-notation": "error",
         "eqeqeq": ["error", "smart"],
         "indent": ["error", 4, {"SwitchCase": 1}],
@@ -44,7 +44,7 @@
         "no-mixed-operators": "error",
         "no-multi-spaces": "error",
         "no-multi-str": "error",
-        "no-multiple-empty-lines": ["error", {"max": 1}],
+        "no-multiple-empty-lines": ["error", {"max": 1, "maxBOF": 2}], // https://github.com/sveltejs/eslint-plugin-svelte3/issues/41
         "no-unused-vars": ["error", {"args": "none"}],
         "no-useless-concat": "error",
         "no-use-before-define": ["error", {
@@ -53,7 +53,9 @@
             "variables": true
         }],
         "no-var": "error",
-        "nonblock-statement-body-position": ["error", "below"],
+        "nonblock-statement-body-position": ["error", "below", {
+            "overrides": {"if": "any"}
+        }],
         "object-curly-spacing": ["error", "never"],
         "operator-assignment": ["error", "always"],
         "operator-linebreak": ["error", "before"],
@@ -61,6 +63,7 @@
         "prefer-template": "error",
         "quotes": ["error", "double"],
         "semi": ["error", "always", {"omitLastInOneLineBlock": true}],
+        "space-before-blocks": "error",
         "space-before-function-paren": ["error", {
             "anonymous": "never",
             "named": "never",
