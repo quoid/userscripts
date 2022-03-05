@@ -17,7 +17,7 @@ function copy() {
         .pipe(dest(copyLocation));
 }
 
-// autoprefix select stylesheets and overwrite in place
+// autoprefix select stylesheets and overwrite in place, at copy location
 function autoprefix() {
     return src([`${copyLocation}/build/bundle.css`, `${copyLocation}/css/global.css`])
         .pipe(postcss([
@@ -26,7 +26,7 @@ function autoprefix() {
         .pipe(dest(file => file.base));
 }
 
-// inline assets
+// inline assets, minify css and remove comment in monolithic html file
 function inlineAssets() {
     return src(`${copyLocation}/index.html`)
         .pipe(inline({
