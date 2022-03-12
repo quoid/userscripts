@@ -147,7 +147,7 @@
 
     async function openExtensionPage() {
         const url = browser.runtime.getURL("page.html");
-        const tabs =  await browser.tabs.query({});
+        const tabs = await browser.tabs.query({});
         for (let i = 0; i < tabs.length; i++) {
             if (tabs[i].url === url) {
                 await browser.windows.update(tabs[i].windowId, {focused: true});
@@ -176,7 +176,7 @@
         try {
             lastUpdateCheckObj = await browser.storage.local.get(["lastUpdateCheck"]);
         } catch (error) {
-            console.error("Error checking extension storage " + error);
+            console.error(`Error checking extension storage ${error}`);
             return false;
         }
         // if extension storage doesn't have key, run the check
@@ -200,7 +200,7 @@
             return false;
         }
 
-        console.log(((timestampMs - lastUpdateCheck) / (1000 * 60 * 60)) + " hours have passed");
+        console.log(`${(timestampMs - lastUpdateCheck) / (1000 * 60 * 60)} hours have passed`);
         console.log("running update check");
         // otherwise run the check
         return true;
@@ -215,8 +215,9 @@
         } else if (response.items) {
             showAll = true;
             allItems = response.items;
+            allItems = [];
         } else if (response.error) {
-            console.log("Error opening save location: " + response.error);
+            console.log(`Error opening save location: ${response.error}`);
             error = response.error;
         }
         disabled = false;
@@ -229,7 +230,7 @@
         try {
             pltfm = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
         } catch (error) {
-            console.log("Error for pltfm promise: " + error);
+            console.log(`Error for pltfm promise: ${error}`);
             initError = true;
             loading = false;
             return;
@@ -249,7 +250,7 @@
         try {
             init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"});
         } catch (error) {
-            console.log("Error for init promise: " + error);
+            console.log(`Error for init promise: ${error}`);
             initError = true;
             loading = false;
             return;
@@ -287,7 +288,7 @@
             matches = await browser.runtime.sendNativeMessage(message);
             // response = await browser.runtime.sendMessage(message);
         } catch (error) {
-            console.log("Error for matches promise: " + error);
+            console.log(`Error for matches promise: ${error}`);
             initError = true;
             loading = false;
             return;
@@ -312,7 +313,7 @@
                 abort = true;
                 updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
             } catch (error) {
-                console.error("Error for updates promise: " + error);
+                console.error(`Error for updates promise: ${error}`);
                 initError = true;
                 loading = false;
                 abort = false;
@@ -346,7 +347,7 @@
             // https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
             const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_00"});
             if (response.error) {
-                console.log("Error checking .user.js url: " + response.error);
+                console.log(`Error checking .user.js url: ${response.error}`);
                 error = response.error;
             } else if (!response.invalid) {
                 // the response will contain the string to display
@@ -394,10 +395,10 @@
             let addHeight = 0;
             // if warn or error elements visible, also subtract that from applied height
             if (warn) addHeight += warn.offsetHeight;
-            if (err)  addHeight += err.offsetHeight;
+            if (err) addHeight += err.offsetHeight;
             windowHeight = (window.outerHeight - (headerHeight + addHeight));
-            main.style.height = windowHeight + "px";
-            main.style.paddingBottom = (headerHeight + addHeight) + "px";
+            main.style.height = `${windowHeight}px`;
+            main.style.paddingBottom = `${headerHeight + addHeight}px`;
         }, 25);
     }
 
@@ -419,7 +420,7 @@
 
         // if the response includes an error, display it in the view
         if (response.error) {
-            console.log("Can not install userscript: " + response.error);
+            console.log(`Can not install userscript: ${response.error}`);
             installViewUserscriptError = response.error;
         } else {
             installViewUserscript = response;
@@ -456,6 +457,7 @@
         resize();
     });
 </script>
+
 <svelte:window on:resize={resize}/>
 <div class="header" bind:this={header}>
     <IconButton
@@ -510,7 +512,13 @@
             <div class="none">Popup inactive on extension page</div>
         {:else if initError}
             <div class="none">
-                Something went wrong:&nbsp;<span class="link" on:click={() => window.location.reload()}> click to retry</span>
+                Something went wrong:&nbsp;
+                <span
+                    class="link"
+                    on:click={() => window.location.reload()}
+                >
+                    click to retry
+                </span>
             </div>
         {:else if items.length < 1}
             <div class="none">No matched userscripts</div>
@@ -531,7 +539,9 @@
 </div>
 {#if !inactive && platform === "macos"}
     <div class="footer">
-        <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
+        <div class="link" on:click={openExtensionPage}>
+            Open Extension Page
+        </div>
     </div>
 {/if}
 {#if showUpdates}
@@ -568,7 +578,10 @@
     <View
         headerTitle={"All Userscripts"}
         loading={disabled}
-        closeClick={() => {showAll = false; refreshView()}}
+        closeClick={() => {
+            showAll = false;
+            refreshView();
+        }}
         showLoaderOnDisabled={false}
     >
         <AllItemsView
@@ -577,6 +590,7 @@
         />
     </View>
 {/if}
+
 <style>
     .header {
         align-items: center;

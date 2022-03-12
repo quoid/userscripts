@@ -6,12 +6,13 @@
     export let installCancelClick;
     export let installConfirmClick;
 </script>
+
 <div class="view--install">
     {#if installError}
         <div class="install__error">
             {@html iconError}
-            <div>The usercript can not be installed.</div>
-            <p>Error: OK GO</p>
+            <div>Couldn't install userscript</div>
+            <p>{installError}</p>
         </div>
     {:else if userscript}
         <ul>
@@ -57,11 +58,16 @@
             <div class="badge--text">Be sure you trust the author before installing. Nefarious code can exploit your security and privacy.</div>
         </div>
         <div class="buttons">
-            <button class="cancel" on:click={installCancelClick}>Cancel</button>
-            <button class="install" on:click={installConfirmClick}>Install</button>
+            <button class="cancel" on:click={installCancelClick}>
+                Cancel
+            </button>
+            <button class="install" on:click={installConfirmClick}>
+                Install
+            </button>
         </div>
     {/if}
 </div>
+
 <style>
     .view--install {
         color: var(--text-color-secondary);

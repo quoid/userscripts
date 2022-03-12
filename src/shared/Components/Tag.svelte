@@ -1,7 +1,9 @@
 <script>
     export let type = undefined;
-
 </script>
+
+<div class="script__tag {`script__tag--${type}`}"></div>
+
 <style>
     .script__tag {
         background-color: transparent;
@@ -42,4 +44,3 @@
         content: "js";
     }
 </style>
-<div class="script__tag {type ? "script__tag--" + type : ""}"></div>

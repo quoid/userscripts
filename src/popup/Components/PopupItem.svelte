@@ -5,6 +5,14 @@
     export let type;
     export let subframe;
 </script>
+
+<div class="item {enabled ? "enabled" : "disabled"}" on:click>
+    <span></span>
+    <div class="truncate">{name}</div>
+    {#if subframe}<div class="subframe">SUB</div>{/if}
+    <Tag type={type}/>
+</div>
+
 <style>
     .item {
         align-items: center;
@@ -18,12 +26,12 @@
 
     @media (hover: hover) {
         .item:hover {
-            background-color: rgba(255, 255, 255, 0.075);
+            background-color: rgb(255 255 255 / 0.075);
         }
     }
 
     .item:active {
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: rgb(255 255 255 / 0.15);
     }
 
     span {
@@ -74,9 +82,3 @@
         text-align: center;
     }
 </style>
-<div class="item {enabled ? "enabled" : "disabled"}" on:click>
-    <span></span>
-    <div class="truncate">{name}</div>
-    {#if subframe}<div class="subframe">SUB</div>{/if}
-    <Tag type={type}/>
-</div>

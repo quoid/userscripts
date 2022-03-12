@@ -1,3 +1,7 @@
+/**
+ * @param {number} ms millisecond timestamp
+ * @returns {string}
+ */
 export function formatDate(ms) {
     const d = new Date(ms);
     const yr = new Intl.DateTimeFormat("en", {year: "numeric"}).format(d);
@@ -9,9 +13,24 @@ export function formatDate(ms) {
 }
 
 export function uniqueId() {
-    return Math.random().toString(36).substr(2, 8);
+    return Math.random().toString(36).substring(2, 10);
 }
 
+/**
+ * awaitable function for waiting an arbitrary amount of time
+ * @param {number} ms the amount of time to wait in milliseconds
+ * @returns {Promise.<void>}
+ */
+export function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// TODO: describe the items array that should get passed to this function
+/**
+ * @param {array} array
+ * @param {("lastModifiedAsc"|"lastModifiedDesc"|"nameAsc"|"nameDesc")} order
+ * @returns
+ */
 export function sortBy(array, order) {
     if (order === "nameAsc") {
         array.sort((a, b) => a.name.localeCompare(b.name));
@@ -27,7 +46,14 @@ export function sortBy(array, order) {
     return array;
 }
 
-export function  newScriptDefault(description, name, type) {
+/**
+ *
+ * @param {string} description
+ * @param {string} name
+ * @param {("css"|"js")} type
+ * @returns {string}
+ */
+export function newScriptDefault(description, name, type) {
     if (type === "css") {
         return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n@match       <all_urls>\n==/UserStyle== */`;
     } else if (type === "js") {
@@ -35,6 +61,10 @@ export function  newScriptDefault(description, name, type) {
     }
 }
 
+/**
+ * @param {string} str
+ * @returns {{code: string, content: str, metablock: string, metadata: {string: string[]}}}
+ */
 export function parse(str) {
     if (typeof str != "string") return null;
     const blocksReg = /(?:(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==[ \t]*?\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))/;
@@ -49,8 +79,8 @@ export function parse(str) {
     const metadata = {};
     const metaArray = metas.split("\n");
     metaArray.forEach(function(m) {
-        var parts = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)/);
-        var parts2 = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$/);
+        const parts = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)/);
+        const parts2 = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$/);
         if (parts) {
             metadata[parts[1]] = metadata[parts[1]] || [];
             metadata[parts[1]].push(parts[2]);

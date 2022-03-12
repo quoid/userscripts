@@ -8,7 +8,7 @@
     import Notification from "./Components/Notification.svelte";
     import logo from "../shared/img/logo.svg";
 
-    let logger = [];
+    const logger = [];
 
     $: $log.some(item => {
         if (!logger.includes(item)) {
@@ -32,13 +32,12 @@
     }
 
     // currently inactive, but could be used to globally prevent auto text replacement in app
-    // eslint-disable-next-line no-unused-vars
-    function preventAutoTextReplacements(e) {
-        if (e.inputType === "insertReplacementText" && e.data === ". ") {
-            e.preventDefault();
-            e.target.value += " ";
-        }
-    }
+    // function preventAutoTextReplacements(e) {
+    //     if (e.inputType === "insertReplacementText" && e.data === ". ") {
+    //         e.preventDefault();
+    //         e.target.value += " ";
+    //     }
+    // }
 
     onMount(async () => {
         log.add("Requesting initialization data", "info", false);
@@ -60,6 +59,30 @@
         state.remove("items-loading");
     });
 </script>
+
+<svelte:window on:keydown={preventKeyCommands} on:resize={windowResize}/>
+
+{#if $state.includes("init")}
+    <div class="initializer" out:blur="{{duration: 350}}">
+        {@html logo}
+        {#if $state.includes("init-error")}
+            <span>Failed to initialize app, check the browser console</span>
+        {:else}
+            <span>Initializing app...</span>
+        {/if}
+    </div>
+{/if}
+<div>
+    <Sidebar/>
+    <Editor/>
+</div>
+<ul>
+    {#each $notifications as item (item.id)}
+        <Notification on:click={() => notifications.remove(item.id)} {item}/>
+    {/each}
+</ul>
+{#if $state.includes("settings")}<Settings/>{/if}
+
 <style>
     .initializer {
         align-items: center;
@@ -101,26 +124,3 @@
         z-index: 98;
     }
 </style>
-
-<svelte:window on:keydown={preventKeyCommands} on:resize={windowResize}/>
-
-{#if $state.includes("init")}
-    <div class="initializer" out:blur="{{duration: 350}}">
-        {@html logo}
-        {#if $state.includes("init-error")}
-            <span>Failed to initialize app, check the console!</span>
-        {:else}
-            <span>Initializing page...</span>
-        {/if}
-    </div>
-{/if}
-<div>
-    <Sidebar/>
-    <Editor/>
-</div>
-<ul>
-    {#each $notifications as item (item.id)}
-        <Notification on:click={() =>  notifications.remove(item.id)} {item}/>
-    {/each}
-</ul>
-{#if $state.includes("settings")}<Settings/>{/if}

@@ -262,9 +262,9 @@ function addContextMenuItem(filename, name) {
     // https://stackoverflow.com/q/68431201
     let pathname = window.location.pathname;
     if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
-    const url = window.location.protocol + "//" + window.location.hostname + pathname;
+    const url = `${window.location.protocol}//${window.location.hostname}${pathname}`;
 
-    const menuItemId = url + "&$&" + filename;
+    const menuItemId = `${url}&$&${filename}`;
     const message = {name: "CONTEXT_CREATE", menuItemId: menuItemId, title: name, url: url};
     browser.runtime.sendMessage(message, response => {
         // avoid adding unnecessary event listeners
@@ -515,7 +515,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // arraybuffer responses had their data converted, convert it back to arraybuffer
         if (request.response.responseType === "arraybuffer" && resp.response) {
             try {
-                const r =  new Uint8Array(resp.response).buffer;
+                const r = new Uint8Array(resp.response).buffer;
                 resp.response = r;
             } catch (error) {
                 console.error("error parsing xhr arraybuffer response", error);
@@ -585,7 +585,7 @@ window.addEventListener("message", e => {
     } else if (name === "API_GET_VALUE") {
         message = {name: "API_GET_VALUE", filename: e.data.filename, pid: pid, key: e.data.key, defaultValue: e.data.defaultValue};
         browser.runtime.sendMessage(message, response => {
-            const resp =  response === `undefined--${pid}` ? undefined : response;
+            const resp = response === `undefined--${pid}` ? undefined : response;
             window.postMessage({id: id, pid: pid, name: "RESP_GET_VALUE", filename: e.data.filename, response: resp});
         });
     } else if (name === "API_DELETE_VALUE") {

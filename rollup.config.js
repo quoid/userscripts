@@ -9,25 +9,21 @@ import multi from "@rollup/plugin-multi-entry";
 
 const production = !process.env.ROLLUP_WATCH;
 const directory = process.env.NODE_ENV === "popup" ? "popup" : "page";
-let input = [`src/${directory}/dev.js`, `src/${directory}/main.js`];
-if (production) {
-    input = `src/${directory}/main.js`;
-}
+
+//let input = [`src/${directory}/dev.js`, `src/${directory}/main.js`];
+let input = ["src/shared/dev.js", `src/${directory}/main.js`];
+if (production) input = `src/${directory}/main.js`;
 
 function serve() {
     let server;
 
     function toExit() {
-        if (server) {
-            server.kill(0);
-        }
+        if (server) server.kill(0);
     }
 
     return {
         writeBundle() {
-            if (server) {
-                return;
-            }
+            if (server) return;
             server = require("child_process").spawn(
                 "npm",
                 ["run", `start:${directory}`, "--", "--dev"],
@@ -92,18 +88,24 @@ export default {
     }
 };
 
-// https://dev.to/lukap/creating-a-rollup-plugin-to-copy-and-watch-a-file-3hi2
-function copyAndWatch(fileIn, fileOut) {
+/**
+ * Simple plugin for watching and copying asset for use in app.
+ * @see {@link https://dev.to/lukap/creating-a-rollup-plugin-to-copy-and-watch-a-file-3hi2 Tutorial}
+ * @see {@link https://rollupjs.org/guide/en/#build-hooks Rollup Build Hooks}
+ * @param {string} inputFilePath
+ * @param {string} outputFilename
+ */
+function copyAndWatch(inputFilePath, outputFilename) {
     return {
         name: "copy-and-watch",
         async buildStart() {
-            this.addWatchFile(fileIn);
+            this.addWatchFile(inputFilePath);
         },
         async generateBundle() {
             this.emitFile({
                 type: "asset",
-                fileName: fileOut,
-                source: fs.readFileSync(fileIn)
+                fileName: outputFilename,
+                source: fs.readFileSync(inputFilePath)
             });
         }
     };

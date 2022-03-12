@@ -17,7 +17,7 @@
             // button click events bubble to document body
             // can use to determine if button triggered body event listener func
             // event.target = button, e.target = body event listener trigger el
-            if (e.target != event.target) {
+            if (e.target !== event.target) {
                 // the body event listener not triggered by button
                 // if omitted, dropdown would close immediately
                 active = false;
@@ -34,6 +34,15 @@
         });
     }
 </script>
+
+<div class:active>
+    <IconButton icon={icon} on:click={dropdownClick} {title} {disabled}/>
+    <ul>
+        <slot>
+            <li>At least one slot is required...</li>
+        </slot>
+    </ul>
+</div>
 
 <style>
     div {
@@ -90,12 +99,3 @@
     }
 
 </style>
-
-<div class:active>
-    <IconButton icon={icon} on:click={dropdownClick} {title} {disabled}/>
-    <ul>
-        <slot>
-            <li>At least one slot is required...</li>
-        </slot>
-    </ul>
-</div>

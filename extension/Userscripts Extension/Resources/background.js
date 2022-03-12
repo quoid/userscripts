@@ -83,13 +83,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     } else if (name === "API_SET_VALUE") {
         const item = {};
-        item[request.filename + "---" + request.key] = request.value;
+        item[`${request.filename}---${request.key}`] = request.value;
         browser.storage.local.set(item, () => {
             sendResponse({success: true});
         });
         return true;
     } else if (name === "API_GET_VALUE") {
-        const key = request.filename + "---" + request.key;
+        const key = `${request.filename}---${request.key}`;
         browser.storage.local.get(key, item => {
             if (Object.keys(item).length === 0) {
                 if (request.defaultValue) {
@@ -103,13 +103,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     } else if (name === "API_DELETE_VALUE") {
-        const key = request.filename + "---" + request.key;
+        const key = `${request.filename}---${request.key}`;
         browser.storage.local.remove(key, response => {
             sendResponse({success: true});
         });
         return true;
     } else if (name === "API_LIST_VALUES") {
-        const prefix = request.filename + "---";
+        const prefix = `${request.filename}---`;
         const keys = [];
         browser.storage.local.get().then(items => {
             for (const key in items) {
@@ -272,7 +272,9 @@ function purgeContextMenus() {
     // loop through all tabs and remove context menu items targeting tab urls that don't exist
     browser.tabs.query({}, tabs => {
         const tabUrls = [];
-        tabs.forEach(tab => {if (tab.url) tabUrls.push(tab.url);});
+        tabs.forEach(tab => {
+            if (tab.url) tabUrls.push(tab.url);
+        });
         const contextMenuItemsUrls = [];
         // parse urls from context menu item ids
         contextMenuItems.forEach(item => contextMenuItemsUrls.push(item.split("&$&")[0]));

@@ -124,10 +124,10 @@
                 "Cmd-/": "toggleComment",
                 "Cmd-S": () => saveHandler(),
                 "Cmd-F": () => activateSearch(),
-                "Esc": () => {searchActive = false},
+                "Esc": () => searchActive = false,
                 Tab: cm => {
                     // convert tabs to spaces and add invisible elements
-                    var s = Array(cm.getOption("indentUnit") + 1).join(" ");
+                    const s = Array(cm.getOption("indentUnit") + 1).join(" ");
                     cm.replaceSelection(s);
                 }
             }
@@ -162,7 +162,7 @@
 
     function autoHint(cm) {
         // check for valid key combinations
-        const  validKeys = keysPressed.every(v => {
+        const validKeys = keysPressed.every(v => {
             // if a single key press, only show hint if letter/number
             if (keysPressed.length === 1) {
                 return v.startsWith("Digit") || v.startsWith("Key");
@@ -177,7 +177,7 @@
             // ensure hinting not active already
             && !cm.state.completionActive
             // not first position on the line
-            && cm.getCursor().ch != 0
+            && cm.getCursor().ch !== 0
             // only hint when 1-2 key combos
             && keysPressed.length < 3
             // valid keys combo
@@ -206,8 +206,8 @@
         if (
             changeObj.origin === "+input"
             && changeObj.text.length === 1
-            && changeObj.text[0] === ". ")
-        {
+            && changeObj.text[0] === ". "
+        ) {
             changeObj.update(changeObj.from, changeObj.to, ["  "]);
         }
     }
@@ -257,7 +257,7 @@
         this={EditorSearch}
         active={searchActive}
         bind:this={search}
-        closeHandler={() => {searchActive = false}}
+        closeHandler={() => searchActive = false}
         instance={instance}
     />
 {/if}

@@ -11,6 +11,19 @@
 
     const icon = item.type === "error" ? iconError : item.type === "info" ? iconInfo : iconWarn;
 </script>
+
+<li
+    class:error={item.type === "error"}
+    class:info={item.type === "info"}
+    class:warn={item.type === "warn"}
+    in:fly={{y: 24, duration: 150}}
+    out:fade={{duration: 150}}
+>
+    <div>{@html icon}</div>
+    <span>{item.message}</span>
+    <IconButton icon={iconClose} on:click/>
+</li>
+
 <style>
     li {
         align-items: center;
@@ -67,15 +80,3 @@
         width: 1rem;
     }
 </style>
-
-<li
-    class:error={item.type === "error"}
-    class:info={item.type === "info"}
-    class:warn={item.type === "warn"}
-    in:fly={{y: 24, duration: 150}}
-    out:fade={{duration: 150}}
->
-    <div>{@html icon}</div>
-    <span>{item.message}</span>
-    <IconButton icon={iconClose} on:click/>
-</li>

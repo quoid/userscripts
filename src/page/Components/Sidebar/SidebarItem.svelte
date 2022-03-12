@@ -14,7 +14,7 @@
     function formatDescription(str) {
         if (str && str.length > 120) {
             showTitle = true;
-            return str.substring(0, 120).trim() + "...";
+            return `${str.substring(0, 120).trim()}...`;
         } else {
             showTitle = false;
             return str;
@@ -23,6 +23,29 @@
 
     $: description = formatDescription(data.description);
 </script>
+
+<div
+    class="item {data.class || ""}"
+    class:active={data.active}
+    class:disabled={data.disabled}
+    class:temp={data.temp}
+    data-filename={data.filename}
+    data-last-modified={data.lastModified}
+    data-type={data.type}
+    on:click
+>
+    <div class="item__header">
+        <Tag type={data.type}/>
+        <div class="item__title truncate">{data.name}</div>
+        <Toggle checked={!data.disabled} on:click={toggleClick}/>
+    </div>
+    {#if description}
+        <div class="item__description" title="{showTitle ? data.description : null}">
+            {description}
+        </div>
+    {/if}
+</div>
+
 <style>
     .item {
         background-color: var(--color-bg-secondary);
@@ -75,25 +98,3 @@
         opacity: 0.65;
     }
 </style>
-
-<div
-    class="item {data.class || ""}"
-    class:active={data.active}
-    class:disabled={data.disabled}
-    class:temp={data.temp}
-    data-filename={data.filename}
-    data-last-modified={data.lastModified}
-    data-type={data.type}
-    on:click
->
-    <div class="item__header">
-        <Tag type={data.type}/>
-        <div class="item__title truncate">{data.name}</div>
-        <Toggle checked={!data.disabled} on:click={toggleClick}/>
-    </div>
-    {#if description}
-        <div class="item__description" title="{showTitle ? data.description : null}">
-            {description}
-        </div>
-    {/if}
-</div>

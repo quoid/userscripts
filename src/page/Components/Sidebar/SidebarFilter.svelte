@@ -16,7 +16,7 @@
     function filter(query) {
         $items = $items.map(item => {
             const visible = item.filename.toLowerCase().includes(query.trim().toLowerCase());
-            if (visible != item.visible) return {...item, visible};
+            if (visible !== item.visible) return {...item, visible};
             return item;
         });
     }
@@ -25,6 +25,49 @@
         settings.updateSingleSetting("sortOrder", order);
     }
 </script>
+
+<div class="filter">
+    <input
+        type="text"
+        placeholder="Search and filter here..."
+        autocapitalize="off"
+        autocomplete="off"
+        spellcheck="false"
+        autocorrect="off"
+        bind:value={query}
+        {disabled}
+    >
+    <Dropdown icon={iconSort} {disabled}>
+        <li
+            class:selected={sortOrder === "lastModifiedAsc"}
+            on:click={() => updateSortOrder("lastModifiedAsc")}
+        >
+            Last Modified: Asc{sortOrder === "lastModifiedAsc" ? " *" : ""}
+        </li>
+        <li
+            class:selected={sortOrder === "lastModifiedDesc"}
+            on:click={() => updateSortOrder("lastModifiedDesc")}
+        >
+            Last Modified: Desc{sortOrder === "lastModifiedDesc" ? " *" : ""}
+        </li>
+        <li
+            class:selected={sortOrder === "nameAsc"}
+            on:click={() => updateSortOrder("nameAsc")}
+        >
+            Name: Asc{sortOrder === "nameAsc" ? " *" : ""}
+        </li>
+        <li
+            class:selected={sortOrder === "nameDesc"}
+            on:click={() => updateSortOrder("nameDesc")}
+        >
+            Name: Desc{sortOrder === "nameDesc" ? " *" : ""}
+        </li>
+    </Dropdown>
+    {#if query}
+        <IconButton icon={iconClear} on:click={() => query = ""} {disabled}/>
+    {/if}
+</div>
+
 <style>
     .filter {
         font: var(--text-default);
@@ -72,45 +115,3 @@
         opacity: calc(var(--opacity-disabled) * 0.5);
     }
 </style>
-
-<div class="filter">
-    <input
-        type="text"
-        placeholder="Search and filter here..."
-        autocapitalize="off"
-        autocomplete="off"
-        spellcheck="false"
-        autocorrect="off"
-        bind:value={query}
-        {disabled}
-    >
-    <Dropdown icon={iconSort} {disabled}>
-        <li
-            class:selected={sortOrder === "lastModifiedAsc"}
-            on:click={() => updateSortOrder("lastModifiedAsc")}
-        >
-            Last Modified: Asc{sortOrder === "lastModifiedAsc" ? " *" : ""}
-        </li>
-        <li
-            class:selected={sortOrder === "lastModifiedDesc"}
-            on:click={() => updateSortOrder("lastModifiedDesc")}
-        >
-            Last Modified: Desc{sortOrder === "lastModifiedDesc" ? " *" : ""}
-        </li>
-        <li
-            class:selected={sortOrder === "nameAsc"}
-            on:click={() => updateSortOrder("nameAsc")}
-        >
-            Name: Asc{sortOrder === "nameAsc" ? " *" : ""}
-        </li>
-        <li
-            class:selected={sortOrder === "nameDesc"}
-            on:click={() => updateSortOrder("nameDesc")}
-        >
-            Name: Desc{sortOrder === "nameDesc" ? " *" : ""}
-        </li>
-    </Dropdown>
-    {#if query}
-        <IconButton icon={iconClear} on:click={() => query = ""} {disabled}/>
-    {/if}
-</div>

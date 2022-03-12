@@ -6,6 +6,16 @@
     export let abortClick = () => {};
     export let backgroundColor = "var(--color-bg-secondary)";
 </script>
+
+<div class="loader" style="background-color: {backgroundColor};" out:fade="{{duration: 125}}">
+    {@html iconLoader}
+    {#if abort}
+        <div>
+            Fetching resources, <span class="link" on:click={abortClick}>cancel request</span>
+        </div>
+    {/if}
+</div>
+
 <style>
     .loader {
         align-items: center;
@@ -32,11 +42,3 @@
         margin-top: 1rem;
     }
 </style>
-<div class="loader" style="background-color: {backgroundColor};" out:fade="{{duration: 125}}">
-    {@html iconLoader}
-    {#if abort}
-        <div>
-            Fetching resources, <span class="link" on:click={abortClick}>cancel request</span>
-        </div>
-    {/if}
-</div>

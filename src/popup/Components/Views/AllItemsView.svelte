@@ -16,6 +16,7 @@
         rowColorsAll = undefined;
     }
 </script>
+
 {#if allItems.length}
     <div class="items view--all {rowColorsAll || ""}" class:disabled={disabled}>
         {#each list as item (item.filename)}
@@ -31,6 +32,7 @@
 {:else}
     <div class="none">No valid files found in directory</div>
 {/if}
+
 <style>
     .items {
         padding-bottom: 60px;
@@ -40,5 +42,18 @@
     .even--all :global(.item:nth-of-type(odd)),
     .odd--all :global(.item:nth-of-type(even)) {
         background-color: var(--color-bg-secondary);
+    }
+
+    .none {
+        align-items: center;
+        bottom: 0;
+        color: var(--text-color-disabled);
+        display: flex;
+        font-weight: 600;
+        justify-content: center;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
     }
 </style>
