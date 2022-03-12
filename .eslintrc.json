@@ -43,6 +43,7 @@
         "no-multi-spaces": "error",
         "no-multi-str": "error",
         "no-multiple-empty-lines": ["error", {"max": 1, "maxBOF": 2}], // https://github.com/sveltejs/eslint-plugin-svelte3/issues/41
+        "no-tabs": "error",
         "no-unused-vars": ["error", {"args": "none"}],
         "no-useless-concat": "error",
         "no-use-before-define": ["error", {
