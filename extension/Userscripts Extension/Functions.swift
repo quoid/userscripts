@@ -318,7 +318,7 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
     logText("updateManifestMatches started")
     // only get all files if files were not provided
     var files = [[String: Any]]()
-    if optionalFilesArray.count < 1 {
+    if optionalFilesArray.isEmpty {
         guard let getFiles = getAllFiles() else {return false}
         files = getFiles
     } else {
@@ -411,7 +411,7 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
         // remove filename from array by index
         returnDictionary[pattern]?.remove(at: ind!)
         // if filename was the last item in array, remove the url pattern from dictionary
-        if returnDictionary[pattern]!.count < 1 {
+        if returnDictionary[pattern]!.isEmpty {
             returnDictionary.removeValue(forKey: pattern)
         }
     }
@@ -423,7 +423,7 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
     logText("updateManifestRequired started")
     // only get all files if files were not provided
     var files = [[String: Any]]()
-    if optionalFilesArray.count < 1 {
+    if optionalFilesArray.isEmpty {
         guard let getFiles = getAllFiles() else {
             logText("updateManifestRequired count not get files")
             return false
@@ -458,7 +458,7 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
 
         // if there are values, write them to manifest
         // if failed to write to manifest, continue to next file & log error
-        if r.count > 0 && r != manifest.require[filename] {
+        if !r.isEmpty && r != manifest.require[filename] {
             manifest.require[filename] = r
             if !updateManifest(with: manifest) {
                 err("couldn't update manifest when getting required resources")
@@ -476,7 +476,7 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
     var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
     // only get all files if files were not provided
     var allFiles = [[String: Any]]()
-    if optionalFilesArray.count < 1 {
+    if optionalFilesArray.isEmpty {
         // if getAllFiles fails to return, ignore and pass an empty array
         let getFiles = getAllFiles() ?? []
         allFiles = getFiles
@@ -692,7 +692,7 @@ func getAllFiles() -> [[String: Any]]? {
 func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
     let directory = getRequireLocation().appendingPathComponent(filename)
     // if file requires no resource but directory exists, trash it
-    if resources.count < 1 && FileManager.default.fileExists(atPath: directory.path) {
+    if resources.isEmpty && FileManager.default.fileExists(atPath: directory.path) {
         do {
             try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
         } catch {
@@ -737,7 +737,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[String: String]]? {
     // only get all files if files were not provided
     var files = [[String: Any]]()
-    if optionalFilesArray.count < 1 {
+    if optionalFilesArray.isEmpty {
         guard let getFiles = getAllFiles() else {
             err("checkForRemoteUpdates failed at (1)")
             return nil
@@ -828,7 +828,7 @@ func getRemoteFileContents(_ url: String) -> String? {
     }
 
     // if made it to this point and contents still an empty string, something went wrong with the request
-    if contents.count < 1 {
+    if contents.isEmpty {
         logText("getRemoteFileContents failed at (4), contents empty, \(url)")
         return nil
     }
@@ -1024,9 +1024,9 @@ func include(_ url: String,_ pattern: String) -> Bool {
     return true
 }
 
-func getMatchedFiles(_ url: String) -> [String] {
+func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlocklist: Bool) -> [String] {
     logText("Getting matched files for \(url)")
-    let manifest = getManifest()
+    let manifest = optionalManifest ?? getManifest()
     guard
         let parts = getUrlProps(url),
         let ptcl = parts["protocol"],
@@ -1037,81 +1037,73 @@ func getMatchedFiles(_ url: String) -> [String] {
         err("getMatchedFiles failed at (1) for \(url)")
         return [String]()
     }
-    // domains where loading is excluded for file
-    var excludedFilenames:[String] = []
-    // when code is loaded from a file, it's filename will be populated in the below array, to avoid duplication
-    var matchedFilenames:[String] = []
+    
+    // filenames that should not load for the passed url
+    // the manifest values from @exclude and @exclude-match populate this set
+    var excludedFilenames: Set<String> = []
+    // filenames that should load for the passed url
+    // the manifest values from @include and @match populate this set
+    var matchedFilenames: Set<String> = []
     // all exclude-match patterns from manifest
     let excludeMatchPatterns = manifest.excludeMatch.keys
     // all match patterns from manifest
     let matchPatterns = manifest.match.keys
-    // all include patterns from manifest
+    // all include expressions from manifest
     let includeExpressions = manifest.include.keys
-    // all exclude patterns from manifest
+    // all exclude expressions from manifest
     let excludeExpressions = manifest.exclude.keys
-
-    // loop through exclude patterns and see if any match against page url
-    for pattern in excludeMatchPatterns {
-        // if pattern matches page url, add filenames from page url to excludes array, code from those filenames won't be loaded
-        if match(ptcl, host, path, pattern) {
-            guard let filenames = manifest.excludeMatch[pattern] else {
-                err("getMatchedFiles failed at (2)")
-                continue
-            }
-            for filename in filenames {
-                if !excludedFilenames.contains(filename) {
-                    excludedFilenames.append(filename)
-                }
+    
+    // if url matches a pattern in blocklist, no injection for this url
+    if (checkBlocklist) {
+        for pattern in manifest.blacklist {
+            if match(ptcl, host, path, pattern) {
+                // return empty array
+                return Array(matchedFilenames)
             }
         }
     }
-    // loop through exclude expressions and check for matches
+
+    // loop through all the @exclude-match patterns
+    // if any match passed url, push all filenames to excludedFilenames set
+    for pattern in excludeMatchPatterns {
+        if match(ptcl, host, path, pattern) {
+            guard let filenames = manifest.excludeMatch[pattern] else {
+                err("getMatchedFiles failed at (2) for \(pattern)")
+                continue
+            }
+            excludedFilenames = excludedFilenames.union(filenames)
+        }
+    }
     for exp in excludeExpressions {
         if include(href, exp) {
             guard let filenames = manifest.exclude[exp] else {
-                err("getMatchedFiles failed at (3)")
+                err("getMatchedFiles failed at (3) for \(exp)")
                 continue
             }
-            for filename in filenames {
-                if !excludedFilenames.contains(filename) {
-                    excludedFilenames.append(filename)
-                }
-            }
+            excludedFilenames = excludedFilenames.union(filenames)
         }
     }
-    // loop through all match patterns from manifest to see if they match against the current page url
     for pattern in matchPatterns {
         if match(ptcl, host, path, pattern) {
-            // the filenames listed for the pattern that match page url
             guard let filenames = manifest.match[pattern] else {
-                err("getMatchedFiles failed at (4)")
+                err("getMatchedFiles failed at (4) for \(pattern)")
                 continue
             }
-            // loop through matched filenames and populate matchedFilenames array
-            for filename in filenames {
-                // don't push to array if filename is in excludes or filename already exists in matchedFilenames array (to avoid duplication)
-                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
-                    matchedFilenames.append(filename)
-                }
-            }
+            matchedFilenames = matchedFilenames.union(filenames)
         }
     }
-    // loop through include expressions and check for matches
     for exp in includeExpressions {
         if include(href, exp) {
             guard let filenames = manifest.include[exp] else {
-                err("getMatchedFiles failed at (5)")
+                err("getMatchedFiles failed at (5) for \(exp)")
                 continue
             }
-            for filename in filenames {
-                if !excludedFilenames.contains(filename) && !matchedFilenames.contains(filename) {
-                    matchedFilenames.append(filename)
-                }
-            }
+            matchedFilenames = matchedFilenames.union(filenames)
         }
     }
+    matchedFilenames = matchedFilenames.subtracting(excludedFilenames)
     logText("Got \(matchedFilenames.count) matched files for \(url)")
-    return matchedFilenames
+    return Array(matchedFilenames)
 }
 
 // injection
@@ -1171,8 +1163,8 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         // if either is missing, use default value
         var injectInto = metadata["inject-into"]?[0] ?? "auto"
         var runAt = metadata["run-at"]?[0] ?? "document-end"
-        let injectVals = ["auto", "content", "page"]
-        let runAtVals = ["context-menu", "document-start", "document-end", "document-idle"]
+        let injectVals: Set<String> = ["auto", "content", "page"]
+        let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {
             injectInto = "auto"
@@ -1184,7 +1176,9 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         // attempt to get all @grant value
         var grants = metadata["grant"] ?? []
         // remove duplicates, if any exist
-        grants = Array(Set(grants))
+        if !grants.isEmpty {
+            grants = Array(Set(grants))
+        }
         
         // set GM.info data
         let description = metadata["description"]?[0] ?? ""
@@ -1227,7 +1221,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
                 let value = metaline.value
                 // metalines without values aren't included in parsed metadata object
                 // the only exception is @noframes
-                scriptObject[key] = value.count > 1 ? value : value[0]
+                scriptObject[key] = !value.isEmpty ? value : value[0]
             }
         }
         let scriptMetaStr = contents["metablock"] as? String ?? "??"
@@ -1343,27 +1337,14 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
 func getInjectionFilenames(_ url: String) -> [String]? {
     var filenames = [String]()
     let manifest = getManifest()
-    let matched = getMatchedFiles(url)
-    guard
-        let active = manifest.settings["active"],
-        let parts = getUrlProps(url),
-        let ptcl = parts["protocol"],
-        let host = parts["host"],
-        let path = parts["pathname"]
-    else {
+    let matched = getMatchedFiles(url, manifest, true)
+    guard let active = manifest.settings["active"] else {
         err("getInjectionFilenames failed at (1)")
         return nil
     }
     // if injection is disabled return empty array
     if active != "true" {
         return filenames
-    }
-    // url matches a pattern in blacklist, no injection for this url
-    // return empty array
-    for pattern in manifest.blacklist {
-        if match(ptcl, host, path, pattern) {
-            return filenames
-        }
     }
     // filter out all disabled files
     filenames = matched.filter{!manifest.disabled.contains($0)}
@@ -1378,7 +1359,7 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]
         return matches
     }
     // get all the files saved to manifest that match the passed url
-    let matched = getMatchedFiles(url)
+    let matched = getMatchedFiles(url, nil, false)
     // get all the files at the save location
     guard
         let files = getAllFiles()
@@ -1397,7 +1378,7 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]
     let frameUrls = subframeUrls.filter{$0 != url}
     // for each url just pushed to frameUrls, get all the files saved to manifest that match their url
     for frameUrl in frameUrls {
-        let frameMatches = getMatchedFiles(frameUrl)
+        let frameMatches = getMatchedFiles(frameUrl, nil, false)
         for frameMatch in frameMatches {
             // for the match against the frameUrl, see if it has @noframes
             // if so, it should not be appended to frameUrlsMatches

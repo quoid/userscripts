@@ -23,7 +23,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         } else if name == "REQ_USERSCRIPTS" {
             if let url = message?["url"] as? String, let isTop = message?["isTop"] as? Bool {
                 if
-                    checkDefaultDirectories(),
                     let matches = getInjectionFilenames(url),
                     let code = getCode(matches, isTop)
                 {
@@ -201,7 +200,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "PAGE_INIT_DATA" {
             #if os(macOS)
-                if let settings = getInitData() {
+                if let settings = getInitData(), checkDefaultDirectories() {
                     response.userInfo = [SFExtensionMessageKey: settings]
                 } else {
                     response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
