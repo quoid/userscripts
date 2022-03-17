@@ -27,7 +27,7 @@ export function wait(ms) {
 
 // TODO: describe the items array that should get passed to this function
 /**
- * @param {array} array
+ * @param {Array} array
  * @param {("lastModifiedAsc"|"lastModifiedDesc"|"nameAsc"|"nameDesc")} order
  * @returns
  */
