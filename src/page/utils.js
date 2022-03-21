@@ -63,7 +63,7 @@ export function newScriptDefault(description, name, type) {
 
 /**
  * @param {string} str
- * @returns {{code: string, content: str, metablock: string, metadata: {string: string[]}}}
+ * @returns {?{code: string, content: str, metablock: string, metadata: {string: string[]}}}
  */
 export function parse(str) {
     if (typeof str != "string") return null;
@@ -100,3 +100,76 @@ export function parse(str) {
         metadata: metadata
     };
 }
+
+/**
+ * @param {string} text editor code
+ * @returns {{match: boolean, meta: boolean} | {key: string, value: string, text: string}[]}
+ */
+export function parseMetadata(text) {
+    const groupsRe = /(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)/;
+    const groups = text.match(groupsRe);
+    // userscript code doesn't match the regex expression
+    // could be missing opening/closing tags, malformed
+    // or missing metadata between opening/closing tags (group 2 in regex exp)
+    if (!groups) {
+        return {match: false};
+    }
+
+    // userscript code matches but content between opening/closing tag missing
+    // ex. opening/closing tags present, but newline characters between the tags
+    const metas = groups[2];
+    if (!metas) return {match: true, meta: false};
+
+    const metadata = [];
+    const metaArray = metas.split("\n");
+
+    for (let i = 0; i < metaArray.length; i++) {
+        const metaRegex = /^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]*([^\s]+[^\r\n\t\v\f]*)?/;
+        const meta = metaArray[i];
+        const parts = meta.match(metaRegex);
+        if (parts) metadata.push({key: parts[1], value: parts[2], text: parts[0]});
+    }
+
+    // if there is content between the opening/closing tags, match will be found
+    // this additionally checks that there's at least one properly formed key
+    // if not keys found, assume metadata is missing
+    // checking that required keys are present will happen elsewhere
+    if (!Object.keys(metadata).length) return {match: true, meta: false};
+
+    return metadata;
+}
+
+export const validGrants = new Set([
+    "GM.addStyle",
+    "GM.deleteValue",
+    "GM.getValue",
+    "GM.info",
+    "GM.listValues",
+    "GM.openInTab",
+    "GM.setClipboard",
+    "GM.setValue",
+    "GM.xmlHttpRequest",
+    "GM_addStyle",
+    "GM_info",
+    "GM_setClipboard",
+    "GM_xmlhttpRequest"
+]);
+
+export const validKeys = new Set([
+    "author",
+    "description",
+    "downloadURL",
+    "exclude",
+    "exclude-match",
+    "grant",
+    "include",
+    "inject-into",
+    "match",
+    "name",
+    "noframes",
+    "require",
+    "run-at",
+    "updateURL",
+    "version",
+    "weight"
+]);
