@@ -1107,35 +1107,15 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
 }
 
 // injection
-// func getCode(_ filenames: [String], _ isTop: Bool)-> [String: [String: [String: Any]]]? {
 func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
-    //var allFiles = [String: [String: [String: Any]]]()
-    var allFiles = [String: Any]()
-    var cssFiles = [String:[String:String]]()
-    var jsFiles = [String: [String: [String: [String: Any]]]]()
-    jsFiles["auto"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["content"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["page"] = ["document-start": [:], "document-end": [:], "document-idle": [:]]
-    jsFiles["context-menu"] = ["auto": [:], "content": [:], "page": [:]]
-    var auto_docStart = [String: [String: Any]]()
-    var auto_docEnd = [String: [String: Any]]()
-    var auto_docIdle = [String: [String: Any]]()
-    var content_docStart = [String: [String: Any]]()
-    var content_docEnd = [String: [String: Any]]()
-    var content_docIdle = [String: [String: Any]]()
-    var page_docStart = [String: [String: Any]]()
-    var page_docEnd = [String: [String: Any]]()
-    var page_docIdle = [String: [String: Any]]()
-
-    var auto_context_scripts = [String: [String: Any]]()
-    var content_context_scripts = [String: [String: Any]]()
-    var page_context_scripts = [String: [String: Any]]()
-
+    var cssFiles = [Any]()
+    var jsFiles = [Any]()
+    
     guard let saveLocation = getSaveLocation() else {
         err("getCode failed at (1)")
         return nil
     }
-
+    
     for filename in filenames {
         guard
             let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
@@ -1193,7 +1173,8 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "description": description,
             "excludes": excludes,
             "exclude-match": excludeMatches,
-            "grant": grants,
+            "filename": filename,
+            "grants": grants,
             "includes": includes,
             "inject-into": injectInto,
             "matches": matches,
@@ -1244,73 +1225,29 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         }
 
         if type == "css" {
-            cssFiles[filename] = ["code": code, "weight": weight, "name": name]
-        } else if type == "js" {
-            let data = [
+            cssFiles.append([
                 "code": code,
-                "weight": weight,
+                "filename": filename,
+                "name": name,
+                "type": "css",
+                "weight": weight
+            ])
+        } else if type == "js" {
+            jsFiles.append([
+                "code": code,
                 "scriptMetaStr": scriptMetaStr,
-                "scriptObject": scriptObject
-            ] as [String : Any]
-            // add file data to appropriate dict
-            if injectInto == "auto" && runAt == "document-start" {
-                auto_docStart[filename] = data
-            } else if injectInto == "auto" && runAt == "document-end" {
-                auto_docEnd[filename] = data
-            } else if injectInto == "auto" && runAt == "document-idle" {
-                auto_docIdle[filename] = data
-            } else if injectInto == "content" && runAt == "document-start" {
-                content_docStart[filename] = data
-            } else if injectInto == "content" && runAt == "document-end" {
-                content_docEnd[filename] = data
-            } else if injectInto == "content" && runAt == "document-idle" {
-                content_docIdle[filename] = data
-            } else if injectInto == "page" && runAt == "document-start" {
-                page_docStart[filename] = data
-            } else if injectInto == "page" && runAt == "document-end" {
-                page_docEnd[filename] = data
-            } else if injectInto == "page" && runAt == "document-idle" {
-                page_docIdle[filename] = data
-            }
-            if runAt == "context-menu" && injectInto == "auto" {
-                auto_context_scripts[filename] = data
-            }
-            if runAt == "context-menu" && injectInto == "content" {
-                content_context_scripts[filename] = data
-            }
-            if runAt == "context-menu" && injectInto == "page" {
-                page_context_scripts[filename] = data
-            }
+                "scriptObject": scriptObject,
+                "type": "js",
+                "weight": weight
+            ])
         }
     }
-
-    // construct the js specific dictionaries
-    jsFiles["auto"]!["document-start"] = auto_docStart
-    jsFiles["auto"]!["document-end"] = auto_docEnd
-    jsFiles["auto"]!["document-idle"] = auto_docIdle
-    jsFiles["content"]!["document-start"] = content_docStart
-    jsFiles["content"]!["document-end"] = content_docEnd
-    jsFiles["content"]!["document-idle"] = content_docIdle
-    jsFiles["page"]!["document-start"] = page_docStart
-    jsFiles["page"]!["document-end"] = page_docEnd
-    jsFiles["page"]!["document-idle"] = page_docIdle
-    // the context-menu dictionaries are constructed differently
-    // they will need to be handled in a unique way on the JS side
-    jsFiles["context-menu"]!["auto"] = auto_context_scripts
-    jsFiles["context-menu"]!["content"] = content_context_scripts
-    jsFiles["context-menu"]!["page"] = page_context_scripts
-
-    // construct the returned dictionary
-    allFiles["css"] = cssFiles
-    allFiles["js"] = jsFiles
-    
-    // add global values
-    let scriptHandler = "Userscripts"
-    let scriptHandlerVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
-    allFiles["scriptHandler"] = scriptHandler
-    allFiles["scriptHandlerVersion"] = scriptHandlerVersion
-    
-    return allFiles
+    let resp = [
+        "files": ["css": cssFiles, "js": jsFiles],
+        "scriptHandler": "Userscripts",
+        "scriptHandlerVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+    ] as [String : Any]
+    return resp
 }
 
 func getFileContentsParsed(_ url: URL) -> [String: Any]? {

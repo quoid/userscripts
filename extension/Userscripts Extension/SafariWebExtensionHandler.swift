@@ -26,7 +26,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                     let matches = getInjectionFilenames(url),
                     let code = getCode(matches, isTop)
                 {
-                    response.userInfo = [SFExtensionMessageKey: ["code": code]]
+                    response.userInfo = [SFExtensionMessageKey: code]
                 } else {
                     response.userInfo = [SFExtensionMessageKey: ["error": "REQ_USERSCRIPTS failed"]]
                 }
