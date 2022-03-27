@@ -78,11 +78,11 @@
 
     async function updateItem(item) {
         disabled = true;
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
-        const url = tabs[0].url;
+        const currentTab = await browser.tabs.getCurrent();
+        const url = currentTab.url;
         const frameUrls = [];
         if (url) {
-            const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
+            const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
             frames.forEach(frame => frameUrls.push(frame.url));
         }
         const message = {
@@ -272,9 +272,10 @@
         const currentTab = await browser.tabs.getCurrent();
         const url = currentTab.url;
         if (!url) {
+            console.error("Error getting current tab url");
             initError = true;
             loading = false;
-            return console.error("Error getting current tab url");
+            return;
         }
         if (url === extensionPageUrl) {
             // disable popup on extension page
@@ -353,7 +354,7 @@
             // then the content script will send response to the popup
             // Content scripts that are injected into web content cannot send messages to the native app
             // https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
-            const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_00"});
+            const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_00"});
             if (response.error) {
                 console.log(`Error checking .user.js url: ${response.error}`);
                 error = response.error;
@@ -416,9 +417,9 @@
         // show the install view
         showInstall = true;
         // get the active tab
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        const currentTab = await browser.tabs.getCurrent();
         // send content script a message on the active tab
-        const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_01"});
+        const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_01"});
         // when above message is sent, content script will get active tab's stringified dom content
         // and then send that content and a message to the bg page
         // the bg page will send a message and the content to the swift side for parsing
@@ -444,9 +445,9 @@
         // go back to main view
         showInstall = false;
         // get the active tab
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        const currentTab = await browser.tabs.getCurrent();
         // send content script a message on the active tab, which will start the install process
-        const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_02"});
+        const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_02"});
         if (response.error) {
             error = response.error;
             disabled = false;

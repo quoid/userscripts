@@ -2867,12 +2867,12 @@
     	return child_ctx;
     }
 
-    // (497:0) {#if !active}
+    // (498:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (500:0) {#if showInstallPrompt}
+    // (501:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2914,7 +2914,7 @@
     	};
     }
 
-    // (505:0) {#if error}
+    // (506:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2964,7 +2964,7 @@
     	};
     }
 
-    // (533:8) {:else}
+    // (534:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3037,7 +3037,7 @@
     	};
     }
 
-    // (531:35) 
+    // (532:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3059,7 +3059,7 @@
     	};
     }
 
-    // (521:28) 
+    // (522:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3097,7 +3097,7 @@
     	};
     }
 
-    // (519:8) {#if inactive}
+    // (520:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3119,7 +3119,7 @@
     	};
     }
 
-    // (516:4) {#if loading}
+    // (517:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3159,7 +3159,7 @@
     	};
     }
 
-    // (535:16) {#each list as item (item.filename)}
+    // (536:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3218,7 +3218,7 @@
     	};
     }
 
-    // (548:0) {#if !inactive && platform === "macos"}
+    // (549:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3251,7 +3251,7 @@
     	};
     }
 
-    // (585:18) 
+    // (586:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3301,7 +3301,7 @@
     	};
     }
 
-    // (571:22) 
+    // (572:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3351,7 +3351,7 @@
     	};
     }
 
-    // (555:0) {#if showUpdates}
+    // (556:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3404,7 +3404,7 @@
     	};
     }
 
-    // (586:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
+    // (587:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3444,7 +3444,7 @@
     	};
     }
 
-    // (572:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (573:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3488,7 +3488,7 @@
     	};
     }
 
-    // (556:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
+    // (557:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -4028,12 +4028,12 @@
 
     	async function updateItem(item) {
     		$$invalidate(3, disabled = true);
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-    		const url = tabs[0].url;
+    		const currentTab = await browser.tabs.getCurrent();
+    		const url = currentTab.url;
     		const frameUrls = [];
 
     		if (url) {
-    			const frames = await browser.webNavigation.getAllFrames({ tabId: tabs[0].id });
+    			const frames = await browser.webNavigation.getAllFrames({ tabId: currentTab.id });
     			frames.forEach(frame => frameUrls.push(frame.url));
     		}
 
@@ -4178,9 +4178,10 @@
     		const url = currentTab.url;
 
     		if (!url) {
+    			console.error("Error getting current tab url");
     			$$invalidate(11, initError = true);
     			$$invalidate(2, loading = false);
-    			return console.error("Error getting current tab url");
+    			return;
     		}
 
     		if (url === extensionPageUrl) {
@@ -4277,7 +4278,7 @@
     			// then the content script will send response to the popup
     			// Content scripts that are injected into web content cannot send messages to the native app
     			// https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
-    			const response = await browser.tabs.sendMessage(tabs[0].id, { name: "USERSCRIPT_INSTALL_00" });
+    			const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_00" });
 
     			if (response.error) {
     				console.log(`Error checking .user.js url: ${response.error}`);
@@ -4344,10 +4345,10 @@
     		$$invalidate(16, showInstall = true);
 
     		// get the active tab
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
+    		const currentTab = await browser.tabs.getCurrent();
 
     		// send content script a message on the active tab
-    		const response = await browser.tabs.sendMessage(tabs[0].id, { name: "USERSCRIPT_INSTALL_01" });
+    		const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_01" });
 
     		// when above message is sent, content script will get active tab's stringified dom content
     		// and then send that content and a message to the bg page
@@ -4377,10 +4378,10 @@
     		$$invalidate(16, showInstall = false);
 
     		// get the active tab
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
+    		const currentTab = await browser.tabs.getCurrent();
 
     		// send content script a message on the active tab, which will start the install process
-    		const response = await browser.tabs.sendMessage(tabs[0].id, { name: "USERSCRIPT_INSTALL_02" });
+    		const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_02" });
 
     		if (response.error) {
     			$$invalidate(0, error = response.error);
