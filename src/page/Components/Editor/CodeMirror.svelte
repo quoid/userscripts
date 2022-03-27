@@ -264,7 +264,6 @@
                 errors.push(err);
             }
         });
-        console.log(errors);
         return errors;
     }
 
@@ -308,6 +307,7 @@
                     message: "Userscript metadata missing."
                 });
             }
+
             // run additional checks
             const invalidKeys = new Set();
             let invalidKeysErrors = [];
@@ -316,26 +316,29 @@
             const emptyKeyValues = new Set();
             let emptyKeyValuesErrors = [];
 
-            // find invalid keys or empty key values
-            for (let i = 0; i < parsedMetadata.length; i++) {
-                const {key, value: val, text} = parsedMetadata[i];
-                if (!validKeys.has(key)) {
-                    invalidKeys.add(key);
+            // if metadata fails initial check, it won't be array
+            // don't run the additional checks if initial checks failed
+            if (Array.isArray(parsedMetadata)) {
+                // find invalid keys or empty key values
+                for (let i = 0; i < parsedMetadata.length; i++) {
+                    const {key, value: val, text} = parsedMetadata[i];
+                    if (!validKeys.has(key)) {
+                        invalidKeys.add(key);
+                    }
+                    if (key !== "noframes" && !invalidKeys.has(key) && !val) {
+                        emptyKeyValues.add(text);
+                    }
                 }
-                if (key !== "noframes" && !invalidKeys.has(key) && !val) {
-                    emptyKeyValues.add(text);
+
+                // find unsupported @grant methods
+                const grants = parsedMetadata.filter(a => a.key === "grant");
+                for (let i = 0; i < grants.length; i++) {
+                    const {value, text} = grants[i];
+                    if (!validGrants.has(value)) {
+                        invalidGrants.add(text);
+                    }
                 }
             }
-
-            // find unsupported @grant methods
-            const grants = parsedMetadata.filter(a => a.key === "grant");
-            for (let i = 0; i < grants.length; i++) {
-                const {value, text} = grants[i];
-                if (!validGrants.has(value)) {
-                    invalidGrants.add(text);
-                }
-            }
-
             invalidKeysErrors = makeErrors({
                 set: invalidKeys,
                 setName: "invalidKeys",

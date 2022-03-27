@@ -962,6 +962,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         return { set, update, subscribe };
     }
 
+    /**
+     * @param {number} ms millisecond timestamp
+     * @returns {string}
+     */
     function formatDate(ms) {
         const d = new Date(ms);
         const yr = new Intl.DateTimeFormat("en", {year: "numeric"}).format(d);
@@ -973,9 +977,15 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function uniqueId() {
-        return Math.random().toString(36).substr(2, 8);
+        return Math.random().toString(36).substring(2, 10);
     }
 
+    // TODO: describe the items array that should get passed to this function
+    /**
+     * @param {Array} array
+     * @param {("lastModifiedAsc"|"lastModifiedDesc"|"nameAsc"|"nameDesc")} order
+     * @returns
+     */
     function sortBy(array, order) {
         if (order === "nameAsc") {
             array.sort((a, b) => a.name.localeCompare(b.name));
@@ -991,13 +1001,106 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         return array;
     }
 
-    function  newScriptDefault(description, name, type) {
+    /**
+     *
+     * @param {string} description
+     * @param {string} name
+     * @param {("css"|"js")} type
+     * @returns {string}
+     */
+    function newScriptDefault(description, name, type) {
         if (type === "css") {
             return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n@match       <all_urls>\n==/UserStyle== */`;
         } else if (type === "js") {
             return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// @match       *://*/*\n// ==/UserScript==`;
         }
     }
+
+    /**
+     * @param {string} text editor code
+     * @returns {{match: boolean, meta: boolean} | {key: string, value: string, text: string}[]}
+     */
+    function parseMetadata(text) {
+        const groupsRe = /(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)/;
+        const groups = text.match(groupsRe);
+        // userscript code doesn't match the regex expression
+        // could be missing opening/closing tags, malformed
+        // or missing metadata between opening/closing tags (group 2 in regex exp)
+        if (!groups) {
+            return {match: false};
+        }
+
+        // userscript code matches but content between opening/closing tag missing
+        // ex. opening/closing tags present, but newline characters between the tags
+        const metas = groups[2];
+        if (!metas) return {match: true, meta: false};
+
+        const metadata = [];
+        const metaArray = metas.split("\n");
+
+        for (let i = 0; i < metaArray.length; i++) {
+            const metaRegex = /^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]*([^\s]+[^\r\n\t\v\f]*)?/;
+            const meta = metaArray[i];
+            const parts = meta.match(metaRegex);
+            if (parts) metadata.push({key: parts[1], value: parts[2], text: parts[0]});
+        }
+
+        // if there is content between the opening/closing tags, match will be found
+        // this additionally checks that there's at least one properly formed key
+        // if not keys found, assume metadata is missing
+        // checking that required keys are present will happen elsewhere
+        if (!Object.keys(metadata).length) return {match: true, meta: false};
+
+        return metadata;
+    }
+
+    const validGrants = new Set([
+        "GM.addStyle",
+        "GM.deleteValue",
+        "GM.getValue",
+        "GM.info",
+        "GM.listValues",
+        "GM.openInTab",
+        "GM.setClipboard",
+        "GM.setValue",
+        "GM.xmlHttpRequest",
+        "GM_addStyle",
+        "GM_info",
+        "GM_setClipboard",
+        "GM_xmlhttpRequest"
+    ]);
+
+    const validKeys = new Set([
+        "author",
+        "description",
+        "downloadURL",
+        "exclude",
+        "exclude-match",
+        "grant",
+        "include",
+        "inject-into",
+        "match",
+        "name",
+        "noframes",
+        "require",
+        "run-at",
+        "updateURL",
+        "version",
+        "weight"
+    ]);
+
+    function notificationStore() {
+        const {subscribe, update} = writable([]);
+        const add = item => {
+            update(a => {
+                a.push(item);
+                return a;
+            });
+        };
+        const remove = id => update(a => a.filter(b => b.id !== id));
+        return {subscribe, add, remove};
+    }
+    const notifications = notificationStore();
 
     function logStore() {
         const {subscribe, set, update} = writable([]);
@@ -1015,19 +1118,6 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         return {subscribe, add, remove, reset};
     }
     const log = logStore();
-
-    function notificationStore() {
-        const {subscribe, update} = writable([]);
-        const add = item => {
-            update(a => {
-                a.push(item);
-                return a;
-            });
-        };
-        const remove = id => update(a => a.filter(b => b.id !== id));
-        return {subscribe, add, remove};
-    }
-    const notifications = notificationStore();
 
     function stateStore() {
         const {subscribe, update} = writable(["init"]);
@@ -1318,7 +1408,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			// button click events bubble to document body
     			// can use to determine if button triggered body event listener func
     			// event.target = button, e.target = body event listener trigger el
-    			if (e.target != event.target) {
+    			if (e.target !== event.target) {
     				// the body event listener not triggered by button
     				// if omitted, dropdown would close immediately
     				$$invalidate(3, active = false);
@@ -1470,7 +1560,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (113:4) {#if query}
+    // (66:4) {#if query}
     function create_if_block(ctx) {
     	let iconbutton;
     	let current;
@@ -1642,7 +1732,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			items,
     			$items = $items.map(item => {
     				const visible = item.filename.toLowerCase().includes(query.trim().toLowerCase());
-    				if (visible != item.visible) return { ...item, visible };
+    				if (visible !== item.visible) return { ...item, visible };
     				return item;
     			}),
     			$items
@@ -1843,13 +1933,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return {
     		c() {
     			div = element("div");
-    			attr(div, "class", div_class_value = "script__tag " + (/*type*/ ctx[0] ? "script__tag--" + /*type*/ ctx[0] : "") + " svelte-p9vdxd");
+    			attr(div, "class", div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-p9vdxd");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + (/*type*/ ctx[0] ? "script__tag--" + /*type*/ ctx[0] : "") + " svelte-p9vdxd")) {
+    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-p9vdxd")) {
     				attr(div, "class", div_class_value);
     			}
     		},
@@ -2171,7 +2261,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	function formatDescription(str) {
     		if (str && str.length > 120) {
     			$$invalidate(2, showTitle = true);
-    			return str.substring(0, 120).trim() + "...";
+    			return `${str.substring(0, 120).trim()}...`;
     		} else {
     			$$invalidate(2, showTitle = false);
     			return str;
@@ -17351,6 +17441,47 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	instance$7.display.wrapper.removeAttribute("style");
     }
 
+    /**
+     * @param {{set: Set<string>, setName: string, message: string}}
+     * @returns {{from: {line: number, ch: number},
+     * to: {line: number, ch: number}, message: string, severity: string}}
+     */
+    function makeErrors({ set, setName, message }) {
+    	const errors = [];
+
+    	//for (let i = 0; i < array.length; i++) {
+    	set.forEach(el => {
+    		//const el = array[i];
+    		let regex = new RegExp(`^${el}$`);
+
+    		if (setName === "invalidKeys") {
+    			regex = new RegExp(`^// @${el}.*?$`);
+    		}
+
+    		const cursor = instance$7.getSearchCursor(regex);
+    		const ranges = [];
+
+    		while (cursor.findNext()) {
+    			ranges.push({ anchor: cursor.from(), head: cursor.to() });
+    		}
+
+    		for (let j = 0; j < ranges.length; j++) {
+    			const range = ranges[j];
+
+    			const err = {
+    				from: range?.anchor,
+    				to: range?.head,
+    				severity: "warning",
+    				message
+    			};
+
+    			errors.push(err);
+    		}
+    	});
+
+    	return errors;
+    }
+
     function getValue() {
     	return instance$7.getValue();
     }
@@ -17384,7 +17515,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let searchActive = false;
 
     	// linter options - https://jshint.com/docs/options/
-    	const lintOptions = { asi: true, esversion: 9 };
+    	const lintOptions = { async: true, getAnnotations: linter };
 
     	function init() {
     		// do lint settings check
@@ -17394,7 +17525,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		instance$7 = codemirror.fromTextArea(textarea, {
     			mode: "javascript",
     			autoCloseBrackets: $settings.autoCloseBrackets,
-    			continueComments: false,
+    			continueComments: true,
     			foldGutter: true,
     			lineNumbers: true,
     			lineWrapping: true,
@@ -17417,12 +17548,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				"Cmd-/": "toggleComment",
     				"Cmd-S": () => saveHandler(),
     				"Cmd-F": () => activateSearch(),
-    				"Esc": () => {
-    					$$invalidate(2, searchActive = false);
-    				},
+    				"Esc": () => $$invalidate(2, searchActive = false),
     				Tab: cm => {
     					// convert tabs to spaces and add invisible elements
-    					var s = Array(cm.getOption("indentUnit") + 1).join(" ");
+    					const s = Array(cm.getOption("indentUnit") + 1).join(" ");
 
     					cm.replaceSelection(s);
     				}
@@ -17471,7 +17600,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		if (// check if setting is enabled
     		$settings.autoHint && // ensure hinting not active already
     		!cm.state.completionActive && // not first position on the line
-    		cm.getCursor().ch != 0 && // only hint when 1-2 key combos
+    		cm.getCursor().ch !== 0 && // only hint when 1-2 key combos
     		keysPressed.length < 3 && // valid keys combo
     		validKeys) cm.showHint({ completeSingle: false });
     	}
@@ -17501,6 +17630,118 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		instance$7.refresh();
     	}
 
+    	function linter(text, updateLinting, options) {
+
+    		// only lint in javascript mode
+    		if (instance$7?.options.mode !== "javascript") return;
+
+    		// normal javascript linting through CodeMirror addon and jshint
+    		let errors = codemirror.lint.javascript(text, { asi: true, esversion: 9 });
+
+    		// errors from custom checks & metadata parser will populate this array
+    		let customErrors = [];
+
+    		{
+    			// check if whitespace characters precede userscript tags
+    			if ((/^\s/).test(text)) {
+    				customErrors.push({
+    					from: { line: 0, ch: 0 },
+    					to: { line: 0, ch: 0 },
+    					severity: "warning",
+    					message: "Userscript starts with whitespace characters."
+    				});
+    			}
+
+    			// parse the code metadata
+    			const parsedMetadata = parseMetadata(text);
+
+    			// check parser result for initial errors
+    			if (parsedMetadata.match === false) {
+    				customErrors.push({
+    					from: { line: 0, ch: 0 },
+    					to: { line: 0, ch: 0 },
+    					severity: "error",
+    					message: "Userscript metadata missing or improperly formatted."
+    				});
+    			} else if (parsedMetadata.meta === false) {
+    				customErrors.push({
+    					from: { line: 0, ch: 0 },
+    					to: { line: 0, ch: 0 },
+    					severity: "error",
+    					message: "Userscript metadata missing."
+    				});
+    			}
+
+    			// run additional checks
+    			const invalidKeys = new Set();
+
+    			let invalidKeysErrors = [];
+    			const invalidGrants = new Set();
+    			let invalidGrantsErrors = [];
+    			const emptyKeyValues = new Set();
+    			let emptyKeyValuesErrors = [];
+
+    			// if metadata fails initial check, it won't be array
+    			// don't run the additional checks if initial checks failed
+    			if (Array.isArray(parsedMetadata)) {
+    				// find invalid keys or empty key values
+    				for (let i = 0; i < parsedMetadata.length; i++) {
+    					const { key, value: val, text } = parsedMetadata[i];
+
+    					if (!validKeys.has(key)) {
+    						invalidKeys.add(key);
+    					}
+
+    					if (key !== "noframes" && !invalidKeys.has(key) && !val) {
+    						emptyKeyValues.add(text);
+    					}
+    				}
+
+    				// find unsupported @grant methods
+    				const grants = parsedMetadata.filter(a => a.key === "grant");
+
+    				for (let i = 0; i < grants.length; i++) {
+    					const { value, text } = grants[i];
+
+    					if (!validGrants.has(value)) {
+    						invalidGrants.add(text);
+    					}
+    				}
+    			}
+
+    			invalidKeysErrors = makeErrors({
+    				set: invalidKeys,
+    				setName: "invalidKeys",
+    				message: "Unsupported metadata key."
+    			});
+
+    			emptyKeyValuesErrors = makeErrors({
+    				set: emptyKeyValues,
+    				setName: "emptyKeyValues",
+    				message: "Key requires a value."
+    			});
+
+    			invalidGrantsErrors = makeErrors({
+    				set: invalidGrants,
+    				setName: "invalidGrants",
+    				message: "@grant method not supported."
+    			});
+
+    			// combine all custom error arrays
+    			customErrors = [
+    				...customErrors,
+    				...invalidKeysErrors,
+    				...emptyKeyValuesErrors,
+    				...invalidGrantsErrors
+    			];
+    		}
+
+    		// if the custom linter returned errors, add them to errors array
+    		if (customErrors.length) errors = [...errors, ...customErrors];
+
+    		updateLinting(errors);
+    	}
+
     	function discardChanges() {
     		if ($state.includes("ready")) {
     			instance$7.setValue(savedCode);
@@ -17517,9 +17758,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		});
     	}
 
-    	const func = () => {
-    		$$invalidate(2, searchActive = false);
-    	};
+    	const func = () => $$invalidate(2, searchActive = false);
 
     	function switch_instance_binding($$value) {
     		binding_callbacks[$$value ? "unshift" : "push"](() => {
@@ -17641,7 +17880,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return child_ctx;
     }
 
-    // (230:8) <Dropdown icon={iconPlus} title={"New item"} {disabled}>
+    // (180:8) <Dropdown icon={iconPlus} title={"New item"} {disabled}>
     function create_default_slot$1(ctx) {
     	let li0;
     	let t1;
@@ -17692,7 +17931,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (237:8) {#if $state.includes("items-loading")}
+    // (187:8) {#if $state.includes("items-loading")}
     function create_if_block_1(ctx) {
     	let loader;
     	let current;
@@ -17721,7 +17960,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (240:8) {#each list as item (item.filename)}
+    // (190:8) {#each list as item (item.filename)}
     function create_each_block(key_1, ctx) {
     	let first;
     	let switch_instance;
@@ -17819,7 +18058,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (249:4) {#if showCount}
+    // (199:4) {#if showCount}
     function create_if_block$5(ctx) {
     	let div;
     	let t0_value = /*list*/ ctx[3].length + "";
@@ -17833,7 +18072,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			div = element("div");
     			t0 = text(t0_value);
     			t1 = text(" Items");
-    			attr(div, "class", "sidebar__count svelte-11mx0re");
+    			attr(div, "class", "sidebar__count svelte-23v8pd");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -17942,13 +18181,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			t4 = space();
     			if (if_block1) if_block1.c();
-    			attr(div0, "class", "sidebar__filter svelte-11mx0re");
-    			attr(div1, "class", "sidebar__header svelte-11mx0re");
-    			attr(div2, "class", "sidebar__body svelte-11mx0re");
+    			attr(div0, "class", "sidebar__filter svelte-23v8pd");
+    			attr(div1, "class", "sidebar__header svelte-23v8pd");
+    			attr(div2, "class", "sidebar__body svelte-23v8pd");
 
     			attr(div3, "class", div3_class_value = "sidebar " + (!/*$settings*/ ctx[4].descriptions
     			? "sidebar--compact"
-    			: "") + " svelte-11mx0re");
+    			: "") + " svelte-23v8pd");
     		},
     		m(target, anchor) {
     			insert(target, div3, anchor);
@@ -18045,7 +18284,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (!current || dirty & /*$settings*/ 16 && div3_class_value !== (div3_class_value = "sidebar " + (!/*$settings*/ ctx[4].descriptions
     			? "sidebar--compact"
-    			: "") + " svelte-11mx0re")) {
+    			: "") + " svelte-23v8pd")) {
     				attr(div3, "class", div3_class_value);
     			}
     		},
@@ -18129,7 +18368,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     		const namePrefix = type === "js" ? "NewScript-" : "NewStyle-";
     		const name = namePrefix + random;
-    		const filename = name + "." + type;
+    		const filename = `${name}.${type}`;
     		const description = "This is your new file, start writing code";
 
     		const item = {
@@ -18160,7 +18399,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		// can occur when user clicks a non-temp item while a temp item exists
     		const temp = $items.find(i => i.temp);
 
-    		if ((temp && temp != item || cmChanged()) && !warn()) return;
+    		if ((temp && temp !== item || cmChanged()) && !warn()) return;
 
     		// the editor has changed or the above scenario is true
     		// the user has been warned and has accepted the warning
@@ -18173,7 +18412,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		}
 
     		// remove the temp item if needed
-    		if (temp && temp != item) items.update(i => i.filter(a => !a.temp));
+    		if (temp && temp !== item) items.update(i => i.filter(a => !a.temp));
 
     		// set the saved and session code variables properly
     		const savedCode = item.temp ? null : item.content;
@@ -18275,11 +18514,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	const click_handler = () => state.add("settings");
     	const click_handler_1 = () => newItem("css");
     	const click_handler_2 = () => newItem("js");
-
-    	const func = (item, e) => {
-    		toggleItem(e, item);
-    	};
-
+    	const func = (item, e) => toggleItem(e, item);
     	const click_handler_3 = item => activate(item);
     	let disabled;
     	let list;
@@ -18291,7 +18526,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		}
 
     		if ($$self.$$.dirty & /*$items, $settings*/ 65552) {
-    			 $$invalidate(3, list = sortBy($items, $settings.sortOrder).filter(a => a.visible != false));
+    			 $$invalidate(3, list = sortBy($items, $settings.sortOrder).filter(a => a.visible !== false));
     		}
 
     		if ($$self.$$.dirty & /*list*/ 8) {
@@ -18366,7 +18601,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (268:4) {#if !activeItem}
+    // (154:4) {#if !activeItem}
     function create_if_block_5(ctx) {
     	let div;
 
@@ -18374,7 +18609,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		c() {
     			div = element("div");
     			div.textContent = "No Item Selected";
-    			attr(div, "class", "editor__empty svelte-cbo01e");
+    			attr(div, "class", "editor__empty svelte-5bq9yj");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -18385,7 +18620,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (289:20) {:else}
+    // (175:20) {:else}
     function create_else_block(ctx) {
     	let t0;
     	let t1;
@@ -18409,7 +18644,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (287:35) 
+    // (173:35) 
     function create_if_block_4(ctx) {
     	let t;
 
@@ -18427,7 +18662,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (285:37) 
+    // (171:37) 
     function create_if_block_3(ctx) {
     	let t0;
     	let span;
@@ -18440,7 +18675,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			span = element("span");
     			t1 = text("remotely fetched");
     			t2 = text(", check carefully before saving!");
-    			attr(span, "class", "info svelte-cbo01e");
+    			attr(span, "class", "info svelte-5bq9yj");
     			attr(span, "title", /*remote*/ ctx[4]);
     		},
     		m(target, anchor) {
@@ -18462,7 +18697,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (283:58) 
+    // (169:58) 
     function create_if_block_2(ctx) {
     	let t0;
     	let span;
@@ -18495,7 +18730,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (281:58) 
+    // (167:58) 
     function create_if_block_1$1(ctx) {
     	let t;
 
@@ -18513,7 +18748,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (279:20) {#if $state.includes("saving")}
+    // (165:20) {#if $state.includes("saving")}
     function create_if_block$6(ctx) {
     	let t;
 
@@ -18659,19 +18894,19 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t11 = space();
     			button1 = element("button");
     			t12 = text("Save");
-    			attr(div0, "class", "editor__title truncate svelte-cbo01e");
-    			attr(div1, "class", "svelte-cbo01e");
-    			attr(div3, "class", "editor__status svelte-cbo01e");
-    			attr(div4, "class", "editor__header__content svelte-cbo01e");
-    			attr(div5, "class", "editor__header__buttons svelte-cbo01e");
-    			attr(div6, "class", "editor__header svelte-cbo01e");
-    			attr(div7, "class", "editor__code svelte-cbo01e");
+    			attr(div0, "class", "editor__title truncate svelte-5bq9yj");
+    			attr(div1, "class", "svelte-5bq9yj");
+    			attr(div3, "class", "editor__status svelte-5bq9yj");
+    			attr(div4, "class", "editor__header__content svelte-5bq9yj");
+    			attr(div5, "class", "editor__header__buttons svelte-5bq9yj");
+    			attr(div6, "class", "editor__header svelte-5bq9yj");
+    			attr(div7, "class", "editor__code svelte-5bq9yj");
     			button0.disabled = button0_disabled_value = /*disabled*/ ctx[9] || /*discardDisabled*/ ctx[7];
-    			attr(button0, "class", "svelte-cbo01e");
+    			attr(button0, "class", "svelte-5bq9yj");
     			button1.disabled = button1_disabled_value = /*disabled*/ ctx[9] || /*saveDisabled*/ ctx[8];
-    			attr(button1, "class", "svelte-cbo01e");
-    			attr(div8, "class", "editor__footer svelte-cbo01e");
-    			attr(div9, "class", "editor svelte-cbo01e");
+    			attr(button1, "class", "svelte-5bq9yj");
+    			attr(div8, "class", "editor__footer svelte-5bq9yj");
+    			attr(div9, "class", "editor svelte-5bq9yj");
     		},
     		m(target, anchor) {
     			insert(target, div9, anchor);
@@ -18864,12 +19099,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			items.update(i => {
     				const index = i.findIndex(a => a.active);
 
-    				const disabled = i[index].disabled != undefined
+    				const disabled = i[index].disabled !== undefined
     				? i[index].disabled
     				: false;
 
     				const type = i[index].type;
-    				const visible = i[index].visible != undefined ? i[index].visible : true;
+    				const visible = i[index].visible !== undefined ? i[index].visible : true;
     				i[index] = response;
     				i[index].active = true;
     				i[index].disabled = disabled;
@@ -18891,7 +19126,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		const link = document.createElement("a");
     		const content = codemirror.getValue();
     		const filename = activeItem.filename;
-    		link.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(content));
+    		link.setAttribute("href", `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`);
     		link.setAttribute("download", filename);
     		link.style.display = "none";
     		document.body.appendChild(link);
@@ -18946,7 +19181,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				log.add(response.error, "error", true);
     			} else {
     				items.update(i => i.filter(a => !a.active));
-    				log.add("Successfully trashed " + activeItem.filename, "info", false);
+    				log.add(`Successfully trashed ${activeItem.filename}`, "info", false);
     			}
     		}
 
@@ -19281,7 +19516,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t22 = space();
     			div26 = element("div");
     			div16 = element("div");
-    			div16.innerHTML = `<div class="svelte-1ibrghz">General Settings</div>`;
+    			div16.innerHTML = `<div class="svelte-9f6q4c">General Settings</div>`;
     			t24 = space();
     			div18 = element("div");
     			div17 = element("div");
@@ -19337,51 +19572,51 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			a2 = element("a");
     			a2.textContent = "supporting the project";
     			t53 = text(".");
-    			attr(div0, "class", "svelte-1ibrghz");
-    			attr(div1, "class", "modal__title svelte-1ibrghz");
-    			attr(div2, "class", "svelte-1ibrghz");
-    			attr(div3, "class", "modal__row svelte-1ibrghz");
-    			attr(div4, "class", "svelte-1ibrghz");
-    			attr(div5, "class", "modal__row svelte-1ibrghz");
-    			attr(div6, "class", "svelte-1ibrghz");
-    			attr(div7, "class", "modal__row svelte-1ibrghz");
-    			attr(div8, "class", "svelte-1ibrghz");
-    			attr(div9, "class", "modal__row svelte-1ibrghz");
-    			attr(div10, "class", "svelte-1ibrghz");
-    			attr(div11, "class", "modal__row svelte-1ibrghz");
-    			attr(div12, "class", "svelte-1ibrghz");
+    			attr(div0, "class", "svelte-9f6q4c");
+    			attr(div1, "class", "modal__title svelte-9f6q4c");
+    			attr(div2, "class", "svelte-9f6q4c");
+    			attr(div3, "class", "modal__row svelte-9f6q4c");
+    			attr(div4, "class", "svelte-9f6q4c");
+    			attr(div5, "class", "modal__row svelte-9f6q4c");
+    			attr(div6, "class", "svelte-9f6q4c");
+    			attr(div7, "class", "modal__row svelte-9f6q4c");
+    			attr(div8, "class", "svelte-9f6q4c");
+    			attr(div9, "class", "modal__row svelte-9f6q4c");
+    			attr(div10, "class", "svelte-9f6q4c");
+    			attr(div11, "class", "modal__row svelte-9f6q4c");
+    			attr(div12, "class", "svelte-9f6q4c");
     			option0.__value = "2";
     			option0.value = option0.__value;
     			option1.__value = "4";
     			option1.value = option1.__value;
     			if (/*$settings*/ ctx[3].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
-    			attr(div13, "class", "modal__row svelte-1ibrghz");
+    			attr(div13, "class", "modal__row svelte-9f6q4c");
     			attr(div14, "class", "modal__section");
-    			attr(div16, "class", "modal__title svelte-1ibrghz");
-    			attr(div17, "class", "svelte-1ibrghz");
+    			attr(div16, "class", "modal__title svelte-9f6q4c");
+    			attr(div17, "class", "svelte-9f6q4c");
     			toggle_class(div17, "red", !/*$settings*/ ctx[3].active);
-    			attr(div18, "class", "modal__row svelte-1ibrghz");
-    			attr(div19, "class", "svelte-1ibrghz");
-    			attr(div20, "class", "modal__row svelte-1ibrghz");
-    			attr(div21, "class", "svelte-1ibrghz");
-    			attr(div22, "class", "truncate svelte-1ibrghz");
-    			attr(div23, "class", "modal__row saveLocation svelte-1ibrghz");
-    			attr(div24, "class", "blacklist svelte-1ibrghz");
+    			attr(div18, "class", "modal__row svelte-9f6q4c");
+    			attr(div19, "class", "svelte-9f6q4c");
+    			attr(div20, "class", "modal__row svelte-9f6q4c");
+    			attr(div21, "class", "svelte-9f6q4c");
+    			attr(div22, "class", "truncate svelte-9f6q4c");
+    			attr(div23, "class", "modal__row saveLocation svelte-9f6q4c");
+    			attr(div24, "class", "blacklist svelte-9f6q4c");
     			attr(textarea, "placeholder", "Comma separated domain patterns");
     			attr(textarea, "spellcheck", "false");
     			textarea.value = /*blacklisted*/ ctx[2];
     			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[1];
-    			attr(textarea, "class", "svelte-1ibrghz");
-    			attr(div25, "class", "modal__row modal__row--wrap svelte-1ibrghz");
+    			attr(textarea, "class", "svelte-9f6q4c");
+    			attr(div25, "class", "modal__row modal__row--wrap svelte-9f6q4c");
     			attr(div26, "class", "modal__section");
-    			attr(div27, "class", "modal__title svelte-1ibrghz");
+    			attr(div27, "class", "modal__title svelte-9f6q4c");
     			attr(a0, "href", "https://github.com/quoid/userscripts");
     			attr(a1, "href", "https://apps.apple.com/us/app/userscripts/id1463298887");
     			attr(a2, "href", "https://github.com/quoid/userscripts#support");
-    			attr(p, "class", "svelte-1ibrghz");
+    			attr(p, "class", "svelte-9f6q4c");
     			attr(div28, "class", "modal__section");
-    			attr(div29, "class", "modal svelte-1ibrghz");
-    			attr(div30, "class", "settings svelte-1ibrghz");
+    			attr(div29, "class", "modal svelte-9f6q4c");
+    			attr(div30, "class", "settings svelte-9f6q4c");
     		},
     		m(target, anchor) {
     			insert(target, div30, anchor);
@@ -19643,7 +19878,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		const val = blacklist.value.split(",").map(item => item.trim()).filter(n => n);
 
     		// compare blacklist input to saved blacklist
-    		if ([...val].sort().toString() != [...$settings.blacklist].sort().toString()) {
+    		if ([...val].sort().toString() !== [...$settings.blacklist].sort().toString()) {
     			settings.updateSingleSetting("blacklist", val);
 
     			// when blacklistSaving, visual indication of saving occurs on element
@@ -19683,10 +19918,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		});
     	}
 
-    	const click_handler_8 = () => {
-    		state.remove("settings");
-    	};
-
+    	const click_handler_8 = () => state.remove("settings");
     	let blacklisted;
 
     	$$self.$$.update = () => {
@@ -19852,7 +20084,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return child_ctx;
     }
 
-    // (107:0) {#if $state.includes("init")}
+    // (65:0) {#if $state.includes("init")}
     function create_if_block_1$2(ctx) {
     	let div;
     	let html_tag;
@@ -19913,14 +20145,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (112:8) {:else}
+    // (70:8) {:else}
     function create_else_block$1(ctx) {
     	let span;
 
     	return {
     		c() {
     			span = element("span");
-    			span.textContent = "Initializing page...";
+    			span.textContent = "Initializing app...";
     			attr(span, "class", "svelte-17m9goi");
     		},
     		m(target, anchor) {
@@ -19932,14 +20164,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (110:8) {#if $state.includes("init-error")}
+    // (68:8) {#if $state.includes("init-error")}
     function create_if_block_2$1(ctx) {
     	let span;
 
     	return {
     		c() {
     			span = element("span");
-    			span.textContent = "Failed to initialize app, check the console!";
+    			span.textContent = "Failed to initialize app, check the browser console";
     			attr(span, "class", "svelte-17m9goi");
     		},
     		m(target, anchor) {
@@ -19951,7 +20183,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (122:4) {#each $notifications as item (item.id)}
+    // (80:4) {#each $notifications as item (item.id)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let notification;
@@ -19999,7 +20231,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (126:0) {#if $state.includes("settings")}
+    // (84:0) {#if $state.includes("settings")}
     function create_if_block$8(ctx) {
     	let settings_1;
     	let current;
@@ -20224,7 +20456,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	component_subscribe($$self, log, $$value => $$invalidate(4, $log = $$value));
     	component_subscribe($$self, state, $$value => $$invalidate(0, $state = $$value));
     	component_subscribe($$self, notifications, $$value => $$invalidate(1, $notifications = $$value));
-    	let logger = [];
+    	const logger = [];
 
     	// app proportions can get messed up when opening/closing new tabs
     	async function windowResize() {
@@ -20236,6 +20468,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		document.documentElement.removeAttribute("style");
     	}
 
+    	// currently inactive, but could be used to globally prevent auto text replacement in app
+    	// function preventAutoTextReplacements(e) {
+    	//     if (e.inputType === "insertReplacementText" && e.data === ". ") {
+    	//         e.preventDefault();
+    	//         e.target.value += " ";
+    	//     }
+    	// }
     	onMount(async () => {
     		log.add("Requesting initialization data", "info", false);
     		const initData = await browser.runtime.sendNativeMessage({ name: "PAGE_INIT_DATA" });
