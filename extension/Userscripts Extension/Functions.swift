@@ -1386,7 +1386,7 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]
             // can force unwrap filename b/c getAllFiles always returns it
             let frameMatchMetadata = files.filter{$0["filename"] as! String == frameMatch}.first
             // can force unwrap noframes b/c getAllFiles always returns it
-            let noFrames = frameMatchMetadata!["noframes"] != nil ? true : false
+            let noFrames = frameMatchMetadata?["noframes"] as? Bool ?? false
             if !matched.contains(frameMatch) && !noFrames {
                 frameUrlsMatches.append(frameMatch)
             }
