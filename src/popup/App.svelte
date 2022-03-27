@@ -269,20 +269,28 @@
 
         // get matches
         const extensionPageUrl = browser.runtime.getURL("page.html");
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
-        const url = tabs[0].url;
-        const frameUrls = [];
+        const currentTab = await browser.tabs.getCurrent();
+        const url = currentTab.url;
+        if (!url) {
+            initError = true;
+            loading = false;
+            return console.error("Error getting current tab url");
+        }
         if (url === extensionPageUrl) {
             // disable popup on extension page
             inactive = true;
             loading = false;
             return;
         }
-        if (url) {
-            const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
-            frames.forEach(frame => frameUrls.push(frame.url));
+        const frameUrls = new Set();
+        const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
+        for (let i = 0; i < frames.length; i++) {
+            const frameUrl = frames[i].url;
+            if (frameUrl !== url && frameUrl.startsWith("http")) {
+                frameUrls.add(frameUrl);
+            }
         }
-        const message = {name: "POPUP_MATCHES", url: url, frameUrls: frameUrls};
+        const message = {name: "POPUP_MATCHES", url: url, frameUrls: Array.from(frameUrls)};
         let matches;
         try {
             matches = await browser.runtime.sendNativeMessage(message);
