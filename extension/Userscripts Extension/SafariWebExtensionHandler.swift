@@ -15,7 +15,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         // send standard error when there's an issue parsing inbound message
         var inBoundError = false
         // these if/else if statement are formatted so that they can be neatly collapsed in Xcode
-        // typically the "else if" would be on the same line as the preceding statements close backet
+        // typically the "else if" would be on the same line as the preceding statements close bracket
         // ie. } else if {
         if name == "REQ_PLATFORM" {
             let platform = getPlatform()
@@ -70,32 +70,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
             } else {
                 response.userInfo = [SFExtensionMessageKey: ["error": "failed to get updates"]]
-            }
-        }
-        else if name == "POPUP_INITX" {
-            if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-                let platform = getPlatform()
-                let manifest = getManifest()
-                if
-                    checkDefaultDirectories(),
-                    checkSettings(),
-                    let files = getAllFiles(),
-                    updateManifestMatches(files),
-                    updateManifestRequired(files),
-                    purgeManifest(files),
-                    let matches = getPopupMatches(url, frameUrls),
-                    let active = manifest.settings["active"],
-                    let updates = checkForRemoteUpdates()
-                {
-                    let r = [
-                        "active": active, "items": matches, "platform": platform, "updates": updates
-                    ] as [String : Any]
-                    response.userInfo = [SFExtensionMessageKey: r]
-                } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to run init sequence"]]
-                }
-            } else {
-                inBoundError = true
             }
         }
         else if name == "POPUP_UPDATE_ALL" {
