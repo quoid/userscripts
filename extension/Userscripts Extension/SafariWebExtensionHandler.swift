@@ -28,7 +28,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 {
                     response.userInfo = [SFExtensionMessageKey: ["code": code]]
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "couldn't get userscripts"]]
+                    response.userInfo = [SFExtensionMessageKey: ["error": "REQ_USERSCRIPTS failed"]]
                 }
             } else {
                 inBoundError = true
