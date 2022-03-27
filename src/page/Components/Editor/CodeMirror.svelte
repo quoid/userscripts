@@ -105,7 +105,7 @@
 
         // create codemirror instance
         instance = CodeMirror.fromTextArea(textarea, {
-            mode:  "javascript",
+            mode: "javascript",
             autoCloseBrackets: $settings.autoCloseBrackets,
             continueComments: true,
             foldGutter: true,
@@ -114,7 +114,7 @@
             matchBrackets: true,
             smartIndent: true,
             styleActiveLine: true,
-            indentUnit:  parseInt($settings.tabSize),
+            indentUnit: parseInt($settings.tabSize),
             showInvisibles: $settings.showInvisibles,
             tabSize: parseInt($settings.tabSize),
             highlightSelectionMatches: false,
