@@ -272,9 +272,8 @@
         const currentTab = await browser.tabs.getCurrent();
         const url = currentTab.url;
         if (!url) {
-            console.error("Error getting current tab url");
-            initError = true;
             loading = false;
+            disabled = false;
             return;
         }
         if (url === extensionPageUrl) {
