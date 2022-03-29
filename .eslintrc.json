@@ -25,6 +25,7 @@
         "array-bracket-spacing": ["error", "never"],
         "arrow-parens": ["error", "as-needed"],
         "brace-style": ["error", "1tbs", {"allowSingleLine": false}],
+        "comma-dangle": ["error", "never"],
         "comma-spacing": ["error", {
             "before": false,
             "after": true
