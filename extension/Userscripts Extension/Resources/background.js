@@ -6,32 +6,32 @@
 // that means it's ok that this var gets reset when the bg page unloads
 let xhrs = [];
 
-/* global US_filename, uid */
+/* global US_filename, US_uid */
 // filename and uid will be available to functions at runtime
 const apis = {
     US_openInTab(url, openInBackground) {
         const pid = Math.random().toString(36).substring(1, 9);
         return new Promise(resolve => {
             const callback = e => {
-                if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_OPEN_TAB") return;
+                if (e.data.pid !== pid || e.data.id !== US_uid || e.data.name !== "RESP_OPEN_TAB") return;
                 resolve(e.data.response);
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
             const active = (openInBackground === true) ? false : true;
-            window.postMessage({id: uid, pid: pid, name: "API_OPEN_TAB", url: url, active: active});
+            window.postMessage({id: US_uid, pid: pid, name: "API_OPEN_TAB", url: url, active: active});
         });
     },
     US_closeTab(tabId) {
         const pid = Math.random().toString(36).substring(1, 9);
         return new Promise(resolve => {
             const callback = e => {
-                if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_CLOSE_TAB") return;
+                if (e.data.pid !== pid || e.data.id !== US_uid || e.data.name !== "RESP_CLOSE_TAB") return;
                 resolve(e.data.response);
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_CLOSE_TAB", tabId: tabId});
+            window.postMessage({id: US_uid, pid: pid, name: "API_CLOSE_TAB", tabId: tabId});
         });
     },
     US_setValue(key, value) {
@@ -40,7 +40,7 @@ const apis = {
             const callback = e => {
                 if (
                     e.data.pid !== pid
-                    || e.data.id !== uid
+                    || e.data.id !== US_uid
                     || e.data.name !== "RESP_SET_VALUE"
                     || e.data.filename !== US_filename
                 ) return;
@@ -49,7 +49,7 @@ const apis = {
             };
             window.addEventListener("message", callback);
             window.postMessage({
-                id: uid,
+                id: US_uid,
                 pid: pid,
                 name: "API_SET_VALUE",
                 filename: US_filename,
@@ -64,7 +64,7 @@ const apis = {
             const callback = e => {
                 if (
                     e.data.pid !== pid
-                    || e.data.id !== uid
+                    || e.data.id !== US_uid
                     || e.data.name !== "RESP_GET_VALUE"
                     || e.data.filename !== US_filename
                 ) return;
@@ -74,7 +74,8 @@ const apis = {
             };
             window.addEventListener("message", callback);
             window.postMessage({
-                id: uid, pid: pid,
+                id: US_uid,
+                pid: pid,
                 name: "API_GET_VALUE",
                 filename: US_filename,
                 key: key,
@@ -88,7 +89,7 @@ const apis = {
             const callback = e => {
                 if (
                     e.data.pid !== pid
-                    || e.data.id !== uid
+                    || e.data.id !== US_uid
                     || e.data.name !== "RESP_LIST_VALUES"
                     || e.data.filename !== US_filename
                 ) return;
@@ -96,7 +97,7 @@ const apis = {
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_LIST_VALUES", filename: US_filename});
+            window.postMessage({id: US_uid, pid: pid, name: "API_LIST_VALUES", filename: US_filename});
         });
     },
     US_deleteValue(key) {
@@ -105,7 +106,7 @@ const apis = {
             const callback = e => {
                 if (
                     e.data.pid !== pid
-                    || e.data.id !== uid
+                    || e.data.id !== US_uid
                     || e.data.name !== "RESP_DELETE_VALUE"
                     || e.data.filename !== US_filename
                 ) return;
@@ -113,42 +114,48 @@ const apis = {
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_DELETE_VALUE", filename: US_filename, key: key});
+            window.postMessage({
+                id: US_uid,
+                pid: pid,
+                name: "API_DELETE_VALUE",
+                filename: US_filename,
+                key: key
+            });
         });
     },
     US_addStyleSync(css) {
-        window.postMessage({id: uid, name: "API_ADD_STYLE_SYNC", css: css});
+        window.postMessage({id: US_uid, name: "API_ADD_STYLE_SYNC", css: css});
         return css;
     },
     US_addStyle(css) {
         const pid = Math.random().toString(36).substring(1, 9);
         return new Promise(resolve => {
             const callback = e => {
-                if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_ADD_STYLE") return;
+                if (e.data.pid !== pid || e.data.id !== US_uid || e.data.name !== "RESP_ADD_STYLE") return;
                 resolve(e.data.response);
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_ADD_STYLE", css: css});
+            window.postMessage({id: US_uid, pid: pid, name: "API_ADD_STYLE", css: css});
         });
     },
     US_setClipboard(data, type) {
         const pid = Math.random().toString(36).substring(1, 9);
         return new Promise(resolve => {
             const callback = e => {
-                if (e.data.pid !== pid || e.data.id !== uid || e.data.name !== "RESP_SET_CLIPBOARD") return;
+                if (e.data.pid !== pid || e.data.id !== US_uid || e.data.name !== "RESP_SET_CLIPBOARD") return;
                 resolve(e.data.response);
                 if (!e.data.response) console.error("clipboard write failed");
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_SET_CLIPBOARD", data: data, type: type});
+            window.postMessage({id: US_uid, pid: pid, name: "API_SET_CLIPBOARD", data: data, type: type});
         });
     },
     US_setClipboardSync(data, type) {
         // there's actually no sync method since a promise needs to be sent to bg page
         // however make a dummy sync method for compatibility
-        window.postMessage({id: uid, name: "API_SET_CLIPBOARD", data: data, type: type});
+        window.postMessage({id: US_uid, name: "API_SET_CLIPBOARD", data: data, type: type});
         return undefined;
     },
     // when xhr is called it sends a message to the content script
@@ -177,14 +184,14 @@ const apis = {
         if (details.ontimeout) detailsParsed.ontimeout = true;
         // abort function gets returned when this function is called
         const abort = () => {
-            window.postMessage({id: uid, name: "API_XHR_ABORT_INJ", xhrId: xhrId});
+            window.postMessage({id: US_uid, name: "API_XHR_ABORT_INJ", xhrId: xhrId});
         };
         const callback = e => {
             const name = e.data.name;
             const response = e.data.response;
             // ensure callback is responding to the proper message
             if (
-                e.data.id !== uid
+                e.data.id !== US_uid
                 || e.data.xhrId !== xhrId
                 || !name
                 || !name.startsWith("RESP_API_XHR_CS")
@@ -212,7 +219,7 @@ const apis = {
             }
         };
         window.addEventListener("message", callback);
-        window.postMessage({id: uid, name: "API_XHR_INJ", details: detailsParsed, xhrId: xhrId});
+        window.postMessage({id: US_uid, name: "API_XHR_INJ", details: detailsParsed, xhrId: xhrId});
         return {abort: abort};
     }
 };
@@ -342,7 +349,7 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         const filename = userscript.scriptObject.filename;
         const grants = userscript.scriptObject.grants;
         // prepare the api string
-        let api = `const uid = "${uid}";\nconst US_filename = "${filename}";`;
+        let api = `const US_uid = "${uid}";\nconst US_filename = "${filename}";`;
         // all scripts get access to US_info / GM./GM_info, prepare that object
         const scriptData = {
             "script": userscript.scriptObject,
