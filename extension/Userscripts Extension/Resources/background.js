@@ -6,7 +6,7 @@
 // that means it's ok that this var gets reset when the bg page unloads
 let xhrs = [];
 
-/* global filename, uid */
+/* global US_filename, uid */
 // filename and uid will be available to functions at runtime
 const apis = {
     US_openInTab(url, openInBackground) {
@@ -42,7 +42,7 @@ const apis = {
                     e.data.pid !== pid
                     || e.data.id !== uid
                     || e.data.name !== "RESP_SET_VALUE"
-                    || e.data.filename !== filename
+                    || e.data.filename !== US_filename
                 ) return;
                 resolve(e.data.response);
                 window.removeEventListener("message", callback);
@@ -52,7 +52,7 @@ const apis = {
                 id: uid,
                 pid: pid,
                 name: "API_SET_VALUE",
-                filename: filename,
+                filename: US_filename,
                 key: key,
                 value: value
             });
@@ -66,7 +66,7 @@ const apis = {
                     e.data.pid !== pid
                     || e.data.id !== uid
                     || e.data.name !== "RESP_GET_VALUE"
-                    || e.data.filename !== filename
+                    || e.data.filename !== US_filename
                 ) return;
                 const response = e.data.response;
                 resolve(response);
@@ -76,7 +76,7 @@ const apis = {
             window.postMessage({
                 id: uid, pid: pid,
                 name: "API_GET_VALUE",
-                filename: filename,
+                filename: US_filename,
                 key: key,
                 defaultValue: defaultValue
             });
@@ -90,13 +90,13 @@ const apis = {
                     e.data.pid !== pid
                     || e.data.id !== uid
                     || e.data.name !== "RESP_LIST_VALUES"
-                    || e.data.filename !== filename
+                    || e.data.filename !== US_filename
                 ) return;
                 resolve(e.data.response);
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_LIST_VALUES", filename: filename});
+            window.postMessage({id: uid, pid: pid, name: "API_LIST_VALUES", filename: US_filename});
         });
     },
     US_deleteValue(key) {
@@ -107,13 +107,13 @@ const apis = {
                     e.data.pid !== pid
                     || e.data.id !== uid
                     || e.data.name !== "RESP_DELETE_VALUE"
-                    || e.data.filename !== filename
+                    || e.data.filename !== US_filename
                 ) return;
                 resolve(e.data.response);
                 window.removeEventListener("message", callback);
             };
             window.addEventListener("message", callback);
-            window.postMessage({id: uid, pid: pid, name: "API_DELETE_VALUE", filename: filename, key: key});
+            window.postMessage({id: uid, pid: pid, name: "API_DELETE_VALUE", filename: US_filename, key: key});
         });
     },
     US_addStyleSync(css) {
@@ -342,7 +342,7 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         const filename = userscript.scriptObject.filename;
         const grants = userscript.scriptObject.grants;
         // prepare the api string
-        let api = `const uid = "${uid}";\nconst filename = "${filename}";`;
+        let api = `const uid = "${uid}";\nconst US_filename = "${filename}";`;
         // all scripts get access to US_info / GM./GM_info, prepare that object
         const scriptData = {
             "script": userscript.scriptObject,
