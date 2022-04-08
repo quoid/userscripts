@@ -46,8 +46,8 @@
         "no-multi-str": "error",
         "no-multiple-empty-lines": ["error", {"max": 1, "maxBOF": 2}], // https://github.com/sveltejs/eslint-plugin-svelte3/issues/41
         "no-tabs": "error",
-        "no-unused-vars": ["error", {"args": "none"}],
         "no-useless-concat": "error",
+        "no-unused-vars": ["error", {"args": "none"}],
         "no-use-before-define": ["error", {
             "classes": true,
             "functions": false,
@@ -72,6 +72,7 @@
         }],
         "space-in-parens": ["error", "never"],
         "template-curly-spacing": ["error", "never"],
+        "space-infix-ops": "error",
         "jsx-a11y/a11y-missing-attribute": "off"
     }
 }
