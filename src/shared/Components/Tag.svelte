@@ -43,4 +43,13 @@
     .script__tag--js::before {
         content: "js";
     }
+
+    .script__tag--request {
+        border-color: var(--editor-string-2);
+        color: var(--editor-string-2);
+    }
+
+    .script__tag--request::before {
+        content: "req";
+    }
 </style>

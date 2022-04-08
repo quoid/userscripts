@@ -4,13 +4,14 @@
     export let name;
     export let type;
     export let subframe;
+    export let request = false;
 </script>
 
 <div class="item {enabled ? "enabled" : "disabled"}" on:click>
     <span></span>
     <div class="truncate">{name}</div>
     {#if subframe}<div class="subframe">SUB</div>{/if}
-    <Tag type={type}/>
+    <Tag type={request ? "request" : type}/>
 </div>
 
 <style>

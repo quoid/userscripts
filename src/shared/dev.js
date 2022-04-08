@@ -7,20 +7,20 @@ import {parse, uniqueId, wait} from "../page/utils";
  * @param {boolean?} longName
  * @returns
  */
-function generateFile(type, updates = false, longName = false) {
+function generateFile(type, updates = false, longName = false, request = false) {
     const uid = uniqueId();
-    let name = `${uid}-example-${type}`;
+    let name = request ? `${uid}-request-${type}` : `${uid}-example-${type}`;
     if (longName) name = `${uid}${uid}${uid}-example-${type}`;
-    const randomDate = +(new Date() - Math.floor(Math.random()*10000000000));
+    const randomDate = +(new Date() - Math.floor(Math.random() * 10000000000));
     let content = "// ==UserScript=="
-    +`\n// @name         ${name}`
-    +`\n// @description  Custom description for userscript with name "${name}"`
-    +"\n// @match        *://*.*"
-    +"\n// @exclude-match https://github.com/quoid/userscripts"
-    +"\n// @version       1.0"
-    +"\n// @noframes"
-    +"\n// ==/UserScript=="
-    +`\n\nconsole.log("I am ${name}");`;
+    + `\n// @name         ${name}`
+    + `\n// @description  Custom description for userscript with name "${name}"`
+    + "\n// @match        *://*.*"
+    + "\n// @exclude-match https://github.com/quoid/userscripts"
+    + "\n// @version       1.0"
+    + "\n// @noframes"
+    + "\n// ==/UserScript=="
+    + `\n\nconsole.log("I am ${name}");`;
     if (type === "css") {
         content = content.replace("// ==UserScript==", "/* ==UserStyle==");
         content = content.replace("// ==/UserScript==", "==/UserStyle== */");
@@ -30,6 +30,9 @@ function generateFile(type, updates = false, longName = false) {
             "#id,\n.class\n.pseudo-element::after {\n    color: red\n}"
         );
         updates = false;
+    }
+    if (request) {
+        content = content.replace("// @noframes", "// @noframes\n// @run-at request");
     }
     if (updates) {
         content = content.replace(
@@ -44,14 +47,18 @@ function generateFile(type, updates = false, longName = false) {
     return {
         content: content,
         filename: `${name}.${type}`,
-        lastModified: randomDate
+        lastModified: randomDate,
+        name: name,
+        request: request,
+        type: type
     };
 }
 
 const files = [
     generateFile("js", true, true),
     generateFile("css"),
-    ...Array.from({length: 5}, (_, i) => generateFile("js"))
+    generateFile("js", false, false, true),
+    ...Array.from({length: 7}, (_, i) => generateFile("js"))
 ];
 
 const _browser = {
@@ -60,6 +67,18 @@ const _browser = {
     runtime: {
         getURL() {
             return "https://www.example.com/";
+        },
+        async sendMessage(message, responseCallback) {
+            const name = message.name;
+            console.info(`Got message: ${name}`);
+            let response = {};
+            if (name === "REFRESH_SESSION_RULES") {
+                response = {success: true};
+            }
+            if (!responseCallback) {
+                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+            }
+            setTimeout(() => responseCallback(response), _browser.delay);
         },
         async sendNativeMessage(message, responseCallback) {
             const name = message.name;
@@ -99,7 +118,9 @@ const _browser = {
                         lastModified: file.lastModified,
                         metadata: metadata,
                         name: metadata.name[0],
-                        type: file.filename.substring(file.filename.lastIndexOf(".") + 1)
+                        request: file.request,
+                        // type: file.filename.substring(file.filename.lastIndexOf(".") + 1)
+                        type: file.type
                     };
                     response.push(scriptData);
                 });
@@ -114,7 +135,6 @@ const _browser = {
                 const result = await getRemoteFileContents(message.url);
                 response = result;
             } else if (name === "PAGE_SAVE") {
-                console.log(message);
                 const newContent = message.content;
                 const oldFilename = message.item.filename;
                 const parsed = parse(newContent);
@@ -141,14 +161,20 @@ const _browser = {
                     content: newContent,
                     filename: newFilename,
                     lastModified: lastModified,
-                    name: name,
+                    name: name
                 };
 
                 // add description if in file metadata
                 if (parsed.metadata.description) {
                     success.description = parsed.metadata.description[0];
                 }
-
+                // check if declarative network request
+                if (
+                    parsed.metadata["run-at"]
+                    && parsed.metadata["run-at"][0] === "request"
+                ) {
+                    success.request = true;
+                }
                 // overwriting
                 if (newFilename.toLowerCase() === oldFilename.toLowerCase()) {
                     saveFile(newContent, lastModified, newFilename, oldFilename);
@@ -264,20 +290,16 @@ const _browser = {
                     ]
                 };
             } else if (name === "POPUP_MATCHES") {
+                console.log(files);
                 response = {
                     matches: [
-                        {
-                            name: "Google Images Restored",
-                            filename: "Google Images Restored.js",
-                            disabled: false,
-                            type: "js"
-                        },
+                        ...files,
                         {
                             name: "Subframe Script Managerial Staffing Company",
                             filename: "Subframe Script.js",
                             disabled: false,
                             subframe: true,
-                            type: "css"
+                            type: "js"
                         }
                     ]
                 };
@@ -340,6 +362,10 @@ const _browser = {
         }
     },
     tabs: {
+        getCurrent(responseCallback) {
+            const response = {url: "https://www.filmgarb.com/foo.user.js", id: 101};
+            return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+        },
         query(message, responseCallback) {
             const response = [{url: "https://www.filmgarb.com/foo.user.js", id: 101}];
             if (!responseCallback) {

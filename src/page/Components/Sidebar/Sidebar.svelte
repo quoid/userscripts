@@ -95,7 +95,8 @@
         // set up editor after activating file
         await tick();
         const cm = cmGetInstance();
-        const mode = item.type === "js" ? "javascript" : item.type;
+        let mode = "javascript";
+        if (item.type === "css") mode = "css";
         cm.setOption("mode", mode);
         cm.setValue(item.content);
         cm.clearHistory();

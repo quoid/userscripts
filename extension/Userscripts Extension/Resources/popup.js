@@ -1115,13 +1115,13 @@
     	return {
     		c() {
     			div = element("div");
-    			attr(div, "class", div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-p9vdxd");
+    			attr(div, "class", div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-1rzbr97");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-p9vdxd")) {
+    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-1rzbr97")) {
     				attr(div, "class", div_class_value);
     			}
     		},
@@ -1184,7 +1184,12 @@
     	let mounted;
     	let dispose;
     	let if_block = /*subframe*/ ctx[3] && create_if_block$1();
-    	tag = new Tag({ props: { type: /*type*/ ctx[2] } });
+
+    	tag = new Tag({
+    			props: {
+    				type: /*request*/ ctx[4] ? "request" : /*type*/ ctx[2]
+    			}
+    		});
 
     	return {
     		c() {
@@ -1214,7 +1219,7 @@
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div1, "click", /*click_handler*/ ctx[4]);
+    				dispose = listen(div1, "click", /*click_handler*/ ctx[5]);
     				mounted = true;
     			}
     		},
@@ -1233,7 +1238,7 @@
     			}
 
     			const tag_changes = {};
-    			if (dirty & /*type*/ 4) tag_changes.type = /*type*/ ctx[2];
+    			if (dirty & /*request, type*/ 20) tag_changes.type = /*request*/ ctx[4] ? "request" : /*type*/ ctx[2];
     			tag.$set(tag_changes);
 
     			if (!current || dirty & /*enabled*/ 1 && div1_class_value !== (div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-51jdr7")) {
@@ -1264,6 +1269,7 @@
     	let { name } = $$props;
     	let { type } = $$props;
     	let { subframe } = $$props;
+    	let { request = false } = $$props;
 
     	function click_handler(event) {
     		bubble($$self, event);
@@ -1274,9 +1280,10 @@
     		if ("name" in $$props) $$invalidate(1, name = $$props.name);
     		if ("type" in $$props) $$invalidate(2, type = $$props.type);
     		if ("subframe" in $$props) $$invalidate(3, subframe = $$props.subframe);
+    		if ("request" in $$props) $$invalidate(4, request = $$props.request);
     	};
 
-    	return [enabled, name, type, subframe, click_handler];
+    	return [enabled, name, type, subframe, request, click_handler];
     }
 
     class PopupItem extends SvelteComponent {
@@ -1287,7 +1294,8 @@
     			enabled: 0,
     			name: 1,
     			type: 2,
-    			subframe: 3
+    			subframe: 3,
+    			request: 4
     		});
     	}
     }
@@ -2585,7 +2593,7 @@
     	return child_ctx;
     }
 
-    // (32:0) {:else}
+    // (33:0) {:else}
     function create_else_block$2(ctx) {
     	let div;
 
@@ -2700,7 +2708,8 @@
     				enabled: !/*item*/ ctx[6].disabled,
     				name: /*item*/ ctx[6].name,
     				subframe: /*item*/ ctx[6].subframe,
-    				type: /*item*/ ctx[6].type
+    				type: /*item*/ ctx[6].type,
+    				request: /*item*/ ctx[6].request ? true : false
     			}
     		});
 
@@ -2726,6 +2735,7 @@
     			if (dirty & /*list*/ 8) popupitem_changes.name = /*item*/ ctx[6].name;
     			if (dirty & /*list*/ 8) popupitem_changes.subframe = /*item*/ ctx[6].subframe;
     			if (dirty & /*list*/ 8) popupitem_changes.type = /*item*/ ctx[6].type;
+    			if (dirty & /*list*/ 8) popupitem_changes.request = /*item*/ ctx[6].request ? true : false;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -2867,12 +2877,12 @@
     	return child_ctx;
     }
 
-    // (497:0) {#if !active}
+    // (499:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (500:0) {#if showInstallPrompt}
+    // (502:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2914,7 +2924,7 @@
     	};
     }
 
-    // (505:0) {#if error}
+    // (507:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2964,7 +2974,7 @@
     	};
     }
 
-    // (533:8) {:else}
+    // (535:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3037,7 +3047,7 @@
     	};
     }
 
-    // (531:35) 
+    // (533:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3059,7 +3069,7 @@
     	};
     }
 
-    // (521:28) 
+    // (523:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3097,7 +3107,7 @@
     	};
     }
 
-    // (519:8) {#if inactive}
+    // (521:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3119,7 +3129,7 @@
     	};
     }
 
-    // (516:4) {#if loading}
+    // (518:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3159,7 +3169,7 @@
     	};
     }
 
-    // (535:16) {#each list as item (item.filename)}
+    // (537:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3174,7 +3184,8 @@
     				enabled: !/*item*/ ctx[48].disabled,
     				name: /*item*/ ctx[48].name,
     				subframe: /*item*/ ctx[48].subframe,
-    				type: /*item*/ ctx[48].type
+    				type: /*item*/ ctx[48].type,
+    				request: /*item*/ ctx[48].request ? true : false
     			}
     		});
 
@@ -3200,6 +3211,7 @@
     			if (dirty[0] & /*list*/ 4194304) popupitem_changes.name = /*item*/ ctx[48].name;
     			if (dirty[0] & /*list*/ 4194304) popupitem_changes.subframe = /*item*/ ctx[48].subframe;
     			if (dirty[0] & /*list*/ 4194304) popupitem_changes.type = /*item*/ ctx[48].type;
+    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.request = /*item*/ ctx[48].request ? true : false;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -3218,7 +3230,7 @@
     	};
     }
 
-    // (548:0) {#if !inactive && platform === "macos"}
+    // (551:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3251,7 +3263,7 @@
     	};
     }
 
-    // (585:18) 
+    // (588:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3301,7 +3313,7 @@
     	};
     }
 
-    // (571:22) 
+    // (574:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3351,7 +3363,7 @@
     	};
     }
 
-    // (555:0) {#if showUpdates}
+    // (558:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3404,7 +3416,7 @@
     	};
     }
 
-    // (586:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
+    // (589:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3444,7 +3456,7 @@
     	};
     }
 
-    // (572:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (575:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3488,7 +3500,7 @@
     	};
     }
 
-    // (556:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
+    // (559:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -4114,7 +4126,6 @@
     		} else if (response.items) {
     			$$invalidate(19, showAll = true);
     			$$invalidate(20, allItems = response.items);
-    			$$invalidate(20, allItems = []);
     		} else if (response.error) {
     			console.log(`Error opening save location: ${response.error}`);
     			$$invalidate(0, error = response.error);
@@ -4167,6 +4178,9 @@
     		} else {
     			$$invalidate(1, active = init.initData.active === "true" ? true : false);
     		}
+
+    		// refresh session rules
+    		browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
 
     		// set popup height
     		resize();

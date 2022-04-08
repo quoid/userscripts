@@ -35,7 +35,7 @@
     on:click
 >
     <div class="item__header">
-        <Tag type={data.type}/>
+        <Tag type={data.request ? "request" : data.type}/>
         <div class="item__title truncate">{data.name}</div>
         <Toggle checked={!data.disabled} on:click={toggleClick}/>
     </div>

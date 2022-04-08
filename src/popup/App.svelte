@@ -215,7 +215,6 @@
         } else if (response.items) {
             showAll = true;
             allItems = response.items;
-            allItems = [];
         } else if (response.error) {
             console.log(`Error opening save location: ${response.error}`);
             error = response.error;
@@ -263,6 +262,9 @@
         } else {
             active = init.initData.active === "true" ? true : false;
         }
+
+        // refresh session rules
+        browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
 
         // set popup height
         resize();
@@ -538,6 +540,7 @@
                         name={item.name}
                         subframe={item.subframe}
                         type={item.type}
+                        request={item.request ? true : false}
                         on:click={() => toggleItem(item)}
                     />
                 {/each}

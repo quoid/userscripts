@@ -25,6 +25,7 @@
                 name={item.name}
                 subframe={item.subframe}
                 type={item.type}
+                request={item.request ? true : false}
                 on:click={() => allItemsToggleItem(item)}
             />
         {/each}

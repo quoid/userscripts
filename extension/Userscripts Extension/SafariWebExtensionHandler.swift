@@ -34,6 +34,13 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 inBoundError = true
             }
         }
+        else if name == "REQ_REQUESTS" {
+            if let requestScripts = getRequestScripts() {
+                response.userInfo = [SFExtensionMessageKey: requestScripts]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get requestScripts"]]
+            }
+        }
         else if name == "POPUP_BADGE_COUNT" {
             #if os(macOS)
                 if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {

@@ -19,7 +19,7 @@ export function uniqueId() {
 /**
  * awaitable function for waiting an arbitrary amount of time
  * @param {number} ms the amount of time to wait in milliseconds
- * @returns {Promise.<void>}
+ * @returns {Promise<void>}
  */
 export function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

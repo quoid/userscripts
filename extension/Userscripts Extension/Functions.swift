@@ -246,6 +246,7 @@ func parse(_ content: String) -> [String: Any]? {
 // manifest
 struct Manifest: Codable {
     var blacklist:[String]
+    var declarativeNetRequest: [String]
     var disabled:[String]
     var exclude: [String: [String]]
     var excludeMatch: [String: [String]]
@@ -254,7 +255,7 @@ struct Manifest: Codable {
     var require: [String: [String]]
     var settings: [String: String]
     private enum CodingKeys : String, CodingKey {
-        case blacklist, disabled, exclude, excludeMatch = "exclude-match", include, match, require, settings
+        case blacklist, declarativeNetRequest, disabled, exclude, excludeMatch = "exclude-match", include, match, require, settings
     }
 }
 
@@ -301,6 +302,7 @@ func getManifest() -> Manifest {
         // create new manifest with default key/vals
         let manifest = Manifest(
             blacklist: [],
+            declarativeNetRequest: [],
             disabled: [],
             exclude: [:],
             excludeMatch: [:],
@@ -329,6 +331,11 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         // can be force unwrapped because getAllFiles didn't return nil
         let metadata = file["metadata"] as! [String: [String]]
         let filename = file["filename"] as! String
+        // skip request type userscripts
+        let runAt = metadata["run-at"]?[0] ?? "document-end"
+        if runAt == "request" {
+            continue
+        }
         // populate excludes & matches
         var excludeMatched = [String]()
         var matched = [String]()
@@ -345,6 +352,14 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         }
         if metadata["exclude"] != nil {
             excluded.append(contentsOf: metadata["exclude"]!)
+        }
+        // if in declarativeNetRequest array, remove it
+        if manifest.declarativeNetRequest.contains(filename) {
+            if let index = manifest.declarativeNetRequest.firstIndex(of: filename) {
+                manifest.declarativeNetRequest.remove(at: index)
+            } else {
+                err("failed to remove \(filename) from declarativeNetRequest array")
+            }
         }
 
         // update manifest values
@@ -470,6 +485,85 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
     return true
 }
 
+func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+    logText("updateManifestDeclarativeNetRequests started")
+    var files = [[String: Any]]()
+    if optionalFilesArray.isEmpty {
+        guard let getFiles = getAllFiles() else {
+            err("updateManifestDeclarativeNetRequests failed at (1)")
+            return false
+        }
+        files = getFiles
+    } else {
+        files = optionalFilesArray
+    }
+    var manifest = getManifest()
+    for file in files {
+        // can be force unwrapped because getAllFiles didn't return nil
+        // and getAllFiles always returns the following
+        let metadata = file["metadata"] as! [String: [String]]
+        let filename = file["filename"] as! String
+        let runAt = metadata["run-at"]?[0] ?? "document-end"
+        // if not a request type, ignore
+        if runAt != "request" {
+            continue
+        }
+        var update = false
+        // if filename already in manifest
+        if !manifest.declarativeNetRequest.contains(filename) {
+            manifest.declarativeNetRequest.append(filename)
+            update = true
+        }
+        // if filename in another array remove it
+        for (pattern, filenames) in manifest.match {
+            for fn in filenames {
+                if fn == filename, let index = manifest.match[pattern]?.firstIndex(of: filename) {
+                    manifest.match[pattern]?.remove(at: index)
+                    update = true
+                } else {
+                    err("updateManifestDeclarativeNetRequests failed at (2), \(filename)")
+                }
+            }
+        }
+        for (pattern, filenames) in manifest.excludeMatch {
+            for fn in filenames {
+                if fn == filename, let index = manifest.excludeMatch[pattern]?.firstIndex(of: filename) {
+                    manifest.excludeMatch[pattern]?.remove(at: index)
+                    update = true
+                } else {
+                    err("updateManifestDeclarativeNetRequests failed at (3), \(filename)")
+                }
+            }
+        }
+        for (pattern, filenames) in manifest.include {
+            for fn in filenames {
+                if fn == filename, let index = manifest.include[pattern]?.firstIndex(of: filename) {
+                    manifest.include[pattern]?.remove(at: index)
+                    update = true
+                } else {
+                    err("updateManifestDeclarativeNetRequests failed at (4), \(filename)")
+                }
+            }
+        }
+        for (pattern, filenames) in manifest.exclude {
+            for fn in filenames {
+                if fn == filename, let index = manifest.exclude[pattern]?.firstIndex(of: filename) {
+                    manifest.exclude[pattern]?.remove(at: index)
+                    update = true
+                } else {
+                    err("updateManifestDeclarativeNetRequests failed at (5), \(filename)")
+                }
+            }
+        }
+        if update, !updateManifest(with: manifest) {
+            err("updateManifestDeclarativeNetRequests failed at (6)")
+            return false
+        }
+    }
+    logText("updateManifestDeclarativeNetRequests complete")
+    return true
+}
+
 func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
     logText("purgeManifest started")
     // purge all manifest keys of any stale entries
@@ -583,6 +677,16 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             }
         }
     }
+    // loop through manifest declarativeNetRequest
+    for filename in manifest.declarativeNetRequest {
+        if !allSaveLocationFilenames.contains(filename) {
+            if let index = manifest.declarativeNetRequest.firstIndex(of: filename) {
+                manifest.declarativeNetRequest.remove(at: index)
+                update = true
+                logText("Could not find \(filename) in save location, removed from declarativeNetRequest")
+            }
+        }
+    }
     // remove obsolete settings
     for setting in manifest.settings {
         if !defaultSettings.keys.contains(setting.key) {
@@ -630,7 +734,7 @@ func updateSettings(_ settings: [String: String]) -> Bool {
 }
 
 // files
-func getAllFiles() -> [[String: Any]]? {
+func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
     // returns all files of proper type with filenames, metadata & more
     var files = [[String: Any]]()
     let fm = FileManager.default
@@ -673,9 +777,14 @@ func getAllFiles() -> [[String: Any]]? {
         fileData["filename"] = filename
         fileData["lastModified"] = dateToMilliseconds(dateMod)
         fileData["metadata"] = metadata
-        // for unwrap name since parse ensure it exists
+        // force unwrap name since parser ensure it exists
         fileData["name"] = metadata["name"]![0]
         fileData["type"] = "\(type)"
+        // add extra data if a request userscript
+        let runAt = metadata["run-at"]?[0] ?? "document-end"
+        if runAt == "request" {
+            fileData["request"] = true
+        }
         if metadata["description"] != nil {
             fileData["description"] = metadata["description"]![0]
         }
@@ -683,6 +792,11 @@ func getAllFiles() -> [[String: Any]]? {
             fileData["canUpdate"] = true
         }
         fileData["noframes"] = metadata["noframes"] != nil ? true : false
+        // if asked, also return the code string
+        if (includeCode) {
+            // can force unwrap because always returned from parser
+            fileData["code"] = parsed["code"] as! String
+        }
         files.append(fileData)
     }
     logText("getAllFiles completed")
@@ -1135,14 +1249,19 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             continue
         }
 
+        // get run-at values and set default if missing
+        // if type request, ignore
+        var runAt = metadata["run-at"]?[0] ?? "document-end"
+        if runAt == "request" {
+            continue
+        }
+        
         // normalize weight
         var weight = metadata["weight"]?[0] ?? "1"
         weight = normalizeWeight(weight)
         
-        // get inject-into and run-at values
-        // if either is missing, use default value
+        // get inject-into and set default if missing
         var injectInto = metadata["inject-into"]?[0] ?? "auto"
-        var runAt = metadata["run-at"]?[0] ?? "document-end"
         let injectVals: Set<String> = ["auto", "content", "page"]
         let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
         // if either is invalid use default value
@@ -1286,6 +1405,40 @@ func getInjectionFilenames(_ url: String) -> [String]? {
     // filter out all disabled files
     filenames = matched.filter{!manifest.disabled.contains($0)}
     return filenames
+}
+
+func getRequestScripts() -> [[String: String]]? {
+    var requestScripts = [[String: String]]()
+    // check the manifest to see if injection is enabled
+    let manifest = getManifest()
+    guard let active = manifest.settings["active"] else {
+        err("getRequestScripts failed at (1)")
+        return nil
+    }
+    // if not enabled, do not apply any net requests, ie. return empty array
+    if active != "true" {
+        return requestScripts
+    }
+    guard let files = getAllFiles(includeCode: true) else {
+        err("getRequestScripts failed at (2)")
+        return nil
+    }
+    for file in files {
+        let isRequest = file["request"] as? Bool ?? false
+        // skip any non-request userscripts
+        if !isRequest {
+            continue
+        }
+        // can be force unwrapped because getAllFiles always returns these
+        let name = file["name"] as! String
+        let code = file["code"] as! String
+        let filename = file["filename"] as! String
+        
+        if !manifest.disabled.contains(filename) {
+            requestScripts.append(["name": name, "code": code])
+        }
+    }
+    return requestScripts
 }
 
 // popup
@@ -1539,7 +1692,13 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
 
     // update manifest for new file and purge anything from old file
-    guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
+    guard
+        let allFiles = getAllFiles(),
+        updateManifestMatches(allFiles),
+        updateManifestRequired(allFiles),
+        updateManifestDeclarativeNetRequests(allFiles),
+        purgeManifest(allFiles)
+    else {
         err("saveFile failed at (4)")
         return ["error": "file save but manifest couldn't be updated"]
     }
@@ -1558,6 +1717,11 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
     if metadata["version"] != nil && metadata["updateURL"] != nil {
         response["canUpdate"] = true
+    }
+    // if a request "type" userscript add key/val
+    let runAt = metadata["run-at"]?[0] ?? "document-end"
+    if runAt == "request" {
+        response["request"] = true
     }
 
     return response
@@ -1663,6 +1827,8 @@ func popupInit() -> [String: String]? {
     let updateManifestMatches = updateManifestMatches(allFiles)
     // update the required resources
     let updateManifestRequired = updateManifestRequired(allFiles)
+    // update declarativeNetRequest
+    let updateDeclarativeNetRequest = updateManifestDeclarativeNetRequests(allFiles)
     // verbose error checking
     if !checkDefaultDirectories {
         err("Failed to checkDefaultDirectories in popupInit")
@@ -1682,6 +1848,10 @@ func popupInit() -> [String: String]? {
     }
     if !updateManifestRequired {
         err("Failed to updateManifestRequired in popupInit")
+        return nil
+    }
+    if !updateDeclarativeNetRequest {
+        err("Failed to updateDeclarativeNetRequest in popupInit")
         return nil
     }
     let manifest = getManifest()

@@ -1933,13 +1933,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return {
     		c() {
     			div = element("div");
-    			attr(div, "class", div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-p9vdxd");
+    			attr(div, "class", div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-1rzbr97");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-p9vdxd")) {
+    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-1rzbr97")) {
     				attr(div, "class", div_class_value);
     			}
     		},
@@ -2124,7 +2124,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let current;
     	let mounted;
     	let dispose;
-    	tag = new Tag({ props: { type: /*data*/ ctx[0].type } });
+
+    	tag = new Tag({
+    			props: {
+    				type: /*data*/ ctx[0].request
+    				? "request"
+    				: /*data*/ ctx[0].type
+    			}
+    		});
 
     	toggle = new Toggle({
     			props: { checked: !/*data*/ ctx[0].disabled }
@@ -2179,7 +2186,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		p(new_ctx, [dirty]) {
     			ctx = new_ctx;
     			const tag_changes = {};
-    			if (dirty & /*data*/ 1) tag_changes.type = /*data*/ ctx[0].type;
+
+    			if (dirty & /*data*/ 1) tag_changes.type = /*data*/ ctx[0].request
+    			? "request"
+    			: /*data*/ ctx[0].type;
+
     			tag.$set(tag_changes);
     			if ((!current || dirty & /*data*/ 1) && t1_value !== (t1_value = /*data*/ ctx[0].name + "")) set_data(t1, t1_value);
     			const toggle_changes = {};
@@ -17880,7 +17891,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return child_ctx;
     }
 
-    // (180:8) <Dropdown icon={iconPlus} title={"New item"} {disabled}>
+    // (181:8) <Dropdown icon={iconPlus} title={"New item"} {disabled}>
     function create_default_slot$1(ctx) {
     	let li0;
     	let t1;
@@ -17931,7 +17942,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (187:8) {#if $state.includes("items-loading")}
+    // (188:8) {#if $state.includes("items-loading")}
     function create_if_block_1(ctx) {
     	let loader;
     	let current;
@@ -17960,7 +17971,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (190:8) {#each list as item (item.filename)}
+    // (191:8) {#each list as item (item.filename)}
     function create_each_block(key_1, ctx) {
     	let first;
     	let switch_instance;
@@ -18058,7 +18069,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (199:4) {#if showCount}
+    // (200:4) {#if showCount}
     function create_if_block$5(ctx) {
     	let div;
     	let t0_value = /*list*/ ctx[3].length + "";
@@ -18430,7 +18441,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		await tick();
 
     		const cm = cmGetInstance();
-    		const mode = item.type === "js" ? "javascript" : item.type;
+    		let mode = "javascript";
+    		if (item.type === "css") mode = "css";
     		cm.setOption("mode", mode);
     		cm.setValue(item.content);
     		cm.clearHistory();
@@ -19233,7 +19245,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				$$invalidate(1, name = activeItem.name);
     				$$invalidate(4, remote = activeItem.remote);
     				$$invalidate(5, temp = activeItem.temp);
-    				$$invalidate(2, type = activeItem.type);
+    				$$invalidate(2, type = activeItem.request ? "request" : activeItem.type);
     				$$invalidate(0, canUpdate = activeItem.canUpdate);
 
     				// on load if temp item, disabled discard and enable save, if not disable both

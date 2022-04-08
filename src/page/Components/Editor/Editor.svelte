@@ -30,7 +30,7 @@
         name = activeItem.name;
         remote = activeItem.remote;
         temp = activeItem.temp;
-        type = activeItem.type;
+        type = activeItem.request ? "request" : activeItem.type;
         canUpdate = activeItem.canUpdate;
         // on load if temp item, disabled discard and enable save, if not disable both
         if (temp) {
