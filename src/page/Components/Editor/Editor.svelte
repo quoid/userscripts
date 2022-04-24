@@ -69,6 +69,10 @@
             });
             // set the newly saved file contents in codemirror instance
             cmSetSavedCode(response.content);
+            // update session declarativeNetRequest rules if needed
+            if (response.request) {
+                browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
+            }
         }
         state.remove("saving");
     }

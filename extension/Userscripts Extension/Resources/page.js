@@ -18613,7 +18613,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (154:4) {#if !activeItem}
+    // (158:4) {#if !activeItem}
     function create_if_block_5(ctx) {
     	let div;
 
@@ -18632,7 +18632,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (175:20) {:else}
+    // (179:20) {:else}
     function create_else_block(ctx) {
     	let t0;
     	let t1;
@@ -18656,7 +18656,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (173:35) 
+    // (177:35) 
     function create_if_block_4(ctx) {
     	let t;
 
@@ -18674,7 +18674,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (171:37) 
+    // (175:37) 
     function create_if_block_3(ctx) {
     	let t0;
     	let span;
@@ -18709,7 +18709,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (169:58) 
+    // (173:58) 
     function create_if_block_2(ctx) {
     	let t0;
     	let span;
@@ -18742,7 +18742,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (167:58) 
+    // (171:58) 
     function create_if_block_1$1(ctx) {
     	let t;
 
@@ -18760,7 +18760,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (165:20) {#if $state.includes("saving")}
+    // (169:20) {#if $state.includes("saving")}
     function create_if_block$6(ctx) {
     	let t;
 
@@ -19127,6 +19127,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			// set the newly saved file contents in codemirror instance
     			cmSetSavedCode(response.content);
+
+    			// update session declarativeNetRequest rules if needed
+    			if (response.request) {
+    				browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
+    			}
     		}
 
     		state.remove("saving");
