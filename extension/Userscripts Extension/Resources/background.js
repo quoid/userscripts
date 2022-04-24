@@ -647,44 +647,61 @@ async function setSessionRules() {
         console.error(response.error);
         return;
     }
-    console.log(response);
     // there are no rules to apply
     if (!response.length) return;
     // loop through response, parse the rules, push to array and log
     const rules = [];
     for (let i = 0; i < response.length; i++) {
         const rule = response[i];
-        rules.push(JSON.parse(rule.code));
-        console.info(`Setting session rule: ${rule.name}`);
+        const code = JSON.parse(rule.code);
+        // check if an array or single rule
+        if (Array.isArray(code)) {
+            code.forEach(rule => rules.push(rule));
+            console.info(`Setting session rule: ${rule.name} (${code.length})`);
+        } else {
+            rules.push(code);
+            console.info(`Setting session rule: ${rule.name}`);
+        }
     }
-    console.log(rules);
+    // generate unique ids for all rules to ensure no repeats
+    const ids = randomNumberSet(1000, rules.length);
+    rules.map((rule, index) => rule.id = ids[index]);
     try {
-        await browser.declarativeNetRequest.updateSessionRules({
-            addRules: rules
-        });
+        await browser.declarativeNetRequest.updateSessionRules({addRules: rules});
     } catch (error) {
         console.error(`Error setting session rules: ${error}`);
         return;
     }
-    console.info("done setting session rules");
+    console.info(`Finished setting ${rules.length} session rules`);
 }
 
 async function clearAllSessionRules() {
     const rules = await browser.declarativeNetRequest.getSessionRules();
     if (!rules.length) return;
-    console.log(`Clearing ${rules.length} session rules`);
+    console.info(`Clearing ${rules.length} session rules`);
     const ruleIds = rules.map(a => a.id);
     await browser.declarativeNetRequest.updateSessionRules({
         removeRuleIds: ruleIds
     });
 }
 
+function randomNumberSet(max, count) {
+    // generates a set of random unique numbers
+    // returns an array
+    const numbers = new Set();
+    while (numbers.size < count) {
+        numbers.add((Math.floor(Math.random() * (max - 1 + 1)) + 1));
+    }
+    return [...numbers];
+}
+
 browser.runtime.onStartup.addListener(async () => {
     // on startup get declarativeNetRequests
     // and set the requests for the session
     // should also check and refresh when:
-    // 1. popup opens (done) 2. the extension page is opened (TODO)
-    // 3. a new save event in the page occurs (TODO) 4. the refresh button is pushed in the popup (TODO)
+    // 1. popup opens (done)
+    // 2. a new save event in the page occurs
+    // 3. the refresh button is pushed in the popup
     await setSessionRules();
 });
 browser.tabs.onActivated.addListener(setBadgeCount);
