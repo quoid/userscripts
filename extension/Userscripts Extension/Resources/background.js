@@ -92,7 +92,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const key = request.filename + "---" + request.key;
         browser.storage.local.get(key, item => {
             if (Object.keys(item).length === 0) {
-                if (request.defaultValue) {
+                if (request.defaultValue !== undefined) {
                     sendResponse(request.defaultValue);
                 } else {
                     sendResponse(`undefined--${request.pid}`);
