@@ -20,7 +20,7 @@
         const val = blacklist.value.split(",").map(item => item.trim()).filter(n => n);
 
         // compare blacklist input to saved blacklist
-        if ([...val].sort().toString() != [...$settings.blacklist].sort().toString()) {
+        if ([...val].sort().toString() !== [...$settings.blacklist].sort().toString()) {
             settings.updateSingleSetting("blacklist", val);
             // when blacklistSaving, visual indication of saving occurs on element
             // the visual save indication is mostly ux only indicates a setting save was attempted
@@ -48,17 +48,134 @@
         // close all open extension pages
         const url = browser.runtime.getURL("page.html");
         const close = [];
-        const tabs =  await browser.tabs.query({});
+        const tabs = await browser.tabs.query({});
         tabs.forEach(tab => tab.url === url && close.push(tab.id));
         if (close.length > 0) browser.tabs.remove(close);
     }
 </script>
+
+<div
+    class="settings"
+    on:click|self={() => state.remove("settings")}
+    in:fade={{duration: 150}}
+    out:fade={{duration: 150, delay: 75}}
+>
+    <div
+        class="modal"
+        in:fly={{y: 50, duration: 150, delay: 75}}
+        out:fly={{y: 50, duration: 150, delay: 0}}
+    >
+        <div class="modal__section">
+            <div class="modal__title">
+                <div>Editor Settings</div>
+                <IconButton icon={iconClose} on:click={() => state.remove("settings")}/>
+            </div>
+            <div class="modal__row">
+                <div>Auto Close Brackets</div>
+                <Toggle
+                    checked={$settings.autoCloseBrackets}
+                    on:click={() => update("autoCloseBrackets", !$settings.autoCloseBrackets)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Auto Hint</div>
+                <Toggle
+                    checked={$settings.autoHint}
+                    on:click={() => update("autoHint", !$settings.autoHint)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Hide Descriptions</div>
+                <Toggle
+                    checked={!$settings.descriptions}
+                    on:click={() => update("descriptions", !$settings.descriptions)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Javascript Linter</div>
+                <Toggle
+                    checked={$settings.lint}
+                    on:click={() => update("lint", !$settings.lint)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Show Invisibles</div>
+                <Toggle
+                    checked={$settings.showInvisibles}
+                    on:click={() => update("showInvisibles", !$settings.showInvisibles)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Tab Size</div>
+                <select
+                    bind:value="{$settings.tabSize}"
+                    on:blur={() => update("tabSize", $settings.tabSize)}
+                >
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal__section">
+            <div class="modal__title">
+                <div>General Settings</div>
+            </div>
+            <div class="modal__row">
+                <div class:red={!$settings.active}>Enable Injection</div>
+                <Toggle
+                    checked={$settings.active}
+                    on:click={() => update("active", !$settings.active)}
+                />
+            </div>
+            <div class="modal__row">
+                <div>Show Toolbar Count</div>
+                <Toggle
+                    checked={$settings.showCount}
+                    on:click={() => update("showCount", !$settings.showCount)}
+                />
+            </div>
+            <div class="modal__row saveLocation">
+                <div>Save Location</div>
+                <div
+                    class="truncate"
+                    on:click={openSaveLocation}
+                >{$settings.saveLocation}</div>
+                <IconButton
+                    icon={iconEdit}
+                    on:click={changeSaveLocation}
+                    title={"Change save location"}
+                />
+            </div>
+            <div class="modal__row modal__row--wrap">
+                <div class="blacklist">
+                    <span>Global Blacklist</span>
+                    { #if blacklistSaving}{@html iconLoader}{/if}
+                </div>
+                <textarea
+                    placeholder="Comma separated domain patterns"
+                    spellcheck="false"
+                    bind:this={blacklist}
+                    value={blacklisted}
+                    on:blur={saveBlacklist}
+                    disabled={$state.includes("blacklist-saving") || blacklistSaving}
+                ></textarea>
+            </div>
+        </div>
+        <div class="modal__section">
+            <div class="modal__title">Information</div>
+            <p>
+                Userscripts Safari Version {$settings.version} ({$settings.build})<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support">supporting the project</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
 <style>
     .settings {
         align-items: center;
         backdrop-filter: blur(3px);
         -webkit-backdrop-filter: blur(3px);
-        background-color: rgba(0, 0, 0, 0.45);
+        background-color: rgba(0 0 0 / 0.45);
         color: var(--text-color-secondary);
         display: flex;
         font: var(--text-medium);
@@ -173,117 +290,3 @@
         padding: 1rem;
     }
 </style>
-
-<div
-    class="settings"
-    on:click|self={() => {state.remove("settings")}}
-    in:fade={{duration: 150}}
-    out:fade={{duration: 150, delay: 75}}
->
-    <div
-        class="modal"
-        in:fly={{y: 50, duration: 150, delay: 75}}
-        out:fly={{y: 50, duration: 150, delay: 0}}
-    >
-        <div class="modal__section">
-            <div class="modal__title">
-                <div>Editor Settings</div>
-                <IconButton icon={iconClose} on:click={() => state.remove("settings")}/>
-            </div>
-            <div class="modal__row">
-                <div>Auto Close Brackets</div>
-                <Toggle
-                    checked={$settings.autoCloseBrackets}
-                    on:click={() => update("autoCloseBrackets", !$settings.autoCloseBrackets)}
-                />
-            </div>
-            <div class="modal__row">
-                <div>Auto Hint</div>
-                <Toggle
-                    checked={$settings.autoHint}
-                    on:click={() => update("autoHint", !$settings.autoHint)}
-                />
-            </div>
-            <div class="modal__row">
-                <div>Hide Descriptions</div>
-                <Toggle
-                    checked={!$settings.descriptions}
-                    on:click={() => update("descriptions", !$settings.descriptions)}
-                />
-            </div>
-            <div class="modal__row">
-                <div>Javascript Linter</div>
-                <Toggle
-                    checked={$settings.lint}
-                    on:click={() => update("lint", !$settings.lint)}
-                />
-            </div>
-            <div class="modal__row">
-                <div>Show Invisibles</div>
-                <Toggle
-                    checked={$settings.showInvisibles}
-                    on:click={() => update("showInvisibles", !$settings.showInvisibles)}
-                />
-            </div>
-            <div class="modal__row">
-                <div>Tab Size</div>
-                <select
-                    bind:value="{$settings.tabSize}"
-                    on:blur={() => update("tabSize", $settings.tabSize)}
-                >
-                    <option value="2">2</option>
-                    <option value="4">4</option>
-                </select>
-            </div>
-        </div>
-        <div class="modal__section">
-            <div class="modal__title">
-                <div>General Settings</div>
-            </div>
-            <div class="modal__row">
-                <div class:red={!$settings.active}>Enable Injection</div>
-                <Toggle
-                    checked={$settings.active}
-                    on:click={() => update("active", !$settings.active)}
-                />
-            </div>
-            <div class="modal__row">
-                <div>Show Toolbar Count</div>
-                <Toggle
-                    checked={$settings.showCount}
-                    on:click={() => update("showCount", !$settings.showCount)}
-                />
-            </div>
-            <div class="modal__row saveLocation">
-                <div>Save Location</div>
-                <div
-                    class="truncate"
-                    on:click={openSaveLocation}
-                >{$settings.saveLocation}</div>
-                <IconButton
-                    icon={iconEdit}
-                    on:click={changeSaveLocation}
-                    title={"Change save location"}
-                />
-            </div>
-            <div class="modal__row modal__row--wrap">
-                <div class="blacklist">
-                    <span>Global Blacklist</span>
-                    { #if blacklistSaving}{@html iconLoader}{/if}
-                </div>
-                <textarea
-                    placeholder="Comma separated domain patterns"
-                    spellcheck="false"
-                    bind:this={blacklist}
-                    value={blacklisted}
-                    on:blur={saveBlacklist}
-                    disabled={$state.includes("blacklist-saving") || blacklistSaving}
-                ></textarea>
-            </div>
-        </div>
-        <div class="modal__section">
-            <div class="modal__title">Information</div>
-            <p>Userscripts Safari Version {$settings.version} ({$settings.build})<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support">supporting the project</a>.
-        </div>
-    </div>
-</div>

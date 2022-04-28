@@ -78,11 +78,11 @@
 
     async function updateItem(item) {
         disabled = true;
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
-        const url = tabs[0].url;
+        const currentTab = await browser.tabs.getCurrent();
+        const url = currentTab.url;
         const frameUrls = [];
         if (url) {
-            const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
+            const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
             frames.forEach(frame => frameUrls.push(frame.url));
         }
         const message = {
@@ -147,7 +147,7 @@
 
     async function openExtensionPage() {
         const url = browser.runtime.getURL("page.html");
-        const tabs =  await browser.tabs.query({});
+        const tabs = await browser.tabs.query({});
         for (let i = 0; i < tabs.length; i++) {
             if (tabs[i].url === url) {
                 await browser.windows.update(tabs[i].windowId, {focused: true});
@@ -176,7 +176,7 @@
         try {
             lastUpdateCheckObj = await browser.storage.local.get(["lastUpdateCheck"]);
         } catch (error) {
-            console.error("Error checking extension storage " + error);
+            console.error(`Error checking extension storage ${error}`);
             return false;
         }
         // if extension storage doesn't have key, run the check
@@ -200,7 +200,7 @@
             return false;
         }
 
-        console.log(((timestampMs - lastUpdateCheck) / (1000 * 60 * 60)) + " hours have passed");
+        console.log(`${(timestampMs - lastUpdateCheck) / (1000 * 60 * 60)} hours have passed`);
         console.log("running update check");
         // otherwise run the check
         return true;
@@ -216,7 +216,7 @@
             showAll = true;
             allItems = response.items;
         } else if (response.error) {
-            console.log("Error opening save location: " + response.error);
+            console.log(`Error opening save location: ${response.error}`);
             error = response.error;
         }
         disabled = false;
@@ -229,7 +229,7 @@
         try {
             pltfm = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
         } catch (error) {
-            console.log("Error for pltfm promise: " + error);
+            console.log(`Error for pltfm promise: ${error}`);
             initError = true;
             loading = false;
             return;
@@ -249,7 +249,7 @@
         try {
             init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"});
         } catch (error) {
-            console.log("Error for init promise: " + error);
+            console.log(`Error for init promise: ${error}`);
             initError = true;
             loading = false;
             return;
@@ -263,31 +263,42 @@
             active = init.initData.active === "true" ? true : false;
         }
 
+        // refresh session rules
+        browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
+
         // set popup height
         resize();
 
         // get matches
         const extensionPageUrl = browser.runtime.getURL("page.html");
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
-        const url = tabs[0].url;
-        const frameUrls = [];
+        const currentTab = await browser.tabs.getCurrent();
+        const url = currentTab.url;
+        if (!url) {
+            loading = false;
+            disabled = false;
+            return;
+        }
         if (url === extensionPageUrl) {
             // disable popup on extension page
             inactive = true;
             loading = false;
             return;
         }
-        if (url) {
-            const frames = await browser.webNavigation.getAllFrames({tabId: tabs[0].id});
-            frames.forEach(frame => frameUrls.push(frame.url));
+        const frameUrls = new Set();
+        const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
+        for (let i = 0; i < frames.length; i++) {
+            const frameUrl = frames[i].url;
+            if (frameUrl !== url && frameUrl.startsWith("http")) {
+                frameUrls.add(frameUrl);
+            }
         }
-        const message = {name: "POPUP_MATCHES", url: url, frameUrls: frameUrls};
+        const message = {name: "POPUP_MATCHES", url: url, frameUrls: Array.from(frameUrls)};
         let matches;
         try {
             matches = await browser.runtime.sendNativeMessage(message);
             // response = await browser.runtime.sendMessage(message);
         } catch (error) {
-            console.log("Error for matches promise: " + error);
+            console.log(`Error for matches promise: ${error}`);
             initError = true;
             loading = false;
             return;
@@ -312,7 +323,7 @@
                 abort = true;
                 updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
             } catch (error) {
-                console.error("Error for updates promise: " + error);
+                console.error(`Error for updates promise: ${error}`);
                 initError = true;
                 loading = false;
                 abort = false;
@@ -344,9 +355,9 @@
             // then the content script will send response to the popup
             // Content scripts that are injected into web content cannot send messages to the native app
             // https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
-            const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_00"});
+            const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_00"});
             if (response.error) {
-                console.log("Error checking .user.js url: " + response.error);
+                console.log(`Error checking .user.js url: ${response.error}`);
                 error = response.error;
             } else if (!response.invalid) {
                 // the response will contain the string to display
@@ -394,10 +405,10 @@
             let addHeight = 0;
             // if warn or error elements visible, also subtract that from applied height
             if (warn) addHeight += warn.offsetHeight;
-            if (err)  addHeight += err.offsetHeight;
+            if (err) addHeight += err.offsetHeight;
             windowHeight = (window.outerHeight - (headerHeight + addHeight));
-            main.style.height = windowHeight + "px";
-            main.style.paddingBottom = (headerHeight + addHeight) + "px";
+            main.style.height = `${windowHeight}px`;
+            main.style.paddingBottom = `${headerHeight + addHeight}px`;
         }, 25);
     }
 
@@ -407,9 +418,9 @@
         // show the install view
         showInstall = true;
         // get the active tab
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        const currentTab = await browser.tabs.getCurrent();
         // send content script a message on the active tab
-        const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_01"});
+        const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_01"});
         // when above message is sent, content script will get active tab's stringified dom content
         // and then send that content and a message to the bg page
         // the bg page will send a message and the content to the swift side for parsing
@@ -419,7 +430,7 @@
 
         // if the response includes an error, display it in the view
         if (response.error) {
-            console.log("Can not install userscript: " + response.error);
+            console.log(`Can not install userscript: ${response.error}`);
             installViewUserscriptError = response.error;
         } else {
             installViewUserscript = response;
@@ -435,9 +446,9 @@
         // go back to main view
         showInstall = false;
         // get the active tab
-        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        const currentTab = await browser.tabs.getCurrent();
         // send content script a message on the active tab, which will start the install process
-        const response = await browser.tabs.sendMessage(tabs[0].id, {name: "USERSCRIPT_INSTALL_02"});
+        const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_02"});
         if (response.error) {
             error = response.error;
             disabled = false;
@@ -456,6 +467,7 @@
         resize();
     });
 </script>
+
 <svelte:window on:resize={resize}/>
 <div class="header" bind:this={header}>
     <IconButton
@@ -510,7 +522,13 @@
             <div class="none">Popup inactive on extension page</div>
         {:else if initError}
             <div class="none">
-                Something went wrong:&nbsp;<span class="link" on:click={() => window.location.reload()}> click to retry</span>
+                Something went wrong:&nbsp;
+                <span
+                    class="link"
+                    on:click={() => window.location.reload()}
+                >
+                    click to retry
+                </span>
             </div>
         {:else if items.length < 1}
             <div class="none">No matched userscripts</div>
@@ -522,6 +540,7 @@
                         name={item.name}
                         subframe={item.subframe}
                         type={item.type}
+                        request={item.request ? true : false}
                         on:click={() => toggleItem(item)}
                     />
                 {/each}
@@ -531,7 +550,9 @@
 </div>
 {#if !inactive && platform === "macos"}
     <div class="footer">
-        <div class="link" on:click={openExtensionPage}>Open Extension Page</div>
+        <div class="link" on:click={openExtensionPage}>
+            Open Extension Page
+        </div>
     </div>
 {/if}
 {#if showUpdates}
@@ -568,7 +589,10 @@
     <View
         headerTitle={"All Userscripts"}
         loading={disabled}
-        closeClick={() => {showAll = false; refreshView()}}
+        closeClick={() => {
+            showAll = false;
+            refreshView();
+        }}
         showLoaderOnDisabled={false}
     >
         <AllItemsView
@@ -577,6 +601,7 @@
         />
     </View>
 {/if}
+
 <style>
     .header {
         align-items: center;

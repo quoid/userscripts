@@ -1,6 +1,19 @@
 import {writable} from "svelte/store";
 import {uniqueId} from "./utils.js";
 
+function notificationStore() {
+    const {subscribe, update} = writable([]);
+    const add = item => {
+        update(a => {
+            a.push(item);
+            return a;
+        });
+    };
+    const remove = id => update(a => a.filter(b => b.id !== id));
+    return {subscribe, add, remove};
+}
+export const notifications = notificationStore();
+
 function logStore() {
     const {subscribe, set, update} = writable([]);
     const add = (message, type, notify) => {
@@ -17,19 +30,6 @@ function logStore() {
     return {subscribe, add, remove, reset};
 }
 export const log = logStore();
-
-function notificationStore() {
-    const {subscribe, update} = writable([]);
-    const add = item => {
-        update(a => {
-            a.push(item);
-            return a;
-        });
-    };
-    const remove = id => update(a => a.filter(b => b.id !== id));
-    return {subscribe, add, remove};
-}
-export const notifications = notificationStore();
 
 function stateStore() {
     const {subscribe, update} = writable(["init"]);

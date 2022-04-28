@@ -6,32 +6,37 @@
     export let checkClick;
     export let updateSingleClick;
 </script>
+
 {#if updates.length}
     {#each updates as item (item.name)}
     <!-- {#each Array(10) as _, i} -->
         <div class="item">
             <div class="truncate">{item.name}</div>
-            <a href="{item.url}" target="_blank">Source</a>
-            <span
-                class="link"
-                on:click={() => updateSingleClick(item)}
-            >
+            <a href="{item.url}" target="_blank">
+                Source
+            </a>
+            <span class="link" on:click={() => updateSingleClick(item)}>
                 Update
             </span>
         </div>
     {/each}
     <p>Be sure you trust the author before saving remote code to your device.</p>
-    <div class="link" on:click={updateClick}>Update All</div>
+    <div class="link" on:click={updateClick}>
+        Update All
+    </div>
 {:else}
     <div class="none">
         {@html iconUpdate}
         <div>
             There are no file updates available
             <br>
-            <div class="link" on:click={checkClick}>Check Again</div>
+            <div class="link" on:click={checkClick}>
+                Check Updates
+            </div>
         </div>
     </div>
 {/if}
+
 <style>
     .item {
         align-items: center;

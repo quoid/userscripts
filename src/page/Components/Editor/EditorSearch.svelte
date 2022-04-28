@@ -104,7 +104,7 @@
             cm.scrollIntoView({from: ranges[i].anchor, to: ranges[i].head}, 20);
             // mark currently selected element
             marks.forEach(marker => marker.clear());
-            const  m = cm.markText(ranges[i].anchor, ranges[i].head, {className: "cm-search-mark"});
+            const m = cm.markText(ranges[i].anchor, ranges[i].head, {className: "cm-search-mark"});
             marks.push(m);
             // increment display index after getting data from array
             // display index is always +1 compared to index within array
@@ -126,11 +126,29 @@
             cm.scrollIntoView({from: ranges[i].anchor, to: ranges[i].head}, 20);
             // mark currently selected element
             marks.forEach(marker => marker.clear());
-            const  m = cm.markText(ranges[i].anchor, ranges[i].head, {className: "cm-search-mark"});
+            const m = cm.markText(ranges[i].anchor, ranges[i].head, {className: "cm-search-mark"});
             marks.push(m);
         }
     }
 </script>
+
+{#if active}
+    <div class="editor__search">
+        <input
+            type="text"
+            bind:this={inp}
+            bind:value={inputValue}
+            on:input={highlightMatches}
+            on:input={getMatches}
+            on:keydown={keys}
+        >
+    <span>{rangesIndex}/{query ? ranges.length : "?"}</span>
+        <IconButton icon={iconArrowDown} on:click={() => next()}/>
+        <IconButton icon={iconArrowUp} on:click={() => previous()}/>
+        <IconButton icon={iconClose} on:click={closeHandler}/>
+    </div>
+{/if}
+
 <style>
     .editor__search {
         align-items: center;
@@ -176,19 +194,3 @@
         width: 45%;
     }
 </style>
-{#if active}
-    <div class="editor__search">
-        <input
-            type="text"
-            bind:this={inp}
-            bind:value={inputValue}
-            on:input={highlightMatches}
-            on:input={getMatches}
-            on:keydown={keys}
-        >
-    <span>{rangesIndex}/{query ? ranges.length : "?"}</span>
-        <IconButton icon={iconArrowDown} on:click={() => next()}/>
-        <IconButton icon={iconArrowUp} on:click={() => previous()}/>
-        <IconButton icon={iconClose} on:click={closeHandler}/>
-    </div>
-{/if}

@@ -1115,13 +1115,13 @@
     	return {
     		c() {
     			div = element("div");
-    			attr(div, "class", div_class_value = "script__tag " + (/*type*/ ctx[0] ? "script__tag--" + /*type*/ ctx[0] : "") + " svelte-p9vdxd");
+    			attr(div, "class", div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-1rzbr97");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + (/*type*/ ctx[0] ? "script__tag--" + /*type*/ ctx[0] : "") + " svelte-p9vdxd")) {
+    			if (dirty & /*type*/ 1 && div_class_value !== (div_class_value = "script__tag " + `script__tag--${/*type*/ ctx[0]}` + " svelte-1rzbr97")) {
     				attr(div, "class", div_class_value);
     			}
     		},
@@ -1159,7 +1159,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "SUB";
-    			attr(div, "class", "subframe svelte-1lgjchf");
+    			attr(div, "class", "subframe svelte-51jdr7");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -1184,7 +1184,12 @@
     	let mounted;
     	let dispose;
     	let if_block = /*subframe*/ ctx[3] && create_if_block$1();
-    	tag = new Tag({ props: { type: /*type*/ ctx[2] } });
+
+    	tag = new Tag({
+    			props: {
+    				type: /*request*/ ctx[4] ? "request" : /*type*/ ctx[2]
+    			}
+    		});
 
     	return {
     		c() {
@@ -1197,9 +1202,9 @@
     			if (if_block) if_block.c();
     			t3 = space();
     			create_component(tag.$$.fragment);
-    			attr(span, "class", "svelte-1lgjchf");
-    			attr(div0, "class", "truncate svelte-1lgjchf");
-    			attr(div1, "class", div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-1lgjchf");
+    			attr(span, "class", "svelte-51jdr7");
+    			attr(div0, "class", "truncate svelte-51jdr7");
+    			attr(div1, "class", div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-51jdr7");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -1214,7 +1219,7 @@
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div1, "click", /*click_handler*/ ctx[4]);
+    				dispose = listen(div1, "click", /*click_handler*/ ctx[5]);
     				mounted = true;
     			}
     		},
@@ -1233,10 +1238,10 @@
     			}
 
     			const tag_changes = {};
-    			if (dirty & /*type*/ 4) tag_changes.type = /*type*/ ctx[2];
+    			if (dirty & /*request, type*/ 20) tag_changes.type = /*request*/ ctx[4] ? "request" : /*type*/ ctx[2];
     			tag.$set(tag_changes);
 
-    			if (!current || dirty & /*enabled*/ 1 && div1_class_value !== (div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-1lgjchf")) {
+    			if (!current || dirty & /*enabled*/ 1 && div1_class_value !== (div1_class_value = "item " + (/*enabled*/ ctx[0] ? "enabled" : "disabled") + " svelte-51jdr7")) {
     				attr(div1, "class", div1_class_value);
     			}
     		},
@@ -1264,6 +1269,7 @@
     	let { name } = $$props;
     	let { type } = $$props;
     	let { subframe } = $$props;
+    	let { request = false } = $$props;
 
     	function click_handler(event) {
     		bubble($$self, event);
@@ -1274,9 +1280,10 @@
     		if ("name" in $$props) $$invalidate(1, name = $$props.name);
     		if ("type" in $$props) $$invalidate(2, type = $$props.type);
     		if ("subframe" in $$props) $$invalidate(3, subframe = $$props.subframe);
+    		if ("request" in $$props) $$invalidate(4, request = $$props.request);
     	};
 
-    	return [enabled, name, type, subframe, click_handler];
+    	return [enabled, name, type, subframe, request, click_handler];
     }
 
     class PopupItem extends SvelteComponent {
@@ -1287,7 +1294,8 @@
     			enabled: 0,
     			name: 1,
     			type: 2,
-    			subframe: 3
+    			subframe: 3,
+    			request: 4
     		});
     	}
     }
@@ -1335,7 +1343,7 @@
     	};
     }
 
-    // (33:8) {#if loading && showLoaderOnDisabled}
+    // (34:8) {#if loading && showLoaderOnDisabled}
     function create_if_block$2(ctx) {
     	let loader;
     	let current;
@@ -1377,7 +1385,7 @@
     	};
     }
 
-    // (36:18) <div>
+    // (37:18) <div>
     function fallback_block(ctx) {
     	let div;
 
@@ -1576,7 +1584,7 @@
     	return child_ctx;
     }
 
-    // (25:0) {:else}
+    // (27:0) {:else}
     function create_else_block$1(ctx) {
     	let div2;
     	let html_tag;
@@ -1598,7 +1606,7 @@
     			br = element("br");
     			t2 = space();
     			div0 = element("div");
-    			div0.textContent = "Check Again";
+    			div0.textContent = "Check Updates";
     			html_tag = new HtmlTag(t0);
     			attr(div0, "class", "link svelte-1v987ms");
     			attr(div1, "class", "svelte-1v987ms");
@@ -1633,7 +1641,7 @@
     	};
     }
 
-    // (9:0) {#if updates.length}
+    // (10:0) {#if updates.length}
     function create_if_block$3(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -1708,7 +1716,7 @@
     	};
     }
 
-    // (10:4) {#each updates as item (item.name)}
+    // (11:4) {#each updates as item (item.name)}
     function create_each_block(key_1, ctx) {
     	let div1;
     	let div0;
@@ -1881,7 +1889,7 @@
     	return child_ctx;
     }
 
-    // (16:25) 
+    // (17:25) 
     function create_if_block_1(ctx) {
     	let ul;
     	let li;
@@ -2072,7 +2080,7 @@
     	};
     }
 
-    // (10:4) {#if installError}
+    // (11:4) {#if installError}
     function create_if_block$4(ctx) {
     	let div1;
     	let html_tag;
@@ -2080,16 +2088,17 @@
     	let div0;
     	let t2;
     	let p;
+    	let t3;
 
     	return {
     		c() {
     			div1 = element("div");
     			t0 = space();
     			div0 = element("div");
-    			div0.textContent = "The usercript can not be installed.";
+    			div0.textContent = "Couldn't install userscript";
     			t2 = space();
     			p = element("p");
-    			p.textContent = "Error: OK GO";
+    			t3 = text(/*installError*/ ctx[1]);
     			html_tag = new HtmlTag(t0);
     			attr(p, "class", "svelte-tdpz3j");
     			attr(div1, "class", "install__error svelte-tdpz3j");
@@ -2101,15 +2110,18 @@
     			append(div1, div0);
     			append(div1, t2);
     			append(div1, p);
+    			append(p, t3);
     		},
-    		p: noop,
+    		p(ctx, dirty) {
+    			if (dirty & /*installError*/ 2) set_data(t3, /*installError*/ ctx[1]);
+    		},
     		d(detaching) {
     			if (detaching) detach(div1);
     		}
     	};
     }
 
-    // (19:12) {#if userscript.description}
+    // (20:12) {#if userscript.description}
     function create_if_block_6(ctx) {
     	let li;
     	let t_value = /*userscript*/ ctx[0].description + "";
@@ -2134,7 +2146,7 @@
     	};
     }
 
-    // (22:12) {#if userscript.match}
+    // (23:12) {#if userscript.match}
     function create_if_block_5(ctx) {
     	let li;
     	let div;
@@ -2200,7 +2212,7 @@
     	};
     }
 
-    // (25:20) {#each userscript.match as match}
+    // (26:20) {#each userscript.match as match}
     function create_each_block_3(ctx) {
     	let div;
     	let t_value = /*match*/ ctx[13] + "";
@@ -2225,7 +2237,7 @@
     	};
     }
 
-    // (30:12) {#if userscript.include}
+    // (31:12) {#if userscript.include}
     function create_if_block_4(ctx) {
     	let li;
     	let div;
@@ -2291,7 +2303,7 @@
     	};
     }
 
-    // (33:20) {#each userscript.include as include}
+    // (34:20) {#each userscript.include as include}
     function create_each_block_2(ctx) {
     	let div;
     	let t_value = /*include*/ ctx[10] + "";
@@ -2316,7 +2328,7 @@
     	};
     }
 
-    // (38:12) {#if userscript.require}
+    // (39:12) {#if userscript.require}
     function create_if_block_3(ctx) {
     	let li;
     	let div;
@@ -2382,7 +2394,7 @@
     	};
     }
 
-    // (41:20) {#each userscript.require as require}
+    // (42:20) {#each userscript.require as require}
     function create_each_block_1(ctx) {
     	let div;
     	let t_value = /*require*/ ctx[7] + "";
@@ -2407,7 +2419,7 @@
     	};
     }
 
-    // (46:12) {#if userscript.grant}
+    // (47:12) {#if userscript.grant}
     function create_if_block_2(ctx) {
     	let li;
     	let div;
@@ -2473,7 +2485,7 @@
     	};
     }
 
-    // (49:20) {#each userscript.grant as grant}
+    // (50:20) {#each userscript.grant as grant}
     function create_each_block$1(ctx) {
     	let div;
     	let t_value = /*grant*/ ctx[4] + "";
@@ -2581,7 +2593,7 @@
     	return child_ctx;
     }
 
-    // (31:0) {:else}
+    // (33:0) {:else}
     function create_else_block$2(ctx) {
     	let div;
 
@@ -2589,7 +2601,7 @@
     		c() {
     			div = element("div");
     			div.textContent = "No valid files found in directory";
-    			attr(div, "class", "none");
+    			attr(div, "class", "none svelte-rd8r5o");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2603,7 +2615,7 @@
     	};
     }
 
-    // (19:0) {#if allItems.length}
+    // (20:0) {#if allItems.length}
     function create_if_block$5(ctx) {
     	let div;
     	let each_blocks = [];
@@ -2627,7 +2639,7 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[2] || "") + " svelte-d4295n");
+    			attr(div, "class", div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[2] || "") + " svelte-rd8r5o");
     			toggle_class(div, "disabled", /*disabled*/ ctx[4]);
     		},
     		m(target, anchor) {
@@ -2647,7 +2659,7 @@
     				check_outros();
     			}
 
-    			if (!current || dirty & /*rowColorsAll*/ 4 && div_class_value !== (div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[2] || "") + " svelte-d4295n")) {
+    			if (!current || dirty & /*rowColorsAll*/ 4 && div_class_value !== (div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[2] || "") + " svelte-rd8r5o")) {
     				attr(div, "class", div_class_value);
     			}
 
@@ -2681,7 +2693,7 @@
     	};
     }
 
-    // (21:8) {#each list as item (item.filename)}
+    // (22:8) {#each list as item (item.filename)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -2696,7 +2708,8 @@
     				enabled: !/*item*/ ctx[6].disabled,
     				name: /*item*/ ctx[6].name,
     				subframe: /*item*/ ctx[6].subframe,
-    				type: /*item*/ ctx[6].type
+    				type: /*item*/ ctx[6].type,
+    				request: /*item*/ ctx[6].request ? true : false
     			}
     		});
 
@@ -2722,6 +2735,7 @@
     			if (dirty & /*list*/ 8) popupitem_changes.name = /*item*/ ctx[6].name;
     			if (dirty & /*list*/ 8) popupitem_changes.subframe = /*item*/ ctx[6].subframe;
     			if (dirty & /*list*/ 8) popupitem_changes.type = /*item*/ ctx[6].type;
+    			if (dirty & /*list*/ 8) popupitem_changes.request = /*item*/ ctx[6].request ? true : false;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -2863,12 +2877,12 @@
     	return child_ctx;
     }
 
-    // (487:0) {#if !active}
+    // (499:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (490:0) {#if showInstallPrompt}
+    // (502:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2910,7 +2924,7 @@
     	};
     }
 
-    // (495:0) {#if error}
+    // (507:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2960,7 +2974,7 @@
     	};
     }
 
-    // (517:8) {:else}
+    // (535:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3033,7 +3047,7 @@
     	};
     }
 
-    // (515:35) 
+    // (533:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3055,7 +3069,7 @@
     	};
     }
 
-    // (511:28) 
+    // (523:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3066,7 +3080,7 @@
     	return {
     		c() {
     			div = element("div");
-    			t0 = text("Something went wrong: ");
+    			t0 = text("Something went wrong: \n                ");
     			span = element("span");
     			span.textContent = "click to retry";
     			attr(span, "class", "link svelte-1w80sz6");
@@ -3093,7 +3107,7 @@
     	};
     }
 
-    // (509:8) {#if inactive}
+    // (521:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3115,7 +3129,7 @@
     	};
     }
 
-    // (506:4) {#if loading}
+    // (518:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3155,7 +3169,7 @@
     	};
     }
 
-    // (519:16) {#each list as item (item.filename)}
+    // (537:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3170,7 +3184,8 @@
     				enabled: !/*item*/ ctx[48].disabled,
     				name: /*item*/ ctx[48].name,
     				subframe: /*item*/ ctx[48].subframe,
-    				type: /*item*/ ctx[48].type
+    				type: /*item*/ ctx[48].type,
+    				request: /*item*/ ctx[48].request ? true : false
     			}
     		});
 
@@ -3196,6 +3211,7 @@
     			if (dirty[0] & /*list*/ 4194304) popupitem_changes.name = /*item*/ ctx[48].name;
     			if (dirty[0] & /*list*/ 4194304) popupitem_changes.subframe = /*item*/ ctx[48].subframe;
     			if (dirty[0] & /*list*/ 4194304) popupitem_changes.type = /*item*/ ctx[48].type;
+    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.request = /*item*/ ctx[48].request ? true : false;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -3214,7 +3230,7 @@
     	};
     }
 
-    // (532:0) {#if !inactive && platform === "macos"}
+    // (551:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3247,7 +3263,7 @@
     	};
     }
 
-    // (567:18) 
+    // (588:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3297,7 +3313,7 @@
     	};
     }
 
-    // (553:22) 
+    // (574:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3347,7 +3363,7 @@
     	};
     }
 
-    // (537:0) {#if showUpdates}
+    // (558:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3400,7 +3416,7 @@
     	};
     }
 
-    // (568:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {showAll = false; refreshView()}}         showLoaderOnDisabled={false}     >
+    // (589:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3440,7 +3456,7 @@
     	};
     }
 
-    // (554:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (575:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3484,7 +3500,7 @@
     	};
     }
 
-    // (538:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
+    // (559:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -3921,7 +3937,7 @@
     	try {
     		lastUpdateCheckObj = await browser.storage.local.get(["lastUpdateCheck"]);
     	} catch(error) {
-    		console.error("Error checking extension storage " + error);
+    		console.error(`Error checking extension storage ${error}`);
     		return false;
     	}
 
@@ -3949,7 +3965,7 @@
     		return false;
     	}
 
-    	console.log((timestampMs - lastUpdateCheck) / (1000 * 60 * 60) + " hours have passed");
+    	console.log(`${(timestampMs - lastUpdateCheck) / (1000 * 60 * 60)} hours have passed`);
     	console.log("running update check");
 
     	// otherwise run the check
@@ -4024,12 +4040,12 @@
 
     	async function updateItem(item) {
     		$$invalidate(3, disabled = true);
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-    		const url = tabs[0].url;
+    		const currentTab = await browser.tabs.getCurrent();
+    		const url = currentTab.url;
     		const frameUrls = [];
 
     		if (url) {
-    			const frames = await browser.webNavigation.getAllFrames({ tabId: tabs[0].id });
+    			const frames = await browser.webNavigation.getAllFrames({ tabId: currentTab.id });
     			frames.forEach(frame => frameUrls.push(frame.url));
     		}
 
@@ -4111,7 +4127,7 @@
     			$$invalidate(19, showAll = true);
     			$$invalidate(20, allItems = response.items);
     		} else if (response.error) {
-    			console.log("Error opening save location: " + response.error);
+    			console.log(`Error opening save location: ${response.error}`);
     			$$invalidate(0, error = response.error);
     		}
 
@@ -4126,7 +4142,7 @@
     		try {
     			pltfm = await browser.runtime.sendNativeMessage({ name: "REQ_PLATFORM" });
     		} catch(error) {
-    			console.log("Error for pltfm promise: " + error);
+    			console.log(`Error for pltfm promise: ${error}`);
     			$$invalidate(11, initError = true);
     			$$invalidate(2, loading = false);
     			return;
@@ -4148,7 +4164,7 @@
     		try {
     			init = await browser.runtime.sendNativeMessage({ name: "POPUP_INIT" });
     		} catch(error) {
-    			console.log("Error for init promise: " + error);
+    			console.log(`Error for init promise: ${error}`);
     			$$invalidate(11, initError = true);
     			$$invalidate(2, loading = false);
     			return;
@@ -4163,15 +4179,23 @@
     			$$invalidate(1, active = init.initData.active === "true" ? true : false);
     		}
 
+    		// refresh session rules
+    		browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
+
     		// set popup height
     		resize();
 
     		// get matches
     		const extensionPageUrl = browser.runtime.getURL("page.html");
 
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-    		const url = tabs[0].url;
-    		const frameUrls = [];
+    		const currentTab = await browser.tabs.getCurrent();
+    		const url = currentTab.url;
+
+    		if (!url) {
+    			$$invalidate(2, loading = false);
+    			$$invalidate(3, disabled = false);
+    			return;
+    		}
 
     		if (url === extensionPageUrl) {
     			// disable popup on extension page
@@ -4181,18 +4205,29 @@
     			return;
     		}
 
-    		if (url) {
-    			const frames = await browser.webNavigation.getAllFrames({ tabId: tabs[0].id });
-    			frames.forEach(frame => frameUrls.push(frame.url));
+    		const frameUrls = new Set();
+    		const frames = await browser.webNavigation.getAllFrames({ tabId: currentTab.id });
+
+    		for (let i = 0; i < frames.length; i++) {
+    			const frameUrl = frames[i].url;
+
+    			if (frameUrl !== url && frameUrl.startsWith("http")) {
+    				frameUrls.add(frameUrl);
+    			}
     		}
 
-    		const message = { name: "POPUP_MATCHES", url, frameUrls };
+    		const message = {
+    			name: "POPUP_MATCHES",
+    			url,
+    			frameUrls: Array.from(frameUrls)
+    		};
+
     		let matches;
 
     		try {
     			matches = await browser.runtime.sendNativeMessage(message);
     		} catch(error) {
-    			console.log("Error for matches promise: " + error); // response = await browser.runtime.sendMessage(message);
+    			console.log(`Error for matches promise: ${error}`); // response = await browser.runtime.sendMessage(message);
     			$$invalidate(11, initError = true);
     			$$invalidate(2, loading = false);
     			return;
@@ -4221,7 +4256,7 @@
     				$$invalidate(21, abort = true);
     				updatesResponse = await browser.runtime.sendNativeMessage({ name: "POPUP_UPDATES" });
     			} catch(error) {
-    				console.error("Error for updates promise: " + error);
+    				console.error(`Error for updates promise: ${error}`);
     				$$invalidate(11, initError = true);
     				$$invalidate(2, loading = false);
     				$$invalidate(21, abort = false);
@@ -4256,10 +4291,10 @@
     			// then the content script will send response to the popup
     			// Content scripts that are injected into web content cannot send messages to the native app
     			// https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
-    			const response = await browser.tabs.sendMessage(tabs[0].id, { name: "USERSCRIPT_INSTALL_00" });
+    			const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_00" });
 
     			if (response.error) {
-    				console.log("Error checking .user.js url: " + response.error);
+    				console.log(`Error checking .user.js url: ${response.error}`);
     				$$invalidate(0, error = response.error);
     			} else if (!response.invalid) {
     				// the response will contain the string to display
@@ -4308,8 +4343,8 @@
 
     				if (err) addHeight += err.offsetHeight;
     				windowHeight = window.outerHeight - (headerHeight + addHeight);
-    				$$invalidate(7, main.style.height = windowHeight + "px", main);
-    				$$invalidate(7, main.style.paddingBottom = headerHeight + addHeight + "px", main);
+    				$$invalidate(7, main.style.height = `${windowHeight}px`, main);
+    				$$invalidate(7, main.style.paddingBottom = `${headerHeight + addHeight}px`, main);
     			},
     			25
     		);
@@ -4323,10 +4358,10 @@
     		$$invalidate(16, showInstall = true);
 
     		// get the active tab
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
+    		const currentTab = await browser.tabs.getCurrent();
 
     		// send content script a message on the active tab
-    		const response = await browser.tabs.sendMessage(tabs[0].id, { name: "USERSCRIPT_INSTALL_01" });
+    		const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_01" });
 
     		// when above message is sent, content script will get active tab's stringified dom content
     		// and then send that content and a message to the bg page
@@ -4336,7 +4371,7 @@
     		// the content script will then send a response here
     		// if the response includes an error, display it in the view
     		if (response.error) {
-    			console.log("Can not install userscript: " + response.error);
+    			console.log(`Can not install userscript: ${response.error}`);
     			$$invalidate(18, installViewUserscriptError = response.error);
     		} else {
     			$$invalidate(17, installViewUserscript = response);
@@ -4356,10 +4391,10 @@
     		$$invalidate(16, showInstall = false);
 
     		// get the active tab
-    		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
+    		const currentTab = await browser.tabs.getCurrent();
 
     		// send content script a message on the active tab, which will start the install process
-    		const response = await browser.tabs.sendMessage(tabs[0].id, { name: "USERSCRIPT_INSTALL_02" });
+    		const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_02" });
 
     		if (response.error) {
     			$$invalidate(0, error = response.error);

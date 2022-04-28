@@ -1,7 +1,9 @@
 <script>
     export let type = undefined;
-
 </script>
+
+<div class="script__tag {`script__tag--${type}`}"></div>
+
 <style>
     .script__tag {
         background-color: transparent;
@@ -41,5 +43,13 @@
     .script__tag--js::before {
         content: "js";
     }
+
+    .script__tag--request {
+        border-color: var(--editor-string-2);
+        color: var(--editor-string-2);
+    }
+
+    .script__tag--request::before {
+        content: "req";
+    }
 </style>
-<div class="script__tag {type ? "script__tag--" + type : ""}"></div>

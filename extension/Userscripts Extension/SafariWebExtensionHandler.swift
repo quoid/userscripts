@@ -15,7 +15,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         // send standard error when there's an issue parsing inbound message
         var inBoundError = false
         // these if/else if statement are formatted so that they can be neatly collapsed in Xcode
-        // typically the "else if" would be on the same line as the preceding statements close backet
+        // typically the "else if" would be on the same line as the preceding statements close bracket
         // ie. } else if {
         if name == "REQ_PLATFORM" {
             let platform = getPlatform()
@@ -23,16 +23,22 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         } else if name == "REQ_USERSCRIPTS" {
             if let url = message?["url"] as? String, let isTop = message?["isTop"] as? Bool {
                 if
-                    checkDefaultDirectories(),
                     let matches = getInjectionFilenames(url),
                     let code = getCode(matches, isTop)
                 {
-                    response.userInfo = [SFExtensionMessageKey: ["code": code]]
+                    response.userInfo = [SFExtensionMessageKey: code]
                 } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "couldn't get userscripts"]]
+                    response.userInfo = [SFExtensionMessageKey: ["error": "REQ_USERSCRIPTS failed"]]
                 }
             } else {
                 inBoundError = true
+            }
+        }
+        else if name == "REQ_REQUESTS" {
+            if let requestScripts = getRequestScripts() {
+                response.userInfo = [SFExtensionMessageKey: requestScripts]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get requestScripts"]]
             }
         }
         else if name == "POPUP_BADGE_COUNT" {
@@ -71,32 +77,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
             } else {
                 response.userInfo = [SFExtensionMessageKey: ["error": "failed to get updates"]]
-            }
-        }
-        else if name == "POPUP_INITX" {
-            if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-                let platform = getPlatform()
-                let manifest = getManifest()
-                if
-                    checkDefaultDirectories(),
-                    checkSettings(),
-                    let files = getAllFiles(),
-                    updateManifestMatches(files),
-                    updateManifestRequired(files),
-                    purgeManifest(files),
-                    let matches = getPopupMatches(url, frameUrls),
-                    let active = manifest.settings["active"],
-                    let updates = checkForRemoteUpdates()
-                {
-                    let r = [
-                        "active": active, "items": matches, "platform": platform, "updates": updates
-                    ] as [String : Any]
-                    response.userInfo = [SFExtensionMessageKey: r]
-                } else {
-                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to run init sequence"]]
-                }
-            } else {
-                inBoundError = true
             }
         }
         else if name == "POPUP_UPDATE_ALL" {
@@ -201,7 +181,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "PAGE_INIT_DATA" {
             #if os(macOS)
-                if let settings = getInitData() {
+                if let settings = getInitData(), checkDefaultDirectories() {
                     response.userInfo = [SFExtensionMessageKey: settings]
                 } else {
                     response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]

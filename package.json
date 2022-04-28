@@ -17,7 +17,7 @@
     "cm-show-invisibles": "^3.1.0",
     "codemirror": "^5.58.2",
     "del": "^6.0.0",
-    "eslint": "^7.11.0",
+    "eslint": "^8.10.0",
     "eslint-plugin-svelte3": "^2.7.3",
     "gulp": "^4.0.2",
     "gulp-dom": "^1.0.0",
