@@ -383,7 +383,6 @@
 
     async function resize() {
         if (!platform || platform === "macos") return;
-        // special styling for ipados and split views
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(async () => {
             if (platform === "ipados") {
