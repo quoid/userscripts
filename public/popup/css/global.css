@@ -41,8 +41,23 @@ body.ipados {
     width: 18rem;
 }
 
+@media screen and (max-width: 360px) {
+    body.ipados {
+        height: 100vh;
+    }
+
+    body.ipados #app {
+        height: 100%;
+    }
+}
+
 body.ios {
+    height: 100vh;
     width: 100vw;
+}
+
+body.ios #app {
+    height: 100%;
 }
 
 noscript {
