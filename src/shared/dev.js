@@ -388,7 +388,7 @@ const _browser = {
                     require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
                     source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
                 };
-                response = {error: "a userscript with this @name value already exists, @name needs to be unique"};
+                //response = {error: "a userscript with this @name value already exists, @name needs to be unique"};
             }
             if (!responseCallback) {
                 return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
