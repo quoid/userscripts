@@ -1047,22 +1047,15 @@ func checkDefaultDirectories() -> Bool {
 
 // matching
 func getUrlProps(_ url: String) -> [String: String]? {
-    let pattern = #"^(.*:)\/\/((?:\*\.)?(?:[a-z0-9-:]+\.?)+(?:[a-z0-9]+))(\/.*)?$"#
-    let regex = try! NSRegularExpression(pattern: pattern, options: .caseInsensitive)
     guard
-        let result = regex.firstMatch(in: url, options: [], range: NSMakeRange(0, url.utf16.count)),
-        let ptclRange = Range(result.range(at: 1), in: url),
-        let hostRange = Range(result.range(at: 2), in: url)
+        let parts = URLComponents(string: url),
+        let ptcl = parts.scheme,
+        let host = parts.host
     else {
+        err("failed to parse url in getUrlProps")
         return nil
     }
-    let ptcl = String(url[ptclRange])
-    let host = String(url[hostRange])
-    var path = "/"
-    if let pathRange = Range(result.range(at: 3), in: url) {
-        path = String(url[pathRange])
-    }
-    return ["protocol": ptcl, "host": host, "pathname": path, "href": url]
+    return ["protocol": "\(ptcl):", "host": host, "pathname": parts.path, "href": url]
 }
 
 func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
