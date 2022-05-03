@@ -88,6 +88,30 @@ class UserscriptsTests: XCTestCase {
         }
         XCTAssert(result.count == urls.count)
     }
+    
+    func testMatching() throws {
+        let pattern = "*://www.google.com/*"
+        let urls = [
+            "https://www.google.com/://aa",
+            "https://www.google.com/preferences?prev=https://www.google.com/",
+            "https://www.google.com/preferences?prev=",
+            "https://www.google.com/"
+        ]
+        var result = [String]()
+        for url in urls {
+            if
+                let parts = getUrlProps(url),
+                let ptcl = parts["protocol"],
+                let host = parts["host"],
+                let path = parts["pathname"]
+            {
+                if match(ptcl, host, path, pattern) {
+                    result.append("1")
+                }
+            }
+        }
+        XCTAssert(result.count == urls.count)
+    }
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
