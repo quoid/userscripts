@@ -2877,12 +2877,12 @@
     	return child_ctx;
     }
 
-    // (499:0) {#if !active}
+    // (498:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (502:0) {#if showInstallPrompt}
+    // (501:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2924,7 +2924,7 @@
     	};
     }
 
-    // (507:0) {#if error}
+    // (506:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2974,7 +2974,7 @@
     	};
     }
 
-    // (535:8) {:else}
+    // (534:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3047,7 +3047,7 @@
     	};
     }
 
-    // (533:35) 
+    // (532:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3069,7 +3069,7 @@
     	};
     }
 
-    // (523:28) 
+    // (522:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3107,7 +3107,7 @@
     	};
     }
 
-    // (521:8) {#if inactive}
+    // (520:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3129,7 +3129,7 @@
     	};
     }
 
-    // (518:4) {#if loading}
+    // (517:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3169,7 +3169,7 @@
     	};
     }
 
-    // (537:16) {#each list as item (item.filename)}
+    // (536:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3230,7 +3230,7 @@
     	};
     }
 
-    // (551:0) {#if !inactive && platform === "macos"}
+    // (550:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3263,7 +3263,7 @@
     	};
     }
 
-    // (588:18) 
+    // (587:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3313,7 +3313,7 @@
     	};
     }
 
-    // (574:22) 
+    // (573:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3363,7 +3363,7 @@
     	};
     }
 
-    // (558:0) {#if showUpdates}
+    // (557:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3416,7 +3416,7 @@
     	};
     }
 
-    // (589:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
+    // (588:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3456,7 +3456,7 @@
     	};
     }
 
-    // (575:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (574:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3500,7 +3500,7 @@
     	};
     }
 
-    // (559:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
+    // (558:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -4311,8 +4311,6 @@
 
     	async function resize() {
     		if (!platform || platform === "macos") return;
-
-    		// special styling for ipados and split views
     		clearTimeout(resizeTimer);
 
     		resizeTimer = setTimeout(
