@@ -1946,14 +1946,14 @@
     			t11 = space();
     			button1 = element("button");
     			button1.textContent = "Install";
-    			attr(li, "class", "userscript--name svelte-tdpz3j");
-    			attr(ul, "class", "svelte-tdpz3j");
-    			attr(div0, "class", "badge--icon svelte-tdpz3j");
-    			attr(div1, "class", "badge--text svelte-tdpz3j");
-    			attr(div2, "class", "badge svelte-tdpz3j");
-    			attr(button0, "class", "cancel svelte-tdpz3j");
-    			attr(button1, "class", "install svelte-tdpz3j");
-    			attr(div3, "class", "buttons svelte-tdpz3j");
+    			attr(li, "class", "userscript--name svelte-p5i392");
+    			attr(ul, "class", "svelte-p5i392");
+    			attr(div0, "class", "badge--icon svelte-p5i392");
+    			attr(div1, "class", "badge--text svelte-p5i392");
+    			attr(div2, "class", "badge svelte-p5i392");
+    			attr(button0, "class", "cancel svelte-p5i392");
+    			attr(button1, "class", "install svelte-p5i392");
+    			attr(div3, "class", "buttons svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, ul, anchor);
@@ -2100,8 +2100,8 @@
     			p = element("p");
     			t3 = text(/*installError*/ ctx[1]);
     			html_tag = new HtmlTag(t0);
-    			attr(p, "class", "svelte-tdpz3j");
-    			attr(div1, "class", "install__error svelte-tdpz3j");
+    			attr(p, "class", "svelte-p5i392");
+    			attr(div1, "class", "install__error svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
@@ -2131,7 +2131,7 @@
     		c() {
     			li = element("li");
     			t = text(t_value);
-    			attr(li, "class", "userscript--description svelte-tdpz3j");
+    			attr(li, "class", "userscript--description svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2169,8 +2169,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-tdpz3j");
-    			attr(li, "class", "userscript--field svelte-tdpz3j");
+    			attr(div, "class", "svelte-p5i392");
+    			attr(li, "class", "userscript--field svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2222,7 +2222,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-tdpz3j");
+    			attr(div, "class", "truncate svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2260,8 +2260,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-tdpz3j");
-    			attr(li, "class", "userscript--field svelte-tdpz3j");
+    			attr(div, "class", "svelte-p5i392");
+    			attr(li, "class", "userscript--field svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2313,7 +2313,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-tdpz3j");
+    			attr(div, "class", "truncate svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2351,8 +2351,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-tdpz3j");
-    			attr(li, "class", "userscript--field svelte-tdpz3j");
+    			attr(div, "class", "svelte-p5i392");
+    			attr(li, "class", "userscript--field svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2404,7 +2404,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "truncate svelte-tdpz3j");
+    			attr(div, "class", "truncate svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2442,8 +2442,8 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", "svelte-tdpz3j");
-    			attr(li, "class", "userscript--field svelte-tdpz3j");
+    			attr(div, "class", "svelte-p5i392");
+    			attr(li, "class", "userscript--field svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
@@ -2495,7 +2495,7 @@
     		c() {
     			div = element("div");
     			t = text(t_value);
-    			attr(div, "class", "svelte-tdpz3j");
+    			attr(div, "class", "svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -2525,7 +2525,7 @@
     		c() {
     			div = element("div");
     			if (if_block) if_block.c();
-    			attr(div, "class", "view--install svelte-tdpz3j");
+    			attr(div, "class", "view--install svelte-p5i392");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);

@@ -39,16 +39,11 @@ body {
 
 body.ipados {
     width: 18rem;
+    height: 100vh;
 }
 
-@media screen and (max-width: 360px) {
-    body.ipados {
-        height: 100vh;
-    }
-
-    body.ipados #app {
-        height: 100%;
-    }
+body.ipados #app {
+    height: 100%;
 }
 
 body.ios {
