@@ -2877,12 +2877,12 @@
     	return child_ctx;
     }
 
-    // (498:0) {#if !active}
+    // (500:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (501:0) {#if showInstallPrompt}
+    // (503:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2924,7 +2924,7 @@
     	};
     }
 
-    // (506:0) {#if error}
+    // (508:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2974,7 +2974,7 @@
     	};
     }
 
-    // (534:8) {:else}
+    // (536:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
@@ -3047,7 +3047,7 @@
     	};
     }
 
-    // (532:35) 
+    // (534:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3069,7 +3069,7 @@
     	};
     }
 
-    // (522:28) 
+    // (524:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3107,7 +3107,7 @@
     	};
     }
 
-    // (520:8) {#if inactive}
+    // (522:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3129,7 +3129,7 @@
     	};
     }
 
-    // (517:4) {#if loading}
+    // (519:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3169,7 +3169,7 @@
     	};
     }
 
-    // (536:16) {#each list as item (item.filename)}
+    // (538:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
@@ -3230,7 +3230,7 @@
     	};
     }
 
-    // (550:0) {#if !inactive && platform === "macos"}
+    // (552:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3263,7 +3263,7 @@
     	};
     }
 
-    // (587:18) 
+    // (589:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3313,7 +3313,7 @@
     	};
     }
 
-    // (573:22) 
+    // (575:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3363,7 +3363,7 @@
     	};
     }
 
-    // (557:0) {#if showUpdates}
+    // (559:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3416,7 +3416,7 @@
     	};
     }
 
-    // (588:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
+    // (590:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
@@ -3456,7 +3456,7 @@
     	};
     }
 
-    // (574:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (576:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
@@ -3500,7 +3500,7 @@
     	};
     }
 
-    // (558:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
+    // (560:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -4181,6 +4181,9 @@
 
     		// refresh session rules
     		browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
+
+    		// refresh context-menu scripts
+    		browser.runtime.sendMessage({ name: "REFRESH_CONTEXT_MENU_SCRIPTS" });
 
     		// set popup height
     		resize();

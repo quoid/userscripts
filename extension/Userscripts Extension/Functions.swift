@@ -1217,6 +1217,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
 func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
     var cssFiles = [Any]()
     var jsFiles = [Any]()
+    var menuFiles = [Any]()
     
     guard let saveLocation = getSaveLocation() else {
         err("getCode failed at (1)")
@@ -1345,17 +1346,29 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
                 "weight": weight
             ])
         } else if type == "js" {
-            jsFiles.append([
-                "code": code,
-                "scriptMetaStr": scriptMetaStr,
-                "scriptObject": scriptObject,
-                "type": "js",
-                "weight": weight
-            ])
+            if runAt == "context-menu" {
+                #if os(macOS)
+                    menuFiles.append([
+                        "code": code,
+                        "scriptMetaStr": scriptMetaStr,
+                        "scriptObject": scriptObject,
+                        "type": "js",
+                        "weight": weight
+                    ])
+                #endif
+            } else {
+                jsFiles.append([
+                    "code": code,
+                    "scriptMetaStr": scriptMetaStr,
+                    "scriptObject": scriptObject,
+                    "type": "js",
+                    "weight": weight
+                ])
+            }
         }
     }
     let resp = [
-        "files": ["css": cssFiles, "js": jsFiles],
+        "files": ["css": cssFiles, "js": jsFiles, "menu": menuFiles],
         "scriptHandler": "Userscripts",
         "scriptHandlerVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
     ] as [String : Any]
@@ -1432,6 +1445,48 @@ func getRequestScripts() -> [[String: String]]? {
         }
     }
     return requestScripts
+}
+
+func getContextMenuScripts() -> [String: Any]? {
+    var menuFilenames = [String]()
+    // check the manifest to see if injection is enabled
+    let manifest = getManifest()
+    guard let active = manifest.settings["active"] else {
+        err("getContextMenuScripts failed at (1)")
+        return nil
+    }
+    // if not enabled return empty array
+    if active != "true" {
+        return ["files": ["menu": []]]
+    }
+    // get all files at save location
+    guard let files = getAllFiles() else {
+        err("getContextMenuScripts failed at (2)")
+        return nil
+    }
+    // loop through files and find @run-at context-menu script filenames
+    for file in files {
+        if
+            let fileMetadata = file["metadata"] as? [String: [String]],
+            let filename = file["filename"] as? String
+        {
+            let runAt = fileMetadata["run-at"]?[0] ?? "document-end"
+            if runAt != "context-menu" {
+                continue
+            }
+            if !manifest.disabled.contains(filename) {
+                menuFilenames.append(filename)
+            }
+        } else {
+            err("getContextMenuScripts failed at (3), couldn't get metadata for \(file)")
+        }
+    }
+    // get and return script objects for all context-menu scripts
+    guard let scripts = getCode(menuFilenames, true) else {
+        err("getContextMenuScripts failed at (4)")
+        return nil
+    }
+    return scripts
 }
 
 // popup

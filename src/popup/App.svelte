@@ -265,6 +265,8 @@
 
         // refresh session rules
         browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
+        // refresh context-menu scripts
+        browser.runtime.sendMessage({name: "REFRESH_CONTEXT_MENU_SCRIPTS"});
 
         // set popup height
         resize();

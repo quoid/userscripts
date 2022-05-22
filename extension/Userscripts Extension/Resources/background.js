@@ -506,6 +506,88 @@ async function setBadgeCount() {
     });
 }
 
+async function getContextMenuItems() {
+    // macos exclusive feature
+    const platform = await getPlatform();
+    if (platform !== "macos") return;
+    // since it's not possible to get a list of currently active menu items
+    // on update, all context-menu items are clears, then re-added
+    // this is done to get fresh code changes to context-menu scripts on certain events
+    await browser.menus.removeAll();
+    // get the context-menu scripts
+    const response = await browser.runtime.sendNativeMessage({name: "REQ_CONTEXT_MENU_SCRIPTS"});
+    if (response.error) {
+        console.error(response.error);
+        return;
+    }
+    // add menus items
+    const items = response.files?.menu || [];
+    if (items.length) {
+        console.info(`Setting ${items.length} context-menu userscripts`);
+    }
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        // context-menu scripts require @match value
+        // @include values are ignored
+        if (!item.scriptObject.matches.length) continue;
+        addContextMenuItem(item);
+    }
+}
+
+async function addContextMenuItem(userscript) {
+    // context-menu items persist for a session
+    // to avoid duplication, when created, save the filename to session storage
+    const savedItems = sessionStorage.getItem("menu");
+    // if the session storage key doesn't exist use empty array
+    const activeItems = savedItems ? JSON.parse(savedItems) : [];
+    if (activeItems.indexOf(userscript.scriptObject.filename) !== -1) {
+        // if already saved, remove it, to get fresh code changes
+        await browser.menus.remove(userscript.scriptObject.filename);
+    }
+    // potential bug? https://developer.apple.com/forums/thread/685273
+    // https://stackoverflow.com/q/68431201
+    // parse through match values and change pathnames to deal with bug
+    const patterns = userscript.scriptObject.matches;
+    patterns.forEach((pattern, index) => {
+        try {
+            const url = new URL(pattern);
+            let pathname = url.pathname;
+            if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
+            patterns[index] = `${url.protocol}//${url.hostname}${pathname}`;
+        } catch (error) {
+            // prevent breaking when non-url pattern present
+        }
+    });
+
+    browser.menus.create({
+        contexts: ["all"],
+        documentUrlPatterns: patterns,
+        id: userscript.scriptObject.filename,
+        title: userscript.scriptObject.name
+    }, () => {
+        // add event listener if needed
+        if (!browser.menus.onClicked.hasListener(contextClick)) {
+            browser.menus.onClicked.addListener(contextClick);
+        }
+        // save the context-menu item reference to sessionStorage
+        sessionStorage.setItem("menu", JSON.stringify([userscript.scriptObject.filename]));
+    });
+}
+
+function contextClick(info, tab) {
+    // when any created context-menu item is clicked, send message to tab
+    // the content script for that tag will have the context-menu code
+    // which will get send back in the response if/when found
+    const message = {name: "CONTEXT_RUN", menuItemId: info.menuItemId};
+    browser.tabs.sendMessage(tab.id, message, response => {
+        // if code is returned, execute on that tab
+        if (!response.code) return;
+        browser.tabs.executeScript(tab.id, {
+            code: response.code
+        });
+    });
+}
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const name = request.name;
     switch (name) {
@@ -534,6 +616,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 // update badge count on injection
                 // especially useful when injection is deferred (ie. subframes)
                 setBadgeCount();
+                // refresh context menu items if needed
+                // if (response.files.menu.length) {
+                //     getContextMenuItems();
+                // }
             });
             return true;
         }
@@ -636,6 +722,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
         case "REFRESH_SESSION_RULES": {
             setSessionRules();
+            break;
+        }
+        case "REFRESH_CONTEXT_MENU_SCRIPTS": {
+            getContextMenuItems();
+            break;
         }
     }
 });
@@ -703,6 +794,7 @@ browser.runtime.onStartup.addListener(async () => {
     // 2. a new save event in the page occurs
     // 3. the refresh button is pushed in the popup
     await setSessionRules();
+    await getContextMenuItems();
 });
 browser.tabs.onActivated.addListener(setBadgeCount);
 browser.windows.onFocusChanged.addListener(setBadgeCount);

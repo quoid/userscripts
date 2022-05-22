@@ -291,8 +291,26 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
             return true;
         }
+    } else if (name === "CONTEXT_RUN") {
+        // from bg script when context-menu item is clicked
+        // double check to ensure context-menu scripts only run in top windows
+        if (window !== window.top) return;
+
+        // loop through context-menu scripts saved to data object and find match
+        // if no match found, nothing will execute and error will log
+        const filename = request.menuItemId;
+        for (let i = 0; i < data.files.menu.length; i++) {
+            const item = data.files.menu[i];
+            if (item.scriptObject.filename === filename) {
+                console.info(`Injecting ${filename} %c(js)`, "color: #fff600");
+                sendResponse({code: item.code});
+                return;
+            }
+        }
+        console.error(`Couldn't find ${filename} code!`);
     }
 });
+
 // listens for messages from api methods calls in content script or current page
 window.addEventListener("message", handleApiMessages);
 // when userscript fails due to a CSP and has @inject-into value of auto or page

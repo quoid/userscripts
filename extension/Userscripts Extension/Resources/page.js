@@ -19128,10 +19128,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			// set the newly saved file contents in codemirror instance
     			cmSetSavedCode(response.content);
 
-    			// update session declarativeNetRequest rules if needed
-    			if (response.request) {
-    				browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
-    			}
+    			// refresh session rules
+    			browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
+
+    			// refresh context-menu scripts
+    			browser.runtime.sendMessage({ name: "REFRESH_CONTEXT_MENU_SCRIPTS" });
     		}
 
     		state.remove("saving");

@@ -41,6 +41,13 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 response.userInfo = [SFExtensionMessageKey: ["error": "failed to get requestScripts"]]
             }
         }
+        else if name == "REQ_CONTEXT_MENU_SCRIPTS" {
+            if let contextMenuScripts = getContextMenuScripts() {
+                response.userInfo = [SFExtensionMessageKey: contextMenuScripts]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get contextMenuScripts"]]
+            }
+        }
         else if name == "POPUP_BADGE_COUNT" {
             #if os(macOS)
                 if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
