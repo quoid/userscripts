@@ -30,7 +30,7 @@
         name = activeItem.name;
         remote = activeItem.remote;
         temp = activeItem.temp;
-        type = activeItem.type;
+        type = activeItem.request ? "request" : activeItem.type;
         canUpdate = activeItem.canUpdate;
         // on load if temp item, disabled discard and enable save, if not disable both
         if (temp) {
@@ -57,9 +57,9 @@
             // overwrite item in items store
             items.update(i => {
                 const index = i.findIndex(a => a.active);
-                const disabled = i[index].disabled != undefined ? i[index].disabled : false;
+                const disabled = i[index].disabled !== undefined ? i[index].disabled : false;
                 const type = i[index].type;
-                const visible = i[index].visible != undefined ? i[index].visible : true;
+                const visible = i[index].visible !== undefined ? i[index].visible : true;
                 i[index] = response;
                 i[index].active = true;
                 i[index].disabled = disabled;
@@ -69,6 +69,10 @@
             });
             // set the newly saved file contents in codemirror instance
             cmSetSavedCode(response.content);
+            // refresh session rules
+            browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
+            // refresh context-menu scripts
+            browser.runtime.sendMessage({name: "REFRESH_CONTEXT_MENU_SCRIPTS"});
         }
         state.remove("saving");
     }
@@ -79,7 +83,7 @@
         const link = document.createElement("a");
         const content = codemirror.getValue();
         const filename = activeItem.filename;
-        link.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(content));
+        link.setAttribute("href", `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`);
         link.setAttribute("download", filename);
         link.style.display = "none";
         document.body.appendChild(link);
@@ -125,7 +129,7 @@
                 log.add(response.error, "error", true);
             } else {
                 items.update(i => i.filter(a => !a.active));
-                log.add("Successfully trashed " + activeItem.filename, "info", false);
+                log.add(`Successfully trashed ${activeItem.filename}`, "info", false);
             }
         }
         state.remove("trashing");
@@ -146,6 +150,72 @@
         }
     }
 </script>
+
+<div class="editor">
+    {#if $state.includes("editor-loading") || $state.includes("fetching")}
+        <Loader/>
+    {/if}
+    {#if !activeItem}
+        <div class="editor__empty">No Item Selected</div>
+    {/if}
+    <div class="editor__header">
+        <div class="editor__header__content">
+            <div>
+                <Tag type={type}/>
+                <div class="editor__title truncate">{name}</div>
+            </div>
+            <div class="editor__status">
+                <div>
+                    {#if $state.includes("saving")}
+                        Saving...
+                    {:else if $state.includes("trashing")}
+                        （◞‸◟）
+                    {:else if $state.includes("updating")}
+                        Updating code, <span class="link" on:click={abort}>cancel request</span>
+                    {:else if remote}
+                        Code was <span class="info" title={remote}>remotely fetched</span>, check carefully before saving!
+                    {:else if temp}
+                        Ready for code!
+                    {:else}
+                        Last modified: {lastModified}
+                    {/if}
+                </div>
+            </div>
+        </div>
+        <div class="editor__header__buttons">
+            <IconButton
+                icon={iconSync}
+                on:click={update}
+                title={"Check for updates"}
+                disabled={disabled || !canUpdate}
+            />
+            <IconButton
+                icon={iconDownload}
+                on:click={download}
+                title={"Download file"}
+                {disabled}
+            />
+            <IconButton
+                icon={iconTrash}
+                on:click={trash}
+                title={"Trash file"}
+                {disabled}
+            />
+        </div>
+    </div>
+    <div class="editor__code">
+        <CodeMirror
+            bind:this={codemirror}
+            on:message={handleMessage}
+            saveHandler={save}
+        />
+    </div>
+    <div class="editor__footer">
+        <button on:click={discard} disabled={disabled || discardDisabled}>Discard</button>
+        <button on:click={save} disabled={disabled || saveDisabled}>Save</button>
+    </div>
+</div>
+
 <style>
     .editor {
         background-color: var(--color-bg-primary);
@@ -231,7 +301,7 @@
     }
 
     .editor__footer {
-        background: rgba(50, 54, 57, 0.65);
+        background: rgba(50 54 57 / 0.65);
         border-radius: var(--border-radius);
         bottom: 0.25rem;
         padding: 0.5rem 1rem;
@@ -260,68 +330,3 @@
         margin-left: 2rem;
     }
 </style>
-
-<div class="editor">
-    {#if $state.includes("editor-loading") || $state.includes("fetching")}
-        <Loader/>
-    {/if}
-    {#if !activeItem}
-        <div class="editor__empty">No Item Selected</div>
-    {/if}
-    <div class="editor__header">
-        <div class="editor__header__content">
-            <div>
-                <Tag type={type}/>
-                <div class="editor__title truncate">{name}</div>
-            </div>
-            <div class="editor__status">
-                <div>
-                    {#if $state.includes("saving")}
-                        Saving...
-                    {:else if $state.includes("trashing")}
-                        （◞‸◟）
-                    {:else if $state.includes("updating")}
-                        Updating code, <span class="link" on:click={abort}>cancel request</span>
-                    {:else if remote}
-                        Code was <span class="info" title={remote}>remotely fetched</span>, check carefully before saving!
-                    {:else if temp}
-                        Ready for code!
-                    {:else}
-                        Last modified: {lastModified}
-                    {/if}
-                </div>
-            </div>
-        </div>
-        <div class="editor__header__buttons">
-            <IconButton
-                icon={iconSync}
-                on:click={update}
-                title={"Check for updates"}
-                disabled={disabled || !canUpdate}
-            />
-            <IconButton
-                icon={iconDownload}
-                on:click={download}
-                title={"Download file"}
-                {disabled}
-            />
-            <IconButton
-                icon={iconTrash}
-                on:click={trash}
-                title={"Trash file"}
-                {disabled}
-            />
-        </div>
-    </div>
-    <div class="editor__code">
-        <CodeMirror
-            bind:this={codemirror}
-            on:message={handleMessage}
-            saveHandler={save}
-        />
-    </div>
-    <div class="editor__footer">
-        <button on:click={discard} disabled={disabled || discardDisabled}>Discard</button>
-        <button on:click={save} disabled={disabled || saveDisabled}>Save</button>
-    </div>
-</div>

@@ -1,3 +1,7 @@
+/**
+ * @param {number} ms millisecond timestamp
+ * @returns {string}
+ */
 export function formatDate(ms) {
     const d = new Date(ms);
     const yr = new Intl.DateTimeFormat("en", {year: "numeric"}).format(d);
@@ -9,9 +13,24 @@ export function formatDate(ms) {
 }
 
 export function uniqueId() {
-    return Math.random().toString(36).substr(2, 8);
+    return Math.random().toString(36).substring(2, 10);
 }
 
+/**
+ * awaitable function for waiting an arbitrary amount of time
+ * @param {number} ms the amount of time to wait in milliseconds
+ * @returns {Promise<void>}
+ */
+export function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// TODO: describe the items array that should get passed to this function
+/**
+ * @param {Array} array
+ * @param {("lastModifiedAsc"|"lastModifiedDesc"|"nameAsc"|"nameDesc")} order
+ * @returns
+ */
 export function sortBy(array, order) {
     if (order === "nameAsc") {
         array.sort((a, b) => a.name.localeCompare(b.name));
@@ -27,7 +46,14 @@ export function sortBy(array, order) {
     return array;
 }
 
-export function  newScriptDefault(description, name, type) {
+/**
+ *
+ * @param {string} description
+ * @param {string} name
+ * @param {("css"|"js")} type
+ * @returns {string}
+ */
+export function newScriptDefault(description, name, type) {
     if (type === "css") {
         return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n@match       <all_urls>\n==/UserStyle== */`;
     } else if (type === "js") {
@@ -35,6 +61,10 @@ export function  newScriptDefault(description, name, type) {
     }
 }
 
+/**
+ * @param {string} str
+ * @returns {?{code: string, content: str, metablock: string, metadata: {string: string[]}}}
+ */
 export function parse(str) {
     if (typeof str != "string") return null;
     const blocksReg = /(?:(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)|(\/\* ==UserStyle==[ \t]*?\r?\n([\S\s]*?)\r?\n==\/UserStyle== \*\/)([\S\s]*))/;
@@ -49,8 +79,8 @@ export function parse(str) {
     const metadata = {};
     const metaArray = metas.split("\n");
     metaArray.forEach(function(m) {
-        var parts = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)/);
-        var parts2 = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$/);
+        const parts = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)/);
+        const parts2 = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$/);
         if (parts) {
             metadata[parts[1]] = metadata[parts[1]] || [];
             metadata[parts[1]].push(parts[2]);
@@ -70,3 +100,76 @@ export function parse(str) {
         metadata: metadata
     };
 }
+
+/**
+ * @param {string} text editor code
+ * @returns {{match: boolean, meta: boolean} | {key: string, value: string, text: string}[]}
+ */
+export function parseMetadata(text) {
+    const groupsRe = /(\/\/ ==UserScript==[ \t]*?\r?\n([\S\s]*?)\r?\n\/\/ ==\/UserScript==)([\S\s]*)/;
+    const groups = text.match(groupsRe);
+    // userscript code doesn't match the regex expression
+    // could be missing opening/closing tags, malformed
+    // or missing metadata between opening/closing tags (group 2 in regex exp)
+    if (!groups) {
+        return {match: false};
+    }
+
+    // userscript code matches but content between opening/closing tag missing
+    // ex. opening/closing tags present, but newline characters between the tags
+    const metas = groups[2];
+    if (!metas) return {match: true, meta: false};
+
+    const metadata = [];
+    const metaArray = metas.split("\n");
+
+    for (let i = 0; i < metaArray.length; i++) {
+        const metaRegex = /^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]*([^\s]+[^\r\n\t\v\f]*)?/;
+        const meta = metaArray[i];
+        const parts = meta.match(metaRegex);
+        if (parts) metadata.push({key: parts[1], value: parts[2], text: parts[0]});
+    }
+
+    // if there is content between the opening/closing tags, match will be found
+    // this additionally checks that there's at least one properly formed key
+    // if not keys found, assume metadata is missing
+    // checking that required keys are present will happen elsewhere
+    if (!Object.keys(metadata).length) return {match: true, meta: false};
+
+    return metadata;
+}
+
+export const validGrants = new Set([
+    "GM.addStyle",
+    "GM.deleteValue",
+    "GM.getValue",
+    "GM.info",
+    "GM.listValues",
+    "GM.openInTab",
+    "GM.setClipboard",
+    "GM.setValue",
+    "GM.xmlHttpRequest",
+    "GM_addStyle",
+    "GM_info",
+    "GM_setClipboard",
+    "GM_xmlhttpRequest"
+]);
+
+export const validKeys = new Set([
+    "author",
+    "description",
+    "downloadURL",
+    "exclude",
+    "exclude-match",
+    "grant",
+    "include",
+    "inject-into",
+    "match",
+    "name",
+    "noframes",
+    "require",
+    "run-at",
+    "updateURL",
+    "version",
+    "weight"
+]);

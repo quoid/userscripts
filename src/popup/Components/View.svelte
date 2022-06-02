@@ -20,6 +20,7 @@
         };
     }
 </script>
+
 <div class="view" transition:slide>
     <div class="view__header">
         {headerTitle}
@@ -37,6 +38,7 @@
         {/if}
     </div>
 </div>
+
 <style>
     .view {
         background-color: var(--color-bg-primary);

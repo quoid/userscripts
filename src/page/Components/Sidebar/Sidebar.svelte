@@ -20,7 +20,7 @@
     // disable buttons accordingly
     $: disabled = !$state.includes("ready");
 
-    $: list = sortBy($items, $settings.sortOrder).filter(a => a.visible != false);
+    $: list = sortBy($items, $settings.sortOrder).filter(a => a.visible !== false);
 
     // always scroll to an active item
     // when sorting is changed, a save occurs, etc... will scroll to active item
@@ -43,7 +43,7 @@
         const random = uniqueId();
         const namePrefix = type === "js" ? "NewScript-" : "NewStyle-";
         const name = namePrefix + random;
-        const filename = name + "." + type;
+        const filename = `${name}.${type}`;
         const description = "This is your new file, start writing code";
         const item = {
             content: content || newScriptDefault(description, name, type),
@@ -70,17 +70,17 @@
         // check if there's a temp item and it's not the item to be activated
         // can occur when user clicks a non-temp item while a temp item exists
         const temp = $items.find(i => i.temp);
-        if ((temp && (temp != item) || cmChanged()) && !warn()) return;
+        if (((temp && (temp !== item)) || cmChanged()) && !warn()) return;
         // the editor has changed or the above scenario is true
         // the user has been warned and has accepted the warning
         // if another item already active, deactivate it
         const activeItem = $items.find(i => i.active);
-        if (activeItem)  {
+        if (activeItem) {
             activeItem.active = false;
             $items = $items;
         }
         // remove the temp item if needed
-        if (temp && (temp != item)) items.update(i => i.filter(a => !a.temp));
+        if (temp && (temp !== item)) items.update(i => i.filter(a => !a.temp));
 
         // set the saved and session code variables properly
         const savedCode = item.temp ? null : item.content;
@@ -95,7 +95,8 @@
         // set up editor after activating file
         await tick();
         const cm = cmGetInstance();
-        const mode = item.type === "js" ? "javascript" : item.type;
+        let mode = "javascript";
+        if (item.type === "css") mode = "css";
         cm.setOption("mode", mode);
         cm.setValue(item.content);
         cm.clearHistory();
@@ -166,6 +167,41 @@
         sidebarTimeout = setTimeout(() => showCount = true, 750);
     }
 </script>
+
+<div class="sidebar {!$settings.descriptions ? "sidebar--compact" : ""}">
+    <div class="sidebar__header">
+        <div class="sidebar__filter"><SidebarFilter/></div>
+        <IconButton
+            notification={!$settings.active}
+            icon={iconSettings}
+            on:click={() => state.add("settings")}
+            title={"Open settings"}
+            {disabled}
+        />
+        <Dropdown icon={iconPlus} title={"New item"} {disabled}>
+            <li on:click={() => newItem("css")}>New CSS</li>
+            <li on:click={() => newItem("js")}>New Javascript</li>
+            <li on:click={newRemote}>New Remote</li>
+        </Dropdown>
+    </div>
+    <div class="sidebar__body" on:scroll={sidebarScroll}>
+        {#if $state.includes("items-loading")}
+            <Loader/>
+        {/if}
+        {#each list as item (item.filename)}
+            <svelte:component
+                this={SidebarItem}
+                data={item}
+                toggleClick={e => toggleItem(e, item)}
+                on:click={() => activate(item)}
+            />
+        {/each}
+    </div>
+    {#if showCount}
+        <div transition:fade="{{duration: 150}}" class="sidebar__count">{list.length} Items</div>
+    {/if}
+</div>
+
 <style>
     .sidebar {
         background-color: var(--color-bg-secondary);
@@ -196,7 +232,7 @@
     .sidebar__count {
         backdrop-filter: blur(3px);
         -webkit-backdrop-filter: blur(3px);
-        background: rgba(47, 51, 55, 0.65);
+        background: rgba(47 51 55 / 0.65);
         border-radius: var(--border-radius);
         bottom: 0.25rem;
         color: var(--text-color-secondary);
@@ -216,37 +252,3 @@
         position: relative;
     }
 </style>
-
-<div class="sidebar {!$settings.descriptions ? "sidebar--compact" : ""}">
-    <div class="sidebar__header">
-        <div class="sidebar__filter"><SidebarFilter/></div>
-        <IconButton
-            notification={!$settings.active}
-            icon={iconSettings}
-            on:click={() => state.add("settings")}
-            title={"Open settings"}
-            {disabled}
-        />
-        <Dropdown icon={iconPlus} title={"New item"} {disabled}>
-            <li on:click={() => newItem("css")}>New CSS</li>
-            <li on:click={() => newItem("js")}>New Javascript</li>
-            <li on:click={newRemote}>New Remote</li>
-        </Dropdown>
-    </div>
-    <div class="sidebar__body" on:scroll={sidebarScroll}>
-        {#if $state.includes("items-loading")}
-            <Loader/>
-        {/if}
-        {#each list as item (item.filename)}
-            <svelte:component
-                this={SidebarItem}
-                data={item}
-                toggleClick={e => {toggleItem(e, item)}}
-                on:click={() => activate(item)}
-            />
-        {/each}
-    </div>
-    {#if showCount}
-        <div transition:fade="{{duration: 150}}" class="sidebar__count">{list.length} Items</div>
-    {/if}
-</div>

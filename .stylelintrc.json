@@ -3,21 +3,20 @@
         "stylelint-config-standard",
         "stylelint-config-html/svelte"
     ],
+    "ignoreFiles": ["**/codemirror/*", "**/reset.css", "**/*.js"],
     "rules": {
-        "comment-empty-line-before": [
-            "always",
-            {
-                "ignore": ["after-comment", "stylelint-commands"]
-            }
-        ],
+        "alpha-value-notation": "number",
+        "comment-empty-line-before": ["always",{
+            "ignore": ["after-comment", "stylelint-commands"]
+        }],
+        "custom-property-empty-line-before": null,
         "indentation": 4,
+        "max-empty-lines": 1,
         "no-descending-specificity": null,
+        "property-no-vendor-prefix": null,
         "selector-class-pattern": null,
-        "selector-pseudo-class-no-unknown": [
-            true,
-            {
-                "ignorePseudoClasses": ["global"]
-            }
-        ]
+        "selector-pseudo-class-no-unknown": [true, {
+            "ignorePseudoClasses": ["global"]
+        }]
     }
 }
