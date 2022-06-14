@@ -90,7 +90,22 @@ function injectJS(name, filename, code, scope, fallback) {
 
 function injectCSS(name, code) {
     console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
-    browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
+    // Safari lacks full support for tabs.insertCSS
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/insertCSS
+    // specifically frameId and cssOrigin
+    // if support for those details keys arrives, the method below can be used
+    // NOTE: manifest V3 does support frameId, but not origin
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/insertCSS
+
+    // browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
+
+    // write the css code to head of the document
+    let wrapper = "const tag = document.createElement(\"style\");\n";
+    wrapper += `tag.textContent = \`${code}\`;`;
+    wrapper += "\ndocument.head.appendChild(tag);";
+    // eval the code directly into the context of the content script (not page context)
+    // wrapper += "console.log(window.browser)"; // this validates the execution env
+    eval(wrapper);
 }
 
 function cspFallback(e) {
