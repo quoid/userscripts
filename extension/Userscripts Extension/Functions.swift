@@ -520,8 +520,6 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.match[pattern]?.firstIndex(of: filename) {
                     manifest.match[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (2), \(filename)")
                 }
             }
         }
@@ -530,8 +528,6 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.excludeMatch[pattern]?.firstIndex(of: filename) {
                     manifest.excludeMatch[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (3), \(filename)")
                 }
             }
         }
@@ -540,8 +536,6 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.include[pattern]?.firstIndex(of: filename) {
                     manifest.include[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (4), \(filename)")
                 }
             }
         }
@@ -550,13 +544,11 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.exclude[pattern]?.firstIndex(of: filename) {
                     manifest.exclude[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (5), \(filename)")
                 }
             }
         }
         if update, !updateManifest(with: manifest) {
-            err("updateManifestDeclarativeNetRequests failed at (6)")
+            err("updateManifestDeclarativeNetRequests failed at (2)")
             return false
         }
     }
