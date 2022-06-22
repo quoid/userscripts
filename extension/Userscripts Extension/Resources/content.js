@@ -19,6 +19,16 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS", uid: uid}, response => {
     data = response;
     for (let i = 0; i < data.files.js.length; i++) {
         const userscript = data.files.js[i];
+        if (
+            userscript.scriptObject?.grants?.length
+            && (
+                userscript.scriptObject["inject-into"] === "auto"
+                || userscript.scriptObject["inject-into"] === "page"
+            )
+        ) {
+            userscript.scriptObject["inject-into"] = "content";
+            console.warn(`${userscript.scriptObject.filename} had it's @inject-value automatically set to "content" because it has @grant values - see: https://github.com/quoid/userscripts/issues/252#issuecomment-1136637700`);
+        }
         processJS(
             userscript.scriptObject.name,
             userscript.scriptObject.filename,
