@@ -137,9 +137,34 @@ func openSaveLocation() -> Bool {
 }
 
 func validateUrl(_ urlString: String) -> Bool {
+    var urlChecked = urlString
+    // if the url is already encoded, decode it
+    if isEncoded(urlChecked) {
+        if let decodedUrl = urlChecked.removingPercentEncoding {
+            urlChecked = decodedUrl
+        } else {
+            err("validateUrl failed at (1), couldn't decode url, \(urlString)")
+            return false
+        }
+    }
+    // encode all urls strings
+    if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+        urlChecked = encodedUrl
+    } else {
+        err("validateUrl failed at (2), couldn't percent encode url, \(urlString)")
+        return false
+    }
+    guard
+        let parts = getUrlProps(urlChecked),
+        let ptcl = parts["protocol"],
+        let path = parts["pathname"]
+    else {
+        err("validateUrl failed at (3) for \(urlString)")
+        return false
+    }
     if
-        (!urlString.hasPrefix("https://") && !urlString.hasPrefix("http://"))
-        || (!urlString.hasSuffix(".css") && !urlString.hasSuffix(".js"))
+        (ptcl != "https:" && ptcl != "http:")
+        || (!path.hasSuffix(".css") && !path.hasSuffix(".js"))
     {
         return false
     }
