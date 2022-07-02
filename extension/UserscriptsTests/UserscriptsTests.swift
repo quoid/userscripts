@@ -91,11 +91,11 @@ class UserscriptsTests: XCTestCase {
     
     func testFileRemoteUpdate() throws {
         let urls = [
-            "http://www.k21p.com/example.user.js",
-            "http://www.k21p.com/example.user.js?foo=bar", // query string
+            "https://www.k21p.com/example.user.js",
+            "https://www.k21p.com/example.user.js?foo=bar", // query string
             "http://www.k21p.com/example.user.js", // http protocol
             "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js", // non latin chars
-            "http://www.k21p.com/example.user.jsx" // should fail
+            "https://www.k21p.com/example.user.jsx" // should fail
             
         ]
         var result = [Int]()
