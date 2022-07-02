@@ -89,6 +89,34 @@ class UserscriptsTests: XCTestCase {
         XCTAssert(result.count == urls.count)
     }
     
+    func testFileRemoteUpdate() throws {
+        let urls = [
+            "http://www.k21p.com/example.user.js",
+            "http://www.k21p.com/example.user.js?foo=bar", // query string
+            "http://www.k21p.com/example.user.js", // http protocol
+            "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js", // non latin chars
+            "http://www.k21p.com/example.user.jsx" // should fail
+            
+        ]
+        var result = [Int]()
+        for url in urls {
+            let content = """
+            // ==UserScript==
+            // @name test
+            // @match       *://*/*
+            // @version 0.1
+            // @updateURL http://www.k21p.com/example.user.js
+            // @downloadURL \(url)
+            // ==/UserScript==
+            """;
+            let response = getFileRemoteUpdate(content)
+            if !response.keys.contains("error") {
+                result.append(1)
+            }
+        }
+        XCTAssert(result.count == (urls.count - 1))
+    }
+    
     func testMatching() throws {
         let pattern = "*://www.google.com/*"
         let urls = [
