@@ -101,7 +101,7 @@ After installing Userscripts on macOS, you **do not** need to select a userscrip
 - **Show Toolbar Count** - displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on
 - **Save Location** - where your file are currently located and being saved to (click the blue text to open location)
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
-- **Global Blacklist** - all domain patterns listed here will be *globally* ignored for script injection
+- **Global Blacklist** - this input accepts a comma separated list of [`@match` patterns](https://developer.chrome.com/docs/extensions/mv3/match_patterns/), a page url that matches against a pattern in this list will be ignored for script injection
 
 ### Popup:
 
