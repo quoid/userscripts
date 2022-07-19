@@ -137,9 +137,34 @@ func openSaveLocation() -> Bool {
 }
 
 func validateUrl(_ urlString: String) -> Bool {
+    var urlChecked = urlString
+    // if the url is already encoded, decode it
+    if isEncoded(urlChecked) {
+        if let decodedUrl = urlChecked.removingPercentEncoding {
+            urlChecked = decodedUrl
+        } else {
+            err("validateUrl failed at (1), couldn't decode url, \(urlString)")
+            return false
+        }
+    }
+    // encode all urls strings
+    if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+        urlChecked = encodedUrl
+    } else {
+        err("validateUrl failed at (2), couldn't percent encode url, \(urlString)")
+        return false
+    }
+    guard
+        let parts = getUrlProps(urlChecked),
+        let ptcl = parts["protocol"],
+        let path = parts["pathname"]
+    else {
+        err("validateUrl failed at (3) for \(urlString)")
+        return false
+    }
     if
-        (!urlString.hasPrefix("https://") && !urlString.hasPrefix("http://"))
-        || (!urlString.hasSuffix(".css") && !urlString.hasSuffix(".js"))
+        (ptcl != "https:" && ptcl != "http:")
+        || (!path.hasSuffix(".css") && !path.hasSuffix(".js"))
     {
         return false
     }
@@ -520,8 +545,6 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.match[pattern]?.firstIndex(of: filename) {
                     manifest.match[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (2), \(filename)")
                 }
             }
         }
@@ -530,8 +553,6 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.excludeMatch[pattern]?.firstIndex(of: filename) {
                     manifest.excludeMatch[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (3), \(filename)")
                 }
             }
         }
@@ -540,8 +561,6 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.include[pattern]?.firstIndex(of: filename) {
                     manifest.include[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (4), \(filename)")
                 }
             }
         }
@@ -550,13 +569,11 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
                 if fn == filename, let index = manifest.exclude[pattern]?.firstIndex(of: filename) {
                     manifest.exclude[pattern]?.remove(at: index)
                     update = true
-                } else {
-                    err("updateManifestDeclarativeNetRequests failed at (5), \(filename)")
                 }
             }
         }
         if update, !updateManifest(with: manifest) {
-            err("updateManifestDeclarativeNetRequests failed at (6)")
+            err("updateManifestDeclarativeNetRequests failed at (2)")
             return false
         }
     }
@@ -1255,12 +1272,12 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         weight = normalizeWeight(weight)
         
         // get inject-into and set default if missing
-        var injectInto = metadata["inject-into"]?[0] ?? "auto"
+        var injectInto = metadata["inject-into"]?[0] ?? "content"
         let injectVals: Set<String> = ["auto", "content", "page"]
         let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {
-            injectInto = "auto"
+            injectInto = "content"
         }
         if !runAtVals.contains(runAt) {
             runAt = "document-end"

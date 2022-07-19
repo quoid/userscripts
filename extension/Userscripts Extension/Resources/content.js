@@ -19,6 +19,16 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS", uid: uid}, response => {
     data = response;
     for (let i = 0; i < data.files.js.length; i++) {
         const userscript = data.files.js[i];
+        if (
+            userscript.scriptObject?.grants?.length
+            && (
+                userscript.scriptObject["inject-into"] === "auto"
+                || userscript.scriptObject["inject-into"] === "page"
+            )
+        ) {
+            userscript.scriptObject["inject-into"] = "content";
+            console.warn(`${userscript.scriptObject.filename} had it's @inject-value automatically set to "content" because it has @grant values - see: https://github.com/quoid/userscripts/issues/252#issuecomment-1136637700`);
+        }
         processJS(
             userscript.scriptObject.name,
             userscript.scriptObject.filename,
@@ -90,7 +100,22 @@ function injectJS(name, filename, code, scope, fallback) {
 
 function injectCSS(name, code) {
     console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
-    browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
+    // Safari lacks full support for tabs.insertCSS
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/insertCSS
+    // specifically frameId and cssOrigin
+    // if support for those details keys arrives, the method below can be used
+    // NOTE: manifest V3 does support frameId, but not origin
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/insertCSS
+
+    // browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
+
+    // write the css code to head of the document
+    let wrapper = "const tag = document.createElement(\"style\");\n";
+    wrapper += `tag.textContent = \`${code}\`;`;
+    wrapper += "\ndocument.head.appendChild(tag);";
+    // eval the code directly into the context of the content script (not page context)
+    // wrapper += "console.log(window.browser)"; // this validates the execution env
+    eval(wrapper);
 }
 
 function cspFallback(e) {
