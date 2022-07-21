@@ -1272,12 +1272,12 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         weight = normalizeWeight(weight)
         
         // get inject-into and set default if missing
-        var injectInto = metadata["inject-into"]?[0] ?? "content"
+        var injectInto = metadata["inject-into"]?[0] ?? "auto"
         let injectVals: Set<String> = ["auto", "content", "page"]
         let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {
-            injectInto = "content"
+            injectInto = "auto"
         }
         if !runAtVals.contains(runAt) {
             runAt = "document-end"
