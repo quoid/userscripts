@@ -101,7 +101,7 @@ After installing Userscripts on macOS, you **do not** need to select a userscrip
 - **Show Toolbar Count** - displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on
 - **Save Location** - where your file are currently located and being saved to (click the blue text to open location)
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
-- **Global Blacklist** - all domain patterns listed here will be *globally* ignored for script injection
+- **Global Blacklist** - this input accepts a comma separated list of [`@match` patterns](https://developer.chrome.com/docs/extensions/mv3/match_patterns/), a page url that matches against a pattern in this list will be ignored for script injection
 
 ### Popup:
 
@@ -130,7 +130,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@exclude` - Functions in a similar way as `@include` but rather than injecting, a match against this key's value will prevent injection
 - `@inject-into` - allows the user to choose which context to inject the script into
     - allows the user to choose which context to inject the script into
-    - values: `auto`, `content` (default), `page`
+    - values: `auto` (default), `content`, `page`
         - `GM` apis are only available when using `content`
     - works like [violentmonkey](https://violentmonkey.github.io/api/metadata-block/#inject-into)
 - `@run-at`

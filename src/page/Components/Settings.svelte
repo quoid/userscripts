@@ -152,7 +152,7 @@
                     { #if blacklistSaving}{@html iconLoader}{/if}
                 </div>
                 <textarea
-                    placeholder="Comma separated domain patterns"
+                    placeholder="Comma separated list of @match patterns"
                     spellcheck="false"
                     bind:this={blacklist}
                     value={blacklisted}

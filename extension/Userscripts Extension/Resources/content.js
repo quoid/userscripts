@@ -20,7 +20,7 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS", uid: uid}, response => {
     for (let i = 0; i < data.files.js.length; i++) {
         const userscript = data.files.js[i];
         if (
-            userscript.scriptObject?.grants?.length
+            userscript.scriptObject?.grants?.length >= 1
             && (
                 userscript.scriptObject["inject-into"] === "auto"
                 || userscript.scriptObject["inject-into"] === "page"

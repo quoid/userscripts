@@ -360,6 +360,8 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         api += `\nconst US_info = ${JSON.stringify(scriptData)}`;
         api += "\nconst GM_info = US_info;";
         gmMethods.push("info: US_info");
+        // if @grant explicitly set to none, empty grants array
+        if (grants.includes("none")) grants.length = 0;
         // loop through each @grant for the userscript, add methods as needed
         for (let j = 0; j < grants.length; j++) {
             const grant = grants[j];
