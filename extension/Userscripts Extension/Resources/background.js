@@ -5,6 +5,7 @@
 // xhrs are only kept in this array when active, otherwise array is empty
 // that means it's ok that this var gets reset when the bg page unloads
 let xhrs = [];
+let US_tabs = {};
 
 /* global US_filename, US_uid */
 // filename and uid will be available to functions at runtime
@@ -157,6 +158,53 @@ const apis = {
         // however make a dummy sync method for compatibility
         window.postMessage({id: US_uid, name: "API_SET_CLIPBOARD", data: data, type: type});
         return undefined;
+    },
+    US_getTab() {
+        const pid = Math.random().toString(36).substring(1, 9);
+        return new Promise(resolve => {
+            const callback = e => {
+                if (
+                    e.data.pid !== pid
+                    || e.data.id !== US_uid
+                    || e.data.name !== "RESP_GET_TAB"
+                    || e.data.filename !== US_filename
+                ) return;
+                const response = e.data.response;
+                resolve(response);
+                window.removeEventListener("message", callback);
+            };
+            window.addEventListener("message", callback);
+            window.postMessage({
+                id: US_uid,
+                pid: pid,
+                name: "API_GET_TAB",
+                filename: US_filename,
+            });
+        });
+    },
+    US_saveTab(tab) {
+        const pid = Math.random().toString(36).substring(1, 9);
+        return new Promise(resolve => {
+            const callback = e => {
+                if (
+                    e.data.pid !== pid
+                    || e.data.id !== US_uid
+                    || e.data.name !== "RESP_SAVE_TAB"
+                    || e.data.filename !== US_filename
+                ) return;
+                const response = e.data.response;
+                resolve(response);
+                window.removeEventListener("message", callback);
+            };
+            window.addEventListener("message", callback);
+            window.postMessage({
+                id: US_uid,
+                pid: pid,
+                name: "API_SAVE_TAB",
+                filename: US_filename,
+                tab: tab
+            });
+        });
     },
     // when xhr is called it sends a message to the content script
     // and adds it's own event listener to get responses from content script
@@ -404,6 +452,14 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
                 case "GM_setClipboard":
                     api += `\n${apis.US_setClipboardSync}`;
                     api += "\nconst GM_setClipboard = US_setClipboardSync;";
+                    break;
+                case "GM.getTab":
+                    api += `\n${apis.US_getTab}`;
+                    gmMethods.push("getTab: US_getTab");
+                    break;
+                case "GM.saveTab":
+                    api += `\n${apis.US_saveTab}`;
+                    gmMethods.push("saveTab: US_saveTab");
                     break;
                 case "GM_xmlhttpRequest":
                 case "GM.xmlHttpRequest":
@@ -711,6 +767,30 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else {
                 console.error(`abort message received for ${xhrId}, but it couldn't be found`);
             }
+            break;
+        }
+        case "API_GET_TAB": {
+            if (typeof sender.tab != 'undefined') {
+                if (typeof US_tabs[sender.tab.id] == 'undefined') US_tabs[sender.tab.id] = { storage: {} };
+                let tab = US_tabs[sender.tab.id];
+                sendResponse(tab);
+            } else {
+                console.error("unable to deliver tab due to empty tab id");
+                sendResponse(null);
+            }
+            break;
+        }
+        case "API_SAVE_TAB": {
+            if (typeof sender.tab != 'undefined') {
+                let tab = {};
+                for (let k in request.tab) {
+                    tab[k] = request.tab[k];
+                };
+                US_tabs[sender.tab.id] = tab;
+            } else {
+                console.error("unable to save tab due to empty tab id");
+            }
+            sendResponse({});
             break;
         }
         case "USERSCRIPT_INSTALL_00":
