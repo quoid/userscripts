@@ -1067,7 +1067,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         "GM_addStyle",
         "GM_info",
         "GM_setClipboard",
-        "GM_xmlhttpRequest"
+        "GM_xmlhttpRequest",
+        "GM.getTab",
+        "GM.saveTab"
     ]);
 
     const validKeys = new Set([

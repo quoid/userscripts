@@ -245,6 +245,33 @@ function handleApiMessages(e) {
                 window.postMessage(respMessage);
             });
             break;
+        case "API_GET_TAB":
+            message = {
+                name: name,
+                filename: e.data.filename,
+                pid: pid,
+            };
+            browser.runtime.sendMessage(message, response => {
+                const undef = response === `undefined--${pid}`;
+                respMessage.response = undef ? undefined : response;
+                respMessage.filename = e.data.filename;
+                window.postMessage(respMessage);
+            });
+            break;
+        case "API_SAVE_TAB":
+            message = {
+                name: name,
+                filename: e.data.filename,
+                pid: pid,
+                tab: e.data.tab
+            };
+            browser.runtime.sendMessage(message, response => {
+                const undef = response === `undefined--${pid}`;
+                respMessage.response = undef ? undefined : response;
+                respMessage.filename = e.data.filename;
+                window.postMessage(respMessage);
+            });
+            break;
         case "API_XHR_ABORT_INJ":
             message = {name: "API_XHR_ABORT_CS", xhrId: e.data.xhrId};
             browser.runtime.sendMessage(message);
