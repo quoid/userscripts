@@ -460,14 +460,6 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
                     api += `\n${apis.US_saveTab}`;
                     gmMethods.push("saveTab: US_saveTab");
                     break;
-                case "GM.getTab":
-                    api += `\n${apis.US_getTab}`;
-                    gmMethods.push("getTab: US_getTab");
-                    break;
-                case "GM.saveTab":
-                    api += `\n${apis.US_saveTab}`;
-                    gmMethods.push("saveTab: US_saveTab");
-                    break;
                 case "GM_xmlhttpRequest":
                 case "GM.xmlHttpRequest":
                     if (!includedMethods.includes("xhr")) {
