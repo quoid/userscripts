@@ -249,7 +249,7 @@ function handleApiMessages(e) {
             message = {
                 name: name,
                 filename: e.data.filename,
-                pid: pid,
+                pid: pid
             };
             browser.runtime.sendMessage(message, response => {
                 const undef = response === `undefined--${pid}`;
