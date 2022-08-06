@@ -5,7 +5,6 @@
 // xhrs are only kept in this array when active, otherwise array is empty
 // that means it's ok that this var gets reset when the bg page unloads
 let xhrs = [];
-let US_tabs = {};
 
 /* global US_filename, US_uid */
 // filename and uid will be available to functions at runtime
@@ -178,7 +177,7 @@ const apis = {
                 id: US_uid,
                 pid: pid,
                 name: "API_GET_TAB",
-                filename: US_filename,
+                filename: US_filename
             });
         });
     },
@@ -770,9 +769,15 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
         }
         case "API_GET_TAB": {
-            if (typeof sender.tab != 'undefined') {
-                if (typeof US_tabs[sender.tab.id] == 'undefined') US_tabs[sender.tab.id] = { storage: {} };
-                let tab = US_tabs[sender.tab.id];
+            if (typeof sender.tab !== "undefined") {
+                let tab = null;
+                const tabData = sessionStorage.getItem(`tab-${sender.tab.id}`);
+                try {
+                    // if tabData is null, can still parse it and return that
+                    tab = JSON.parse(tabData);
+                } catch (error) {
+                    console.error("failed to parse tab data for getTab");
+                }
                 sendResponse(tab);
             } else {
                 console.error("unable to deliver tab due to empty tab id");
@@ -781,16 +786,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
         }
         case "API_SAVE_TAB": {
-            if (typeof sender.tab != 'undefined') {
-                let tab = {};
-                for (let k in request.tab) {
-                    tab[k] = request.tab[k];
-                };
-                US_tabs[sender.tab.id] = tab;
+            if (typeof sender.tab !== "undefined" && request.tab) {
+                sessionStorage.setItem(`tab-${sender.tab.id}`, JSON.stringify(request.tab));
+                sendResponse({success: true});
             } else {
-                console.error("unable to save tab due to empty tab id");
+                console.error("unable to save tab due to empty tab id or bad arg");
+                sendResponse(null);
             }
-            sendResponse({});
             break;
         }
         case "USERSCRIPT_INSTALL_00":
