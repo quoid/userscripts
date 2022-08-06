@@ -4,7 +4,7 @@
     "default_locale": "en",
     "name": "__MSG_extension_name__",
     "description": "__MSG_extension_description__",
-    "version": "4.2.2",
+    "version": "4.2.3",
     "icons": {
         "48": "images/icon-48.png",
         "96": "images/icon-96.png",
