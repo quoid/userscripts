@@ -191,6 +191,11 @@ Userscripts currently supports the following api methods. All methods are asynch
     - on success returns a promise resolved with an object indicating success
 - `GM.listValues()`
     - on success returns a promise resolved with an array of the key names of **presently set** values
+- `GM.getTab()`
+    - on success returns a promise resolved with `Any` data that is persistent as long as this tab is open
+- `GM.saveTab(tabObj)`
+    - `tabObj: Any`
+    - on success returns a promise resolved with an object indicating success
 - `GM.openInTab(url, openInBackground)`
     - `url: String`, `openInBackground: Bool`
     - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened
