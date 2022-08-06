@@ -192,7 +192,7 @@ Userscripts currently supports the following api methods. All methods are asynch
 - `GM.listValues()`
     - on success returns a promise resolved with an array of the key names of **presently set** values
 - `GM.getTab()`
-    - on success returns a promise resolved with a object that is persistent as long as this tab is open
+    - on success returns a promise resolved with `Any` data that is persistent as long as this tab is open
 - `GM.saveTab(tabObj)`
     - `tabObj: Any`
     - on success returns a promise resolved with an object indicating success
