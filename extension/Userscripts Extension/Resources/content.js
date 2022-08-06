@@ -252,8 +252,7 @@ function handleApiMessages(e) {
                 pid: pid
             };
             browser.runtime.sendMessage(message, response => {
-                const undef = response === `undefined--${pid}`;
-                respMessage.response = undef ? undefined : response;
+                respMessage.response = response;
                 respMessage.filename = e.data.filename;
                 window.postMessage(respMessage);
             });
@@ -266,8 +265,7 @@ function handleApiMessages(e) {
                 tab: e.data.tab
             };
             browser.runtime.sendMessage(message, response => {
-                const undef = response === `undefined--${pid}`;
-                respMessage.response = undef ? undefined : response;
+                respMessage.response = response;
                 respMessage.filename = e.data.filename;
                 window.postMessage(respMessage);
             });
