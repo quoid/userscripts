@@ -334,10 +334,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             "text/ecmascript",
             "text/javascript"
         ];
-        if (!document.contentType || types.indexOf(document.contentType) === -1) {
+        if (
+            !document.contentType
+            || types.indexOf(document.contentType) === -1
+            || !document.querySelector("pre")
+        ) {
             sendResponse({invalid: true});
         } else {
-            const message = {name: name, content: document.body.innerText};
+            const message = {name: name, content: document.querySelector("pre").innerText};
             browser.runtime.sendMessage(message, response => {
                 sendResponse(response);
             });
