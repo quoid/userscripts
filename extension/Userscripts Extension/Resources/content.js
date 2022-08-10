@@ -325,6 +325,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         || name === "USERSCRIPT_INSTALL_01"
         || name === "USERSCRIPT_INSTALL_02"
     ) {
+        // only response to top frame messages
+        if (window !== window.top) return;
         const types = [
             "text/plain",
             "application/ecmascript",
