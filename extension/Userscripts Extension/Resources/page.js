@@ -19622,7 +19622,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			attr(div22, "class", "truncate svelte-9f6q4c");
     			attr(div23, "class", "modal__row saveLocation svelte-9f6q4c");
     			attr(div24, "class", "blacklist svelte-9f6q4c");
-    			attr(textarea, "placeholder", "Comma separated domain patterns");
+    			attr(textarea, "placeholder", "Comma separated list of @match patterns");
     			attr(textarea, "spellcheck", "false");
     			textarea.value = /*blacklisted*/ ctx[2];
     			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[1];
