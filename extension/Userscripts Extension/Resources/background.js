@@ -395,6 +395,7 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         const userscript = userscripts[i];
         const filename = userscript.scriptObject.filename;
         const grants = userscript.scriptObject.grants;
+        const injectInto = userscript.scriptObject["inject-into"];
         // prepare the api string
         let api = `const US_uid = "${uid}";\nconst US_filename = "${filename}";`;
         // all scripts get access to US_info / GM./GM_info, prepare that object
@@ -408,7 +409,23 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         api += "\nconst GM_info = US_info;";
         gmMethods.push("info: US_info");
         // if @grant explicitly set to none, empty grants array
-        if (grants.includes("none")) grants.length = 0;
+        if (grants.includes("none")) {
+            grants.length = 0;
+        }
+        // @grant exist for page scoped userscript
+        if (grants.length && injectInto === "page") {
+            // remove grants
+            grants.length = 0;
+            // provide warning for content script
+            userscript.warning = `${filename} @grant values changed due to @inject-into value`;
+        }
+        // @grant exist for auto scoped userscript
+        if (grants.length && injectInto === "auto") {
+            // change scope
+            userscript.scriptObject["inject-into"] = "content";
+            // provide warning for content script
+            userscript.warning = `${filename} @inject-into value changed due to @grant values`;
+        }
         // loop through each @grant for the userscript, add methods as needed
         for (let j = 0; j < grants.length; j++) {
             const grant = grants[j];
