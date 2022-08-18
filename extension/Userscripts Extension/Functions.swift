@@ -1094,11 +1094,16 @@ func match(_ ptcl: String,_ host: String,_ path: String,_ matchPattern: String) 
     if (ptcl != "http:" && ptcl != "https:") {
         return false
     }
-    let partsPattern = #"^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*)(\/[^\s]*)$"#
+    let partsPattern = #"^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$"#
     let partsPatternReg = try! NSRegularExpression(pattern: partsPattern, options: .caseInsensitive)
     let range = NSMakeRange(0, matchPattern.utf16.count)
     guard let parts = partsPatternReg.firstMatch(in: matchPattern, options: [], range: range) else {
         err("malformed regex match pattern")
+        return false
+    }
+    // ensure url protocol matches pattern protocol
+    let protocolPattern = matchPattern[Range(parts.range(at: 1), in: matchPattern)!]
+    if (protocolPattern != "*:" && ptcl != protocolPattern) {
         return false
     }
     // construct host regex from matchPattern
