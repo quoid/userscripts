@@ -1079,6 +1079,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         "exclude",
         "exclude-match",
         "grant",
+        "icon",
         "include",
         "inject-into",
         "match",

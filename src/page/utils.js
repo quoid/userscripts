@@ -164,6 +164,7 @@ export const validKeys = new Set([
     "exclude",
     "exclude-match",
     "grant",
+    "icon",
     "include",
     "inject-into",
     "match",

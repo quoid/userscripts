@@ -1299,6 +1299,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         let description = metadata["description"]?[0] ?? ""
         let excludes = metadata["exclude"] ?? []
         let excludeMatches = metadata["exclude-match"] ?? []
+        let icon = metadata["icon"]?[0] ?? ""
         let includes = metadata["include"] ?? []
         let matches = metadata["match"] ?? []
         let requires = metadata["require"] ?? []
@@ -1310,6 +1311,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "exclude-match": excludeMatches,
             "filename": filename,
             "grants": grants,
+            "icon": icon,
             "includes": includes,
             "inject-into": injectInto,
             "matches": matches,
