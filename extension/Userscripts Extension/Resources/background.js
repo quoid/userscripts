@@ -207,7 +207,7 @@ const apis = {
             } else if (name.includes("READYSTATECHANGE") && details.onreadystatechange) {
                 details.onreadystatechange(response);
             } else if (name.includes("LOADSTART") && details.onloadstart) {
-                details.onloadtstart(response);
+                details.onloadstart(response);
             } else if (name.includes("ABORT") && details.onabort) {
                 details.onabort(response);
             } else if (name.includes("ERROR") && details.onerror) {
