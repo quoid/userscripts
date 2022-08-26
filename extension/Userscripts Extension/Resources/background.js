@@ -795,7 +795,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 } catch (error) {
                     console.error("failed to parse tab data for getTab");
                 }
-                sendResponse(tab);
+                sendResponse(tab == null ? {} : tab);
             } else {
                 console.error("unable to deliver tab due to empty tab id");
                 sendResponse(null);
