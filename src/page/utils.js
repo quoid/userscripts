@@ -152,7 +152,9 @@ export const validGrants = new Set([
     "GM_addStyle",
     "GM_info",
     "GM_setClipboard",
-    "GM_xmlhttpRequest"
+    "GM_xmlhttpRequest",
+    "GM.getTab",
+    "GM.saveTab"
 ]);
 
 export const validKeys = new Set([
@@ -162,6 +164,7 @@ export const validKeys = new Set([
     "exclude",
     "exclude-match",
     "grant",
+    "icon",
     "include",
     "inject-into",
     "match",

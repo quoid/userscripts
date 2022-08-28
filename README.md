@@ -123,6 +123,7 @@ Userscripts Safari currently supports the following userscript metadata:
 
 - `@name` - This will be the name that displays in the sidebar and be used as the filename - you can *not* use the same name for multiple files of the same type
 - `@description`- Use this to describe what your userscript does - this will be displayed in the sidebar - there is a setting to hide descriptions
+- `@icon` - This doesn't have a function with this userscript manager, but the **first value** provided in the metadata will be accessible in the `GM_/GM.info` object
 - `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
     - **Note:** this extension only supports `http/s`
 - `@exclude-match` - Domain patterns where you do *not* want the script to run
@@ -191,6 +192,11 @@ Userscripts currently supports the following api methods. All methods are asynch
     - on success returns a promise resolved with an object indicating success
 - `GM.listValues()`
     - on success returns a promise resolved with an array of the key names of **presently set** values
+- `GM.getTab()`
+    - on success returns a promise resolved with `Any` data that is persistent as long as this tab is open
+- `GM.saveTab(tabObj)`
+    - `tabObj: Any`
+    - on success returns a promise resolved with an object indicating success
 - `GM.openInTab(url, openInBackground)`
     - `url: String`, `openInBackground: Bool`
     - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened

@@ -158,6 +158,53 @@ const apis = {
         window.postMessage({id: US_uid, name: "API_SET_CLIPBOARD", data: data, type: type});
         return undefined;
     },
+    US_getTab() {
+        const pid = Math.random().toString(36).substring(1, 9);
+        return new Promise(resolve => {
+            const callback = e => {
+                if (
+                    e.data.pid !== pid
+                    || e.data.id !== US_uid
+                    || e.data.name !== "RESP_GET_TAB"
+                    || e.data.filename !== US_filename
+                ) return;
+                const response = e.data.response;
+                resolve(response);
+                window.removeEventListener("message", callback);
+            };
+            window.addEventListener("message", callback);
+            window.postMessage({
+                id: US_uid,
+                pid: pid,
+                name: "API_GET_TAB",
+                filename: US_filename
+            });
+        });
+    },
+    US_saveTab(tab) {
+        const pid = Math.random().toString(36).substring(1, 9);
+        return new Promise(resolve => {
+            const callback = e => {
+                if (
+                    e.data.pid !== pid
+                    || e.data.id !== US_uid
+                    || e.data.name !== "RESP_SAVE_TAB"
+                    || e.data.filename !== US_filename
+                ) return;
+                const response = e.data.response;
+                resolve(response);
+                window.removeEventListener("message", callback);
+            };
+            window.addEventListener("message", callback);
+            window.postMessage({
+                id: US_uid,
+                pid: pid,
+                name: "API_SAVE_TAB",
+                filename: US_filename,
+                tab: tab
+            });
+        });
+    },
     // when xhr is called it sends a message to the content script
     // and adds it's own event listener to get responses from content script
     // each xhr has a unique id so it won't respond to different xhr
@@ -207,7 +254,7 @@ const apis = {
             } else if (name.includes("READYSTATECHANGE") && details.onreadystatechange) {
                 details.onreadystatechange(response);
             } else if (name.includes("LOADSTART") && details.onloadstart) {
-                details.onloadtstart(response);
+                details.onloadstart(response);
             } else if (name.includes("ABORT") && details.onabort) {
                 details.onabort(response);
             } else if (name.includes("ERROR") && details.onerror) {
@@ -348,6 +395,7 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         const userscript = userscripts[i];
         const filename = userscript.scriptObject.filename;
         const grants = userscript.scriptObject.grants;
+        const injectInto = userscript.scriptObject["inject-into"];
         // prepare the api string
         let api = `const US_uid = "${uid}";\nconst US_filename = "${filename}";`;
         // all scripts get access to US_info / GM./GM_info, prepare that object
@@ -361,7 +409,23 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         api += "\nconst GM_info = US_info;";
         gmMethods.push("info: US_info");
         // if @grant explicitly set to none, empty grants array
-        if (grants.includes("none")) grants.length = 0;
+        if (grants.includes("none")) {
+            grants.length = 0;
+        }
+        // @grant exist for page scoped userscript
+        if (grants.length && injectInto === "page") {
+            // remove grants
+            grants.length = 0;
+            // provide warning for content script
+            userscript.warning = `${filename} @grant values changed due to @inject-into value`;
+        }
+        // @grant exist for auto scoped userscript
+        if (grants.length && injectInto === "auto") {
+            // change scope
+            userscript.scriptObject["inject-into"] = "content";
+            // provide warning for content script
+            userscript.warning = `${filename} @inject-into value changed due to @grant values`;
+        }
         // loop through each @grant for the userscript, add methods as needed
         for (let j = 0; j < grants.length; j++) {
             const grant = grants[j];
@@ -404,6 +468,14 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
                 case "GM_setClipboard":
                     api += `\n${apis.US_setClipboardSync}`;
                     api += "\nconst GM_setClipboard = US_setClipboardSync;";
+                    break;
+                case "GM.getTab":
+                    api += `\n${apis.US_getTab}`;
+                    gmMethods.push("getTab: US_getTab");
+                    break;
+                case "GM.saveTab":
+                    api += `\n${apis.US_saveTab}`;
+                    gmMethods.push("saveTab: US_saveTab");
                     break;
                 case "GM_xmlhttpRequest":
                 case "GM.xmlHttpRequest":
@@ -710,6 +782,33 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 // sendResponse(match);
             } else {
                 console.error(`abort message received for ${xhrId}, but it couldn't be found`);
+            }
+            break;
+        }
+        case "API_GET_TAB": {
+            if (typeof sender.tab !== "undefined") {
+                let tab = null;
+                const tabData = sessionStorage.getItem(`tab-${sender.tab.id}`);
+                try {
+                    // if tabData is null, can still parse it and return that
+                    tab = JSON.parse(tabData);
+                } catch (error) {
+                    console.error("failed to parse tab data for getTab");
+                }
+                sendResponse(tab == null ? {} : tab);
+            } else {
+                console.error("unable to deliver tab due to empty tab id");
+                sendResponse(null);
+            }
+            break;
+        }
+        case "API_SAVE_TAB": {
+            if (typeof sender.tab !== "undefined" && request.tab) {
+                sessionStorage.setItem(`tab-${sender.tab.id}`, JSON.stringify(request.tab));
+                sendResponse({success: true});
+            } else {
+                console.error("unable to save tab due to empty tab id or bad arg");
+                sendResponse(null);
             }
             break;
         }

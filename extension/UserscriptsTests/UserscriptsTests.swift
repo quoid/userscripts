@@ -118,27 +118,86 @@ class UserscriptsTests: XCTestCase {
     }
     
     func testMatching() throws {
-        let pattern = "*://www.google.com/*"
-        let urls = [
-            "https://www.google.com/://aa",
-            "https://www.google.com/preferences?prev=https://www.google.com/",
-            "https://www.google.com/preferences?prev=",
-            "https://www.google.com/"
-        ]
+        var count = 0
         var result = [String]()
-        for url in urls {
-            if
-                let parts = getUrlProps(url),
-                let ptcl = parts["protocol"],
-                let host = parts["host"],
-                let path = parts["pathname"]
-            {
-                if match(ptcl, host, path, pattern) {
-                    result.append("1")
+        let patternDict = [
+            "*://*/*": [
+                "https://www.bing.com/",
+                "https://example.org/foo/bar.html",
+                "https://a.org/some/path/"
+            ],
+            "*://*.mozilla.org/*": [
+                "http://mozilla.org/",
+                "https://mozilla.org/",
+                "https://b.mozilla.org/path/"
+            ],
+            "*://www.google.com/*": [
+                "https://www.google.com/://aa",
+                "https://www.google.com/preferences?prev=https://www.google.com/",
+                "https://www.google.com/preferences?prev=",
+                "https://www.google.com/"
+            ],
+            "*://localhost/*": [
+                "http://localhost:8000/",
+                "https://localhost:3000/foo.html"
+            ],
+            "http://127.0.0.1/*": [
+                "http://127.0.0.1/",
+                "http://127.0.0.1/foo/bar.html"
+            ]
+        ]
+        let patternDictFails = [
+            "https://www.example.com/*": [
+                "file://www.example.com/",
+                "ftp://www.example.com/",
+                "ws://www.example.com/",
+                "http://www.example.com/"
+            ],
+            "http://www.example.com/index.html": [
+                "http://www.example.com/",
+                "https://www.example.com/index.html"
+            ],
+            "*://localhost/*": [
+                "https://localhost.com/",
+                "ftp://localhost:8080/"
+            ],
+            "https://www.example*/*": [
+                "https://www.example.com/"
+            ]
+        ]
+        for (pattern, urls) in patternDict {
+            count = count + urls.count
+            for url in urls {
+                if
+                    let parts = getUrlProps(url),
+                    let ptcl = parts["protocol"],
+                    let host = parts["host"],
+                    let path = parts["pathname"]
+                {
+                    if match(ptcl, host, path, pattern) {
+                        result.append("1")
+                    }
                 }
             }
         }
-        XCTAssert(result.count == urls.count)
+        for (pattern, urls) in patternDictFails {
+            // don't increment count since these tests should fail
+            for url in urls {
+                if
+                    let parts = getUrlProps(url),
+                    let ptcl = parts["protocol"],
+                    let host = parts["host"],
+                    let path = parts["pathname"]
+                {
+                    if match(ptcl, host, path, pattern) {
+                        // if these match, results will get an extra element
+                        // and then the test will fail
+                        result.append("1")
+                    }
+                }
+            }
+        }
+        XCTAssert(result.count == count)
     }
 
     func testPerformanceExample() throws {

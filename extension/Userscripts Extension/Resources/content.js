@@ -29,6 +29,8 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS", uid: uid}, response => {
             userscript.scriptObject["inject-into"] = "content";
             console.warn(`${userscript.scriptObject.filename} had it's @inject-value automatically set to "content" because it has @grant values - see: https://github.com/quoid/userscripts/issues/252#issuecomment-1136637700`);
         }
+        // log warning if provided
+        if (userscript.warning) console.warn(userscript.warning);
         processJS(
             userscript.scriptObject.name,
             userscript.scriptObject.filename,
@@ -245,6 +247,31 @@ function handleApiMessages(e) {
                 window.postMessage(respMessage);
             });
             break;
+        case "API_GET_TAB":
+            message = {
+                name: name,
+                filename: e.data.filename,
+                pid: pid
+            };
+            browser.runtime.sendMessage(message, response => {
+                respMessage.response = response;
+                respMessage.filename = e.data.filename;
+                window.postMessage(respMessage);
+            });
+            break;
+        case "API_SAVE_TAB":
+            message = {
+                name: name,
+                filename: e.data.filename,
+                pid: pid,
+                tab: e.data.tab
+            };
+            browser.runtime.sendMessage(message, response => {
+                respMessage.response = response;
+                respMessage.filename = e.data.filename;
+                window.postMessage(respMessage);
+            });
+            break;
         case "API_XHR_ABORT_INJ":
             message = {name: "API_XHR_ABORT_CS", xhrId: e.data.xhrId};
             browser.runtime.sendMessage(message);
@@ -300,6 +327,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         || name === "USERSCRIPT_INSTALL_01"
         || name === "USERSCRIPT_INSTALL_02"
     ) {
+        // only response to top frame messages
+        if (window !== window.top) return;
         const types = [
             "text/plain",
             "application/ecmascript",
@@ -307,10 +336,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             "text/ecmascript",
             "text/javascript"
         ];
-        if (!document.contentType || types.indexOf(document.contentType) === -1) {
+        if (
+            !document.contentType
+            || types.indexOf(document.contentType) === -1
+            || !document.querySelector("pre")
+        ) {
             sendResponse({invalid: true});
         } else {
-            const message = {name: name, content: document.body.innerText};
+            const message = {name: name, content: document.querySelector("pre").innerText};
             browser.runtime.sendMessage(message, response => {
                 sendResponse(response);
             });
