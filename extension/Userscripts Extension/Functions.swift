@@ -1280,6 +1280,23 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         var injectInto = metadata["inject-into"]?[0] ?? "auto"
         let injectVals: Set<String> = ["auto", "content", "page"]
         let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
+        let validGrants: Set<String> = [
+            "GM.addStyle",
+            "GM.deleteValue",
+            "GM.getValue",
+            "GM.info",
+            "GM.listValues",
+            "GM.openInTab",
+            "GM.setClipboard",
+            "GM.setValue",
+            "GM.xmlHttpRequest",
+            "GM_addStyle",
+            "GM_info",
+            "GM_setClipboard",
+            "GM_xmlhttpRequest",
+            "GM.getTab",
+            "GM.saveTab"
+        ]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {
             injectInto = "auto"
@@ -1294,6 +1311,9 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         if !grants.isEmpty {
             grants = Array(Set(grants))
         }
+        
+        // filter out grant values that are not in validGrant set
+        grants = grants.filter{validGrants.contains($0)}
         
         // set GM.info data
         let description = metadata["description"]?[0] ?? ""
@@ -1310,7 +1330,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "excludes": excludes,
             "exclude-match": excludeMatches,
             "filename": filename,
-            "grants": grants,
+            "grant": grants,
             "icon": icon,
             "includes": includes,
             "inject-into": injectInto,

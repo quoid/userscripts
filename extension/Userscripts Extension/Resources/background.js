@@ -394,7 +394,7 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         const includedMethods = [];
         const userscript = userscripts[i];
         const filename = userscript.scriptObject.filename;
-        const grants = userscript.scriptObject.grants;
+        const grants = userscript.scriptObject.grant;
         const injectInto = userscript.scriptObject["inject-into"];
         // prepare the api string
         let api = `const US_uid = "${uid}";\nconst US_filename = "${filename}";`;
