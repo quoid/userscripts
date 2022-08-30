@@ -417,14 +417,14 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
             // remove grants
             grants.length = 0;
             // provide warning for content script
-            userscript.warning = `${filename} @grant values changed due to @inject-into value: ${injectInto}`;
+            userscript.warning = `${filename} @grant values changed due to @inject-into value: ${injectInto} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`;
         }
         // @grant exist for auto scoped userscript
         if (grants.length && injectInto === "auto") {
             // change scope
             userscript.scriptObject["inject-into"] = "content";
             // provide warning for content script
-            userscript.warning = `${filename} @inject-into value changed due to @grant values: ${grants}`;
+            userscript.warning = `${filename} @inject-into value changed due to @grant values: ${grants} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`;
         }
         // loop through each @grant for the userscript, add methods as needed
         for (let j = 0; j < grants.length; j++) {
