@@ -1295,7 +1295,8 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "GM_setClipboard",
             "GM_xmlhttpRequest",
             "GM.getTab",
-            "GM.saveTab"
+            "GM.saveTab",
+            "US.closeTab"
         ]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {

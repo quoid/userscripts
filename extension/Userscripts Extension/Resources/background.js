@@ -391,6 +391,7 @@ function xhrAddListeners(xhr, tab, id, xhrId, details) {
 function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
     for (let i = 0; i < userscripts.length; i++) {
         const gmMethods = [];
+        const usMethods = [];
         const includedMethods = [];
         const userscript = userscripts[i];
         const filename = userscript.scriptObject.filename;
@@ -434,8 +435,9 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
                     api += `\n${apis.US_openInTab}`;
                     gmMethods.push("openInTab: US_openInTab");
                     break;
-                case "US_closeTab":
+                case "US.closeTab":
                     api += `\n${apis.US_closeTab}`;
+                    usMethods.push("closeTab: US_closeTab");
                     break;
                 case "GM.setValue":
                     api += `\n${apis.US_setValue}`;
@@ -493,8 +495,10 @@ function addApis({userscripts, uid, scriptHandler, scriptHandlerVersion}) {
         }
         // make the GM api string
         const GM = `const GM = {${gmMethods.join(",")}};`;
+        // create US api string
+        const US = usMethods.length ? `const US = {${usMethods.join(",")}};` : "";
         // update the final code string
-        userscript.code = `${api}\n${GM}\n${userscript.code}`;
+        userscript.code = `${api}\n${GM}\n${US}\n${userscript.code}`;
     }
 
     // return the updated userscripts

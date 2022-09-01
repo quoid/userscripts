@@ -154,7 +154,8 @@ export const validGrants = new Set([
     "GM_setClipboard",
     "GM_xmlhttpRequest",
     "GM.getTab",
-    "GM.saveTab"
+    "GM.saveTab",
+    "US.closeTab"
 ]);
 
 export const validKeys = new Set([

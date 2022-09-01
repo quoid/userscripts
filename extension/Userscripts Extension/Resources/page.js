@@ -1069,7 +1069,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         "GM_setClipboard",
         "GM_xmlhttpRequest",
         "GM.getTab",
-        "GM.saveTab"
+        "GM.saveTab",
+        "US.closeTab"
     ]);
 
     const validKeys = new Set([
