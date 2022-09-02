@@ -96,7 +96,11 @@ function injectJS(name, filename, code, scope, fallback) {
         tag.textContent = code;
         document.head.appendChild(tag);
     } else {
-        eval(code);
+        try {
+            eval(code);
+        } catch (error) {
+            console.error(`${filename} error`, error);
+        }
     }
 }
 
