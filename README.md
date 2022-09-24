@@ -316,7 +316,11 @@ Code level contributions are welcome. *I prefer to collaborate directly with con
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
 
-Please ensure your contributions align with the project's license before committing anything.
+Notes:
+- use [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)
+- under most circumstances, you should fork the most current version of the `develop` branch for your contributions
+
+**Please ensure your contributions align with the project's license before committing anything.**
 
 ## Support
 The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see future improvements. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
