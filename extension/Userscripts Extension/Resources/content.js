@@ -49,15 +49,7 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS", uid: uid}, response => {
 function processJS(name, filename, code, scope, timing, fallback) {
     switch (timing) {
         case "document-start":
-            if (document.readyState === "loading") {
-                document.addEventListener("readystatechange", function() {
-                    if (document.readyState === "interactive") {
-                        injectJS(name, filename, code, scope, fallback);
-                    }
-                });
-            } else {
-                injectJS(name, filename, code, scope, fallback);
-            }
+            injectJS(name, filename, code, scope, fallback);
             break;
         case "document-end":
             if (document.readyState !== "loading") {

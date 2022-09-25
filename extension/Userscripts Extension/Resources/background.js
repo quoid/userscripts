@@ -687,8 +687,16 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     scriptHandlerVersion: response.scriptHandlerVersion
                 };
                 response.files.js = addApis(apiConfig);
-                // sort files by weight
-                response.files.js.sort((a, b) => Number(a.weight) < Number(b.weight));
+                // sort files by run-at, first, then weight
+                response.files.js.sort((a, b) => {
+                    const runAtVals = {"document-start": 1, "document-end": 2, "document-idle": 3};
+                    if (a.scriptObject["run-at"] !== b.scriptObject["run-at"]) {
+                        if (runAtVals[a.scriptObject["run-at"]] && runAtVals[b.scriptObject["run-at"]]) {
+                            return runAtVals[a.scriptObject["run-at"]] > runAtVals[b.scriptObject["run-at"]];
+                        }
+                    }
+                    return Number(a.weight) < Number(b.weight);
+                });
                 response.files.css.sort((a, b) => Number(a.weight) < Number(b.weight));
                 sendResponse(response);
                 // update badge count on injection
