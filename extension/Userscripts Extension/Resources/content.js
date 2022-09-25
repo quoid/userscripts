@@ -89,7 +89,7 @@ function injectJS(name, filename, code, scope, fallback) {
         document.head.appendChild(tag);
     } else {
         try {
-            eval(code);
+            return Function(code)();
         } catch (error) {
             console.error(`${filename} error`, error);
         }
