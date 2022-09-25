@@ -20,7 +20,14 @@
         "_browser": "writable",
         "browser": "readonly"
     },
-    "ignorePatterns": ["/node_modules/", "/public/*/build/", "codemirror/"],
+    "ignorePatterns": [
+        "node_modules/",
+        "public/*/build/",
+        "codemirror/",
+        "etc/",
+        "extension/Userscripts Extension/Resources/page.js",
+        "extension/Userscripts Extension/Resources/popup.js"
+    ],
     "rules": {
         "array-bracket-spacing": ["error", "never"],
         "arrow-parens": ["error", "as-needed"],
