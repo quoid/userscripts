@@ -689,8 +689,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 response.files.js = addApis(apiConfig);
                 // sort files by run-at, first, then weight
                 response.files.js.sort((a, b) => {
-                    const runAtVals = { "document-start": 1, "document-end": 2, "document-idle": 3 };
-                    if (a.scriptObject["run-at"] != b.scriptObject["run-at"]) {
+                    const runAtVals = {"document-start": 1, "document-end": 2, "document-idle": 3};
+                    if (a.scriptObject["run-at"] !== b.scriptObject["run-at"]) {
                         if (runAtVals[a.scriptObject["run-at"]] && runAtVals[b.scriptObject["run-at"]]) {
                             return runAtVals[a.scriptObject["run-at"]] > runAtVals[b.scriptObject["run-at"]];
                         }
