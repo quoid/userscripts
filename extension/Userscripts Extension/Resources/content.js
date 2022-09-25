@@ -111,9 +111,9 @@ function injectCSS(name, code) {
     let wrapper = "const tag = document.createElement(\"style\");\n";
     wrapper += `tag.textContent = \`${code}\`;`;
     wrapper += "\ndocument.head.appendChild(tag);";
-    // eval the code directly into the context of the content script (not page context)
+    // execute the code directly into the context of the content script (not page context)
     // wrapper += "console.log(window.browser)"; // this validates the execution env
-    eval(wrapper);
+    return Function(wrapper)();
 }
 
 function cspFallback(e) {
