@@ -108,12 +108,9 @@ function injectCSS(name, code) {
     // browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
 
     // write the css code to head of the document
-    let wrapper = "const tag = document.createElement(\"style\");\n";
-    wrapper += `tag.textContent = \`${code}\`;`;
-    wrapper += "\ndocument.head.appendChild(tag);";
-    // execute the code directly into the context of the content script (not page context)
-    // wrapper += "console.log(window.browser)"; // this validates the execution env
-    return Function(wrapper)();
+    const tag = document.createElement("style");
+    tag.textContent = code;
+    document.head.appendChild(tag);
 }
 
 function cspFallback(e) {
