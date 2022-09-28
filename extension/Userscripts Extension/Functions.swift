@@ -1774,7 +1774,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
 
     // remove old file and manifest records for old file if they exist
-    if oldFilename != newFilename {
+    if oldFilename.lowercased() != newFilename.lowercased() {
         // if user changed the filename, remove file with old filename
         let oldFileUrl = saveLocation.appendingPathComponent(oldFilename)
         // however, when creating a new file, if user changes the temp given name by app...
