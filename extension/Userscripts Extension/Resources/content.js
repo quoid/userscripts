@@ -201,6 +201,23 @@ function injectJS(userscript) {
     }
 }
 
+function injectCSS(name, code) {
+    console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
+    // Safari lacks full support for tabs.insertCSS
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/insertCSS
+    // specifically frameId and cssOrigin
+    // if support for those details keys arrives, the method below can be used
+    // NOTE: manifest V3 does support frameId, but not origin
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/insertCSS
+
+    // browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
+
+    // write the css code to head of the document
+    const tag = document.createElement("style");
+    tag.textContent = code;
+    document.head.appendChild(tag);
+}
+
 function cspFallback(e) {
     // if a security policy violation event has occurred
     // and the directive is script-src or script-src-elem
@@ -300,6 +317,10 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
         userscript.preCode += `const GM = {${gmMethods.join(",")}};`;
         // process file for injection
         processJS(userscript);
+    }
+    for (let i = 0; i < data.files.css.length; i++) {
+        const userstyle = data.files.css[i];
+        injectCSS(userstyle.name, userstyle.code);
     }
 });
 // listens for messages from background, popup, etc...
