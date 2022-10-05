@@ -19,7 +19,7 @@
 
     function saveBlacklist() {
         // get the comma separated values from blacklist input
-        const val = blacklist.value.split(",").map(item => item.trim()).filter(n => n);
+        const val = [...new Set(blacklist.value.split(",").map(item => item.trim()).filter(n => n))];
 
         // check if val matches `match patterns`, if not, return a warning
         const re = /^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$/;
