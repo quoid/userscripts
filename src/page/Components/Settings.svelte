@@ -280,6 +280,7 @@
         opacity: 0.75;
         padding: 0.5rem;
         width: 100%;
+        min-width: 100%;
     }
 
     textarea:focus {
