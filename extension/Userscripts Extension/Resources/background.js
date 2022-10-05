@@ -278,46 +278,6 @@ function handleMessage(request, sender, sendResponse) {
             browser.tabs.create(props, response => sendResponse(response));
             return true;
         }
-        case "API_GET_VALUE": {
-            const key = `${request.filename}---${request.key}`;
-            browser.storage.local.get(key, item => {
-                if (Object.keys(item).length === 0) {
-                    if (request.defaultValue !== undefined) {
-                        sendResponse(request.defaultValue);
-                    } else {
-                        sendResponse(`undefined--${request.uuid}`);
-                    }
-                } else {
-                    sendResponse(Object.values(item)[0]);
-                }
-            });
-            return true;
-        }
-        case "API_SET_VALUE": {
-            const item = {};
-            item[`${request.filename}---${request.key}`] = request.value;
-            browser.storage.local.set(item, () => sendResponse({success: 1}));
-            return true;
-        }
-        case "API_LIST_VALUES": {
-            const prefix = `${request.filename}---`;
-            const keys = [];
-            browser.storage.local.get().then(items => {
-                for (const key in items) {
-                    if (key.startsWith(prefix)) {
-                        const k = key.replace(prefix, "");
-                        keys.push(k);
-                    }
-                }
-                sendResponse(keys);
-            });
-            return true;
-        }
-        case "API_DELETE_VALUE": {
-            const key = `${request.filename}---${request.key}`;
-            browser.storage.local.remove(key, () => sendResponse({success: 1}));
-            return true;
-        }
         case "API_ADD_STYLE": {
             const tabId = sender.tab.id;
             const details = {code: request.css, cssOrigin: "user"};
@@ -343,11 +303,11 @@ function handleMessage(request, sender, sendResponse) {
             break;
         }
         case "API_SAVE_TAB": {
-            if (typeof sender.tab !== "undefined" && request.tab) {
+            if (sender.tab != null && sender.tab.id) {
                 sessionStorage.setItem(`tab-${sender.tab.id}`, JSON.stringify(request.tab));
                 sendResponse({success: true});
             } else {
-                console.error("unable to save tab, empty tab id or bad arg");
+                console.error("unable to save tab, empty tab id");
                 sendResponse({success: false});
             }
             break;

@@ -28,59 +28,66 @@ const apis = {
         });
     },
     setValue(key, value) {
-        if (!key || !value) {
-            console.error("setValue missing key or value args");
-            return;
+        if (typeof key !== "string" || !key.length) {
+            return console.error("setValue invalid key arg");
+        }
+        if (value == null) {
+            return console.error("setValue invalid value arg");
         }
         return new Promise(resolve => {
-            const message = {
-                name: "API_SET_VALUE",
-                key: key,
-                value: value,
-                filename: this.US_filename
-            };
-            browser.runtime.sendMessage(message, response => resolve(response));
+            const item = {};
+            item[`${this.US_filename}---${key}`] = value;
+            browser.storage.local.set(item, () => resolve({success: 1}));
         });
     },
     getValue(key, defaultValue) {
-        if (!key) return console.error("getValue missing key arg");
+        if (typeof key !== "string" || !key.length) {
+            return console.error("getValue invalid key arg");
+        }
+        const prefixedKey = `${this.US_filename}---${key}`;
         return new Promise(resolve => {
-            const uuid = Math.random().toString(36).substring(2, 8);
-            const message = {
-                name: "API_GET_VALUE",
-                key: key,
-                defaultValue: defaultValue,
-                uuid: uuid,
-                filename: this.US_filename
-            };
-            browser.runtime.sendMessage(message, response => {
-                const undef = response === `undefined--${uuid}`;
-                resolve(undef ? undefined : response);
+            browser.storage.local.get(prefixedKey, item => {
+                if (Object.keys(item).length === 0) {
+                    if (defaultValue != null) {
+                        resolve(defaultValue);
+                    } else {
+                        resolve(undefined);
+                    }
+                } else {
+                    resolve(Object.values(item)[0]);
+                }
             });
+        });
+    },
+    deleteValue(key) {
+        if (typeof key !== "string" || !key.length) {
+            return console.error("deleteValue missing key arg");
+        }
+        return new Promise(resolve => {
+            const prefixedKey = `${this.US_filename}---${key}`;
+            console.log(prefixedKey);
+            browser.storage.local.remove(prefixedKey, () => resolve({success: 1}));
         });
     },
     listValues() {
         return new Promise(resolve => {
-            const message = {
-                name: "API_LIST_VALUES",
-                filename: this.US_filename
-            };
-            browser.runtime.sendMessage(message, response => resolve(response));
-        });
-    },
-    deleteValue(key) {
-        if (!key) return console.error("deleteValue missing key arg");
-        return new Promise(resolve => {
-            const message = {
-                name: "API_DELETE_VALUE",
-                key: key,
-                filename: this.US_filename
-            };
-            browser.runtime.sendMessage(message, response => resolve(response));
+            const prefix = `${this.US_filename}---`;
+            const keys = [];
+            browser.storage.local.get().then(items => {
+                for (const key in items) {
+                    if (key.startsWith(prefix)) {
+                        const k = key.replace(prefix, "");
+                        keys.push(k);
+                    }
+                }
+                resolve(keys);
+            });
         });
     },
     addStyle(css) {
-        if (!css) return console.error("addStyle missing css arg");
+        if (typeof key !== "string") {
+            return console.error("addStyle invalid css arg");
+        }
         return new Promise(resolve => {
             const message = {
                 name: "API_ADD_STYLE",
@@ -98,6 +105,7 @@ const apis = {
         });
     },
     saveTab(tab) {
+        if (tab == null) return console.error("saveTab invalid arg");
         return new Promise(resolve => {
             const message = {
                 name: "API_SAVE_TAB",
@@ -271,8 +279,8 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
             let methodStr = `${method}: apis.${method}`;
             // add require variables to specific methods
             switch (method) {
-                case "getValues":
-                case "setValues":
+                case "getValue":
+                case "setValue":
                 case "deleteValue":
                 case "listValues":
                     methodStr += `.bind({"US_filename": "${filename}"})`;
