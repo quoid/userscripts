@@ -1285,18 +1285,17 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "GM.deleteValue",
             "GM.getValue",
             "GM.info",
+            "GM_info",
             "GM.listValues",
             "GM.openInTab",
             "GM.setClipboard",
             "GM.setValue",
-            "GM.xmlHttpRequest",
-            "GM_addStyle",
-            "GM_info",
-            "GM_setClipboard",
             "GM_xmlhttpRequest",
+            "GM.xmlHttpRequest",
+            "GM_setClipboard",
             "GM.getTab",
             "GM.saveTab",
-            "US.closeTab"
+            "GM.closeTab"
         ]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {
