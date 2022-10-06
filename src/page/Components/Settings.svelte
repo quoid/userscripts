@@ -12,7 +12,7 @@
     // indicates that a blacklist save has initiated
     let blacklistSaving = false;
     // indicates that a blacklist value has error
-    let blacklist_error = false;
+    let blacklistError = false;
 
     // the saved blacklisted domain patterns
     $: blacklisted = $settings.blacklist.join(", ");
@@ -25,11 +25,11 @@
         const re = /^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$/;
         for (const v of val) {
             if (re.exec(v) === null) {
-                blacklist_error = true;
+                blacklistError = true;
                 return console.warn("Global blacklist has wrong pattern:", v);
             }
         }
-        blacklist_error = false;
+        blacklistError = false;
 
         // compare blacklist input to saved blacklist
         if ([...val].sort().toString() !== [...$settings.blacklist].sort().toString()) {
@@ -159,12 +159,12 @@
                 />
             </div>
             <div class="modal__row modal__row--wrap">
-                <div class="blacklist">
+                <div class="blacklist" class:red={blacklistError}>
                     <span>Global Blacklist</span>
                     { #if blacklistSaving}{@html iconLoader}{/if}
                 </div>
                 <textarea
-                    class:error={blacklist_error}
+                    class:error={blacklistError}
                     placeholder="Comma separated list of @match patterns"
                     spellcheck="false"
                     bind:this={blacklist}
@@ -297,7 +297,7 @@
     }
 
     textarea.error {
-        border: 1px solid red;
+        border: 1px solid var(--color-red);
     }
 
     textarea:focus {
