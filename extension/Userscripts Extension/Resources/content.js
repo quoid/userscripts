@@ -65,8 +65,9 @@ const apis = {
         }
         return new Promise(resolve => {
             const prefixedKey = `${this.US_filename}---${key}`;
-            console.log(prefixedKey);
-            browser.storage.local.remove(prefixedKey, () => resolve({success: 1}));
+            browser.storage.local.remove(prefixedKey, () => {
+                resolve({success: 1});
+            });
         });
     },
     listValues() {
@@ -127,7 +128,87 @@ const apis = {
                 resolve(response);
             });
         });
-    }
+    },
+    xhr(details) {
+        if (details == null) return console.error("xhr invalid details arg");
+        if (!details.url) return console.error("xhr details missing url key");
+        // generate random port name for single xhr
+        const xhrPortName = Math.random().toString(36).substring(1, 9);
+        // strip out functions from details
+        const detailsParsed = JSON.parse(JSON.stringify(details));
+        // get all the "on" events from XMLHttpRequest object
+        const events = [];
+        for (const k in XMLHttpRequest.prototype) {
+            k.slice(0, 2) === "on" && events.push(k);
+        }
+        // check which functions are included in the original details object
+        // add a bool to indicate if event listeners should be attached
+        for (const e of events) {
+            if (typeof details[e] === "function") detailsParsed[e] = true;
+        }
+        // define return method, will be populated after port is established
+        const response = {
+            abort: () => console.error("xhr has not yet been initialized")
+        };
+        // port listener, most of the messaging logic goes here
+        const listener = port => {
+            if (port.name !== xhrPortName) return;
+            port.onMessage.addListener(async msg => {
+                if (
+                    events.includes(msg.name)
+                    && typeof details[msg.name] === "function"
+                ) {
+                    // process xhr response
+                    const r = msg.response;
+                    if (r.responseType === "arraybuffer") {
+                        // arraybuffer responses had their data converted in background
+                        // convert it back to arraybuffer
+                        try {
+                            const buffer = new Uint8Array(r.response).buffer;
+                            r.response = buffer;
+                        } catch (err) {
+                            console.error("error parsing xhr arraybuffer", err);
+                        }
+                    } else if (r.responseType === "blob" && r.response.data) {
+                        // blob responses had their data converted in background
+                        // convert it back to blob
+                        const response = await fetch(r.response.data);
+                        const b = await response.blob();
+                        r.response = b;
+                    }
+                    // call userscript method
+                    details[msg.name](msg.response);
+                    // all messages received
+                    // tell background it's safe to close port
+                    if (msg.name === "onloadend") {
+                        port.postMessage({name: "DISCONNECT"});
+                    }
+                }
+            });
+
+            // handle port disconnect and clean tasks
+            port.onDisconnect.addListener(p => {
+                p.error && console.error(`port disconnected due to an error: ${p.error.message}`);
+                browser.runtime.onConnect.removeListener(listener);
+            });
+            // fill the method returned to the user script
+            response.abort = () => port.postMessage({name: "ABORT"});
+        };
+        // wait for the background to establish a port connection
+        browser.runtime.onConnect.addListener(listener);
+        // pass the basic information to the background through a common message
+        const message = {
+            name: "API_XHR",
+            details: detailsParsed,
+            xhrPortName: xhrPortName,
+            events: events
+        };
+        browser.runtime.sendMessage(message);
+        return response;
+    },
+    // below methods use xhr(), add it to this object so it doesn't get skipped
+    xmlHttpRequest: true,
+    GM_xmlhttpRequest: true
 };
 // remote window's browser object
 delete window.browser;
@@ -245,7 +326,7 @@ function cspFallback(e) {
 }
 
 browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
-    // abort injection if errors detected
+    // cancel injection if errors detected
     if (!response || response.error) {
         console.error(response?.error || "REQ_USERSCRIPTS returned undefined");
         return;
@@ -302,8 +383,11 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
                 case "listValues":
                     methodStr += `.bind({"US_filename": "${filename}"})`;
                     break;
-                case "GM.info":
+                case "info":
                 case "GM_info":
+                    continue;
+                case "xmlHttpRequest":
+                    gmMethods.push("xmlHttpRequest: apis.xhr");
                     continue;
                 case "GM_xmlhttpRequest":
                     userscript.preCode += "const GM_xmlhttpRequest = apis.xhr;";
