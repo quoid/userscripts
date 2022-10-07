@@ -177,10 +177,6 @@ Userscripts currently supports the following api methods. All methods are asynch
 - `GM.addStyle(css)`
     - `css: String`
     - on success returns a promise resolved with the css string argument provided
-- `GM_addStyle(css)`
-    - `css: String`
-    - **synchronous**
-    - returns the css string argument provided *without regard to success*
 - `GM.setValue(key, value)`
     - `key: String`, `value: Any`
     - on success returns a promise resolved with an object indicating success
@@ -200,7 +196,7 @@ Userscripts currently supports the following api methods. All methods are asynch
 - `GM.openInTab(url, openInBackground)`
     - `url: String`, `openInBackground: Bool`
     - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened
-- `US.closeTab(tabId)`
+- `GM.closeTab(tabId)`
     - `tabId: Int`
     - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
     - on success returns a promise resolved with an object indicating success
@@ -209,10 +205,6 @@ Userscripts currently supports the following api methods. All methods are asynch
     - `type: String` - **optional** and defaults to `text/plain`
     - [read more here](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData)
     - on success returns a promise resolved with a `Bool` indicating success
-- `GM_setClipboard(data, type)`
-    - "synchronous' version of `GM.setClipboard`
-    - the setClipboard function runs in the background script, requires a promise to send message from content script to background to facilitate writing to the clipboard, thus no real synchronous function available
-    - returns `undefined`
 - `GM.info` && `GM_info`
     - is available without needing to add it to `@grant`
     - an object containing information about the running userscript
