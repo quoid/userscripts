@@ -407,7 +407,10 @@ function handleMessage(request, sender, sendResponse) {
                 p.error && console.error(`port disconnected due to an error: ${p.error.message}`);
             });
             xhr.send(body);
-            // send the end message to the content if not already being sent
+            // if onloadend not set in xhr details
+            // onloadend event won't be passed to content script
+            // if that happens port DISCONNECT message won't be posted
+            // if details lacks onloadend attach listener
             if (!details.onloadend) {
                 xhr.onloadend = event => {
                     port.postMessage({name: "onloadend", event: event});
