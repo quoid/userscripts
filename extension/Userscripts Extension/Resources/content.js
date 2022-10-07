@@ -291,8 +291,6 @@ function injectCSS(name, code) {
     // NOTE: manifest V3 does support frameId, but not origin
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/insertCSS
 
-    // browser.runtime.sendMessage({name: "API_ADD_STYLE_SYNC", css: code});
-
     // write the css code to head of the document
     const tag = document.createElement("style");
     tag.textContent = code;
