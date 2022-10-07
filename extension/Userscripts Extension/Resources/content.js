@@ -86,7 +86,7 @@ const apis = {
         });
     },
     addStyle(css) {
-        if (typeof key !== "string") {
+        if (typeof css !== "string") {
             return console.error("addStyle invalid css arg");
         }
         return new Promise(resolve => {
@@ -206,7 +206,7 @@ const apis = {
         browser.runtime.sendMessage(message);
         return response;
     },
-    // below methods use xhr(), add it to this object so it doesn't get skipped
+    // include method names so they don't get skipped when adding to userscript
     xmlHttpRequest: true,
     GM_xmlhttpRequest: true
 };

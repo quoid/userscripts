@@ -1281,21 +1281,20 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         let injectVals: Set<String> = ["auto", "content", "page"]
         let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
         let validGrants: Set<String> = [
-            "GM.addStyle",
-            "GM.deleteValue",
-            "GM.getValue",
             "GM.info",
             "GM_info",
-            "GM.listValues",
+            "GM.addStyle",
             "GM.openInTab",
-            "GM.setClipboard",
+            "GM.closeTab",
             "GM.setValue",
-            "GM_xmlhttpRequest",
-            "GM.xmlHttpRequest",
-            "GM_setClipboard",
+            "GM.getValue",
+            "GM.deleteValue",
+            "GM.listValues",
+            "GM.setClipboard",
             "GM.getTab",
             "GM.saveTab",
-            "GM.closeTab"
+            "GM_xmlhttpRequest",
+            "GM.xmlHttpRequest"
         ]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {

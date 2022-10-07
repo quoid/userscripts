@@ -1055,22 +1055,20 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     const validGrants = new Set([
-        "GM.addStyle",
-        "GM.deleteValue",
-        "GM.getValue",
         "GM.info",
-        "GM.listValues",
-        "GM.openInTab",
-        "GM.setClipboard",
-        "GM.setValue",
-        "GM.xmlHttpRequest",
-        "GM_addStyle",
         "GM_info",
-        "GM_setClipboard",
-        "GM_xmlhttpRequest",
+        "GM.addStyle",
+        "GM.openInTab",
+        "GM.closeTab",
+        "GM.setValue",
+        "GM.getValue",
+        "GM.deleteValue",
+        "GM.listValues",
+        "GM.setClipboard",
         "GM.getTab",
         "GM.saveTab",
-        "US.closeTab"
+        "GM_xmlhttpRequest",
+        "GM.xmlHttpRequest"
     ]);
 
     const validKeys = new Set([
