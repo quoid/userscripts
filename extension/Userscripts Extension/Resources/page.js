@@ -20213,11 +20213,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t3 = space();
     			create_component(iconbutton.$$.fragment);
     			progress_1.value = /*$progress*/ ctx[1];
-    			attr(progress_1, "class", "svelte-18f15x6");
-    			attr(div0, "class", "icon svelte-18f15x6");
-    			attr(span, "class", "svelte-18f15x6");
-    			attr(div1, "class", "svelte-18f15x6");
-    			attr(li, "class", "svelte-18f15x6");
+    			attr(progress_1, "class", "svelte-nig57l");
+    			attr(div0, "class", "icon svelte-nig57l");
+    			attr(span, "class", "svelte-nig57l");
+    			attr(div1, "class", "svelte-nig57l");
+    			attr(li, "class", "svelte-nig57l");
     			toggle_class(li, "error", /*item*/ ctx[0].type === "error");
     			toggle_class(li, "info", /*item*/ ctx[0].type === "info");
     			toggle_class(li, "warn", /*item*/ ctx[0].type === "warn");

@@ -65,7 +65,7 @@
     progress,
     progress::-webkit-progress-bar,
     progress::-webkit-progress-value {
-        border-radius: none;
+        border-radius: var(--border-radius) 0 0 0;
     }
 
     progress {
@@ -73,13 +73,14 @@
         background: transparent;
         border: none;
         display: block;
+        filter: brightness(0.8);
         height: 0.125rem;
         pointer-events: none;
         width: 100%;
     }
 
     progress::-webkit-progress-bar {
-        background-color: black;
+        background-color: transparent;
     }
 
     progress::-webkit-progress-value {
