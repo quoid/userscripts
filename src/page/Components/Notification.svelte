@@ -13,7 +13,7 @@
 
     export let item;
 
-    const timeout = 10000;
+    const timeout = 5000;
     const progress = tweened(1, {duration: timeout, easing: linear});
     const icon = item.type === "error" ? iconError : item.type === "info" ? iconInfo : iconWarn;
     let previousProgress;
