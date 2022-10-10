@@ -11,13 +11,25 @@
     let blacklist;
     // indicates that a blacklist save has initiated
     let blacklistSaving = false;
+    // indicates that a blacklist value has error
+    let blacklistError = false;
 
     // the saved blacklisted domain patterns
     $: blacklisted = $settings.blacklist.join(", ");
 
     function saveBlacklist() {
         // get the comma separated values from blacklist input
-        const val = blacklist.value.split(",").map(item => item.trim()).filter(n => n);
+        const val = [...new Set(blacklist.value.split(",").map(item => item.trim()).filter(n => n))];
+
+        // check if val matches `match patterns`, if not, return a warning
+        const re = /^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$/;
+        for (const v of val) {
+            if (re.exec(v) === null) {
+                blacklistError = true;
+                return console.warn("Global blacklist has wrong pattern:", v);
+            }
+        }
+        blacklistError = false;
 
         // compare blacklist input to saved blacklist
         if ([...val].sort().toString() !== [...$settings.blacklist].sort().toString()) {
@@ -56,7 +68,7 @@
 
 <div
     class="settings"
-    on:click|self={() => state.remove("settings")}
+    on:mousedown|self={() => state.remove("settings")}
     in:fade={{duration: 150}}
     out:fade={{duration: 150, delay: 75}}
 >
@@ -147,11 +159,12 @@
                 />
             </div>
             <div class="modal__row modal__row--wrap">
-                <div class="blacklist">
+                <div class="blacklist" class:red={blacklistError}>
                     <span>Global Blacklist</span>
                     { #if blacklistSaving}{@html iconLoader}{/if}
                 </div>
                 <textarea
+                    class:error={blacklistError}
                     placeholder="Comma separated list of @match patterns"
                     spellcheck="false"
                     bind:this={blacklist}
@@ -280,6 +293,11 @@
         opacity: 0.75;
         padding: 0.5rem;
         width: 100%;
+        min-width: 100%;
+    }
+
+    textarea.error {
+        border: 1px solid var(--color-red);
     }
 
     textarea:focus {
