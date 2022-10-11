@@ -19518,7 +19518,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let mounted;
     	let dispose;
     	iconbutton0 = new IconButton({ props: { icon: iconClose } });
-    	iconbutton0.$on("click", /*click_handler*/ ctx[7]);
+    	iconbutton0.$on("click", /*click_handler*/ ctx[8]);
 
     	toggle0 = new Toggle({
     			props: {
@@ -19526,13 +19526,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		});
 
-    	toggle0.$on("click", /*click_handler_1*/ ctx[8]);
+    	toggle0.$on("click", /*click_handler_1*/ ctx[9]);
 
     	toggle1 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].autoHint }
     		});
 
-    	toggle1.$on("click", /*click_handler_2*/ ctx[9]);
+    	toggle1.$on("click", /*click_handler_2*/ ctx[10]);
 
     	toggle2 = new Toggle({
     			props: {
@@ -19540,13 +19540,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		});
 
-    	toggle2.$on("click", /*click_handler_3*/ ctx[10]);
+    	toggle2.$on("click", /*click_handler_3*/ ctx[11]);
 
     	toggle3 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].lint }
     		});
 
-    	toggle3.$on("click", /*click_handler_4*/ ctx[11]);
+    	toggle3.$on("click", /*click_handler_4*/ ctx[12]);
 
     	toggle4 = new Toggle({
     			props: {
@@ -19554,19 +19554,19 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		});
 
-    	toggle4.$on("click", /*click_handler_5*/ ctx[12]);
+    	toggle4.$on("click", /*click_handler_5*/ ctx[13]);
 
     	toggle5 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].active }
     		});
 
-    	toggle5.$on("click", /*click_handler_6*/ ctx[15]);
+    	toggle5.$on("click", /*click_handler_6*/ ctx[16]);
 
     	toggle6 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].showCount }
     		});
 
-    	toggle6.$on("click", /*click_handler_7*/ ctx[16]);
+    	toggle6.$on("click", /*click_handler_7*/ ctx[17]);
 
     	iconbutton1 = new IconButton({
     			props: {
@@ -19631,7 +19631,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t22 = space();
     			div26 = element("div");
     			div16 = element("div");
-    			div16.innerHTML = `<div class="svelte-9f6q4c">General Settings</div>`;
+    			div16.innerHTML = `<div class="svelte-krvk46">General Settings</div>`;
     			t24 = space();
     			div18 = element("div");
     			div17 = element("div");
@@ -19687,51 +19687,53 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			a2 = element("a");
     			a2.textContent = "supporting the project";
     			t53 = text(".");
-    			attr(div0, "class", "svelte-9f6q4c");
-    			attr(div1, "class", "modal__title svelte-9f6q4c");
-    			attr(div2, "class", "svelte-9f6q4c");
-    			attr(div3, "class", "modal__row svelte-9f6q4c");
-    			attr(div4, "class", "svelte-9f6q4c");
-    			attr(div5, "class", "modal__row svelte-9f6q4c");
-    			attr(div6, "class", "svelte-9f6q4c");
-    			attr(div7, "class", "modal__row svelte-9f6q4c");
-    			attr(div8, "class", "svelte-9f6q4c");
-    			attr(div9, "class", "modal__row svelte-9f6q4c");
-    			attr(div10, "class", "svelte-9f6q4c");
-    			attr(div11, "class", "modal__row svelte-9f6q4c");
-    			attr(div12, "class", "svelte-9f6q4c");
+    			attr(div0, "class", "svelte-krvk46");
+    			attr(div1, "class", "modal__title svelte-krvk46");
+    			attr(div2, "class", "svelte-krvk46");
+    			attr(div3, "class", "modal__row svelte-krvk46");
+    			attr(div4, "class", "svelte-krvk46");
+    			attr(div5, "class", "modal__row svelte-krvk46");
+    			attr(div6, "class", "svelte-krvk46");
+    			attr(div7, "class", "modal__row svelte-krvk46");
+    			attr(div8, "class", "svelte-krvk46");
+    			attr(div9, "class", "modal__row svelte-krvk46");
+    			attr(div10, "class", "svelte-krvk46");
+    			attr(div11, "class", "modal__row svelte-krvk46");
+    			attr(div12, "class", "svelte-krvk46");
     			option0.__value = "2";
     			option0.value = option0.__value;
     			option1.__value = "4";
     			option1.value = option1.__value;
-    			if (/*$settings*/ ctx[0].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
-    			attr(div13, "class", "modal__row svelte-9f6q4c");
+    			if (/*$settings*/ ctx[0].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[14].call(select));
+    			attr(div13, "class", "modal__row svelte-krvk46");
     			attr(div14, "class", "modal__section");
-    			attr(div16, "class", "modal__title svelte-9f6q4c");
-    			attr(div17, "class", "svelte-9f6q4c");
+    			attr(div16, "class", "modal__title svelte-krvk46");
+    			attr(div17, "class", "svelte-krvk46");
     			toggle_class(div17, "red", !/*$settings*/ ctx[0].active);
-    			attr(div18, "class", "modal__row svelte-9f6q4c");
-    			attr(div19, "class", "svelte-9f6q4c");
-    			attr(div20, "class", "modal__row svelte-9f6q4c");
-    			attr(div21, "class", "svelte-9f6q4c");
-    			attr(div22, "class", "truncate svelte-9f6q4c");
-    			attr(div23, "class", "modal__row saveLocation svelte-9f6q4c");
-    			attr(div24, "class", "blacklist svelte-9f6q4c");
+    			attr(div18, "class", "modal__row svelte-krvk46");
+    			attr(div19, "class", "svelte-krvk46");
+    			attr(div20, "class", "modal__row svelte-krvk46");
+    			attr(div21, "class", "svelte-krvk46");
+    			attr(div22, "class", "truncate svelte-krvk46");
+    			attr(div23, "class", "modal__row saveLocation svelte-krvk46");
+    			attr(div24, "class", "blacklist svelte-krvk46");
+    			toggle_class(div24, "red", /*blacklistError*/ ctx[3]);
     			attr(textarea, "placeholder", "Comma separated list of @match patterns");
     			attr(textarea, "spellcheck", "false");
-    			textarea.value = /*blacklisted*/ ctx[3];
-    			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2];
-    			attr(textarea, "class", "svelte-9f6q4c");
-    			attr(div25, "class", "modal__row modal__row--wrap svelte-9f6q4c");
+    			textarea.value = /*blacklisted*/ ctx[4];
+    			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[5].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2];
+    			attr(textarea, "class", "svelte-krvk46");
+    			toggle_class(textarea, "error", /*blacklistError*/ ctx[3]);
+    			attr(div25, "class", "modal__row modal__row--wrap svelte-krvk46");
     			attr(div26, "class", "modal__section");
-    			attr(div27, "class", "modal__title svelte-9f6q4c");
+    			attr(div27, "class", "modal__title svelte-krvk46");
     			attr(a0, "href", "https://github.com/quoid/userscripts");
     			attr(a1, "href", "https://apps.apple.com/us/app/userscripts/id1463298887");
     			attr(a2, "href", "https://github.com/quoid/userscripts#support");
-    			attr(p, "class", "svelte-9f6q4c");
+    			attr(p, "class", "svelte-krvk46");
     			attr(div28, "class", "modal__section");
-    			attr(div29, "class", "modal svelte-9f6q4c");
-    			attr(div30, "class", "settings svelte-9f6q4c");
+    			attr(div29, "class", "modal svelte-krvk46");
+    			attr(div30, "class", "settings svelte-krvk46");
     		},
     		m(target, anchor) {
     			insert(target, div30, anchor);
@@ -19803,7 +19805,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			if (if_block) if_block.m(div24, null);
     			append(div25, t38);
     			append(div25, textarea);
-    			/*textarea_binding*/ ctx[17](textarea);
+    			/*textarea_binding*/ ctx[18](textarea);
     			append(div29, t39);
     			append(div29, div28);
     			append(div28, div27);
@@ -19829,11 +19831,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (!mounted) {
     				dispose = [
-    					listen(select, "change", /*select_change_handler*/ ctx[13]),
-    					listen(select, "blur", /*blur_handler*/ ctx[14]),
+    					listen(select, "change", /*select_change_handler*/ ctx[14]),
+    					listen(select, "blur", /*blur_handler*/ ctx[15]),
     					listen(div22, "click", openSaveLocation),
-    					listen(textarea, "blur", /*saveBlacklist*/ ctx[5]),
-    					listen(div30, "click", self$1(/*click_handler_8*/ ctx[18]))
+    					listen(textarea, "blur", /*saveBlacklist*/ ctx[6]),
+    					listen(div30, "mousedown", self$1(/*mousedown_handler*/ ctx[19]))
     				];
 
     				mounted = true;
@@ -19885,12 +19887,20 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				if_block = null;
     			}
 
-    			if (!current || dirty & /*blacklisted*/ 8) {
-    				textarea.value = /*blacklisted*/ ctx[3];
+    			if (dirty & /*blacklistError*/ 8) {
+    				toggle_class(div24, "red", /*blacklistError*/ ctx[3]);
     			}
 
-    			if (!current || dirty & /*$state, blacklistSaving*/ 20 && textarea_disabled_value !== (textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2])) {
+    			if (!current || dirty & /*blacklisted*/ 16) {
+    				textarea.value = /*blacklisted*/ ctx[4];
+    			}
+
+    			if (!current || dirty & /*$state, blacklistSaving*/ 36 && textarea_disabled_value !== (textarea_disabled_value = /*$state*/ ctx[5].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2])) {
     				textarea.disabled = textarea_disabled_value;
+    			}
+
+    			if (dirty & /*blacklistError*/ 8) {
+    				toggle_class(textarea, "error", /*blacklistError*/ ctx[3]);
     			}
 
     			if ((!current || dirty & /*$settings*/ 1) && t43_value !== (t43_value = /*$settings*/ ctx[0].version + "")) set_data(t43, t43_value);
@@ -19950,7 +19960,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			destroy_component(toggle6);
     			destroy_component(iconbutton1);
     			if (if_block) if_block.d();
-    			/*textarea_binding*/ ctx[17](null);
+    			/*textarea_binding*/ ctx[18](null);
     			if (detaching && div29_outro) div29_outro.end();
     			if (detaching && div30_outro) div30_outro.end();
     			mounted = false;
@@ -19983,15 +19993,32 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let $settings;
     	let $state;
     	component_subscribe($$self, settings, $$value => $$invalidate(0, $settings = $$value));
-    	component_subscribe($$self, state, $$value => $$invalidate(4, $state = $$value));
+    	component_subscribe($$self, state, $$value => $$invalidate(5, $state = $$value));
     	let blacklist;
 
     	// indicates that a blacklist save has initiated
     	let blacklistSaving = false;
 
+    	// indicates that a blacklist value has error
+    	let blacklistError = false;
+
     	function saveBlacklist() {
     		// get the comma separated values from blacklist input
-    		const val = blacklist.value.split(",").map(item => item.trim()).filter(n => n);
+    		const val = [
+    			...new Set(blacklist.value.split(",").map(item => item.trim()).filter(n => n))
+    		];
+
+    		// check if val matches `match patterns`, if not, return a warning
+    		const re = /^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$/;
+
+    		for (const v of val) {
+    			if (re.exec(v) === null) {
+    				$$invalidate(3, blacklistError = true);
+    				return console.warn("Global blacklist has wrong pattern:", v);
+    			}
+    		}
+
+    		$$invalidate(3, blacklistError = false);
 
     		// compare blacklist input to saved blacklist
     		if ([...val].sort().toString() !== [...$settings.blacklist].sort().toString()) {
@@ -20034,12 +20061,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		});
     	}
 
-    	const click_handler_8 = () => state.remove("settings");
+    	const mousedown_handler = () => state.remove("settings");
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$settings*/ 1) {
     			// the saved blacklisted domain patterns
-    			 $$invalidate(3, blacklisted = $settings.blacklist.join(", "));
+    			 $$invalidate(4, blacklisted = $settings.blacklist.join(", "));
     		}
     	};
 
@@ -20047,6 +20074,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		$settings,
     		blacklist,
     		blacklistSaving,
+    		blacklistError,
     		blacklisted,
     		$state,
     		saveBlacklist,
@@ -20062,7 +20090,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		click_handler_6,
     		click_handler_7,
     		textarea_binding,
-    		click_handler_8
+    		mousedown_handler
     	];
     }
 
@@ -20292,7 +20320,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    const timeout = 10000;
+    const timeout = 5000;
 
     function instance$b($$self, $$props, $$invalidate) {
     	let $progress;
