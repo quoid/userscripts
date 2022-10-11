@@ -1280,6 +1280,22 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         var injectInto = metadata["inject-into"]?[0] ?? "auto"
         let injectVals: Set<String> = ["auto", "content", "page"]
         let runAtVals: Set<String> = ["context-menu", "document-start", "document-end", "document-idle"]
+        let validGrants: Set<String> = [
+            "GM.info",
+            "GM_info",
+            "GM.addStyle",
+            "GM.openInTab",
+            "GM.closeTab",
+            "GM.setValue",
+            "GM.getValue",
+            "GM.deleteValue",
+            "GM.listValues",
+            "GM.setClipboard",
+            "GM.getTab",
+            "GM.saveTab",
+            "GM_xmlhttpRequest",
+            "GM.xmlHttpRequest"
+        ]
         // if either is invalid use default value
         if !injectVals.contains(injectInto) {
             injectInto = "auto"
@@ -1294,6 +1310,9 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         if !grants.isEmpty {
             grants = Array(Set(grants))
         }
+        
+        // filter out grant values that are not in validGrant set
+        grants = grants.filter{validGrants.contains($0)}
         
         // set GM.info data
         let description = metadata["description"]?[0] ?? ""
@@ -1310,7 +1329,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "excludes": excludes,
             "exclude-match": excludeMatches,
             "filename": filename,
-            "grants": grants,
+            "grant": grants,
             "icon": icon,
             "includes": includes,
             "inject-into": injectInto,
@@ -1753,7 +1772,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     }
 
     // remove old file and manifest records for old file if they exist
-    if oldFilename != newFilename {
+    if oldFilename.lowercased() != newFilename.lowercased() {
         // if user changed the filename, remove file with old filename
         let oldFileUrl = saveLocation.appendingPathComponent(oldFilename)
         // however, when creating a new file, if user changes the temp given name by app...

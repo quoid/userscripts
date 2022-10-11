@@ -66,14 +66,24 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         }
         return $$scope.dirty;
     }
-    function update_slot(slot, slot_definition, ctx, $$scope, dirty, get_slot_changes_fn, get_slot_context_fn) {
-        const slot_changes = get_slot_changes(slot_definition, $$scope, dirty, get_slot_changes_fn);
+    function update_slot_base(slot, slot_definition, ctx, $$scope, slot_changes, get_slot_context_fn) {
         if (slot_changes) {
             const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
             slot.p(slot_context, slot_changes);
         }
     }
-    function set_store_value(store, ret, value = ret) {
+    function get_all_dirty_from_scope($$scope) {
+        if ($$scope.ctx.length > 32) {
+            const dirty = [];
+            const length = $$scope.ctx.length / 32;
+            for (let i = 0; i < length; i++) {
+                dirty[i] = -1;
+            }
+            return dirty;
+        }
+        return -1;
+    }
+    function set_store_value(store, ret, value) {
         store.set(value);
         return ret;
     }
@@ -112,9 +122,25 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             }
         };
     }
-
     function append(target, node) {
         target.appendChild(node);
+    }
+    function get_root_for_style(node) {
+        if (!node)
+            return document;
+        const root = node.getRootNode ? node.getRootNode() : node.ownerDocument;
+        if (root && root.host) {
+            return root;
+        }
+        return node.ownerDocument;
+    }
+    function append_empty_stylesheet(node) {
+        const style_element = element('style');
+        append_stylesheet(get_root_for_style(node), style_element);
+        return style_element.sheet;
+    }
+    function append_stylesheet(node, style) {
+        append(node.head || node, style);
     }
     function insert(target, node, anchor) {
         target.insertBefore(node, anchor || null);
@@ -124,6 +150,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
     function element(name) {
         return document.createElement(name);
+    }
+    function svg_element(name) {
+        return document.createElementNS('http://www.w3.org/2000/svg', name);
     }
     function text(data) {
         return document.createTextNode(data);
@@ -170,7 +199,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         input.value = value == null ? '' : value;
     }
     function set_style(node, key, value, important) {
-        node.style.setProperty(key, value, important ? 'important' : '');
+        if (value === null) {
+            node.style.removeProperty(key);
+        }
+        else {
+            node.style.setProperty(key, value, important ? 'important' : '');
+        }
     }
     function select_option(select, value) {
         for (let i = 0; i < select.options.length; i += 1) {
@@ -180,6 +214,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
                 return;
             }
         }
+        select.selectedIndex = -1; // no option should be selected
     }
     function select_value(select) {
         const selected_option = select.querySelector(':checked') || select.options[0];
@@ -188,21 +223,28 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     function toggle_class(element, name, toggle) {
         element.classList[toggle ? 'add' : 'remove'](name);
     }
-    function custom_event(type, detail) {
+    function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
-        e.initCustomEvent(type, false, false, detail);
+        e.initCustomEvent(type, bubbles, cancelable, detail);
         return e;
     }
     class HtmlTag {
-        constructor(anchor = null) {
-            this.a = anchor;
+        constructor(is_svg = false) {
+            this.is_svg = false;
+            this.is_svg = is_svg;
             this.e = this.n = null;
+        }
+        c(html) {
+            this.h(html);
         }
         m(html, target, anchor = null) {
             if (!this.e) {
-                this.e = element(target.nodeName);
+                if (this.is_svg)
+                    this.e = svg_element(target.nodeName);
+                else
+                    this.e = element(target.nodeName);
                 this.t = target;
-                this.h(html);
+                this.c(html);
             }
             this.i(anchor);
         }
@@ -225,7 +267,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         }
     }
 
-    const active_docs = new Set();
+    // we need to store the information for multiple documents because a Svelte application could also contain iframes
+    // https://github.com/sveltejs/svelte/issues/3624
+    const managed_styles = new Map();
     let active = 0;
     // https://github.com/darkskyapp/string-hash/blob/master/index.js
     function hash(str) {
@@ -234,6 +278,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         while (i--)
             hash = ((hash << 5) - hash) ^ str.charCodeAt(i);
         return hash >>> 0;
+    }
+    function create_style_information(doc, node) {
+        const info = { stylesheet: append_empty_stylesheet(node), rules: {} };
+        managed_styles.set(doc, info);
+        return info;
     }
     function create_rule(node, a, b, duration, delay, ease, fn, uid = 0) {
         const step = 16.666 / duration;
@@ -244,16 +293,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         }
         const rule = keyframes + `100% {${fn(b, 1 - b)}}\n}`;
         const name = `__svelte_${hash(rule)}_${uid}`;
-        const doc = node.ownerDocument;
-        active_docs.add(doc);
-        const stylesheet = doc.__svelte_stylesheet || (doc.__svelte_stylesheet = doc.head.appendChild(element('style')).sheet);
-        const current_rules = doc.__svelte_rules || (doc.__svelte_rules = {});
-        if (!current_rules[name]) {
-            current_rules[name] = true;
+        const doc = get_root_for_style(node);
+        const { stylesheet, rules } = managed_styles.get(doc) || create_style_information(doc, node);
+        if (!rules[name]) {
+            rules[name] = true;
             stylesheet.insertRule(`@keyframes ${name} ${rule}`, stylesheet.cssRules.length);
         }
         const animation = node.style.animation || '';
-        node.style.animation = `${animation ? `${animation}, ` : ``}${name} ${duration}ms linear ${delay}ms 1 both`;
+        node.style.animation = `${animation ? `${animation}, ` : ''}${name} ${duration}ms linear ${delay}ms 1 both`;
         active += 1;
         return name;
     }
@@ -275,14 +322,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         raf(() => {
             if (active)
                 return;
-            active_docs.forEach(doc => {
-                const stylesheet = doc.__svelte_stylesheet;
+            managed_styles.forEach(info => {
+                const { stylesheet } = info;
                 let i = stylesheet.cssRules.length;
                 while (i--)
                     stylesheet.deleteRule(i);
-                doc.__svelte_rules = {};
+                info.rules = {};
             });
-            active_docs.clear();
+            managed_styles.clear();
         });
     }
 
@@ -292,7 +339,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
     function get_current_component() {
         if (!current_component)
-            throw new Error(`Function called outside component initialization`);
+            throw new Error('Function called outside component initialization');
         return current_component;
     }
     function onMount(fn) {
@@ -300,16 +347,18 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
     function createEventDispatcher() {
         const component = get_current_component();
-        return (type, detail) => {
+        return (type, detail, { cancelable = false } = {}) => {
             const callbacks = component.$$.callbacks[type];
             if (callbacks) {
                 // TODO are there situations where events could be dispatched
                 // in a server (non-DOM) environment?
-                const event = custom_event(type, detail);
+                const event = custom_event(type, detail, { cancelable });
                 callbacks.slice().forEach(fn => {
                     fn.call(component, event);
                 });
+                return !event.defaultPrevented;
             }
+            return true;
         };
     }
     // TODO figure out if we still want to support
@@ -318,7 +367,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     function bubble(component, event) {
         const callbacks = component.$$.callbacks[event.type];
         if (callbacks) {
-            callbacks.slice().forEach(fn => fn(event));
+            // @ts-ignore
+            callbacks.slice().forEach(fn => fn.call(this, event));
         }
     }
 
@@ -341,22 +391,40 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    let flushing = false;
+    // flush() calls callbacks in this order:
+    // 1. All beforeUpdate callbacks, in order: parents before children
+    // 2. All bind:this callbacks, in reverse order: children before parents.
+    // 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+    //    for afterUpdates called during the initial onMount, which are called in
+    //    reverse order: children before parents.
+    // Since callbacks might update component values, which could trigger another
+    // call to flush(), the following steps guard against this:
+    // 1. During beforeUpdate, any updated components will be added to the
+    //    dirty_components array and will cause a reentrant call to flush(). Because
+    //    the flush index is kept outside the function, the reentrant call will pick
+    //    up where the earlier call left off and go through all dirty components. The
+    //    current_component value is saved and restored so that the reentrant call will
+    //    not interfere with the "parent" flush() call.
+    // 2. bind:this callbacks cannot trigger new flush() calls.
+    // 3. During afterUpdate, any updated components will NOT have their afterUpdate
+    //    callback called a second time; the seen_callbacks set, outside the flush()
+    //    function, guarantees this behavior.
     const seen_callbacks = new Set();
+    let flushidx = 0; // Do *not* move this inside the flush() function
     function flush() {
-        if (flushing)
-            return;
-        flushing = true;
+        const saved_component = current_component;
         do {
             // first, call beforeUpdate functions
             // and update components
-            for (let i = 0; i < dirty_components.length; i += 1) {
-                const component = dirty_components[i];
+            while (flushidx < dirty_components.length) {
+                const component = dirty_components[flushidx];
+                flushidx++;
                 set_current_component(component);
                 update(component.$$);
             }
             set_current_component(null);
             dirty_components.length = 0;
+            flushidx = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
             // then, once components are updated, call
@@ -376,8 +444,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             flush_callbacks.pop()();
         }
         update_scheduled = false;
-        flushing = false;
         seen_callbacks.clear();
+        set_current_component(saved_component);
     }
     function update($$) {
         if ($$.fragment !== null) {
@@ -439,6 +507,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             });
             block.o(local);
         }
+        else if (callback) {
+            callback();
+        }
     }
     const null_transition = { duration: 0 };
     function create_in_transition(node, fn, params) {
@@ -483,6 +554,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             start() {
                 if (started)
                     return;
+                started = true;
                 delete_rule(node);
                 if (is_function(config)) {
                     config = config();
@@ -570,7 +642,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
                 delete_rule(node, animation_name);
         }
         function init(program, duration) {
-            const d = program.b - t;
+            const d = (program.b - t);
             duration *= Math.abs(d);
             return {
                 a: t,
@@ -747,22 +819,24 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     function create_component(block) {
         block && block.c();
     }
-    function mount_component(component, target, anchor) {
+    function mount_component(component, target, anchor, customElement) {
         const { fragment, on_mount, on_destroy, after_update } = component.$$;
         fragment && fragment.m(target, anchor);
-        // onMount happens before the initial afterUpdate
-        add_render_callback(() => {
-            const new_on_destroy = on_mount.map(run).filter(is_function);
-            if (on_destroy) {
-                on_destroy.push(...new_on_destroy);
-            }
-            else {
-                // Edge case - component was destroyed immediately,
-                // most likely as a result of a binding initialising
-                run_all(new_on_destroy);
-            }
-            component.$$.on_mount = [];
-        });
+        if (!customElement) {
+            // onMount happens before the initial afterUpdate
+            add_render_callback(() => {
+                const new_on_destroy = on_mount.map(run).filter(is_function);
+                if (on_destroy) {
+                    on_destroy.push(...new_on_destroy);
+                }
+                else {
+                    // Edge case - component was destroyed immediately,
+                    // most likely as a result of a binding initialising
+                    run_all(new_on_destroy);
+                }
+                component.$$.on_mount = [];
+            });
+        }
         after_update.forEach(add_render_callback);
     }
     function destroy_component(component, detaching) {
@@ -784,10 +858,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         }
         component.$$.dirty[(i / 31) | 0] |= (1 << (i % 31));
     }
-    function init(component, options, instance, create_fragment, not_equal, props, dirty = [-1]) {
+    function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty = [-1]) {
         const parent_component = current_component;
         set_current_component(component);
-        const prop_values = options.props || {};
         const $$ = component.$$ = {
             fragment: null,
             ctx: null,
@@ -799,17 +872,20 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             // lifecycle
             on_mount: [],
             on_destroy: [],
+            on_disconnect: [],
             before_update: [],
             after_update: [],
-            context: new Map(parent_component ? parent_component.$$.context : []),
+            context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
             // everything else
             callbacks: blank_object(),
             dirty,
-            skip_bound: false
+            skip_bound: false,
+            root: options.target || parent_component.$$.root
         };
+        append_styles && append_styles($$.root);
         let ready = false;
         $$.ctx = instance
-            ? instance(component, prop_values, (i, ret, ...rest) => {
+            ? instance(component, options.props || {}, (i, ret, ...rest) => {
                 const value = rest.length ? rest[0] : ret;
                 if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
                     if (!$$.skip_bound && $$.bound[i])
@@ -838,11 +914,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             }
             if (options.intro)
                 transition_in(component.$$.fragment);
-            mount_component(component, options.target, options.anchor);
+            mount_component(component, options.target, options.anchor, options.customElement);
             flush();
         }
         set_current_component(parent_component);
     }
+    /**
+     * Base class for Svelte components. Used when dev=false.
+     */
     class SvelteComponent {
         $destroy() {
             destroy_component(this, 1);
@@ -874,7 +953,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         return f * f * f + 1.0;
     }
 
-    function blur(node, { delay = 0, duration = 400, easing = cubicInOut, amount = 5, opacity = 0 }) {
+    function blur(node, { delay = 0, duration = 400, easing = cubicInOut, amount = 5, opacity = 0 } = {}) {
         const style = getComputedStyle(node);
         const target_opacity = +style.opacity;
         const f = style.filter === 'none' ? '' : style.filter;
@@ -886,7 +965,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             css: (_t, u) => `opacity: ${target_opacity - (od * u)}; filter: ${f} blur(${u * amount}px);`
         };
     }
-    function fade(node, { delay = 0, duration = 400, easing = identity }) {
+    function fade(node, { delay = 0, duration = 400, easing = identity } = {}) {
         const o = +getComputedStyle(node).opacity;
         return {
             delay,
@@ -895,7 +974,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
             css: t => `opacity: ${t * o}`
         };
     }
-    function fly(node, { delay = 0, duration = 400, easing = cubicOut, x = 0, y = 0, opacity = 0 }) {
+    function fly(node, { delay = 0, duration = 400, easing = cubicOut, x = 0, y = 0, opacity = 0 } = {}) {
         const style = getComputedStyle(node);
         const target_opacity = +style.opacity;
         const transform = style.transform === 'none' ? '' : style.transform;
@@ -918,16 +997,15 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
      */
     function writable(value, start = noop) {
         let stop;
-        const subscribers = [];
+        const subscribers = new Set();
         function set(new_value) {
             if (safe_not_equal(value, new_value)) {
                 value = new_value;
                 if (stop) { // store is ready
                     const run_queue = !subscriber_queue.length;
-                    for (let i = 0; i < subscribers.length; i += 1) {
-                        const s = subscribers[i];
-                        s[1]();
-                        subscriber_queue.push(s, value);
+                    for (const subscriber of subscribers) {
+                        subscriber[1]();
+                        subscriber_queue.push(subscriber, value);
                     }
                     if (run_queue) {
                         for (let i = 0; i < subscriber_queue.length; i += 2) {
@@ -943,17 +1021,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         }
         function subscribe(run, invalidate = noop) {
             const subscriber = [run, invalidate];
-            subscribers.push(subscriber);
-            if (subscribers.length === 1) {
+            subscribers.add(subscriber);
+            if (subscribers.size === 1) {
                 stop = start(set) || noop;
             }
             run(value);
             return () => {
-                const index = subscribers.indexOf(subscriber);
-                if (index !== -1) {
-                    subscribers.splice(index, 1);
-                }
-                if (subscribers.length === 0) {
+                subscribers.delete(subscriber);
+                if (subscribers.size === 0) {
                     stop();
                     stop = null;
                 }
@@ -1055,21 +1130,20 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     const validGrants = new Set([
-        "GM.addStyle",
-        "GM.deleteValue",
-        "GM.getValue",
         "GM.info",
-        "GM.listValues",
-        "GM.openInTab",
-        "GM.setClipboard",
-        "GM.setValue",
-        "GM.xmlHttpRequest",
-        "GM_addStyle",
         "GM_info",
-        "GM_setClipboard",
-        "GM_xmlhttpRequest",
+        "GM.addStyle",
+        "GM.openInTab",
+        "GM.closeTab",
+        "GM.setValue",
+        "GM.getValue",
+        "GM.deleteValue",
+        "GM.listValues",
+        "GM.setClipboard",
         "GM.getTab",
-        "GM.saveTab"
+        "GM.saveTab",
+        "GM_xmlhttpRequest",
+        "GM.xmlHttpRequest"
     ]);
 
     const validKeys = new Set([
@@ -1206,7 +1280,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     const items = writable([]);
 
-    /* src/shared/Components/IconButton.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/IconButton.svelte generated by Svelte v3.49.0 */
 
     function create_fragment(ctx) {
     	let button;
@@ -1267,15 +1341,15 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let { notification = false } = $$props;
 
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("color" in $$props) $$invalidate(0, color = $$props.color);
-    		if ("disabled" in $$props) $$invalidate(1, disabled = $$props.disabled);
-    		if ("icon" in $$props) $$invalidate(2, icon = $$props.icon);
-    		if ("title" in $$props) $$invalidate(3, title = $$props.title);
-    		if ("notification" in $$props) $$invalidate(4, notification = $$props.notification);
+    		if ('color' in $$props) $$invalidate(0, color = $$props.color);
+    		if ('disabled' in $$props) $$invalidate(1, disabled = $$props.disabled);
+    		if ('icon' in $$props) $$invalidate(2, icon = $$props.icon);
+    		if ('title' in $$props) $$invalidate(3, title = $$props.title);
+    		if ('notification' in $$props) $$invalidate(4, notification = $$props.notification);
     	};
 
     	return [color, disabled, icon, title, notification, click_handler];
@@ -1295,7 +1369,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
-    /* src/shared/Components/Dropdown.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Dropdown.svelte generated by Svelte v3.49.0 */
 
     function fallback_block(ctx) {
     	let li;
@@ -1308,6 +1382,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		m(target, anchor) {
     			insert(target, li, anchor);
     		},
+    		p: noop,
     		d(detaching) {
     			if (detaching) detach(li);
     		}
@@ -1365,8 +1440,17 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			iconbutton.$set(iconbutton_changes);
 
     			if (default_slot) {
-    				if (default_slot.p && dirty & /*$$scope*/ 32) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[5], dirty, null, null);
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 32)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[5],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[5])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[5], dirty, null),
+    						null
+    					);
     				}
     			}
 
@@ -1429,10 +1513,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	$$self.$$set = $$props => {
-    		if ("icon" in $$props) $$invalidate(0, icon = $$props.icon);
-    		if ("disabled" in $$props) $$invalidate(1, disabled = $$props.disabled);
-    		if ("title" in $$props) $$invalidate(2, title = $$props.title);
-    		if ("$$scope" in $$props) $$invalidate(5, $$scope = $$props.$$scope);
+    		if ('icon' in $$props) $$invalidate(0, icon = $$props.icon);
+    		if ('disabled' in $$props) $$invalidate(1, disabled = $$props.disabled);
+    		if ('title' in $$props) $$invalidate(2, title = $$props.title);
+    		if ('$$scope' in $$props) $$invalidate(5, $$scope = $$props.$$scope);
     	};
 
     	return [icon, disabled, title, active, dropdownClick, $$scope, slots];
@@ -1449,27 +1533,27 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     var iconClear = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm4.9 6L12 10.9 7.1 6 6 7.1l4.9 4.9L6 16.9 7.1 18l4.9-4.9 4.9 4.9 1.1-1.1-4.9-4.9L18 7.1 16.9 6z" fill-rule="evenodd"/></svg>';
 
-    /* src/page/Components/Sidebar/SidebarFilter.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Sidebar/SidebarFilter.svelte generated by Svelte v3.49.0 */
 
     function create_default_slot(ctx) {
     	let li0;
     	let t0;
-    	let t1_value = (/*sortOrder*/ ctx[2] === "lastModifiedAsc" ? " *" : "") + "";
+    	let t1_value = (/*sortOrder*/ ctx[1] === "lastModifiedAsc" ? " *" : "") + "";
     	let t1;
     	let t2;
     	let li1;
     	let t3;
-    	let t4_value = (/*sortOrder*/ ctx[2] === "lastModifiedDesc" ? " *" : "") + "";
+    	let t4_value = (/*sortOrder*/ ctx[1] === "lastModifiedDesc" ? " *" : "") + "";
     	let t4;
     	let t5;
     	let li2;
     	let t6;
-    	let t7_value = (/*sortOrder*/ ctx[2] === "nameAsc" ? " *" : "") + "";
+    	let t7_value = (/*sortOrder*/ ctx[1] === "nameAsc" ? " *" : "") + "";
     	let t7;
     	let t8;
     	let li3;
     	let t9;
-    	let t10_value = (/*sortOrder*/ ctx[2] === "nameDesc" ? " *" : "") + "";
+    	let t10_value = (/*sortOrder*/ ctx[1] === "nameDesc" ? " *" : "") + "";
     	let t10;
     	let mounted;
     	let dispose;
@@ -1491,10 +1575,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			li3 = element("li");
     			t9 = text("Name: Desc");
     			t10 = text(t10_value);
-    			toggle_class(li0, "selected", /*sortOrder*/ ctx[2] === "lastModifiedAsc");
-    			toggle_class(li1, "selected", /*sortOrder*/ ctx[2] === "lastModifiedDesc");
-    			toggle_class(li2, "selected", /*sortOrder*/ ctx[2] === "nameAsc");
-    			toggle_class(li3, "selected", /*sortOrder*/ ctx[2] === "nameDesc");
+    			toggle_class(li0, "selected", /*sortOrder*/ ctx[1] === "lastModifiedAsc");
+    			toggle_class(li1, "selected", /*sortOrder*/ ctx[1] === "lastModifiedDesc");
+    			toggle_class(li2, "selected", /*sortOrder*/ ctx[1] === "nameAsc");
+    			toggle_class(li3, "selected", /*sortOrder*/ ctx[1] === "nameDesc");
     		},
     		m(target, anchor) {
     			insert(target, li0, anchor);
@@ -1515,38 +1599,38 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (!mounted) {
     				dispose = [
-    					listen(li0, "click", /*click_handler*/ ctx[5]),
-    					listen(li1, "click", /*click_handler_1*/ ctx[6]),
-    					listen(li2, "click", /*click_handler_2*/ ctx[7]),
-    					listen(li3, "click", /*click_handler_3*/ ctx[8])
+    					listen(li0, "click", /*click_handler*/ ctx[7]),
+    					listen(li1, "click", /*click_handler_1*/ ctx[8]),
+    					listen(li2, "click", /*click_handler_2*/ ctx[9]),
+    					listen(li3, "click", /*click_handler_3*/ ctx[10])
     				];
 
     				mounted = true;
     			}
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*sortOrder*/ 4 && t1_value !== (t1_value = (/*sortOrder*/ ctx[2] === "lastModifiedAsc" ? " *" : "") + "")) set_data(t1, t1_value);
+    			if (dirty & /*sortOrder*/ 2 && t1_value !== (t1_value = (/*sortOrder*/ ctx[1] === "lastModifiedAsc" ? " *" : "") + "")) set_data(t1, t1_value);
 
-    			if (dirty & /*sortOrder*/ 4) {
-    				toggle_class(li0, "selected", /*sortOrder*/ ctx[2] === "lastModifiedAsc");
+    			if (dirty & /*sortOrder*/ 2) {
+    				toggle_class(li0, "selected", /*sortOrder*/ ctx[1] === "lastModifiedAsc");
     			}
 
-    			if (dirty & /*sortOrder*/ 4 && t4_value !== (t4_value = (/*sortOrder*/ ctx[2] === "lastModifiedDesc" ? " *" : "") + "")) set_data(t4, t4_value);
+    			if (dirty & /*sortOrder*/ 2 && t4_value !== (t4_value = (/*sortOrder*/ ctx[1] === "lastModifiedDesc" ? " *" : "") + "")) set_data(t4, t4_value);
 
-    			if (dirty & /*sortOrder*/ 4) {
-    				toggle_class(li1, "selected", /*sortOrder*/ ctx[2] === "lastModifiedDesc");
+    			if (dirty & /*sortOrder*/ 2) {
+    				toggle_class(li1, "selected", /*sortOrder*/ ctx[1] === "lastModifiedDesc");
     			}
 
-    			if (dirty & /*sortOrder*/ 4 && t7_value !== (t7_value = (/*sortOrder*/ ctx[2] === "nameAsc" ? " *" : "") + "")) set_data(t7, t7_value);
+    			if (dirty & /*sortOrder*/ 2 && t7_value !== (t7_value = (/*sortOrder*/ ctx[1] === "nameAsc" ? " *" : "") + "")) set_data(t7, t7_value);
 
-    			if (dirty & /*sortOrder*/ 4) {
-    				toggle_class(li2, "selected", /*sortOrder*/ ctx[2] === "nameAsc");
+    			if (dirty & /*sortOrder*/ 2) {
+    				toggle_class(li2, "selected", /*sortOrder*/ ctx[1] === "nameAsc");
     			}
 
-    			if (dirty & /*sortOrder*/ 4 && t10_value !== (t10_value = (/*sortOrder*/ ctx[2] === "nameDesc" ? " *" : "") + "")) set_data(t10, t10_value);
+    			if (dirty & /*sortOrder*/ 2 && t10_value !== (t10_value = (/*sortOrder*/ ctx[1] === "nameDesc" ? " *" : "") + "")) set_data(t10, t10_value);
 
-    			if (dirty & /*sortOrder*/ 4) {
-    				toggle_class(li3, "selected", /*sortOrder*/ ctx[2] === "nameDesc");
+    			if (dirty & /*sortOrder*/ 2) {
+    				toggle_class(li3, "selected", /*sortOrder*/ ctx[1] === "nameDesc");
     			}
     		},
     		d(detaching) {
@@ -1571,11 +1655,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	iconbutton = new IconButton({
     			props: {
     				icon: iconClear,
-    				disabled: /*disabled*/ ctx[1]
+    				disabled: /*disabled*/ ctx[2]
     			}
     		});
 
-    	iconbutton.$on("click", /*click_handler_4*/ ctx[9]);
+    	iconbutton.$on("click", /*click_handler_4*/ ctx[11]);
 
     	return {
     		c() {
@@ -1587,7 +1671,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		},
     		p(ctx, dirty) {
     			const iconbutton_changes = {};
-    			if (dirty & /*disabled*/ 2) iconbutton_changes.disabled = /*disabled*/ ctx[1];
+    			if (dirty & /*disabled*/ 4) iconbutton_changes.disabled = /*disabled*/ ctx[2];
     			iconbutton.$set(iconbutton_changes);
     		},
     		i(local) {
@@ -1618,7 +1702,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	dropdown = new Dropdown({
     			props: {
     				icon: iconSort,
-    				disabled: /*disabled*/ ctx[1],
+    				disabled: /*disabled*/ ctx[2],
     				$$slots: { default: [create_default_slot] },
     				$$scope: { ctx }
     			}
@@ -1640,7 +1724,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			attr(input, "autocomplete", "off");
     			attr(input, "spellcheck", "false");
     			attr(input, "autocorrect", "off");
-    			input.disabled = /*disabled*/ ctx[1];
+    			input.disabled = /*disabled*/ ctx[2];
     			attr(input, "class", "svelte-1sfj9gc");
     			attr(div, "class", "filter svelte-1sfj9gc");
     		},
@@ -1655,13 +1739,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(input, "input", /*input_input_handler*/ ctx[4]);
+    				dispose = listen(input, "input", /*input_input_handler*/ ctx[6]);
     				mounted = true;
     			}
     		},
     		p(ctx, [dirty]) {
-    			if (!current || dirty & /*disabled*/ 2) {
-    				input.disabled = /*disabled*/ ctx[1];
+    			if (!current || dirty & /*disabled*/ 4) {
+    				input.disabled = /*disabled*/ ctx[2];
     			}
 
     			if (dirty & /*query*/ 1 && input.value !== /*query*/ ctx[0]) {
@@ -1669,9 +1753,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
 
     			const dropdown_changes = {};
-    			if (dirty & /*disabled*/ 2) dropdown_changes.disabled = /*disabled*/ ctx[1];
+    			if (dirty & /*disabled*/ 4) dropdown_changes.disabled = /*disabled*/ ctx[2];
 
-    			if (dirty & /*$$scope, sortOrder*/ 16388) {
+    			if (dirty & /*$$scope, sortOrder*/ 16386) {
     				dropdown_changes.$$scope = { dirty, ctx };
     			}
 
@@ -1722,12 +1806,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance$2($$self, $$props, $$invalidate) {
-    	let $state;
-    	let $settings;
+    	let disabled;
+    	let sortOrder;
     	let $items;
-    	component_subscribe($$self, state, $$value => $$invalidate(10, $state = $$value));
-    	component_subscribe($$self, settings, $$value => $$invalidate(11, $settings = $$value));
+    	let $settings;
+    	let $state;
     	component_subscribe($$self, items, $$value => $$invalidate(12, $items = $$value));
+    	component_subscribe($$self, settings, $$value => $$invalidate(4, $settings = $$value));
+    	component_subscribe($$self, state, $$value => $$invalidate(5, $state = $$value));
     	let query = "";
 
     	function filter(query) {
@@ -1756,16 +1842,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	const click_handler_2 = () => updateSortOrder("nameAsc");
     	const click_handler_3 = () => updateSortOrder("nameDesc");
     	const click_handler_4 = () => $$invalidate(0, query = "");
-    	let disabled;
-    	let sortOrder;
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$state*/ 1024) {
-    			 $$invalidate(1, disabled = !$state.includes("ready") ? true : false);
+    		if ($$self.$$.dirty & /*$state*/ 32) {
+    			 $$invalidate(2, disabled = !$state.includes("ready") ? true : false);
     		}
 
-    		if ($$self.$$.dirty & /*$settings*/ 2048) {
-    			 $$invalidate(2, sortOrder = $settings.sortOrder);
+    		if ($$self.$$.dirty & /*$settings*/ 16) {
+    			 $$invalidate(1, sortOrder = $settings.sortOrder);
     		}
 
     		if ($$self.$$.dirty & /*query*/ 1) {
@@ -1775,9 +1859,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	return [
     		query,
-    		disabled,
     		sortOrder,
+    		disabled,
     		updateSortOrder,
+    		$settings,
+    		$state,
     		input_input_handler,
     		click_handler,
     		click_handler_1,
@@ -1796,7 +1882,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     var iconLoader = '<svg viewBox="0 0 38 38" stroke="#fff">    <g fill="none" fill-rule="evenodd">        <g transform="translate(1 1)" stroke->            <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>            <path d="M36 18c0-9.94-8.06-18-18-18">                <animateTransform                    attributeName="transform"                    type="rotate"                    from="0 18 18"                    to="360 18 18"                    dur="750ms"                    repeatCount="indefinite"/>            </path>        </g>    </g></svg>';
 
-    /* src/shared/Components/Loader.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Loader.svelte generated by Svelte v3.49.0 */
 
     function create_if_block$1(ctx) {
     	let div;
@@ -1849,9 +1935,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return {
     		c() {
     			div = element("div");
+    			html_tag = new HtmlTag(false);
     			t = space();
     			if (if_block) if_block.c();
-    			html_tag = new HtmlTag(t);
+    			html_tag.a = t;
     			attr(div, "class", "loader svelte-tibcgr");
     			set_style(div, "background-color", /*backgroundColor*/ ctx[2]);
     		},
@@ -1907,9 +1994,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let { backgroundColor = "var(--color-bg-secondary)" } = $$props;
 
     	$$self.$$set = $$props => {
-    		if ("abort" in $$props) $$invalidate(0, abort = $$props.abort);
-    		if ("abortClick" in $$props) $$invalidate(1, abortClick = $$props.abortClick);
-    		if ("backgroundColor" in $$props) $$invalidate(2, backgroundColor = $$props.backgroundColor);
+    		if ('abort' in $$props) $$invalidate(0, abort = $$props.abort);
+    		if ('abortClick' in $$props) $$invalidate(1, abortClick = $$props.abortClick);
+    		if ('backgroundColor' in $$props) $$invalidate(2, backgroundColor = $$props.backgroundColor);
     	};
 
     	return [abort, abortClick, backgroundColor];
@@ -1927,7 +2014,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
-    /* src/shared/Components/Tag.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Tag.svelte generated by Svelte v3.49.0 */
 
     function create_fragment$4(ctx) {
     	let div;
@@ -1958,7 +2045,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let { type = undefined } = $$props;
 
     	$$self.$$set = $$props => {
-    		if ("type" in $$props) $$invalidate(0, type = $$props.type);
+    		if ('type' in $$props) $$invalidate(0, type = $$props.type);
     	};
 
     	return [type];
@@ -1971,7 +2058,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
-    /* src/shared/Components/Toggle.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Toggle.svelte generated by Svelte v3.49.0 */
 
     function create_fragment$5(ctx) {
     	let label;
@@ -2049,7 +2136,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let { title = undefined } = $$props;
 
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	function input_change_handler() {
@@ -2058,9 +2145,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	$$self.$$set = $$props => {
-    		if ("checked" in $$props) $$invalidate(0, checked = $$props.checked);
-    		if ("disabled" in $$props) $$invalidate(1, disabled = $$props.disabled);
-    		if ("title" in $$props) $$invalidate(2, title = $$props.title);
+    		if ('checked' in $$props) $$invalidate(0, checked = $$props.checked);
+    		if ('disabled' in $$props) $$invalidate(1, disabled = $$props.disabled);
+    		if ('title' in $$props) $$invalidate(2, title = $$props.title);
     	};
 
     	return [checked, disabled, title, click_handler, input_change_handler];
@@ -2073,7 +2160,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
-    /* src/page/Components/Sidebar/SidebarItem.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Sidebar/SidebarItem.svelte generated by Svelte v3.49.0 */
 
     function create_if_block$2(ctx) {
     	let div;
@@ -2264,6 +2351,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance$6($$self, $$props, $$invalidate) {
+    	let description;
     	let { data = {} } = $$props;
     	let { toggleClick } = $$props;
     	let showTitle = false;
@@ -2283,15 +2371,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("data" in $$props) $$invalidate(0, data = $$props.data);
-    		if ("toggleClick" in $$props) $$invalidate(1, toggleClick = $$props.toggleClick);
+    		if ('data' in $$props) $$invalidate(0, data = $$props.data);
+    		if ('toggleClick' in $$props) $$invalidate(1, toggleClick = $$props.toggleClick);
     	};
-
-    	let description;
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*data*/ 1) {
@@ -16856,7 +16942,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     var iconClose = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12z"/></svg>';
 
-    /* src/page/Components/Editor/EditorSearch.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Editor/EditorSearch.svelte generated by Svelte v3.49.0 */
 
     function create_if_block$3(ctx) {
     	let div;
@@ -16877,9 +16963,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let mounted;
     	let dispose;
     	iconbutton0 = new IconButton({ props: { icon: iconArrowDown } });
-    	iconbutton0.$on("click", /*click_handler*/ ctx[16]);
+    	iconbutton0.$on("click", /*click_handler*/ ctx[17]);
     	iconbutton1 = new IconButton({ props: { icon: iconArrowUp } });
-    	iconbutton1.$on("click", /*click_handler_1*/ ctx[17]);
+    	iconbutton1.$on("click", /*click_handler_1*/ ctx[18]);
     	iconbutton2 = new IconButton({ props: { icon: iconClose } });
 
     	iconbutton2.$on("click", function () {
@@ -16909,8 +16995,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		m(target, anchor) {
     			insert(target, div, anchor);
     			append(div, input);
-    			/*input_binding*/ ctx[14](input);
-    			set_input_value(input, /*inputValue*/ ctx[4]);
+    			/*input_binding*/ ctx[15](input);
+    			set_input_value(input, /*inputValue*/ ctx[3]);
     			append(div, t0);
     			append(div, span);
     			append(span, t1);
@@ -16926,7 +17012,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (!mounted) {
     				dispose = [
-    					listen(input, "input", /*input_input_handler*/ ctx[15]),
+    					listen(input, "input", /*input_input_handler*/ ctx[16]),
     					listen(input, "input", /*highlightMatches*/ ctx[9]),
     					listen(input, "input", /*getMatches*/ ctx[2]),
     					listen(input, "keydown", /*keys*/ ctx[8])
@@ -16938,8 +17024,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*inputValue*/ 16 && input.value !== /*inputValue*/ ctx[4]) {
-    				set_input_value(input, /*inputValue*/ ctx[4]);
+    			if (dirty & /*inputValue*/ 8 && input.value !== /*inputValue*/ ctx[3]) {
+    				set_input_value(input, /*inputValue*/ ctx[3]);
     			}
 
     			if (!current || dirty & /*rangesIndex*/ 64) set_data(t1, /*rangesIndex*/ ctx[6]);
@@ -16960,7 +17046,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		},
     		d(detaching) {
     			if (detaching) detach(div);
-    			/*input_binding*/ ctx[14](null);
+    			/*input_binding*/ ctx[15](null);
     			destroy_component(iconbutton0);
     			destroy_component(iconbutton1);
     			destroy_component(iconbutton2);
@@ -17026,6 +17112,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance_1($$self, $$props, $$invalidate) {
+    	let query;
     	let { active } = $$props;
     	let { instance } = $$props;
 
@@ -17077,7 +17164,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     		if (query.length > 0) {
     			// create the overlay
-    			$$invalidate(18, searchOverlay = {
+    			$$invalidate(14, searchOverlay = {
     				token(stream) {
     					pattern.lastIndex = stream.pos;
     					const match = pattern.exec(stream.string);
@@ -17173,33 +17260,31 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	function input_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			inp = $$value;
-    			$$invalidate(3, inp);
+    			$$invalidate(4, inp);
     		});
     	}
 
     	function input_input_handler() {
     		inputValue = this.value;
-    		((($$invalidate(4, inputValue), $$invalidate(0, active)), $$invalidate(12, instance)), $$invalidate(18, searchOverlay));
+    		((($$invalidate(3, inputValue), $$invalidate(0, active)), $$invalidate(12, instance)), $$invalidate(14, searchOverlay));
     	}
 
     	const click_handler = () => next();
     	const click_handler_1 = () => previous();
 
     	$$self.$$set = $$props => {
-    		if ("active" in $$props) $$invalidate(0, active = $$props.active);
-    		if ("instance" in $$props) $$invalidate(12, instance = $$props.instance);
-    		if ("closeHandler" in $$props) $$invalidate(1, closeHandler = $$props.closeHandler);
+    		if ('active' in $$props) $$invalidate(0, active = $$props.active);
+    		if ('instance' in $$props) $$invalidate(12, instance = $$props.instance);
+    		if ('closeHandler' in $$props) $$invalidate(1, closeHandler = $$props.closeHandler);
     	};
 
-    	let query;
-
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*active, instance, searchOverlay*/ 266241) {
+    		if ($$self.$$.dirty & /*active, instance, searchOverlay*/ 20481) {
     			// runs when search bar is hidden
     			 if (!active) {
-    				$$invalidate(4, inputValue = undefined);
+    				$$invalidate(3, inputValue = undefined);
     				instance.removeOverlay(searchOverlay);
     				instance.focus();
     				$$invalidate(6, rangesIndex = 0);
@@ -17208,7 +17293,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		}
 
-    		if ($$self.$$.dirty & /*inputValue*/ 16) {
+    		if ($$self.$$.dirty & /*inputValue*/ 8) {
     			// the search query
     			 $$invalidate(7, query = inputValue ? inputValue.trim() : "");
     		}
@@ -17223,8 +17308,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		active,
     		closeHandler,
     		getMatches,
-    		inp,
     		inputValue,
+    		inp,
     		ranges,
     		rangesIndex,
     		query,
@@ -17234,6 +17319,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		previous,
     		instance,
     		focusInput,
+    		searchOverlay,
     		input_binding,
     		input_input_handler,
     		click_handler,
@@ -17263,7 +17349,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
-    /* src/page/Components/Editor/CodeMirror.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Editor/CodeMirror.svelte generated by Svelte v3.49.0 */
 
     function create_if_block$4(ctx) {
     	let switch_instance;
@@ -17274,7 +17360,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	function switch_props(ctx) {
     		let switch_instance_props = {
     			active: /*searchActive*/ ctx[2],
-    			closeHandler: /*func*/ ctx[8],
+    			closeHandler: /*func*/ ctx[11],
     			instance: instance$7
     		};
 
@@ -17283,7 +17369,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	if (switch_value) {
     		switch_instance = new switch_value(switch_props(ctx));
-    		/*switch_instance_binding*/ ctx[9](switch_instance);
+    		/*switch_instance_binding*/ ctx[12](switch_instance);
     	}
 
     	return {
@@ -17302,7 +17388,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		p(ctx, dirty) {
     			const switch_instance_changes = {};
     			if (dirty & /*searchActive*/ 4) switch_instance_changes.active = /*searchActive*/ ctx[2];
-    			if (dirty & /*searchActive*/ 4) switch_instance_changes.closeHandler = /*func*/ ctx[8];
+    			if (dirty & /*searchActive*/ 4) switch_instance_changes.closeHandler = /*func*/ ctx[11];
     			if (dirty & /*instance*/ 0) switch_instance_changes.instance = instance$7;
 
     			if (switch_value !== (switch_value = EditorSearch)) {
@@ -17319,7 +17405,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     				if (switch_value) {
     					switch_instance = new switch_value(switch_props(ctx));
-    					/*switch_instance_binding*/ ctx[9](switch_instance);
+    					/*switch_instance_binding*/ ctx[12](switch_instance);
     					create_component(switch_instance.$$.fragment);
     					transition_in(switch_instance.$$.fragment, 1);
     					mount_component(switch_instance, switch_instance_anchor.parentNode, switch_instance_anchor);
@@ -17340,7 +17426,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			current = false;
     		},
     		d(detaching) {
-    			/*switch_instance_binding*/ ctx[9](null);
+    			/*switch_instance_binding*/ ctx[12](null);
     			if (detaching) detach(switch_instance_anchor);
     			if (switch_instance) destroy_component(switch_instance, detaching);
     		}
@@ -17363,7 +17449,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		},
     		m(target, anchor) {
     			insert(target, textarea_1, anchor);
-    			/*textarea_1_binding*/ ctx[7](textarea_1);
+    			/*textarea_1_binding*/ ctx[10](textarea_1);
     			insert(target, t, anchor);
     			if (if_block) if_block.m(target, anchor);
     			insert(target, if_block_anchor, anchor);
@@ -17404,7 +17490,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		},
     		d(detaching) {
     			if (detaching) detach(textarea_1);
-    			/*textarea_1_binding*/ ctx[7](null);
+    			/*textarea_1_binding*/ ctx[10](null);
     			if (detaching) detach(t);
     			if (if_block) if_block.d(detaching);
     			if (detaching) detach(if_block_anchor);
@@ -17501,10 +17587,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance_1$1($$self, $$props, $$invalidate) {
-    	let $settings;
     	let $state;
-    	component_subscribe($$self, settings, $$value => $$invalidate(12, $settings = $$value));
-    	component_subscribe($$self, state, $$value => $$invalidate(13, $state = $$value));
+    	let $settings;
+    	component_subscribe($$self, state, $$value => $$invalidate(8, $state = $$value));
+    	component_subscribe($$self, settings, $$value => $$invalidate(9, $settings = $$value));
 
     	let { saveHandler = () => {
     		
@@ -17766,7 +17852,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	function textarea_1_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			textarea = $$value;
     			$$invalidate(0, textarea);
     		});
@@ -17775,18 +17861,18 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	const func = () => $$invalidate(2, searchActive = false);
 
     	function switch_instance_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			search = $$value;
     			$$invalidate(1, search);
     		});
     	}
 
     	$$self.$$set = $$props => {
-    		if ("saveHandler" in $$props) $$invalidate(3, saveHandler = $$props.saveHandler);
+    		if ('saveHandler' in $$props) $$invalidate(3, saveHandler = $$props.saveHandler);
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*instance, $settings*/ 4096) {
+    		if ($$self.$$.dirty & /*$settings*/ 512) {
     			// update settings when changed
     			 if (instance$7) {
     				instance$7.setOption("autoCloseBrackets", $settings.autoCloseBrackets);
@@ -17796,15 +17882,15 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$state, instance*/ 8192) {
+    		if ($$self.$$.dirty & /*$state*/ 256) {
     			// store cursor position and disable on save
     			 if ($state.includes("saving")) {
-    				$$invalidate(11, cursor = instance$7.getCursor());
+    				$$invalidate(7, cursor = instance$7.getCursor());
     				disable();
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$state, instance, cursor*/ 10240) {
+    		if ($$self.$$.dirty & /*$state, cursor*/ 384) {
     			// re-enable after, focus and set cursor back save completes
     			 if ($state.includes("ready") && state.getOldState().includes("saving")) {
     				enable();
@@ -17813,14 +17899,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$state*/ 8192) {
+    		if ($$self.$$.dirty & /*$state*/ 256) {
     			// disable when trashing or updating file
     			 if ($state.includes("trashing") || $state.includes("updating")) {
     				disable();
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$state*/ 8192) {
+    		if ($$self.$$.dirty & /*$state*/ 256) {
     			// reset saved and session code & re-enable after trashing completes
     			 if ($state && state.getOldState().includes("trashing")) {
     				savedCode = null;
@@ -17829,7 +17915,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$state, instance*/ 8192) {
+    		if ($$self.$$.dirty & /*$state*/ 256) {
     			// update session code and re-enable after updating completes
     			 if ($state && state.getOldState().includes("updating")) {
     				sessionCode = instance$7.getValue();
@@ -17837,7 +17923,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		}
 
-    		if ($$self.$$.dirty & /*instance, $settings*/ 4096) {
+    		if ($$self.$$.dirty & /*$settings*/ 512) {
     			// track lint settings and update accordingly
     			 if (instance$7 && $settings.lint) {
     				toggleLint("enable");
@@ -17855,6 +17941,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		init,
     		discardChanges,
     		getValue,
+    		cursor,
+    		$state,
+    		$settings,
     		textarea_1_binding,
     		func,
     		switch_instance_binding
@@ -17886,7 +17975,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
-    /* src/page/Components/Sidebar/Sidebar.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Sidebar/Sidebar.svelte generated by Svelte v3.49.0 */
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -17924,8 +18013,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			if (!mounted) {
     				dispose = [
-    					listen(li0, "click", /*click_handler_1*/ ctx[11]),
-    					listen(li1, "click", /*click_handler_2*/ ctx[12]),
+    					listen(li0, "click", /*click_handler_1*/ ctx[12]),
+    					listen(li1, "click", /*click_handler_2*/ ctx[13]),
     					listen(li2, "click", /*newRemote*/ ctx[7])
     				];
 
@@ -17982,11 +18071,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let current;
 
     	function func(...args) {
-    		return /*func*/ ctx[13](/*item*/ ctx[18], ...args);
+    		return /*func*/ ctx[14](/*item*/ ctx[18], ...args);
     	}
 
-    	function click_handler_3(...args) {
-    		return /*click_handler_3*/ ctx[14](/*item*/ ctx[18], ...args);
+    	function click_handler_3() {
+    		return /*click_handler_3*/ ctx[15](/*item*/ ctx[18]);
     	}
 
     	var switch_value = SidebarItem;
@@ -18027,8 +18116,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const switch_instance_changes = {};
-    			if (dirty & /*list*/ 8) switch_instance_changes.data = /*item*/ ctx[18];
-    			if (dirty & /*list*/ 8) switch_instance_changes.toggleClick = func;
+    			if (dirty & /*list*/ 1) switch_instance_changes.data = /*item*/ ctx[18];
+    			if (dirty & /*list*/ 1) switch_instance_changes.toggleClick = func;
 
     			if (switch_value !== (switch_value = SidebarItem)) {
     				if (switch_instance) {
@@ -18075,7 +18164,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     // (200:4) {#if showCount}
     function create_if_block$5(ctx) {
     	let div;
-    	let t0_value = /*list*/ ctx[3].length + "";
+    	let t0_value = /*list*/ ctx[0].length + "";
     	let t0;
     	let t1;
     	let div_transition;
@@ -18095,7 +18184,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if ((!current || dirty & /*list*/ 8) && t0_value !== (t0_value = /*list*/ ctx[3].length + "")) set_data(t0, t0_value);
+    			if ((!current || dirty & /*list*/ 1) && t0_value !== (t0_value = /*list*/ ctx[0].length + "")) set_data(t0, t0_value);
     		},
     		i(local) {
     			if (current) return;
@@ -18130,7 +18219,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let dropdown;
     	let t2;
     	let div2;
-    	let show_if = /*$state*/ ctx[2].includes("items-loading");
+    	let show_if = /*$state*/ ctx[1].includes("items-loading");
     	let t3;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -18143,27 +18232,27 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	iconbutton = new IconButton({
     			props: {
-    				notification: !/*$settings*/ ctx[4].active,
+    				notification: !/*$settings*/ ctx[2].active,
     				icon: iconSettings,
     				title: "Open settings",
-    				disabled: /*disabled*/ ctx[1]
+    				disabled: /*disabled*/ ctx[4]
     			}
     		});
 
-    	iconbutton.$on("click", /*click_handler*/ ctx[10]);
+    	iconbutton.$on("click", /*click_handler*/ ctx[11]);
 
     	dropdown = new Dropdown({
     			props: {
     				icon: iconPlus,
     				title: "New item",
-    				disabled: /*disabled*/ ctx[1],
+    				disabled: /*disabled*/ ctx[4],
     				$$slots: { default: [create_default_slot$1] },
     				$$scope: { ctx }
     			}
     		});
 
     	let if_block0 = show_if && create_if_block_1();
-    	let each_value = /*list*/ ctx[3];
+    	let each_value = /*list*/ ctx[0];
     	const get_key = ctx => /*item*/ ctx[18].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -18172,7 +18261,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		each_1_lookup.set(key, each_blocks[i] = create_each_block(key, child_ctx));
     	}
 
-    	let if_block1 = /*showCount*/ ctx[0] && create_if_block$5(ctx);
+    	let if_block1 = /*showCount*/ ctx[3] && create_if_block$5(ctx);
 
     	return {
     		c() {
@@ -18199,7 +18288,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			attr(div1, "class", "sidebar__header svelte-23v8pd");
     			attr(div2, "class", "sidebar__body svelte-23v8pd");
 
-    			attr(div3, "class", div3_class_value = "sidebar " + (!/*$settings*/ ctx[4].descriptions
+    			attr(div3, "class", div3_class_value = "sidebar " + (!/*$settings*/ ctx[2].descriptions
     			? "sidebar--compact"
     			: "") + " svelte-23v8pd");
     		},
@@ -18232,22 +18321,22 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		},
     		p(ctx, [dirty]) {
     			const iconbutton_changes = {};
-    			if (dirty & /*$settings*/ 16) iconbutton_changes.notification = !/*$settings*/ ctx[4].active;
-    			if (dirty & /*disabled*/ 2) iconbutton_changes.disabled = /*disabled*/ ctx[1];
+    			if (dirty & /*$settings*/ 4) iconbutton_changes.notification = !/*$settings*/ ctx[2].active;
+    			if (dirty & /*disabled*/ 16) iconbutton_changes.disabled = /*disabled*/ ctx[4];
     			iconbutton.$set(iconbutton_changes);
     			const dropdown_changes = {};
-    			if (dirty & /*disabled*/ 2) dropdown_changes.disabled = /*disabled*/ ctx[1];
+    			if (dirty & /*disabled*/ 16) dropdown_changes.disabled = /*disabled*/ ctx[4];
 
     			if (dirty & /*$$scope*/ 2097152) {
     				dropdown_changes.$$scope = { dirty, ctx };
     			}
 
     			dropdown.$set(dropdown_changes);
-    			if (dirty & /*$state*/ 4) show_if = /*$state*/ ctx[2].includes("items-loading");
+    			if (dirty & /*$state*/ 2) show_if = /*$state*/ ctx[1].includes("items-loading");
 
     			if (show_if) {
     				if (if_block0) {
-    					if (dirty & /*$state*/ 4) {
+    					if (dirty & /*$state*/ 2) {
     						transition_in(if_block0, 1);
     					}
     				} else {
@@ -18266,18 +18355,18 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				check_outros();
     			}
 
-    			if (dirty & /*SidebarItem, list, toggleItem, activate*/ 328) {
-    				const each_value = /*list*/ ctx[3];
+    			if (dirty & /*SidebarItem, list, toggleItem, activate*/ 321) {
+    				each_value = /*list*/ ctx[0];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div2, outro_and_destroy_block, create_each_block, null, get_each_context);
     				check_outros();
     			}
 
-    			if (/*showCount*/ ctx[0]) {
+    			if (/*showCount*/ ctx[3]) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
 
-    					if (dirty & /*showCount*/ 1) {
+    					if (dirty & /*showCount*/ 8) {
     						transition_in(if_block1, 1);
     					}
     				} else {
@@ -18296,7 +18385,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				check_outros();
     			}
 
-    			if (!current || dirty & /*$settings*/ 16 && div3_class_value !== (div3_class_value = "sidebar " + (!/*$settings*/ ctx[4].descriptions
+    			if (!current || dirty & /*$settings*/ 4 && div3_class_value !== (div3_class_value = "sidebar " + (!/*$settings*/ ctx[2].descriptions
     			? "sidebar--compact"
     			: "") + " svelte-23v8pd")) {
     				attr(div3, "class", div3_class_value);
@@ -18356,12 +18445,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance$8($$self, $$props, $$invalidate) {
-    	let $state;
+    	let disabled;
+    	let list;
     	let $items;
+    	let $state;
     	let $settings;
-    	component_subscribe($$self, state, $$value => $$invalidate(2, $state = $$value));
-    	component_subscribe($$self, items, $$value => $$invalidate(16, $items = $$value));
-    	component_subscribe($$self, settings, $$value => $$invalidate(4, $settings = $$value));
+    	component_subscribe($$self, items, $$value => $$invalidate(10, $items = $$value));
+    	component_subscribe($$self, state, $$value => $$invalidate(1, $state = $$value));
+    	component_subscribe($$self, settings, $$value => $$invalidate(2, $settings = $$value));
 
     	async function newItem(type, content, remote) {
     		// warn if there are unsaved changes or another temp script
@@ -18522,8 +18613,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	function sidebarScroll() {
     		if (sidebarTimeout) clearTimeout(sidebarTimeout);
-    		$$invalidate(0, showCount = false);
-    		sidebarTimeout = setTimeout(() => $$invalidate(0, showCount = true), 750);
+    		$$invalidate(3, showCount = false);
+    		sidebarTimeout = setTimeout(() => $$invalidate(3, showCount = true), 750);
     	}
 
     	const click_handler = () => state.add("settings");
@@ -18531,20 +18622,18 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	const click_handler_2 = () => newItem("js");
     	const func = (item, e) => toggleItem(e, item);
     	const click_handler_3 = item => activate(item);
-    	let disabled;
-    	let list;
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$state*/ 4) {
+    		if ($$self.$$.dirty & /*$state*/ 2) {
     			// disable buttons accordingly
-    			 $$invalidate(1, disabled = !$state.includes("ready"));
+    			 $$invalidate(4, disabled = !$state.includes("ready"));
     		}
 
-    		if ($$self.$$.dirty & /*$items, $settings*/ 65552) {
-    			 $$invalidate(3, list = sortBy($items, $settings.sortOrder).filter(a => a.visible !== false));
+    		if ($$self.$$.dirty & /*$items, $settings*/ 1028) {
+    			 $$invalidate(0, list = sortBy($items, $settings.sortOrder).filter(a => a.visible !== false));
     		}
 
-    		if ($$self.$$.dirty & /*list*/ 8) {
+    		if ($$self.$$.dirty & /*list*/ 1) {
     			// always scroll to an active item
     			// when sorting is changed, a save occurs, etc... will scroll to active item
     			 if (list.find(a => a.active)) {
@@ -18555,16 +18644,17 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
 
     	return [
+    		list,
+    		$state,
+    		$settings,
     		showCount,
     		disabled,
-    		$state,
-    		list,
-    		$settings,
     		newItem,
     		activate,
     		newRemote,
     		toggleItem,
     		sidebarScroll,
+    		$items,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
@@ -18586,7 +18676,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     var iconSync = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 24"><path d="M9 3.273V0L4.75 4.364 9 8.727V5.455c3.517 0 6.375 2.934 6.375 6.545a6.54 6.54 0 01-.744 3.055l1.551 1.592A8.821 8.821 0 0017.5 12c0-4.822-3.804-8.727-8.5-8.727zm0 15.272c-3.517 0-6.375-2.934-6.375-6.545 0-1.102.266-2.15.744-3.055L1.817 7.353A8.821 8.821 0 00.5 12c0 4.822 3.804 8.727 8.5 8.727V24l4.25-4.364L9 15.273v3.272z"/></svg>';
 
-    /* src/page/Components/Editor/Editor.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Editor/Editor.svelte generated by Svelte v3.49.0 */
 
     function create_if_block_6(ctx) {
     	let loader;
@@ -18643,14 +18733,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return {
     		c() {
     			t0 = text("Last modified: ");
-    			t1 = text(/*lastModified*/ ctx[3]);
+    			t1 = text(/*lastModified*/ ctx[7]);
     		},
     		m(target, anchor) {
     			insert(target, t0, anchor);
     			insert(target, t1, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*lastModified*/ 8) set_data(t1, /*lastModified*/ ctx[3]);
+    			if (dirty & /*lastModified*/ 128) set_data(t1, /*lastModified*/ ctx[7]);
     		},
     		d(detaching) {
     			if (detaching) detach(t0);
@@ -18691,7 +18781,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			t1 = text("remotely fetched");
     			t2 = text(", check carefully before saving!");
     			attr(span, "class", "info svelte-5bq9yj");
-    			attr(span, "title", /*remote*/ ctx[4]);
+    			attr(span, "title", /*remote*/ ctx[8]);
     		},
     		m(target, anchor) {
     			insert(target, t0, anchor);
@@ -18700,8 +18790,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			insert(target, t2, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*remote*/ 16) {
-    				attr(span, "title", /*remote*/ ctx[4]);
+    			if (dirty & /*remote*/ 256) {
+    				attr(span, "title", /*remote*/ ctx[8]);
     			}
     		},
     		d(detaching) {
@@ -18783,7 +18873,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     function create_fragment$a(ctx) {
     	let div9;
-    	let show_if_3 = /*$state*/ ctx[10].includes("editor-loading") || /*$state*/ ctx[10].includes("fetching");
+    	let show_if_3 = /*$state*/ ctx[3].includes("editor-loading") || /*$state*/ ctx[3].includes("fetching");
     	let t0;
     	let t1;
     	let div6;
@@ -18822,18 +18912,21 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let mounted;
     	let dispose;
     	let if_block0 = show_if_3 && create_if_block_6();
-    	let if_block1 = !/*activeItem*/ ctx[11] && create_if_block_5();
-    	tag = new Tag({ props: { type: /*type*/ ctx[2] } });
+    	let if_block1 = !/*activeItem*/ ctx[2] && create_if_block_5();
+    	tag = new Tag({ props: { type: /*type*/ ctx[6] } });
 
     	function select_block_type(ctx, dirty) {
-    		if (show_if == null || dirty & /*$state*/ 1024) show_if = !!/*$state*/ ctx[10].includes("saving");
+    		if (dirty & /*$state*/ 8) show_if = null;
+    		if (dirty & /*$state*/ 8) show_if_1 = null;
+    		if (dirty & /*$state*/ 8) show_if_2 = null;
+    		if (show_if == null) show_if = !!/*$state*/ ctx[3].includes("saving");
     		if (show_if) return create_if_block$6;
-    		if (show_if_1 == null || dirty & /*$state*/ 1024) show_if_1 = !!/*$state*/ ctx[10].includes("trashing");
+    		if (show_if_1 == null) show_if_1 = !!/*$state*/ ctx[3].includes("trashing");
     		if (show_if_1) return create_if_block_1$1;
-    		if (show_if_2 == null || dirty & /*$state*/ 1024) show_if_2 = !!/*$state*/ ctx[10].includes("updating");
+    		if (show_if_2 == null) show_if_2 = !!/*$state*/ ctx[3].includes("updating");
     		if (show_if_2) return create_if_block_2;
-    		if (/*remote*/ ctx[4]) return create_if_block_3;
-    		if (/*temp*/ ctx[5]) return create_if_block_4;
+    		if (/*remote*/ ctx[8]) return create_if_block_3;
+    		if (/*temp*/ ctx[0]) return create_if_block_4;
     		return create_else_block;
     	}
 
@@ -18844,7 +18937,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			props: {
     				icon: iconSync,
     				title: "Check for updates",
-    				disabled: /*disabled*/ ctx[9] || !/*canUpdate*/ ctx[0]
+    				disabled: /*disabled*/ ctx[11] || !/*canUpdate*/ ctx[4]
     			}
     		});
 
@@ -18854,7 +18947,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			props: {
     				icon: iconDownload,
     				title: "Download file",
-    				disabled: /*disabled*/ ctx[9]
+    				disabled: /*disabled*/ ctx[11]
     			}
     		});
 
@@ -18864,14 +18957,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			props: {
     				icon: iconTrash,
     				title: "Trash file",
-    				disabled: /*disabled*/ ctx[9]
+    				disabled: /*disabled*/ ctx[11]
     			}
     		});
 
     	iconbutton2.$on("click", /*trash*/ ctx[17]);
     	let codemirror_1_props = { saveHandler: /*save*/ ctx[12] };
     	codemirror_1 = new CodeMirror_1({ props: codemirror_1_props });
-    	/*codemirror_1_binding*/ ctx[19](codemirror_1);
+    	/*codemirror_1_binding*/ ctx[20](codemirror_1);
     	codemirror_1.$on("message", /*handleMessage*/ ctx[18]);
 
     	return {
@@ -18887,7 +18980,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			create_component(tag.$$.fragment);
     			t2 = space();
     			div0 = element("div");
-    			t3 = text(/*name*/ ctx[1]);
+    			t3 = text(/*name*/ ctx[5]);
     			t4 = space();
     			div3 = element("div");
     			div2 = element("div");
@@ -18916,9 +19009,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			attr(div5, "class", "editor__header__buttons svelte-5bq9yj");
     			attr(div6, "class", "editor__header svelte-5bq9yj");
     			attr(div7, "class", "editor__code svelte-5bq9yj");
-    			button0.disabled = button0_disabled_value = /*disabled*/ ctx[9] || /*discardDisabled*/ ctx[7];
+    			button0.disabled = button0_disabled_value = /*disabled*/ ctx[11] || /*discardDisabled*/ ctx[9];
     			attr(button0, "class", "svelte-5bq9yj");
-    			button1.disabled = button1_disabled_value = /*disabled*/ ctx[9] || /*saveDisabled*/ ctx[8];
+    			button1.disabled = button1_disabled_value = /*disabled*/ ctx[11] || /*saveDisabled*/ ctx[10];
     			attr(button1, "class", "svelte-5bq9yj");
     			attr(div8, "class", "editor__footer svelte-5bq9yj");
     			attr(div9, "class", "editor svelte-5bq9yj");
@@ -18969,11 +19062,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*$state*/ 1024) show_if_3 = /*$state*/ ctx[10].includes("editor-loading") || /*$state*/ ctx[10].includes("fetching");
+    			if (dirty & /*$state*/ 8) show_if_3 = /*$state*/ ctx[3].includes("editor-loading") || /*$state*/ ctx[3].includes("fetching");
 
     			if (show_if_3) {
     				if (if_block0) {
-    					if (dirty & /*$state*/ 1024) {
+    					if (dirty & /*$state*/ 8) {
     						transition_in(if_block0, 1);
     					}
     				} else {
@@ -18992,7 +19085,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				check_outros();
     			}
 
-    			if (!/*activeItem*/ ctx[11]) {
+    			if (!/*activeItem*/ ctx[2]) {
     				if (if_block1) ; else {
     					if_block1 = create_if_block_5();
     					if_block1.c();
@@ -19004,9 +19097,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
 
     			const tag_changes = {};
-    			if (dirty & /*type*/ 4) tag_changes.type = /*type*/ ctx[2];
+    			if (dirty & /*type*/ 64) tag_changes.type = /*type*/ ctx[6];
     			tag.$set(tag_changes);
-    			if (!current || dirty & /*name*/ 2) set_data(t3, /*name*/ ctx[1]);
+    			if (!current || dirty & /*name*/ 32) set_data(t3, /*name*/ ctx[5]);
 
     			if (current_block_type === (current_block_type = select_block_type(ctx, dirty)) && if_block2) {
     				if_block2.p(ctx, dirty);
@@ -19021,22 +19114,22 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
 
     			const iconbutton0_changes = {};
-    			if (dirty & /*disabled, canUpdate*/ 513) iconbutton0_changes.disabled = /*disabled*/ ctx[9] || !/*canUpdate*/ ctx[0];
+    			if (dirty & /*disabled, canUpdate*/ 2064) iconbutton0_changes.disabled = /*disabled*/ ctx[11] || !/*canUpdate*/ ctx[4];
     			iconbutton0.$set(iconbutton0_changes);
     			const iconbutton1_changes = {};
-    			if (dirty & /*disabled*/ 512) iconbutton1_changes.disabled = /*disabled*/ ctx[9];
+    			if (dirty & /*disabled*/ 2048) iconbutton1_changes.disabled = /*disabled*/ ctx[11];
     			iconbutton1.$set(iconbutton1_changes);
     			const iconbutton2_changes = {};
-    			if (dirty & /*disabled*/ 512) iconbutton2_changes.disabled = /*disabled*/ ctx[9];
+    			if (dirty & /*disabled*/ 2048) iconbutton2_changes.disabled = /*disabled*/ ctx[11];
     			iconbutton2.$set(iconbutton2_changes);
     			const codemirror_1_changes = {};
     			codemirror_1.$set(codemirror_1_changes);
 
-    			if (!current || dirty & /*disabled, discardDisabled*/ 640 && button0_disabled_value !== (button0_disabled_value = /*disabled*/ ctx[9] || /*discardDisabled*/ ctx[7])) {
+    			if (!current || dirty & /*disabled, discardDisabled*/ 2560 && button0_disabled_value !== (button0_disabled_value = /*disabled*/ ctx[11] || /*discardDisabled*/ ctx[9])) {
     				button0.disabled = button0_disabled_value;
     			}
 
-    			if (!current || dirty & /*disabled, saveDisabled*/ 768 && button1_disabled_value !== (button1_disabled_value = /*disabled*/ ctx[9] || /*saveDisabled*/ ctx[8])) {
+    			if (!current || dirty & /*disabled, saveDisabled*/ 3072 && button1_disabled_value !== (button1_disabled_value = /*disabled*/ ctx[11] || /*saveDisabled*/ ctx[10])) {
     				button1.disabled = button1_disabled_value;
     			}
     		},
@@ -19068,7 +19161,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			destroy_component(iconbutton0);
     			destroy_component(iconbutton1);
     			destroy_component(iconbutton2);
-    			/*codemirror_1_binding*/ ctx[19](null);
+    			/*codemirror_1_binding*/ ctx[20](null);
     			destroy_component(codemirror_1);
     			mounted = false;
     			run_all(dispose);
@@ -19077,10 +19170,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance$9($$self, $$props, $$invalidate) {
+    	let disabled;
+    	let activeItem;
     	let $state;
     	let $items;
-    	component_subscribe($$self, state, $$value => $$invalidate(10, $state = $$value));
-    	component_subscribe($$self, items, $$value => $$invalidate(20, $items = $$value));
+    	component_subscribe($$self, state, $$value => $$invalidate(3, $state = $$value));
+    	component_subscribe($$self, items, $$value => $$invalidate(19, $items = $$value));
     	let canUpdate, name, type, lastModified, remote, temp;
 
     	// binds to codemirror component, allows accessing of component's exported functions
@@ -19210,8 +19305,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	function toggleButtons(discardButtonDisabled, saveButtonDisabled) {
-    		$$invalidate(7, discardDisabled = discardButtonDisabled);
-    		$$invalidate(8, saveDisabled = saveButtonDisabled);
+    		$$invalidate(9, discardDisabled = discardButtonDisabled);
+    		$$invalidate(10, saveDisabled = saveButtonDisabled);
     	}
 
     	function handleMessage(e) {
@@ -19226,36 +19321,33 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	function codemirror_1_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			codemirror = $$value;
-    			$$invalidate(6, codemirror);
+    			$$invalidate(1, codemirror);
     		});
     	}
 
-    	let disabled;
-    	let activeItem;
-
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$state*/ 1024) {
-    			 $$invalidate(9, disabled = !$state.includes("ready"));
+    		if ($$self.$$.dirty & /*$state*/ 8) {
+    			 $$invalidate(11, disabled = !$state.includes("ready"));
     		}
 
-    		if ($$self.$$.dirty & /*$items*/ 1048576) {
-    			 $$invalidate(11, activeItem = $items.find(a => a.active));
+    		if ($$self.$$.dirty & /*$items*/ 524288) {
+    			 $$invalidate(2, activeItem = $items.find(a => a.active));
     		}
 
-    		if ($$self.$$.dirty & /*activeItem, codemirror, temp*/ 2144) {
+    		if ($$self.$$.dirty & /*activeItem, codemirror, temp*/ 7) {
     			 if (activeItem) {
     				if (!cmGetInstance()) codemirror.init();
 
     				// when there active item present, load content into editor
-    				$$invalidate(3, lastModified = formatDate(activeItem.lastModified));
+    				$$invalidate(7, lastModified = formatDate(activeItem.lastModified));
 
-    				$$invalidate(1, name = activeItem.name);
-    				$$invalidate(4, remote = activeItem.remote);
-    				$$invalidate(5, temp = activeItem.temp);
-    				$$invalidate(2, type = activeItem.request ? "request" : activeItem.type);
-    				$$invalidate(0, canUpdate = activeItem.canUpdate);
+    				$$invalidate(5, name = activeItem.name);
+    				$$invalidate(8, remote = activeItem.remote);
+    				$$invalidate(0, temp = activeItem.temp);
+    				$$invalidate(6, type = activeItem.request ? "request" : activeItem.type);
+    				$$invalidate(4, canUpdate = activeItem.canUpdate);
 
     				// on load if temp item, disabled discard and enable save, if not disable both
     				if (temp) {
@@ -19268,18 +19360,18 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
 
     	return [
+    		temp,
+    		codemirror,
+    		activeItem,
+    		$state,
     		canUpdate,
     		name,
     		type,
     		lastModified,
     		remote,
-    		temp,
-    		codemirror,
     		discardDisabled,
     		saveDisabled,
     		disabled,
-    		$state,
-    		activeItem,
     		save,
     		discard,
     		download,
@@ -19287,6 +19379,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		abort,
     		trash,
     		handleMessage,
+    		$items,
     		codemirror_1_binding
     	];
     }
@@ -19300,7 +19393,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     var iconEdit = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M14.604 14.052l1.68-2.904a.424.424 0 00-.096-.54l-1.776-1.392c.036-.264.06-.54.06-.816 0-.276-.024-.552-.06-.828l1.776-1.392a.424.424 0 00.096-.54l-1.68-2.904a.425.425 0 00-.516-.18L12 3.396a6.17 6.17 0 00-1.416-.828l-.312-2.22A.437.437 0 009.852 0h-3.36a.436.436 0 00-.42.36L5.76 2.58a6.436 6.436 0 00-1.416.828l-2.088-.84a.425.425 0 00-.516.18L.06 5.652a.424.424 0 00.096.54l1.776 1.392c-.036.264-.06.54-.06.816 0 .276.024.552.06.828L.156 10.62a.424.424 0 00-.096.54l1.68 2.904c.108.18.324.252.516.18l2.088-.84c.432.336.9.612 1.416.828l.312 2.22a.437.437 0 00.42.348h3.36a.436.436 0 00.42-.36l.312-2.22A6.436 6.436 0 0012 13.392l2.088.84c.192.072.408 0 .516-.18zM8.172 10.8c-1.32 0-2.4-1.08-2.4-2.4 0-1.32 1.08-2.4 2.4-2.4 1.32 0 2.4 1.08 2.4 2.4 0 1.32-1.08 2.4-2.4 2.4zM23.904 20.004l-1.152-.888c.024-.168.048-.348.048-.528 0-.18-.012-.36-.048-.528l1.14-.888a.274.274 0 00.06-.348l-1.08-1.86c-.06-.12-.204-.156-.336-.12l-1.332.54a3.621 3.621 0 00-.912-.528l-.204-1.416a.259.259 0 00-.252-.24h-2.148c-.132 0-.252.096-.264.228l-.204 1.416a4.303 4.303 0 00-.912.528l-1.332-.54a.276.276 0 00-.336.12l-1.08 1.86c-.06.12-.048.264.06.348l1.14.888a3.774 3.774 0 000 1.056l-1.14.888a.274.274 0 00-.06.348l1.08 1.86c.06.12.204.156.336.12l1.332-.54c.276.216.576.396.912.528l.204 1.416a.27.27 0 00.264.228h2.148c.132 0 .252-.096.264-.228l.204-1.416c.324-.144.636-.312.9-.528l1.344.54c.12.048.264 0 .336-.12l1.08-1.86c.072-.108.036-.252-.06-.336zm-5.148.192a1.62 1.62 0 11.002-3.242 1.62 1.62 0 01-.002 3.242z"/></g></svg>';
 
-    /* src/page/Components/Settings.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Settings.svelte generated by Svelte v3.49.0 */
 
     function create_if_block$7(ctx) {
     	let html_tag;
@@ -19308,8 +19401,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	return {
     		c() {
+    			html_tag = new HtmlTag(false);
     			html_anchor = empty();
-    			html_tag = new HtmlTag(html_anchor);
+    			html_tag.a = html_anchor;
     		},
     		m(target, anchor) {
     			html_tag.m(iconLoader, target, anchor);
@@ -19381,7 +19475,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let div21;
     	let t32;
     	let div22;
-    	let t33_value = /*$settings*/ ctx[3].saveLocation + "";
+    	let t33_value = /*$settings*/ ctx[0].saveLocation + "";
     	let t33;
     	let t34;
     	let iconbutton1;
@@ -19399,10 +19493,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let t41;
     	let p;
     	let t42;
-    	let t43_value = /*$settings*/ ctx[3].version + "";
+    	let t43_value = /*$settings*/ ctx[0].version + "";
     	let t43;
     	let t44;
-    	let t45_value = /*$settings*/ ctx[3].build + "";
+    	let t45_value = /*$settings*/ ctx[0].build + "";
     	let t45;
     	let t46;
     	let br0;
@@ -19428,48 +19522,48 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	toggle0 = new Toggle({
     			props: {
-    				checked: /*$settings*/ ctx[3].autoCloseBrackets
+    				checked: /*$settings*/ ctx[0].autoCloseBrackets
     			}
     		});
 
     	toggle0.$on("click", /*click_handler_1*/ ctx[8]);
 
     	toggle1 = new Toggle({
-    			props: { checked: /*$settings*/ ctx[3].autoHint }
+    			props: { checked: /*$settings*/ ctx[0].autoHint }
     		});
 
     	toggle1.$on("click", /*click_handler_2*/ ctx[9]);
 
     	toggle2 = new Toggle({
     			props: {
-    				checked: !/*$settings*/ ctx[3].descriptions
+    				checked: !/*$settings*/ ctx[0].descriptions
     			}
     		});
 
     	toggle2.$on("click", /*click_handler_3*/ ctx[10]);
 
     	toggle3 = new Toggle({
-    			props: { checked: /*$settings*/ ctx[3].lint }
+    			props: { checked: /*$settings*/ ctx[0].lint }
     		});
 
     	toggle3.$on("click", /*click_handler_4*/ ctx[11]);
 
     	toggle4 = new Toggle({
     			props: {
-    				checked: /*$settings*/ ctx[3].showInvisibles
+    				checked: /*$settings*/ ctx[0].showInvisibles
     			}
     		});
 
     	toggle4.$on("click", /*click_handler_5*/ ctx[12]);
 
     	toggle5 = new Toggle({
-    			props: { checked: /*$settings*/ ctx[3].active }
+    			props: { checked: /*$settings*/ ctx[0].active }
     		});
 
     	toggle5.$on("click", /*click_handler_6*/ ctx[15]);
 
     	toggle6 = new Toggle({
-    			props: { checked: /*$settings*/ ctx[3].showCount }
+    			props: { checked: /*$settings*/ ctx[0].showCount }
     		});
 
     	toggle6.$on("click", /*click_handler_7*/ ctx[16]);
@@ -19482,7 +19576,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		});
 
     	iconbutton1.$on("click", changeSaveLocation);
-    	let if_block = /*blacklistSaving*/ ctx[1] && create_if_block$7();
+    	let if_block = /*blacklistSaving*/ ctx[2] && create_if_block$7();
 
     	return {
     		c() {
@@ -19610,12 +19704,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			option0.value = option0.__value;
     			option1.__value = "4";
     			option1.value = option1.__value;
-    			if (/*$settings*/ ctx[3].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
+    			if (/*$settings*/ ctx[0].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
     			attr(div13, "class", "modal__row svelte-9f6q4c");
     			attr(div14, "class", "modal__section");
     			attr(div16, "class", "modal__title svelte-9f6q4c");
     			attr(div17, "class", "svelte-9f6q4c");
-    			toggle_class(div17, "red", !/*$settings*/ ctx[3].active);
+    			toggle_class(div17, "red", !/*$settings*/ ctx[0].active);
     			attr(div18, "class", "modal__row svelte-9f6q4c");
     			attr(div19, "class", "svelte-9f6q4c");
     			attr(div20, "class", "modal__row svelte-9f6q4c");
@@ -19625,8 +19719,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			attr(div24, "class", "blacklist svelte-9f6q4c");
     			attr(textarea, "placeholder", "Comma separated list of @match patterns");
     			attr(textarea, "spellcheck", "false");
-    			textarea.value = /*blacklisted*/ ctx[2];
-    			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[1];
+    			textarea.value = /*blacklisted*/ ctx[3];
+    			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2];
     			attr(textarea, "class", "svelte-9f6q4c");
     			attr(div25, "class", "modal__row modal__row--wrap svelte-9f6q4c");
     			attr(div26, "class", "modal__section");
@@ -19679,7 +19773,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			append(div13, select);
     			append(select, option0);
     			append(select, option1);
-    			select_option(select, /*$settings*/ ctx[3].tabSize);
+    			select_option(select, /*$settings*/ ctx[0].tabSize);
     			append(div29, t22);
     			append(div29, div26);
     			append(div26, div16);
@@ -19747,38 +19841,38 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		},
     		p(ctx, [dirty]) {
     			const toggle0_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle0_changes.checked = /*$settings*/ ctx[3].autoCloseBrackets;
+    			if (dirty & /*$settings*/ 1) toggle0_changes.checked = /*$settings*/ ctx[0].autoCloseBrackets;
     			toggle0.$set(toggle0_changes);
     			const toggle1_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle1_changes.checked = /*$settings*/ ctx[3].autoHint;
+    			if (dirty & /*$settings*/ 1) toggle1_changes.checked = /*$settings*/ ctx[0].autoHint;
     			toggle1.$set(toggle1_changes);
     			const toggle2_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle2_changes.checked = !/*$settings*/ ctx[3].descriptions;
+    			if (dirty & /*$settings*/ 1) toggle2_changes.checked = !/*$settings*/ ctx[0].descriptions;
     			toggle2.$set(toggle2_changes);
     			const toggle3_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle3_changes.checked = /*$settings*/ ctx[3].lint;
+    			if (dirty & /*$settings*/ 1) toggle3_changes.checked = /*$settings*/ ctx[0].lint;
     			toggle3.$set(toggle3_changes);
     			const toggle4_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle4_changes.checked = /*$settings*/ ctx[3].showInvisibles;
+    			if (dirty & /*$settings*/ 1) toggle4_changes.checked = /*$settings*/ ctx[0].showInvisibles;
     			toggle4.$set(toggle4_changes);
 
-    			if (dirty & /*$settings*/ 8) {
-    				select_option(select, /*$settings*/ ctx[3].tabSize);
+    			if (dirty & /*$settings*/ 1) {
+    				select_option(select, /*$settings*/ ctx[0].tabSize);
     			}
 
-    			if (dirty & /*$settings*/ 8) {
-    				toggle_class(div17, "red", !/*$settings*/ ctx[3].active);
+    			if (dirty & /*$settings*/ 1) {
+    				toggle_class(div17, "red", !/*$settings*/ ctx[0].active);
     			}
 
     			const toggle5_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle5_changes.checked = /*$settings*/ ctx[3].active;
+    			if (dirty & /*$settings*/ 1) toggle5_changes.checked = /*$settings*/ ctx[0].active;
     			toggle5.$set(toggle5_changes);
     			const toggle6_changes = {};
-    			if (dirty & /*$settings*/ 8) toggle6_changes.checked = /*$settings*/ ctx[3].showCount;
+    			if (dirty & /*$settings*/ 1) toggle6_changes.checked = /*$settings*/ ctx[0].showCount;
     			toggle6.$set(toggle6_changes);
-    			if ((!current || dirty & /*$settings*/ 8) && t33_value !== (t33_value = /*$settings*/ ctx[3].saveLocation + "")) set_data(t33, t33_value);
+    			if ((!current || dirty & /*$settings*/ 1) && t33_value !== (t33_value = /*$settings*/ ctx[0].saveLocation + "")) set_data(t33, t33_value);
 
-    			if (/*blacklistSaving*/ ctx[1]) {
+    			if (/*blacklistSaving*/ ctx[2]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -19791,16 +19885,16 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				if_block = null;
     			}
 
-    			if (!current || dirty & /*blacklisted*/ 4) {
-    				textarea.value = /*blacklisted*/ ctx[2];
+    			if (!current || dirty & /*blacklisted*/ 8) {
+    				textarea.value = /*blacklisted*/ ctx[3];
     			}
 
-    			if (!current || dirty & /*$state, blacklistSaving*/ 18 && textarea_disabled_value !== (textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[1])) {
+    			if (!current || dirty & /*$state, blacklistSaving*/ 20 && textarea_disabled_value !== (textarea_disabled_value = /*$state*/ ctx[4].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2])) {
     				textarea.disabled = textarea_disabled_value;
     			}
 
-    			if ((!current || dirty & /*$settings*/ 8) && t43_value !== (t43_value = /*$settings*/ ctx[3].version + "")) set_data(t43, t43_value);
-    			if ((!current || dirty & /*$settings*/ 8) && t45_value !== (t45_value = /*$settings*/ ctx[3].build + "")) set_data(t45, t45_value);
+    			if ((!current || dirty & /*$settings*/ 1) && t43_value !== (t43_value = /*$settings*/ ctx[0].version + "")) set_data(t43, t43_value);
+    			if ((!current || dirty & /*$settings*/ 1) && t45_value !== (t45_value = /*$settings*/ ctx[0].build + "")) set_data(t45, t45_value);
     		},
     		i(local) {
     			if (current) return;
@@ -19816,13 +19910,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			add_render_callback(() => {
     				if (div29_outro) div29_outro.end(1);
-    				if (!div29_intro) div29_intro = create_in_transition(div29, fly, { y: 50, duration: 150, delay: 75 });
+    				div29_intro = create_in_transition(div29, fly, { y: 50, duration: 150, delay: 75 });
     				div29_intro.start();
     			});
 
     			add_render_callback(() => {
     				if (div30_outro) div30_outro.end(1);
-    				if (!div30_intro) div30_intro = create_in_transition(div30, fade, { duration: 150 });
+    				div30_intro = create_in_transition(div30, fade, { duration: 150 });
     				div30_intro.start();
     			});
 
@@ -19885,9 +19979,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function instance$a($$self, $$props, $$invalidate) {
+    	let blacklisted;
     	let $settings;
     	let $state;
-    	component_subscribe($$self, settings, $$value => $$invalidate(3, $settings = $$value));
+    	component_subscribe($$self, settings, $$value => $$invalidate(0, $settings = $$value));
     	component_subscribe($$self, state, $$value => $$invalidate(4, $state = $$value));
     	let blacklist;
 
@@ -19905,9 +20000,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			// when blacklistSaving, visual indication of saving occurs on element
     			// the visual save indication is mostly ux only indicates a setting save was attempted
     			// remove visual indication arbitrarily
-    			$$invalidate(1, blacklistSaving = true);
+    			$$invalidate(2, blacklistSaving = true);
 
-    			setTimeout(() => $$invalidate(1, blacklistSaving = false), 1000);
+    			setTimeout(() => $$invalidate(2, blacklistSaving = false), 1000);
     		}
     	}
 
@@ -19933,27 +20028,26 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	const click_handler_7 = () => update("showCount", !$settings.showCount);
 
     	function textarea_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			blacklist = $$value;
-    			$$invalidate(0, blacklist);
+    			$$invalidate(1, blacklist);
     		});
     	}
 
     	const click_handler_8 = () => state.remove("settings");
-    	let blacklisted;
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$settings*/ 8) {
+    		if ($$self.$$.dirty & /*$settings*/ 1) {
     			// the saved blacklisted domain patterns
-    			 $$invalidate(2, blacklisted = $settings.blacklist.join(", "));
+    			 $$invalidate(3, blacklisted = $settings.blacklist.join(", "));
     		}
     	};
 
     	return [
+    		$settings,
     		blacklist,
     		blacklistSaving,
     		blacklisted,
-    		$settings,
     		$state,
     		saveBlacklist,
     		update,
@@ -19979,58 +20073,184 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
     }
 
+    function is_date(obj) {
+        return Object.prototype.toString.call(obj) === '[object Date]';
+    }
+
+    function get_interpolator(a, b) {
+        if (a === b || a !== a)
+            return () => a;
+        const type = typeof a;
+        if (type !== typeof b || Array.isArray(a) !== Array.isArray(b)) {
+            throw new Error('Cannot interpolate values of different type');
+        }
+        if (Array.isArray(a)) {
+            const arr = b.map((bi, i) => {
+                return get_interpolator(a[i], bi);
+            });
+            return t => arr.map(fn => fn(t));
+        }
+        if (type === 'object') {
+            if (!a || !b)
+                throw new Error('Object cannot be null');
+            if (is_date(a) && is_date(b)) {
+                a = a.getTime();
+                b = b.getTime();
+                const delta = b - a;
+                return t => new Date(a + t * delta);
+            }
+            const keys = Object.keys(b);
+            const interpolators = {};
+            keys.forEach(key => {
+                interpolators[key] = get_interpolator(a[key], b[key]);
+            });
+            return t => {
+                const result = {};
+                keys.forEach(key => {
+                    result[key] = interpolators[key](t);
+                });
+                return result;
+            };
+        }
+        if (type === 'number') {
+            const delta = b - a;
+            return t => a + t * delta;
+        }
+        throw new Error(`Cannot interpolate ${type} values`);
+    }
+    function tweened(value, defaults = {}) {
+        const store = writable(value);
+        let task;
+        let target_value = value;
+        function set(new_value, opts) {
+            if (value == null) {
+                store.set(value = new_value);
+                return Promise.resolve();
+            }
+            target_value = new_value;
+            let previous_task = task;
+            let started = false;
+            let { delay = 0, duration = 400, easing = identity, interpolate = get_interpolator } = assign(assign({}, defaults), opts);
+            if (duration === 0) {
+                if (previous_task) {
+                    previous_task.abort();
+                    previous_task = null;
+                }
+                store.set(value = target_value);
+                return Promise.resolve();
+            }
+            const start = now() + delay;
+            let fn;
+            task = loop(now => {
+                if (now < start)
+                    return true;
+                if (!started) {
+                    fn = interpolate(value, new_value);
+                    if (typeof duration === 'function')
+                        duration = duration(value, new_value);
+                    started = true;
+                }
+                if (previous_task) {
+                    previous_task.abort();
+                    previous_task = null;
+                }
+                const elapsed = now - start;
+                if (elapsed > duration) {
+                    store.set(value = new_value);
+                    return false;
+                }
+                // @ts-ignore
+                store.set(value = fn(easing(elapsed / duration)));
+                return true;
+            });
+            return task.promise;
+        }
+        return {
+            set,
+            update: (fn, opts) => set(fn(target_value, value), opts),
+            subscribe: store.subscribe
+        };
+    }
+
     var iconError = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.8 15.6h2.4V18h-2.4v-2.4zm0-9.6h2.4v7.2h-2.4V6zm1.188-6C5.364 0 0 5.376 0 12s5.364 12 11.988 12C18.624 24 24 18.624 24 12S18.624 0 11.988 0zM12 21.6A9.597 9.597 0 012.4 12c0-5.304 4.296-9.6 9.6-9.6 5.304 0 9.6 4.296 9.6 9.6 0 5.304-4.296 9.6-9.6 9.6z"/></svg>';
 
     var iconInfo = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.8 6h2.4v2.4h-2.4V6zm0 4.8h2.4V18h-2.4v-7.2zM12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 21.6c-5.292 0-9.6-4.308-9.6-9.6S6.708 2.4 12 2.4s9.6 4.308 9.6 9.6-4.308 9.6-9.6 9.6z"/></svg>';
 
     var iconWarn = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 22"><path d="M12 4.91l8.215 14.38H3.785L12 4.91M12 .5l-12 21h24L12 .5zm1.09 15.474h-2.18v2.21h2.18v-2.21zm0-6.632h-2.18v4.421h2.18v-4.42z"/></svg>';
 
-    /* src/page/Components/Notification.svelte generated by Svelte v3.29.0 */
+    /* src/page/Components/Notification.svelte generated by Svelte v3.49.0 */
 
     function create_fragment$c(ctx) {
     	let li;
-    	let div;
+    	let progress_1;
     	let t0;
-    	let span;
-    	let t1_value = /*item*/ ctx[0].message + "";
+    	let div1;
+    	let div0;
     	let t1;
+    	let span;
+    	let t2_value = /*item*/ ctx[0].message + "";
     	let t2;
+    	let t3;
     	let iconbutton;
     	let li_intro;
     	let li_outro;
     	let current;
+    	let mounted;
+    	let dispose;
     	iconbutton = new IconButton({ props: { icon: iconClose } });
-    	iconbutton.$on("click", /*click_handler*/ ctx[2]);
+    	iconbutton.$on("click", /*click_handler*/ ctx[6]);
 
     	return {
     		c() {
     			li = element("li");
-    			div = element("div");
+    			progress_1 = element("progress");
     			t0 = space();
+    			div1 = element("div");
+    			div0 = element("div");
+    			t1 = space();
     			span = element("span");
-    			t1 = text(t1_value);
-    			t2 = space();
+    			t2 = text(t2_value);
+    			t3 = space();
     			create_component(iconbutton.$$.fragment);
-    			attr(div, "class", "svelte-imlbn0");
-    			attr(span, "class", "svelte-imlbn0");
-    			attr(li, "class", "svelte-imlbn0");
+    			progress_1.value = /*$progress*/ ctx[1];
+    			attr(progress_1, "class", "svelte-nig57l");
+    			attr(div0, "class", "icon svelte-nig57l");
+    			attr(span, "class", "svelte-nig57l");
+    			attr(div1, "class", "svelte-nig57l");
+    			attr(li, "class", "svelte-nig57l");
     			toggle_class(li, "error", /*item*/ ctx[0].type === "error");
     			toggle_class(li, "info", /*item*/ ctx[0].type === "info");
     			toggle_class(li, "warn", /*item*/ ctx[0].type === "warn");
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
-    			append(li, div);
-    			div.innerHTML = /*icon*/ ctx[1];
+    			append(li, progress_1);
     			append(li, t0);
-    			append(li, span);
-    			append(span, t1);
-    			append(li, t2);
-    			mount_component(iconbutton, li, null);
+    			append(li, div1);
+    			append(div1, div0);
+    			div0.innerHTML = /*icon*/ ctx[3];
+    			append(div1, t1);
+    			append(div1, span);
+    			append(span, t2);
+    			append(div1, t3);
+    			mount_component(iconbutton, div1, null);
     			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					listen(li, "mouseover", /*pause*/ ctx[4]),
+    					listen(li, "mouseout", /*resume*/ ctx[5])
+    				];
+
+    				mounted = true;
+    			}
     		},
     		p(ctx, [dirty]) {
-    			if ((!current || dirty & /*item*/ 1) && t1_value !== (t1_value = /*item*/ ctx[0].message + "")) set_data(t1, t1_value);
+    			if (!current || dirty & /*$progress*/ 2) {
+    				progress_1.value = /*$progress*/ ctx[1];
+    			}
+
+    			if ((!current || dirty & /*item*/ 1) && t2_value !== (t2_value = /*item*/ ctx[0].message + "")) set_data(t2, t2_value);
 
     			if (dirty & /*item*/ 1) {
     				toggle_class(li, "error", /*item*/ ctx[0].type === "error");
@@ -20050,7 +20270,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     			add_render_callback(() => {
     				if (li_outro) li_outro.end(1);
-    				if (!li_intro) li_intro = create_in_transition(li, fly, { y: 24, duration: 150 });
+    				li_intro = create_in_transition(li, fly, { y: 24, duration: 150 });
     				li_intro.start();
     			});
 
@@ -20066,26 +20286,52 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			if (detaching) detach(li);
     			destroy_component(iconbutton);
     			if (detaching && li_outro) li_outro.end();
+    			mounted = false;
+    			run_all(dispose);
     		}
     	};
     }
 
+    const timeout = 10000;
+
     function instance$b($$self, $$props, $$invalidate) {
+    	let $progress;
     	let { item } = $$props;
+    	const progress = tweened(1, { duration: timeout, easing: identity });
+    	component_subscribe($$self, progress, value => $$invalidate(1, $progress = value));
 
     	const icon = item.type === "error"
     	? iconError
     	: item.type === "info" ? iconInfo : iconWarn;
 
+    	let previousProgress;
+
+    	function pause() {
+    		previousProgress = $progress;
+    		progress.set($progress, { duration: 0 });
+    	}
+
+    	function resume() {
+    		progress.set(0, { duration: timeout * previousProgress });
+    	}
+
+    	onMount(() => progress.set(0));
+
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("item" in $$props) $$invalidate(0, item = $$props.item);
+    		if ('item' in $$props) $$invalidate(0, item = $$props.item);
     	};
 
-    	return [item, icon, click_handler];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$progress, item*/ 3) {
+    			 if (!$progress) notifications.remove(item.id);
+    		}
+    	};
+
+    	return [item, $progress, progress, icon, pause, resume, click_handler];
     }
 
     class Notification extends SvelteComponent {
@@ -20097,7 +20343,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     var logo = '<svg viewBox="0 0 181 24"><g fill="none"><path d="M11.733 1.545h3.153v11.54c0 1.318-.31 2.438-.929 3.358-.619.92-1.463 1.62-2.53 2.101-1.07.48-2.276.72-3.623.72-1.347 0-2.554-.24-3.622-.72s-1.912-1.18-2.531-2.1c-.62-.921-.93-2.04-.93-3.359V1.545h3.163V13.01c0 .715.174 1.328.524 1.836.35.509.82.898 1.414 1.168.594.27 1.255.405 1.982.405.733 0 1.396-.135 1.99-.405a3.366 3.366 0 0 0 1.415-1.168c.35-.508.524-1.12.524-1.836V1.545zM27.088 9.37l-2.812.307c-.12-.432-.374-.812-.763-1.142-.39-.33-.939-.494-1.65-.494-.641 0-1.18.139-1.614.417-.435.279-.65.64-.644 1.083-.005.38.135.692.422.933.287.241.763.436 1.428.584l2.233.477c2.449.534 3.676 1.716 3.682 3.546 0 .823-.239 1.55-.716 2.177-.478.628-1.137 1.118-1.978 1.47-.84.353-1.806.529-2.897.529-1.608 0-2.898-.338-3.87-1.015-.971-.676-1.554-1.613-1.747-2.812l3.009-.29c.267 1.193 1.133 1.79 2.6 1.79.732 0 1.322-.15 1.768-.447.446-.299.669-.672.669-1.121 0-.733-.588-1.23-1.765-1.492l-2.232-.468c-1.256-.262-2.185-.704-2.787-1.326-.603-.622-.901-1.41-.895-2.365 0-.807.221-1.507.664-2.1.444-.594 1.063-1.055 1.858-1.381.796-.327 1.72-.49 2.77-.49 1.534 0 2.743.328 3.627.984.883.656 1.43 1.538 1.64 2.646zm7.174 9.887c-1.313 0-2.445-.276-3.396-.827a5.533 5.533 0 0 1-2.195-2.335c-.511-1.006-.767-2.193-.767-3.563 0-1.346.256-2.53.767-3.55s1.232-1.815 2.16-2.386c.93-.57 2.019-.856 3.269-.856 1.074 0 2.065.231 2.974.694.91.463 1.638 1.182 2.186 2.156.549.975.823 2.23.823 3.763v.946h-9.12c.018 1.12.329 1.992.934 2.617s1.408.937 2.408.937c.664 0 1.24-.143 1.725-.43a2.409 2.409 0 0 0 1.044-1.257l2.881.324c-.273 1.136-.908 2.048-1.905 2.735-.997.688-2.26 1.032-3.788 1.032zm-3.29-8.037h6.154c-.006-.892-.283-1.628-.831-2.208-.549-.58-1.266-.869-2.152-.869-.92 0-1.668.304-2.242.912a3.324 3.324 0 0 0-.929 2.165zM41.24 19V5.91h2.992v2.18h.136c.239-.76.65-1.346 1.232-1.755.582-.409 1.248-.613 1.998-.613.17 0 .363.007.576.02.213.015.39.036.532.065v2.838a3.396 3.396 0 0 0-.618-.124 6.254 6.254 0 0 0-.813-.055c-.847 0-1.55.266-2.11.797-.56.531-.84 1.211-.84 2.041V19H41.24zm18.416-9.63l-2.813.306c-.12-.432-.374-.812-.763-1.142-.389-.33-.939-.494-1.649-.494-.642 0-1.18.139-1.615.417-.435.279-.65.64-.643 1.083-.006.38.135.692.421.933.287.241.763.436 1.428.584l2.233.477c2.449.534 3.676 1.716 3.682 3.546 0 .823-.239 1.55-.716 2.177-.477.628-1.137 1.118-1.977 1.47-.841.353-1.807.529-2.898.529-1.608 0-2.898-.338-3.87-1.015-.971-.676-1.553-1.613-1.747-2.812l3.009-.29c.267 1.193 1.133 1.79 2.6 1.79.732 0 1.322-.15 1.768-.447.446-.299.669-.672.669-1.121 0-.733-.588-1.23-1.764-1.492l-2.233-.468c-1.256-.262-2.185-.704-2.787-1.326-.603-.622-.9-1.41-.895-2.365 0-.807.221-1.507.665-2.1.443-.594 1.062-1.055 1.858-1.381.795-.327 1.718-.49 2.77-.49 1.534 0 2.742.328 3.626.984.883.656 1.43 1.538 1.64 2.646zm7.088 9.886c-1.301 0-2.42-.287-3.358-.861a5.69 5.69 0 0 1-2.16-2.386c-.503-1.018-.755-2.185-.755-3.503 0-1.336.256-2.51.767-3.524a5.79 5.79 0 0 1 2.17-2.383c.934-.573 2.04-.86 3.319-.86 1.068 0 2.011.194 2.83.583a4.91 4.91 0 0 1 1.96 1.641c.488.705.767 1.531.835 2.48H69.4a2.852 2.852 0 0 0-.847-1.58c-.446-.424-1.041-.636-1.786-.636-.948 0-1.714.374-2.296 1.121-.583.747-.874 1.783-.874 3.107 0 1.335.288 2.383.865 3.144.577.762 1.345 1.142 2.305 1.142.677 0 1.252-.193 1.726-.58.475-.385.777-.93.908-1.635h2.949c-.074.926-.347 1.744-.818 2.454-.472.71-1.114 1.267-1.927 1.67-.812.404-1.767.606-2.863.606zM73.439 19V5.91h2.992v2.18h.136c.239-.76.65-1.346 1.232-1.755.582-.409 1.248-.613 1.998-.613.17 0 .362.007.575.02.213.015.391.036.533.065v2.838a3.396 3.396 0 0 0-.618-.124 6.254 6.254 0 0 0-.814-.055c-.846 0-1.55.266-2.11.797-.559.531-.839 1.211-.839 2.041V19H73.44zm8.069 0V5.91h3.085V19h-3.085zm1.55-14.949c-.494 0-.915-.163-1.265-.49a1.558 1.558 0 0 1-.524-1.18c0-.466.175-.863.524-1.19a1.79 1.79 0 0 1 1.266-.49c.488 0 .907.164 1.257.49.35.327.524.724.524 1.19 0 .46-.175.853-.524 1.18-.35.327-.769.49-1.257.49zm3.254 19.858v-18h3.034v2.165h.179a5.93 5.93 0 0 1 .669-1.019c.287-.36.679-.67 1.176-.929.497-.258 1.13-.387 1.896-.387 1.012 0 1.925.258 2.74.775.816.517 1.464 1.276 1.944 2.276.48 1 .72 2.227.72 3.682 0 1.437-.236 2.659-.708 3.664-.471 1.006-1.113 1.773-1.926 2.302-.812.528-1.733.792-2.761.792-.75 0-1.372-.125-1.867-.375-.494-.25-.89-.552-1.188-.908a5.615 5.615 0 0 1-.695-1.01h-.128v6.972h-3.085zm3.025-11.454c0 1.267.267 2.29.802 3.072.534.781 1.292 1.172 2.275 1.172 1.017 0 1.79-.4 2.318-1.202.529-.801.793-1.815.793-3.042 0-1.222-.261-2.225-.784-3.009-.523-.784-1.298-1.176-2.327-1.176-.994 0-1.756.38-2.284 1.138-.528.758-.793 1.774-.793 3.047zm17.052-6.546v2.386h-2.583v6.768c0 .619.137 1.026.41 1.223.272.196.602.294.988.294.193 0 .37-.015.533-.043.162-.028.285-.054.37-.077l.52 2.412-.23.071a5.867 5.867 0 0 1-1.584.236c-1.16.034-2.133-.25-2.92-.852-.787-.603-1.177-1.52-1.172-2.753V8.295h-1.858V5.91h1.858V2.773h3.085v3.136h2.583zm11.281 3.46l-2.812.307c-.12-.432-.374-.812-.763-1.142-.39-.33-.939-.494-1.65-.494-.641 0-1.18.139-1.614.417-.435.279-.65.64-.644 1.083-.005.38.135.692.422.933.287.241.763.436 1.428.584l2.233.477c2.449.534 3.676 1.716 3.682 3.546 0 .823-.239 1.55-.716 2.177-.478.628-1.137 1.118-1.978 1.47-.84.353-1.806.529-2.897.529-1.608 0-2.898-.338-3.87-1.015-.971-.676-1.554-1.613-1.747-2.812l3.009-.29c.267 1.193 1.133 1.79 2.6 1.79.732 0 1.322-.15 1.768-.447.446-.299.669-.672.669-1.121 0-.733-.588-1.23-1.765-1.492l-2.232-.468c-1.256-.262-2.185-.704-2.787-1.326-.603-.622-.901-1.41-.895-2.365 0-.807.221-1.507.664-2.1.444-.594 1.063-1.055 1.858-1.381.796-.327 1.72-.49 2.77-.49 1.534 0 2.743.328 3.627.984.883.656 1.43 1.538 1.64 2.646z" fill="#FFF"/><path d="M133.207 6.344c-.08-.745-.412-1.324-.997-1.739-.585-.415-1.35-.622-2.292-.622-.989 0-1.762.214-2.319.643-.556.43-.838.973-.843 1.633-.006.482.139.882.434 1.197.296.315.672.567 1.13.754a9.48 9.48 0 0 0 1.402.452l1.636.409c.875.205 1.703.507 2.484.908a5.37 5.37 0 0 1 1.91 1.602c.49.668.737 1.507.737 2.518-.006 1.54-.588 2.786-1.748 3.738-1.159.951-2.784 1.427-4.875 1.427-2.034 0-3.656-.47-4.866-1.41-1.21-.94-1.847-2.277-1.91-4.01h3.112c.062.915.437 1.596 1.125 2.045.687.45 1.525.674 2.514.674 1.034 0 1.872-.23 2.514-.687.642-.457.966-1.058.972-1.802-.006-.676-.294-1.19-.865-1.538-.571-.35-1.328-.644-2.272-.883l-1.985-.511c-1.438-.37-2.573-.93-3.405-1.683-.833-.753-1.249-1.754-1.249-3.004 0-1.029.279-1.93.835-2.702.557-.773 1.32-1.374 2.289-1.803.968-.429 2.064-.643 3.285-.643 1.239 0 2.327.214 3.264.643.938.43 1.672 1.023 2.204 1.782.53.758.805 1.629.822 2.612h-3.043zm8.273 12.92c-1.25 0-2.292-.335-3.127-1.005-.836-.67-1.253-1.648-1.253-2.932 0-.983.237-1.746.711-2.289.475-.542 1.091-.937 1.85-1.184a11.827 11.827 0 0 1 2.407-.507l.805-.093c.743-.09 1.303-.176 1.68-.257.503-.108.754-.383.754-.827v-.05c0-.643-.19-1.14-.57-1.492-.382-.352-.93-.529-1.646-.529-.756 0-1.354.165-1.794.495-.44.33-.737.718-.89 1.167l-2.881-.409c.34-1.193 1.007-2.093 1.998-2.701.992-.608 2.175-.912 3.55-.912.625 0 1.25.073 1.875.221a5.349 5.349 0 0 1 1.717.733c.52.341.938.801 1.253 1.38.316.58.473 1.302.473 2.166V19h-2.966v-1.798h-.102c-.278.55-.731 1.032-1.36 1.444-.627.412-1.455.618-2.484.618zm.802-2.267c.931 0 1.67-.267 2.215-.801.546-.534.819-1.165.819-1.892v-1.543c-.131.108-.371.203-.72.286-.35.082-.72.152-1.113.209l-.997.145c-.687.096-1.261.285-1.722.566-.46.282-.69.718-.69 1.309 0 .568.208.997.622 1.287.415.29.943.434 1.586.434zm14.4-11.088v2.386h-2.718V19h-3.086V8.295h-1.934V5.91h1.934V4.673c0-.88.184-1.613.55-2.199a3.424 3.424 0 0 1 1.479-1.312c.62-.29 1.307-.435 2.062-.435.534 0 1.009.043 1.424.128l.378.083c.229.053.41.102.542.147l-.622 2.387a5.358 5.358 0 0 0-.486-.124 3.18 3.18 0 0 0-.665-.064c-.574 0-.98.138-1.218.413-.24.276-.358.67-.358 1.18V5.91h2.718zm4.293 13.355c-1.25 0-2.292-.335-3.128-1.005-.835-.67-1.252-1.648-1.252-2.932 0-.983.237-1.746.711-2.289.475-.542 1.091-.937 1.85-1.184a11.827 11.827 0 0 1 2.407-.507l.804-.093c.743-.09 1.304-.176 1.68-.257.504-.108.755-.383.755-.827v-.05c0-.643-.19-1.14-.571-1.492-.38-.352-.929-.529-1.645-.529-.756 0-1.354.165-1.794.495-.44.33-.737.718-.89 1.167l-2.881-.409c.34-1.193 1.007-2.093 1.998-2.701.992-.608 2.175-.912 3.55-.912.625 0 1.25.073 1.875.221a5.349 5.349 0 0 1 1.717.733c.52.341.938.801 1.253 1.38.316.58.473 1.302.473 2.166V19h-2.966v-1.798h-.102c-.278.55-.732 1.032-1.36 1.444-.627.412-1.455.618-2.484.618zm.801-2.267c.932 0 1.67-.267 2.216-.801.546-.534.818-1.165.818-1.892v-1.543c-.13.108-.37.203-.72.286-.35.082-.72.152-1.112.209l-.997.145c-.688.096-1.261.285-1.722.566-.46.282-.69.718-.69 1.309 0 .568.207.997.622 1.287.415.29.943.434 1.585.434zm7.77 2.003V5.91h2.992v2.18h.136c.239-.76.65-1.346 1.232-1.755.582-.409 1.249-.613 1.999-.613.17 0 .362.007.575.02.213.015.39.036.532.065v2.838a3.396 3.396 0 0 0-.617-.124 6.254 6.254 0 0 0-.814-.055c-.847 0-1.55.266-2.11.797-.56.531-.84 1.211-.84 2.041V19h-3.084zm8.069 0V5.91h3.085V19h-3.085zm1.551-14.949c-.494 0-.916-.163-1.265-.49a1.558 1.558 0 0 1-.525-1.18c0-.466.175-.863.525-1.19.349-.326.77-.49 1.265-.49.489 0 .908.164 1.257.49.35.327.524.724.524 1.19 0 .46-.174.853-.524 1.18-.35.327-.768.49-1.257.49z" fill="#96C3ED"/></g></svg>';
 
-    /* src/page/App.svelte generated by Svelte v3.29.0 */
+    /* src/page/App.svelte generated by Svelte v3.49.0 */
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -20115,7 +20361,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let current;
 
     	function select_block_type(ctx, dirty) {
-    		if (show_if == null || dirty & /*$state*/ 1) show_if = !!/*$state*/ ctx[0].includes("init-error");
+    		if (dirty & /*$state*/ 1) show_if = null;
+    		if (show_if == null) show_if = !!/*$state*/ ctx[0].includes("init-error");
     		if (show_if) return create_if_block_2$1;
     		return create_else_block$1;
     	}
@@ -20126,9 +20373,10 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return {
     		c() {
     			div = element("div");
+    			html_tag = new HtmlTag(false);
     			t = space();
     			if_block.c();
-    			html_tag = new HtmlTag(t);
+    			html_tag.a = t;
     			attr(div, "class", "initializer svelte-17m9goi");
     		},
     		m(target, anchor) {
@@ -20210,8 +20458,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let notification;
     	let current;
 
-    	function click_handler(...args) {
-    		return /*click_handler*/ ctx[3](/*item*/ ctx[6], ...args);
+    	function click_handler() {
+    		return /*click_handler*/ ctx[4](/*item*/ ctx[6]);
     	}
 
     	notification = new Notification({ props: { item: /*item*/ ctx[6] } });
@@ -20388,7 +20636,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
 
     			if (dirty & /*$notifications, notifications*/ 2) {
-    				const each_value = /*$notifications*/ ctx[1];
+    				each_value = /*$notifications*/ ctx[1];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, ul, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
     				check_outros();
@@ -20474,7 +20722,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	let $log;
     	let $state;
     	let $notifications;
-    	component_subscribe($$self, log, $$value => $$invalidate(4, $log = $$value));
+    	component_subscribe($$self, log, $$value => $$invalidate(3, $log = $$value));
     	component_subscribe($$self, state, $$value => $$invalidate(0, $state = $$value));
     	component_subscribe($$self, notifications, $$value => $$invalidate(1, $notifications = $$value));
     	const logger = [];
@@ -20520,7 +20768,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	const click_handler = item => notifications.remove(item.id);
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$log*/ 16) {
+    		if ($$self.$$.dirty & /*$log*/ 8) {
     			 $log.some(item => {
     				if (!logger.includes(item)) {
     					console[item.type](item.message);
@@ -20530,7 +20778,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		}
     	};
 
-    	return [$state, $notifications, windowResize, click_handler];
+    	return [$state, $notifications, windowResize, $log, click_handler];
     }
 
     class App extends SvelteComponent {

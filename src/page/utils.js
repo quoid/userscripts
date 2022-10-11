@@ -140,21 +140,20 @@ export function parseMetadata(text) {
 }
 
 export const validGrants = new Set([
-    "GM.addStyle",
-    "GM.deleteValue",
-    "GM.getValue",
     "GM.info",
-    "GM.listValues",
-    "GM.openInTab",
-    "GM.setClipboard",
-    "GM.setValue",
-    "GM.xmlHttpRequest",
-    "GM_addStyle",
     "GM_info",
-    "GM_setClipboard",
-    "GM_xmlhttpRequest",
+    "GM.addStyle",
+    "GM.openInTab",
+    "GM.closeTab",
+    "GM.setValue",
+    "GM.getValue",
+    "GM.deleteValue",
+    "GM.listValues",
+    "GM.setClipboard",
     "GM.getTab",
-    "GM.saveTab"
+    "GM.saveTab",
+    "GM_xmlhttpRequest",
+    "GM.xmlHttpRequest"
 ]);
 
 export const validKeys = new Set([

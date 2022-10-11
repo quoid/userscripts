@@ -172,15 +172,11 @@ Userscripts Safari currently supports the following userscript metadata:
 
 ## API
 
-Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. **All methods are accessible without regard to `@grant` when `@inject-into` has the `content` value.**.
+Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. Users must `@grant` these methods in order to use them in a userscript. When using API methods, it's only possible to inject into the content script scope due to security concerns.
 
 - `GM.addStyle(css)`
     - `css: String`
     - on success returns a promise resolved with the css string argument provided
-- `GM_addStyle(css)`
-    - `css: String`
-    - **synchronous**
-    - returns the css string argument provided *without regard to success*
 - `GM.setValue(key, value)`
     - `key: String`, `value: Any`
     - on success returns a promise resolved with an object indicating success
@@ -200,7 +196,7 @@ Userscripts currently supports the following api methods. All methods are asynch
 - `GM.openInTab(url, openInBackground)`
     - `url: String`, `openInBackground: Bool`
     - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened
-- `US.closeTab(tabId)`
+- `GM.closeTab(tabId)`
     - `tabId: Int`
     - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
     - on success returns a promise resolved with an object indicating success
@@ -209,10 +205,6 @@ Userscripts currently supports the following api methods. All methods are asynch
     - `type: String` - **optional** and defaults to `text/plain`
     - [read more here](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData)
     - on success returns a promise resolved with a `Bool` indicating success
-- `GM_setClipboard(data, type)`
-    - "synchronous' version of `GM.setClipboard`
-    - the setClipboard function runs in the background script, requires a promise to send message from content script to background to facilitate writing to the clipboard, thus no real synchronous function available
-    - returns `undefined`
 - `GM.info` && `GM_info`
     - is available without needing to add it to `@grant`
     - an object containing information about the running userscript
@@ -316,7 +308,11 @@ Code level contributions are welcome. *I prefer to collaborate directly with con
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
 
-Please ensure your contributions align with the project's license before committing anything.
+Notes:
+- use [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)
+- under most circumstances, you should fork the most current version of the `develop` branch for your contributions
+
+**Please ensure your contributions align with the project's license before committing anything.**
 
 ## Support
 The quickest and easiest way to support the project is by [leaving a positive review on the App Store](https://apps.apple.com/us/app/userscripts/id1463298887) if you enjoy the extension and want to see future improvements. Seeing these reviews let me know I am doing something right, or wrong, and motivates me to continue working on the project.
