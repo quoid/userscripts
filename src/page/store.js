@@ -76,7 +76,7 @@ export const state = stateStore();
 
 function settingsStore() {
     const {subscribe, update, set} = writable({});
-    const updateSingleSetting = (key, value) => {
+    const updateSingleSetting_old = (key, value) => {
         update(settings => {
             settings[key] = value;
             // blacklist not stored in normal setting object in manifest, so handle differently
@@ -109,7 +109,42 @@ function settingsStore() {
             return settings;
         });
     };
-    return {subscribe, set, updateSingleSetting};
+    const storageKey = "USettings";
+    const updateSingleSetting = (key, value) => {
+        update(settings => {
+            settings[key] = value;
+            browser.storage.local.set({[storageKey]: settings}); // Durable Storage
+            return settings;
+        });
+        // Temporarily keep the old storage method until it is confirmed that all dependencies are removed
+        updateSingleSetting_old(key, value);
+    };
+    const init_import_from_old = async () => {
+        log.add("Import settings data from old storage", "info", false);
+        const initData = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
+        if (initData.error) {
+            console.error(initData.error);
+            return false;
+        }
+        for (const [key, value] of Object.entries(initData)) {
+            if (value === "true" || value === "false") {
+                initData[key] = JSON.parse(value);
+            }
+        }
+        set(initData);
+        browser.storage.local.set({[storageKey]: initData});
+        return true;
+    };
+    const init = async () => {
+        const result = await browser.storage.local.get(storageKey);
+        if (!result[storageKey]) {
+            // This will remain for several versions until the majority of users use the new version
+            return init_import_from_old();
+        }
+        set(result[storageKey]);
+        return true;
+    };
+    return {subscribe, set, init, updateSingleSetting};
 }
 export const settings = settingsStore();
 
