@@ -35,6 +35,13 @@ const settingDefault = {
 
 const settingsDefine = [
     {
+        name: "legacy_imported",
+        type: "boolean",
+        default: false,
+        platforms: ["macos"],
+        group: "Internal"
+    },
+    {
         name: "global_active",
         type: "boolean",
         default: true,
@@ -120,7 +127,7 @@ const settingsDefine = [
     },
     {
         name: "location_path",
-        type: "boolean",
+        type: "string",
         default: true,
         writable: false,
         platforms: ["macos", "ipados", "ios"],
@@ -260,7 +267,7 @@ const settingsDefine = [
 
 const storagePrefix = "US_";
 
-export const settings = settingsDefine.reduce((arr, val) => {
+export const settingsConfig = settingsDefine.reduce((arr, val) => {
     val.key = storagePrefix + val.name.toUpperCase();
     // arr[val.key] = Object.assign({}, settingDefault, val);
     arr[val.key] = new Proxy(val, {
@@ -268,3 +275,73 @@ export const settings = settingsDefine.reduce((arr, val) => {
     });
     return arr;
 }, {});
+
+const settingsKeys = Object.keys(settingsConfig);
+
+export async function get(key) {
+    if (typeof key !== "string") return console.error("key should be a string:", key);
+    key = storagePrefix + key.toUpperCase();
+    if (!settingsKeys.includes(key)) {
+        return console.error("unexpected settings key:", key);
+    }
+    const result = await browser.storage.local.get(key);
+    return result[key] ?? settingsConfig[key].default;
+}
+
+export async function getAll() {
+    const result = await browser.storage.local.get(settingsKeys);
+    const settingsDefault = {};
+    for (const key in settingsConfig) {
+        settingsDefault[key] = settingsConfig[key].default;
+    }
+    return Object.assign({}, settingsDefault, result);
+}
+
+export function update(key, value) {
+    key = storagePrefix + key.toUpperCase();
+    if (!settingsKeys.includes(key)) {
+        return console.error("Unexpected key:", key);
+    }
+    const type = settingsConfig[key].type;
+    if (typeof(value) !== type) {
+        return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
+    }
+    browser.storage.local.set({[key]: value});
+    return true;
+}
+
+// Note: It seems unnecessary to use this method, comment it out for now
+// export function updateAll(settings) {
+//     for (const key in settings) {
+//         if (!settingsKeys.includes(key)) {
+//             return console.error("unexpected settings key:", key);
+//         }
+//         const type = settingsConfig[key].type;
+//         if (typeof(settings.key) !== type) {
+//             return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
+//         }
+//     }
+//     browser.storage.local.set(settings);
+// }
+
+export async function import_legacy_data() {
+    console.info("Import settings data from legacy manifest file");
+    if (await get("legacy_imported")) return console.info("Legacy settings has already imported");
+    const result = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
+    if (result.error) return console.error(result.error);
+    for (const key in settingsConfig) {
+        const legacy = settingsConfig[key].legacy;
+        if (legacy in result) {
+            let value = result[legacy];
+            console.log(`Importing legacy setting: ${legacy} - ${value}`);
+            switch (settingsConfig[key].type) {
+                case "boolean": value = JSON.parse(value); break;
+                case "number": value = Number(value); break;
+            }
+            if (!update(settingsConfig[key].name, value)) return console.error("Import abort");
+        }
+    }
+    update("legacy_imported", true);
+    console.log("Importing legacy settings complete");
+    // Send a message to the Swift layer to safely clean up legacy data
+}
