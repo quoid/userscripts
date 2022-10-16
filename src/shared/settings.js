@@ -1,26 +1,39 @@
-const setting_template = {
-    name: "setting_name",
+export const settingTemplate = {
+    name: "setting_template",
     type: "boolean",
     default: true,
     writable: true,
     platforms: ["macos", "ipados", "ios"],
     langLabel: {
-        en: "engilsh label",
+        en: "Engilsh label",
         zh_hans: "简体中文标签",
         zh_hant: "繁體中文標籤"
     },
     langTitle: {
-        en: "engilsh title",
-        zh_hans: "简体中文描述",
-        zh_hant: "簡體中文描述"
+        en: "Engilsh title",
+        zh_hans: "简体中文标题",
+        zh_hant: "繁體中文標題"
     },
-    group: "General",
+    group: "Template",
     legacy: "setting_legacy_name",
     nodeType: "Toggle",
     nodeClass: {red: false}
 };
 
-const settings_define = [
+const settingDefault = {
+    name: "setting_default",
+    type: undefined,
+    default: undefined,
+    writable: true,
+    platforms: ["macos", "ipados", "ios"],
+    langLabel: {},
+    langTitle: {},
+    group: "",
+    nodeType: "",
+    nodeClass: {}
+};
+
+const settingsDefine = [
     {
         name: "global_active",
         type: "boolean",
@@ -159,7 +172,7 @@ const settings_define = [
         nodeType: "Toggle"
     },
     {
-        name: "editor_hint",
+        name: "editor_auto_hint",
         type: "boolean",
         default: true,
         platforms: ["macos"],
@@ -210,7 +223,7 @@ const settings_define = [
         nodeType: "Toggle"
     },
     {
-        name: "editor_whitespace_show",
+        name: "editor_show_whitespace",
         type: "boolean",
         default: true,
         platforms: ["macos"],
@@ -245,6 +258,13 @@ const settings_define = [
     }
 ];
 
-export const setting_default = setting_template;
+const storagePrefix = "US_";
 
-export const settings = settings_define;
+export const settings = settingsDefine.reduce((arr, val) => {
+    val.key = storagePrefix + val.name.toUpperCase();
+    // arr[val.key] = Object.assign({}, settingDefault, val);
+    arr[val.key] = new Proxy(val, {
+        get: (obj, p) => p in obj ? obj[p] : settingDefault[p]
+    });
+    return arr;
+}, {});
