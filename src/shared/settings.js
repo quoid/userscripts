@@ -297,7 +297,7 @@ export async function getAll() {
     return Object.assign({}, settingsDefault, result);
 }
 
-export function update(key, value) {
+export async function set(key, value) {
     key = storagePrefix + key.toUpperCase();
     if (!settingsKeys.includes(key)) {
         return console.error("Unexpected key:", key);
@@ -306,12 +306,17 @@ export function update(key, value) {
     if (typeof(value) !== type) {
         return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
     }
-    browser.storage.local.set({[key]: value});
-    return true;
+    try {
+        await browser.storage.local.set({[key]: value});
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
 }
 
 // Note: It seems unnecessary to use this method, comment it out for now
-// export function updateAll(settings) {
+// export function setAll(settings) {
 //     for (const key in settings) {
 //         if (!settingsKeys.includes(key)) {
 //             return console.error("unexpected settings key:", key);
@@ -325,10 +330,10 @@ export function update(key, value) {
 // }
 
 export async function import_legacy_data() {
-    console.info("Import settings data from legacy manifest file");
     if (await get("legacy_imported")) return console.info("Legacy settings has already imported");
     const result = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
     if (result.error) return console.error(result.error);
+    console.info("Import settings data from legacy manifest file");
     for (const key in settingsConfig) {
         const legacy = settingsConfig[key].legacy;
         if (legacy in result) {
@@ -338,10 +343,11 @@ export async function import_legacy_data() {
                 case "boolean": value = JSON.parse(value); break;
                 case "number": value = Number(value); break;
             }
-            if (!update(settingsConfig[key].name, value)) return console.error("Import abort");
+            if (!set(settingsConfig[key].name, value)) return console.error("Import abort");
         }
     }
-    update("legacy_imported", true);
+    set("legacy_imported", true);
     console.log("Importing legacy settings complete");
     // Send a message to the Swift layer to safely clean up legacy data
+    browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
 }

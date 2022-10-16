@@ -1,5 +1,6 @@
 import {writable} from "svelte/store";
 import {uniqueId} from "./utils.js";
+import * as settingsStorage from "../shared/settings.js";
 
 function notificationStore() {
     const {subscribe, update} = writable([]);
@@ -109,40 +110,15 @@ function settingsStore() {
             return settings;
         });
     };
-    const storageKey = "USettings";
     const updateSingleSetting = (key, value) => {
-        update(settings => {
-            settings[key] = value;
-            browser.storage.local.set({[storageKey]: settings}); // Durable Storage
-            return settings;
-        });
+        update(settings => (settings[key] = value, settings));
+        settingsStorage.set(key, value); // Durable Storage
         // Temporarily keep the old storage method until it is confirmed that all dependencies are removed
         updateSingleSetting_old(key, value);
     };
-    const init_import_from_old = async () => {
-        log.add("Import settings data from old storage", "info", false);
-        const initData = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
-        if (initData.error) {
-            console.error(initData.error);
-            return false;
-        }
-        for (const [key, value] of Object.entries(initData)) {
-            if (value === "true" || value === "false") {
-                initData[key] = JSON.parse(value);
-            }
-        }
-        set(initData);
-        browser.storage.local.set({[storageKey]: initData});
-        return true;
-    };
     const init = async () => {
-        const result = await browser.storage.local.get(storageKey);
-        if (!result[storageKey]) {
-            // This will remain for several versions until the majority of users use the new version
-            return init_import_from_old();
-        }
-        set(result[storageKey]);
-        return true;
+        settingsStorage.import_legacy_data();
+        set(await settingsStorage.getAll());
     };
     return {subscribe, set, init, updateSingleSetting};
 }

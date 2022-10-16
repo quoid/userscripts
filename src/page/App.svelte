@@ -41,7 +41,7 @@
 
     onMount(async () => {
         log.add("Requesting initialization data", "info", false);
-        if (!settings.init()) return console.error("Initialization failure");
+        await settings.init();
         state.add("items-loading");
         state.remove("init");
 
