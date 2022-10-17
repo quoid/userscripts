@@ -112,13 +112,13 @@ function settingsStore() {
     };
     const updateSingleSetting = (key, value) => {
         update(settings => (settings[key] = value, settings));
-        settingsStorage.set(key, value); // Durable Storage
+        settingsStorage.set({[key]: value}); // Durable Storage
         // Temporarily keep the old storage method until it is confirmed that all dependencies are removed
         updateSingleSetting_old(key, value);
     };
     const init = async () => {
         settingsStorage.import_legacy_data();
-        set(await settingsStorage.getAll());
+        set(await settingsStorage.get());
     };
     return {subscribe, set, init, updateSingleSetting};
 }

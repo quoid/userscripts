@@ -1,29 +1,18 @@
-export const settingTemplate = {
-    name: "setting_template",
-    type: "boolean",
-    default: true,
-    writable: true,
-    platforms: ["macos", "ipados", "ios"],
-    langLabel: {
-        en: "Engilsh label",
-        zh_hans: "简体中文标签",
-        zh_hant: "繁體中文標籤"
-    },
-    langTitle: {
-        en: "Engilsh title",
-        zh_hans: "简体中文标题",
-        zh_hant: "繁體中文標題"
-    },
-    group: "Template",
-    legacy: "setting_legacy_name",
-    nodeType: "Toggle",
-    nodeClass: {red: false}
-};
+function deepFreeze(object) {
+    for (const p in object) {
+        if (typeof object[p] == "object") {
+            deepFreeze(object[p]);
+        }
+    }
+    return Object.freeze(object);
+}
 
-const settingDefault = {
+const settingDefault = deepFreeze({
     name: "setting_default",
     type: undefined,
+    local: false,
     default: undefined,
+    confirm: false,
     writable: true,
     platforms: ["macos", "ipados", "ios"],
     langLabel: {},
@@ -31,19 +20,38 @@ const settingDefault = {
     group: "",
     nodeType: "",
     nodeClass: {}
-};
+});
 
 const settingsDefine = [
     {
         name: "legacy_imported",
         type: "boolean",
+        local: true,
         default: false,
         platforms: ["macos"],
         group: "Internal"
     },
     {
+        name: "settings_sync",
+        type: "boolean",
+        local: true,
+        default: false,
+        platforms: ["macos", "ipados", "ios"],
+        langLabel: {
+            en: "Sync settings",
+            zh_hans: "同步设置"
+        },
+        langTitle: {
+            en: "Sync settings across devices",
+            zh_hans: "跨设备同步设置"
+        },
+        group: "General",
+        nodeType: "Toggle"
+    },
+    {
         name: "global_active",
         type: "boolean",
+        local: true,
         default: true,
         platforms: ["macos"],
         langLabel: {
@@ -112,6 +120,7 @@ const settingsDefine = [
         name: "scripts_auto_update",
         type: "boolean",
         default: false,
+        confirm: true,
         platforms: ["macos", "ipados", "ios"],
         langLabel: {
             en: "Scripts silent auto update",
@@ -122,12 +131,13 @@ const settingsDefine = [
             zh_hans: "脚本在后台静默自动更新，这是危险的，可能引入未经确认的恶意代码"
         },
         group: "General",
-        nodeType: "Toggle_double_confirm",
+        nodeType: "Toggle",
         nodeClass: {warn: true}
     },
     {
         name: "location_path",
         type: "string",
+        local: true,
         default: true,
         writable: false,
         platforms: ["macos", "ipados", "ios"],
@@ -266,88 +276,226 @@ const settingsDefine = [
 ];
 
 const storagePrefix = "US_";
+const storageKey = key => storagePrefix + key.toUpperCase();
+const storageRef = async area => { // storage reference
+    browser.storage.sync.area = "sync";
+    browser.storage.local.area = "local";
+    if (area === "sync") return browser.storage.sync;
+    if (area === "local") return browser.storage.local;
+    const key = storageKey("settings_sync");
+    const result = await browser.storage.local.get(key);
+    if (result?.[key] === true) {
+        return browser.storage.sync;
+    } else {
+        return browser.storage.local;
+    }
+};
 
 export const settingsConfig = settingsDefine.reduce((arr, val) => {
-    val.key = storagePrefix + val.name.toUpperCase();
-    // arr[val.key] = Object.assign({}, settingDefault, val);
-    arr[val.key] = new Proxy(val, {
-        get: (obj, p) => p in obj ? obj[p] : settingDefault[p]
-    });
+    val.key = storageKey(val.name);
+    arr[val.key] = Object.assign({}, settingDefault, val);
     return arr;
 }, {});
 
-const settingsKeys = Object.keys(settingsConfig);
+deepFreeze(settingsConfig);
+deepFreeze(settingsDefine);
 
-export async function get(key) {
-    if (typeof key !== "string") return console.error("key should be a string:", key);
-    key = storagePrefix + key.toUpperCase();
-    if (!settingsKeys.includes(key)) {
-        return console.error("unexpected settings key:", key);
+export const settingsKeys = deepFreeze(Object.keys(settingsConfig));
+
+export async function get(keys, area) {
+    if (![undefined, "local", "sync"].includes(area)) {
+        return console.error("unexpected storage area:", area);
     }
-    const result = await browser.storage.local.get(key);
-    return result[key] ?? settingsConfig[key].default;
+    if (typeof keys == "string") { // single setting
+        const key = storageKey(keys);
+        if (!settingsKeys.includes(key)) {
+            return console.error("unexpected settings key:", key);
+        }
+        settingsConfig[key].local === true && (area = "local");
+        const storage = await storageRef(area);
+        const result = await storage.get(key);
+        return result[key] ?? settingsConfig[key].default;
+    }
+    const complexGet = async areaKeys => {
+        const storage = await storageRef(area);
+        const results = {local: {}, sync: {}};
+        if (storage.area === "sync") {
+            if (areaKeys.sync.length) {
+                results.sync = await storage.get(areaKeys.sync);
+            }
+            if (areaKeys.local.length) {
+                const storage = await storageRef("local");
+                results.local = await storage.get(areaKeys.local);
+            }
+        } else {
+            results.local = await storage.get(areaKeys.all);
+        }
+        return results;
+    };
+    if (Array.isArray(keys)) { // muilt settings
+        if (!keys.length) {
+            return console.error("Settings keys empty:", keys);
+        }
+        const areaKeys = {local: [], sync: [], all: []};
+        const settingsDefault = {};
+        for (const k of keys) {
+            const key = storageKey(k);
+            if (!settingsKeys.includes(key)) {
+                return console.error("unexpected settings key:", key);
+            }
+            settingsDefault[key] = settingsConfig[key].default;
+            settingsConfig[key].local === true
+                ? areaKeys.local.push(key)
+                : areaKeys.sync.push(key);
+            areaKeys.all.push(key);
+        }
+        const {local, sync} = complexGet(areaKeys);
+        return Object.assign(settingsDefault, local, sync);
+    }
+    if (typeof keys == "undefined" || keys === null) { // all settings
+        const areaKeys = {local: [], sync: [], all: []};
+        const settingsDefault = {};
+        for (const key in settingsConfig) {
+            settingsDefault[key] = settingsConfig[key].default;
+            settingsConfig[key].local === true
+                ? areaKeys.local.push(key)
+                : areaKeys.sync.push(key);
+            areaKeys.all.push(key);
+        }
+        const {local, sync} = complexGet(areaKeys);
+        return Object.assign(settingsDefault, local, sync);
+    }
+    return console.error("Unexpected arg type:", keys);
 }
 
-export async function getAll() {
-    const result = await browser.storage.local.get(settingsKeys);
-    const settingsDefault = {};
-    for (const key in settingsConfig) {
-        settingsDefault[key] = settingsConfig[key].default;
+export async function set(keys, area) {
+    if (![undefined, "local", "sync"].includes(area)) {
+        return console.error("unexpected storage area:", area);
     }
-    return Object.assign({}, settingsDefault, result);
-}
-
-export async function set(key, value) {
-    key = storagePrefix + key.toUpperCase();
-    if (!settingsKeys.includes(key)) {
-        return console.error("Unexpected key:", key);
+    if (typeof keys != "object") {
+        return console.error("Unexpected arg type:", keys);
     }
-    const type = settingsConfig[key].type;
-    if (typeof(value) !== type) {
-        return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
+    if (!Object.keys(keys).length) {
+        return console.error("Settings object empty:", keys);
     }
+    const areaKeys = {local: {}, sync: {}, all: {}};
+    for (const k in keys) {
+        const key = storageKey(k);
+        if (!settingsKeys.includes(key)) {
+            return console.error("Unexpected settings keys:", key);
+        }
+        const type = settingsConfig[key].type;
+        if (typeof keys[k] != type) {
+            return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
+        }
+        settingsConfig[key].local === true
+            ? areaKeys.local[key] = keys[k]
+            : areaKeys.sync[key] = keys[k];
+        areaKeys.all[key] = keys[k];
+    }
+    const storage = await storageRef(area);
     try {
-        await browser.storage.local.set({[key]: value});
+        if (storage.area === "sync") {
+            if (Object.keys(areaKeys.sync).length) {
+                await storage.set(areaKeys.sync);
+            }
+            if (Object.keys(areaKeys.local).length) {
+                const storage = await storageRef("local");
+                await storage.set(areaKeys.local);
+            }
+        } else {
+            await storage.set(areaKeys.all);
+        }
         return true;
     } catch (error) {
-        console.error(error);
-        return false;
+        return console.error(error);
     }
 }
 
-// Note: It seems unnecessary to use this method, comment it out for now
-// export function setAll(settings) {
-//     for (const key in settings) {
-//         if (!settingsKeys.includes(key)) {
-//             return console.error("unexpected settings key:", key);
-//         }
-//         const type = settingsConfig[key].type;
-//         if (typeof(settings.key) !== type) {
-//             return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
-//         }
-//     }
-//     browser.storage.local.set(settings);
-// }
+export async function reset(keys, area) { // reset to default
+    if (![undefined, "local", "sync"].includes(area)) {
+        return console.error("unexpected storage area:", area);
+    }
+    if (typeof keys == "string") { // single setting
+        const key = storageKey(keys);
+        if (!settingsKeys.includes(key)) {
+            return console.error("unexpected settings key:", key);
+        }
+        settingsConfig[key].local === true && (area = "local");
+        const storage = await storageRef(area);
+        return storage.remove(key);
+    }
+    const complexRemove = async areaKeys => {
+        const storage = await storageRef(area);
+        try {
+            if (storage.area === "sync") {
+                if (areaKeys.sync.length) {
+                    await storage.remove(areaKeys.sync);
+                }
+                if (areaKeys.local.length) {
+                    const storage = await storageRef("local");
+                    await storage.remove(areaKeys.local);
+                }
+            } else {
+                await storage.remove(areaKeys.all);
+            }
+            return true;
+        } catch (error) {
+            return console.error(error);
+        }
+    };
+    if (Array.isArray(keys)) { // muilt settings
+        if (!keys.length) {
+            return console.error("Settings keys empty:", keys);
+        }
+        const areaKeys = {local: [], sync: [], all: []};
+        for (const k of keys) {
+            const key = storageKey(k);
+            if (!settingsKeys.includes(key)) {
+                return console.error("unexpected settings key:", key);
+            }
+            settingsConfig[key].local === true
+                ? areaKeys.local.push(key)
+                : areaKeys.sync.push(key);
+            areaKeys.all.push(key);
+        }
+        return complexRemove(areaKeys);
+    }
+    if (typeof keys == "undefined" || keys === null) { // all settings
+        const areaKeys = {local: [], sync: [], all: []};
+        for (const key in settingsConfig) {
+            settingsConfig[key].local === true
+                ? areaKeys.local.push(key)
+                : areaKeys.sync.push(key);
+            areaKeys.all.push(key);
+        }
+        return complexRemove(areaKeys);
+    }
+    return console.error("Unexpected arg type:", keys);
+}
 
 export async function import_legacy_data() {
-    if (await get("legacy_imported")) return console.info("Legacy settings has already imported");
+    const imported = await get("legacy_imported");
+    if (imported) return console.info("Legacy settings has already imported");
     const result = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
     if (result.error) return console.error(result.error);
     console.info("Import settings data from legacy manifest file");
+    const settings = {};
     for (const key in settingsConfig) {
         const legacy = settingsConfig[key].legacy;
         if (legacy in result) {
             let value = result[legacy];
-            console.log(`Importing legacy setting: ${legacy} - ${value}`);
             switch (settingsConfig[key].type) {
                 case "boolean": value = JSON.parse(value); break;
                 case "number": value = Number(value); break;
             }
-            if (!set(settingsConfig[key].name, value)) return console.error("Import abort");
+            console.log(`Importing legacy setting: ${legacy}`, value);
+            settings[settingsConfig[key].name] = value;
         }
     }
-    set("legacy_imported", true);
-    console.log("Importing legacy settings complete");
+    if (!set(settings)) return console.error("Import legacy settings abort");
+    set({"legacy_imported": true});
+    console.info("Import legacy settings complete");
     // Send a message to the Swift layer to safely clean up legacy data
     browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
 }

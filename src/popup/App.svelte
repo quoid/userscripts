@@ -52,7 +52,7 @@
     $: if (platform) document.body.classList.add(platform);
 
     async function toggleExtension(e) {
-        await settingsStorage.set("global_active", !active);
+        await settingsStorage.set({"global_active": !active});
         active = await settingsStorage.get("global_active");
     }
 
