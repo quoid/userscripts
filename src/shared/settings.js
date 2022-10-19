@@ -11,6 +11,7 @@ const settingDefault = deepFreeze({
     name: "setting_default",
     type: undefined,
     local: false,
+    values: [],
     default: undefined,
     confirm: false,
     writable: true,
@@ -18,6 +19,7 @@ const settingDefault = deepFreeze({
     langLabel: {},
     langTitle: {},
     group: "",
+    legacy: "",
     nodeType: "",
     nodeClass: {}
 });
@@ -25,11 +27,19 @@ const settingDefault = deepFreeze({
 const settingsDefine = [
     {
         name: "legacy_imported",
-        type: "boolean",
+        type: "number",
         local: true,
-        default: false,
+        default: 0,
         platforms: ["macos"],
         group: "Internal"
+    },
+    {
+        name: "language_code",
+        type: "string",
+        default: "en",
+        platforms: ["macos", "ipados", "ios"],
+        group: "Internal",
+        legacy: "languageCode"
     },
     {
         name: "settings_sync",
@@ -102,8 +112,8 @@ const settingsDefine = [
     },
     {
         name: "scripts_update_check_interval",
-        type: "boolean",
-        default: true,
+        type: "number",
+        default: 86400000,
         platforms: ["macos", "ipados", "ios"],
         langLabel: {
             en: "Scripts update check interval",
@@ -206,9 +216,27 @@ const settingsDefine = [
         nodeType: "Toggle"
     },
     {
+        name: "editor_list_sort",
+        type: "string",
+        values: ["nameAsc", "nameDesc", "lastModifiedAsc", "lastModifiedDesc"],
+        default: "lastModifiedDesc",
+        platforms: ["macos"],
+        langLabel: {
+            en: "Sort order",
+            zh_hans: "排序顺序"
+        },
+        langTitle: {
+            en: "Display order of items in sidebar",
+            zh_hans: "侧栏中项目的显示顺序"
+        },
+        group: "Editor",
+        legacy: "sortOrder",
+        nodeType: "Dropdown"
+    },
+    {
         name: "editor_list_descriptions",
         type: "boolean",
-        default: false,
+        default: true,
         platforms: ["macos"],
         langLabel: {
             en: "Show List Descriptions",
@@ -291,10 +319,10 @@ const storageRef = async area => { // storage reference
     }
 };
 
-export const settingsConfig = settingsDefine.reduce((arr, val) => {
-    val.key = storageKey(val.name);
-    arr[val.key] = Object.assign({}, settingDefault, val);
-    return arr;
+export const settingsConfig = settingsDefine.reduce((p, c) => {
+    c.key = storageKey(c.name);
+    p[c.key] = Object.assign({}, settingDefault, c);
+    return p;
 }, {});
 
 deepFreeze(settingsConfig);
@@ -316,28 +344,32 @@ export async function get(keys, area) {
         const result = await storage.get(key);
         return result[key] ?? settingsConfig[key].default;
     }
-    const complexGet = async areaKeys => {
+    const complexGet = async (settingsDefault, areaKeys) => {
         const storage = await storageRef(area);
-        const results = {local: {}, sync: {}};
+        let local = {}, sync = {};
         if (storage.area === "sync") {
             if (areaKeys.sync.length) {
-                results.sync = await storage.get(areaKeys.sync);
+                sync = await storage.get(areaKeys.sync);
             }
             if (areaKeys.local.length) {
                 const storage = await storageRef("local");
-                results.local = await storage.get(areaKeys.local);
+                local = await storage.get(areaKeys.local);
             }
         } else {
-            results.local = await storage.get(areaKeys.all);
+            local = await storage.get(areaKeys.all);
         }
-        return results;
+        const result = Object.assign(settingsDefault, local, sync);
+        // reduce settings object property name
+        return Object.entries(result).reduce((p, c) => (
+            p[settingsConfig[c[0]].name] = c[1], p
+        ), {});
     };
     if (Array.isArray(keys)) { // muilt settings
         if (!keys.length) {
             return console.error("Settings keys empty:", keys);
         }
-        const areaKeys = {local: [], sync: [], all: []};
         const settingsDefault = {};
+        const areaKeys = {local: [], sync: [], all: []};
         for (const k of keys) {
             const key = storageKey(k);
             if (!settingsKeys.includes(key)) {
@@ -349,12 +381,11 @@ export async function get(keys, area) {
                 : areaKeys.sync.push(key);
             areaKeys.all.push(key);
         }
-        const {local, sync} = complexGet(areaKeys);
-        return Object.assign(settingsDefault, local, sync);
+        return await complexGet(settingsDefault, areaKeys);
     }
     if (typeof keys == "undefined" || keys === null) { // all settings
-        const areaKeys = {local: [], sync: [], all: []};
         const settingsDefault = {};
+        const areaKeys = {local: [], sync: [], all: []};
         for (const key in settingsConfig) {
             settingsDefault[key] = settingsConfig[key].default;
             settingsConfig[key].local === true
@@ -362,8 +393,7 @@ export async function get(keys, area) {
                 : areaKeys.sync.push(key);
             areaKeys.all.push(key);
         }
-        const {local, sync} = complexGet(areaKeys);
-        return Object.assign(settingsDefault, local, sync);
+        return await complexGet(settingsDefault, areaKeys);
     }
     return console.error("Unexpected arg type:", keys);
 }
@@ -459,7 +489,7 @@ export async function reset(keys, area) { // reset to default
                 : areaKeys.sync.push(key);
             areaKeys.all.push(key);
         }
-        return complexRemove(areaKeys);
+        return await complexRemove(areaKeys);
     }
     if (typeof keys == "undefined" || keys === null) { // all settings
         const areaKeys = {local: [], sync: [], all: []};
@@ -469,9 +499,53 @@ export async function reset(keys, area) { // reset to default
                 : areaKeys.sync.push(key);
             areaKeys.all.push(key);
         }
-        return complexRemove(areaKeys);
+        return await complexRemove(areaKeys);
     }
     return console.error("Unexpected arg type:", keys);
+}
+
+export function onChanged(callback) {
+    const listener = (changes, area) => {
+        // console.log(`storage.${area}.onChanged`, changes);
+        const settings = {};
+        for (const key in changes) {
+            if (!(key in settingsConfig)) continue;
+            settings[settingsConfig[key].name] = changes[key].newValue;
+        }
+        callback(settings, area);
+    };
+    browser.storage.sync.onChanged.addListener(changes => {
+        listener(changes, "sync");
+    });
+    browser.storage.local.onChanged.addListener(changes => {
+        listener(changes, "local");
+    });
+}
+
+export async function legacy_get(keys) {
+    const result = await get(keys);
+    // console.log("legacy_get", keys, result);
+    return Object.entries(result).reduce((p, c) => (
+        p[settingsConfig[storageKey(c[0])].legacy || c[0]] = c[1], p
+    ), {});
+}
+
+export async function legacy_set(keys) {
+    if (typeof keys != "object") {
+        return console.error("Unexpected arg type:", keys);
+    }
+    if (!Object.keys(keys).length) {
+        return console.error("Settings object empty:", keys);
+    }
+    const settings = {};
+    for (const obj of settingsDefine) {
+        if (!obj.legacy) continue;
+        if (obj.legacy in keys) {
+            settings[obj.name] = keys[obj.legacy];
+        }
+    }
+    // console.log("legacy_set", keys, settings);
+    return await set(settings);
 }
 
 export async function import_legacy_data() {
@@ -494,7 +568,7 @@ export async function import_legacy_data() {
         }
     }
     if (!set(settings)) return console.error("Import legacy settings abort");
-    set({"legacy_imported": true});
+    set({"legacy_imported": Date.now()});
     console.info("Import legacy settings complete");
     // Send a message to the Swift layer to safely clean up legacy data
     browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});

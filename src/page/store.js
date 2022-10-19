@@ -89,36 +89,28 @@ function settingsStore() {
                         log.add("Failed to save blacklist to disk", "error", true);
                     }
                 });
-                return settings;
             }
-            // settings are saved as strings on the swift side
-            // convert all booleans to strings before dispatching
-            const settingsClone = {...settings};
-            for (const [key, value] of Object.entries(settingsClone)) {
-                if (typeof value === "boolean") settingsClone[key] = value.toString();
-            }
-            // remove settings in clone that aren't save in user defaults
-            delete settingsClone.blacklist;
-            delete settingsClone.version;
-            // update settings on swift side
-            const message = {name: "PAGE_UPDATE_SETTINGS", settings: settingsClone};
-            browser.runtime.sendNativeMessage(message, response => {
-                if (response.error) {
-                    log.add(response.error, "error", true);
-                }
-            });
             return settings;
         });
     };
     const updateSingleSetting = (key, value) => {
         update(settings => (settings[key] = value, settings));
-        settingsStorage.set({[key]: value}); // Durable Storage
+        // For compatibility with legacy setting names only
+        // Once the new name is used, use settingsStorage.set()
+        settingsStorage.legacy_set({[key]: value}); // Durable Storage
         // Temporarily keep the old storage method until it is confirmed that all dependencies are removed
         updateSingleSetting_old(key, value);
     };
     const init = async () => {
         settingsStorage.import_legacy_data();
-        set(await settingsStorage.get());
+        const settings = await settingsStorage.legacy_get();
+        // console.log("store.js settingsStore init", settings);
+        set(settings);
+        // sync popup, backgound, etc... settings changes
+        settingsStorage.onChanged((settings, area) => {
+            console.log(`storage.${area}.onChanged`, settings);
+            update(obj => Object.assign(obj, settings));
+        });
     };
     return {subscribe, set, init, updateSingleSetting};
 }
