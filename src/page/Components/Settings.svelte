@@ -120,11 +120,11 @@
             <div class="modal__row">
                 <div>Tab Size</div>
                 <select
-                    bind:value="{$settings.tabSize}"
+                    bind:value={$settings.tabSize}
                     on:blur={() => update("tabSize", $settings.tabSize)}
                 >
-                    <option value="2">2</option>
-                    <option value="4">4</option>
+                    <option value={2}>2</option>
+                    <option value={4}>4</option>
                 </select>
             </div>
         </div>
