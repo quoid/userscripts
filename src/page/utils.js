@@ -153,7 +153,8 @@ export const validGrants = new Set([
     "GM.getTab",
     "GM.saveTab",
     "GM_xmlhttpRequest",
-    "GM.xmlHttpRequest"
+    "GM.xmlHttpRequest",
+    "none"
 ]);
 
 export const validKeys = new Set([

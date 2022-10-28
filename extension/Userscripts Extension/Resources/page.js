@@ -1143,7 +1143,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         "GM.getTab",
         "GM.saveTab",
         "GM_xmlhttpRequest",
-        "GM.xmlHttpRequest"
+        "GM.xmlHttpRequest",
+        "none"
     ]);
 
     const validKeys = new Set([
