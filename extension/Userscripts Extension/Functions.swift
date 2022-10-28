@@ -1675,16 +1675,21 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
 
 // page
 func getInitData() -> [String: Any]? {
-    let manifest = getManifest()
     guard let saveLocation = getSaveLocation() else {
         err("getInitData failed at (1)")
         return nil
     }
+    return [
+        "saveLocation": saveLocation.path,
+        "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??",
+        "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
+    ]
+}
+
+func getLegacyData() -> [String: Any]? {
+    let manifest = getManifest()
     var data:[String: Any] = manifest.settings
     data["blacklist"] = manifest.blacklist
-    data["saveLocation"] = saveLocation.path
-    data["version"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
-    data["build"] = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     return data
 }
 

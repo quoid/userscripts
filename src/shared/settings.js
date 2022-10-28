@@ -610,7 +610,7 @@ export async function legacy_set(keys) {
 export async function legacy_import() {
     const imported = await get("legacy_imported");
     if (imported) return console.info("Legacy settings has already imported");
-    const result = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
+    const result = await browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORT"});
     if (result.error) return console.error(result.error);
     console.info("Import settings data from legacy manifest file");
     const settings = {};

@@ -188,10 +188,19 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "PAGE_INIT_DATA" {
             #if os(macOS)
-                if let settings = getInitData(), checkDefaultDirectories() {
-                    response.userInfo = [SFExtensionMessageKey: settings]
+                if let initData = getInitData(), checkDefaultDirectories() {
+                    response.userInfo = [SFExtensionMessageKey: initData]
                 } else {
                     response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
+                }
+            #endif
+        }
+        else if name == "PAGE_LEGACY_IMPORT" {
+            #if os(macOS)
+                if let settings = getLegacyData() {
+                    response.userInfo = [SFExtensionMessageKey: settings]
+                } else {
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to get legacy data"]]
                 }
             #endif
         }

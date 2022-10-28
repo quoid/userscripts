@@ -41,7 +41,9 @@
 
     onMount(async () => {
         log.add("Requesting initialization data", "info", false);
-        await settings.init();
+        const initData = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
+        if (initData.error) return console.error(initData.error);
+        await settings.init(initData);
         state.add("items-loading");
         state.remove("init");
 
