@@ -295,6 +295,7 @@ let defaultSettings = [
     "sortOrder": "lastModifiedDesc",
     "showCount": "true",
     "showInvisibles": "true",
+    "strictMode": "false",
     "tabSize": "4"
 ]
 
@@ -1236,7 +1237,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
 }
 
 // injection
-func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
+func getCode(_ filenames: [String], _ isTop: Bool, _ strictMode: Bool)-> [String: Any]? {
     var cssFiles = [Any]()
     var jsFiles = [Any]()
     var menuFiles = [Any]()
@@ -1413,7 +1414,8 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
     let resp = [
         "files": ["css": cssFiles, "js": jsFiles, "menu": menuFiles],
         "scriptHandler": "Userscripts",
-        "scriptHandlerVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+        "scriptHandlerVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??",
+        "strictMode": strictMode
     ] as [String : Any]
     return resp
 }
@@ -1439,9 +1441,9 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     return parsed
 }
 
-func getInjectionFilenames(_ url: String) -> [String]? {
+func getInjectionFilenames(_ url: String, _ optionalManifest: Manifest?) -> [String]? {
     var filenames = [String]()
-    let manifest = getManifest()
+    let manifest = optionalManifest ?? getManifest()
     let matched = getMatchedFiles(url, manifest, true)
     guard let active = manifest.settings["active"] else {
         err("getInjectionFilenames failed at (1)")
@@ -1492,9 +1494,12 @@ func getRequestScripts() -> [[String: String]]? {
 
 func getContextMenuScripts() -> [String: Any]? {
     var menuFilenames = [String]()
-    // check the manifest to see if injection is enabled
+    // check the manifest to see if injection is enabled and strict mode setting
     let manifest = getManifest()
-    guard let active = manifest.settings["active"] else {
+    guard
+        let active = manifest.settings["active"],
+        let strictMode = manifest.settings["strictMode"]
+    else {
         err("getContextMenuScripts failed at (1)")
         return nil
     }
@@ -1525,7 +1530,8 @@ func getContextMenuScripts() -> [String: Any]? {
         }
     }
     // get and return script objects for all context-menu scripts
-    guard let scripts = getCode(menuFilenames, true) else {
+    let strict = (strictMode == "true")
+    guard let scripts = getCode(menuFilenames, true, strict) else {
         err("getContextMenuScripts failed at (4)")
         return nil
     }

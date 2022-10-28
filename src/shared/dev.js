@@ -98,6 +98,7 @@ const _browser = {
                     showCount: "true",
                     showInvisibles: "true",
                     sortOrder: "lastModifiedDesc",
+                    strictMode: "false",
                     tabSize: "4",
                     version: "4.0.0",
                     build: "44"

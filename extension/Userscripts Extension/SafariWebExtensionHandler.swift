@@ -22,9 +22,11 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             response.userInfo = [SFExtensionMessageKey: ["platform": platform]]
         } else if name == "REQ_USERSCRIPTS" {
             if let url = message?["url"] as? String, let isTop = message?["isTop"] as? Bool {
+                let manifest = getManifest()
                 if
-                    let matches = getInjectionFilenames(url),
-                    let code = getCode(matches, isTop)
+                    let strictMode = manifest.settings["strictMode"],
+                    let matches = getInjectionFilenames(url, manifest),
+                    let code = getCode(matches, isTop, (strictMode == "true"))
                 {
                     response.userInfo = [SFExtensionMessageKey: code]
                 } else {

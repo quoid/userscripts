@@ -243,7 +243,7 @@ function processJS(userscript) {
 function wrapCode(preCode, requiredCode, code, filename) {
     return `
         (function() {
-            "use strict";
+            ${data.strictMode ? "\"use strict\";" : ""}
             ${preCode}
             ${requiredCode}
             (function() {
