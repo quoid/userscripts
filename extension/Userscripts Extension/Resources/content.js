@@ -241,7 +241,6 @@ function processJS(userscript) {
 function wrapCode(preCode, code, filename) {
     return `
         (function() {
-            "use strict";
             ${preCode}
             (function() {
                 const US_filename = "${filename}";
