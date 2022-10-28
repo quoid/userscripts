@@ -240,10 +240,10 @@ function processJS(userscript) {
 
 // preCode is the GM apis and boilerplate
 // requiredCode is whatever has be requested with `@require` tags
-function wrapCode(preCode, requiredCode, code, filename) {
+function wrapCode(preCode, requiredCode, code, strict = false, filename) {
     return `
         (function() {
-            ${data.strictMode ? "\"use strict\";" : ""}
+            ${(data.strictMode || strict) ? "\"use strict\";" : ""}
             ${preCode}
             ${requiredCode}
             (function() {
@@ -264,6 +264,7 @@ function injectJS(userscript) {
         userscript.preCode,
         userscript.requiredCode,
         userscript.code,
+        userscript.scriptObject.strict,
         filename
     );
     const name = userscript.scriptObject.name;
@@ -466,6 +467,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         item.preCode,
                         item.requiredCode,
                         item.code,
+                        item.scriptObject.strict,
                         filename
                     )
                 });

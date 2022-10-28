@@ -1325,6 +1325,7 @@ func getCode(_ filenames: [String], _ isTop: Bool, _ strictMode: Bool)-> [String
         let requires = metadata["require"] ?? []
         let version = metadata["version"]?[0] ?? ""
         let noframes = metadata["noframes"] != nil ? true : false
+        let strictValue = metadata["strict"]?[0] == "true" ? true : false
         var scriptObject:[String: Any] = [
             "description": description,
             "excludes": excludes,
@@ -1341,6 +1342,7 @@ func getCode(_ filenames: [String], _ isTop: Bool, _ strictMode: Bool)-> [String
             "resources": "",
             "require": requires,
             "run-at": runAt,
+            "strict": strictValue,
             "version": version
         ]
         // certain metadata keys use a different key name then the actual key name
