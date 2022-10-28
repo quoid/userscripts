@@ -238,11 +238,14 @@ function processJS(userscript) {
     }
 }
 
-function wrapCode(preCode, code, filename) {
+// preCode is the GM apis and boilerplate
+// requiredCode is whatever has be requested with `@require` tags
+function wrapCode(preCode, requiredCode, code, filename) {
     return `
         (function() {
             "use strict";
             ${preCode}
+            ${requiredCode}
             (function() {
                 const US_filename = "${filename}";
                 const apis = undefined;
@@ -257,7 +260,12 @@ function wrapCode(preCode, code, filename) {
 
 function injectJS(userscript) {
     const filename = userscript.scriptObject.filename;
-    const code = wrapCode(userscript.preCode, userscript.code, filename);
+    const code = wrapCode(
+        userscript.preCode,
+        userscript.requiredCode,
+        userscript.code,
+        filename
+    );
     const name = userscript.scriptObject.name;
     let injectInto = userscript.scriptObject["inject-into"];
     // change scope to content since strict CSP event detected

@@ -1249,7 +1249,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
     for filename in filenames {
         guard
             let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
-            var code = contents["code"] as? String,
+            let code = contents["code"] as? String,
             let type = filename.split(separator: ".").last
         else {
             // if guard fails, log error continue to next file
@@ -1365,15 +1365,13 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
 
         // attempt to get require resource from disk
         // if required resource is inaccessible, log error and continue
+        var requiredCode = ""
         if let required = metadata["require"] {
-            // reverse required metadata
-            // if required is ["A", "B", "C"], C gets added above B which is above A, etc..
-            // the reverse of that is desired
-            for require in required.reversed() {
+            for require in required {
                 let sanitizedName = sanitize(require)
                 let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
-                    code = "\(requiredContent)\n\(code)"
+                    requiredCode += requiredContent
                 } else {
                     err("getCode failed at (3) for \(requiredFileURL)")
                 }
@@ -1393,6 +1391,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
                 #if os(macOS)
                     menuFiles.append([
                         "code": code,
+                        "requiredCode": requiredCode,
                         "scriptMetaStr": scriptMetaStr,
                         "scriptObject": scriptObject,
                         "type": "js",
@@ -1402,6 +1401,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             } else {
                 jsFiles.append([
                     "code": code,
+                    "requiredCode": requiredCode,
                     "scriptMetaStr": scriptMetaStr,
                     "scriptObject": scriptObject,
                     "type": "js",
