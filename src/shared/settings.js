@@ -1,11 +1,20 @@
-function deepFreeze(object) {
-    for (const p in object) {
-        if (typeof object[p] == "object") {
-            deepFreeze(object[p]);
-        }
+// wrap a relatively independent settings storage with its own functions
+
+const storagePrefix = "US_";
+const storageKey = key => storagePrefix + key.toUpperCase();
+const storageRef = async area => { // dynamic storage reference
+    browser.storage.sync.area = "sync";
+    browser.storage.local.area = "local";
+    if (area === "sync") return browser.storage.sync;
+    if (area === "local") return browser.storage.local;
+    const key = storageKey("settings_sync");
+    const result = await browser.storage.local.get(key);
+    if (result?.[key] === true) {
+        return browser.storage.sync;
+    } else {
+        return browser.storage.local;
     }
-    return Object.freeze(object);
-}
+};
 
 const settingDefault = deepFreeze({
     name: "setting_default",
@@ -13,8 +22,8 @@ const settingDefault = deepFreeze({
     local: false,
     values: [],
     default: undefined,
+    protect: false,
     confirm: false,
-    writable: true,
     platforms: ["macos", "ipados", "ios"],
     langLabel: {},
     langTitle: {},
@@ -24,12 +33,13 @@ const settingDefault = deepFreeze({
     nodeClass: {}
 });
 
-const settingsDefine = [
+export const settingsDefine = deepFreeze([
     {
         name: "legacy_imported",
         type: "number",
         local: true,
         default: 0,
+        protect: true,
         platforms: ["macos"],
         group: "Internal"
     },
@@ -46,6 +56,7 @@ const settingsDefine = [
         type: "boolean",
         local: true,
         default: false,
+        protect: true,
         platforms: ["macos", "ipados", "ios"],
         langLabel: {
             en: "Sync settings",
@@ -143,25 +154,6 @@ const settingsDefine = [
         group: "General",
         nodeType: "Toggle",
         nodeClass: {warn: true}
-    },
-    {
-        name: "location_path",
-        type: "string",
-        local: true,
-        default: true,
-        writable: false,
-        platforms: ["macos", "ipados", "ios"],
-        langLabel: {
-            en: "Save Location",
-            zh_hans: "脚本存储路径"
-        },
-        langTitle: {
-            en: "where your file are currently located and being saved to (clic to open)",
-            zh_hans: "简体中文描述"
-        },
-        group: "General",
-        legacy: "saveLocation",
-        nodeType: "IconButton"
     },
     {
         name: "global_exclude_match",
@@ -287,6 +279,7 @@ const settingsDefine = [
     {
         name: "editor_tab_size",
         type: "number",
+        values: [2, 4],
         default: 4,
         platforms: ["macos"],
         langLabel: {
@@ -301,48 +294,67 @@ const settingsDefine = [
         legacy: "tabSize",
         nodeType: "select"
     }
-];
+].reduce(settingsDefineReduceCallback, {}));
 
-const storagePrefix = "US_";
-const storageKey = key => storagePrefix + key.toUpperCase();
-const storageRef = async area => { // storage reference
-    browser.storage.sync.area = "sync";
-    browser.storage.local.area = "local";
-    if (area === "sync") return browser.storage.sync;
-    if (area === "local") return browser.storage.local;
-    const key = storageKey("settings_sync");
-    const result = await browser.storage.local.get(key);
-    if (result?.[key] === true) {
-        return browser.storage.sync;
-    } else {
-        return browser.storage.local;
+// populate the settingsDefine with settingDefault
+// and convert settingsDefine to storageKey object
+function settingsDefineReduceCallback(settings, setting) {
+    setting.key = storageKey(setting.name);
+    settings[setting.key] = Object.assign({}, settingDefault, setting);
+    return settings;
+}
+
+// prevent settings define from being modified in any case
+// otherwise user settings may be lost in the worst case
+function deepFreeze(object) {
+    for (const p in object) {
+        if (typeof object[p] == "object") {
+            deepFreeze(object[p]);
+        }
     }
-};
+    return Object.freeze(object);
+}
 
-export const settingsConfig = settingsDefine.reduce((p, c) => {
-    c.key = storageKey(c.name);
-    p[c.key] = Object.assign({}, settingDefault, c);
-    return p;
-}, {});
-
-deepFreeze(settingsConfig);
-deepFreeze(settingsDefine);
-
-export const settingsKeys = deepFreeze(Object.keys(settingsConfig));
+// export and define the operation method of settings storage
+// they are similar to browser.storage but slightly different
 
 export async function get(keys, area) {
     if (![undefined, "local", "sync"].includes(area)) {
-        return console.error("unexpected storage area:", area);
+        return console.error("Unexpected storage area:", area);
     }
+    // validate setting value and fix surprises to default
+    const valueFix = (key, val) => {
+        if (!key || !Object.hasOwn(settingsDefine, key)) return;
+        const def = settingsDefine[key].default;
+        // check if value type conforms to settingsDefine
+        const type = settingsDefine[key].type;
+        if (typeof val != type) {
+            console.warn(`Unexpected ${key} value type '${typeof(val)}' should '${type}', fix to default`);
+            return def;
+        }
+        // check if value conforms to settingsDefine
+        const values = settingsDefine[key].values;
+        if (values.length && !values.includes(val)) {
+            console.warn(`Unexpected ${key} value '${val}' should one of '${values}', fix to default`);
+            return def;
+        }
+        // verified, pass original value
+        return val;
+    };
     if (typeof keys == "string") { // single setting
         const key = storageKey(keys);
-        if (!settingsKeys.includes(key)) {
+        // check if key exist in settingsDefine
+        if (!Object.hasOwn(settingsDefine, key)) {
             return console.error("unexpected settings key:", key);
         }
-        settingsConfig[key].local === true && (area = "local");
+        settingsDefine[key].local === true && (area = "local");
         const storage = await storageRef(area);
         const result = await storage.get(key);
-        return result[key] ?? settingsConfig[key].default;
+        if (Object.hasOwn(result, key)) {
+            return valueFix(key, result[key]);
+        } else {
+            return settingsDefine[key].default;
+        }
     }
     const complexGet = async (settingsDefault, areaKeys) => {
         const storage = await storageRef(area);
@@ -359,9 +371,9 @@ export async function get(keys, area) {
             local = await storage.get(areaKeys.all);
         }
         const result = Object.assign(settingsDefault, local, sync);
-        // reduce settings object property name
+        // revert settings object property name
         return Object.entries(result).reduce((p, c) => (
-            p[settingsConfig[c[0]].name] = c[1], p
+            p[settingsDefine[c[0]].name] = valueFix(...c), p
         ), {});
     };
     if (Array.isArray(keys)) { // muilt settings
@@ -372,13 +384,16 @@ export async function get(keys, area) {
         const areaKeys = {local: [], sync: [], all: []};
         for (const k of keys) {
             const key = storageKey(k);
-            if (!settingsKeys.includes(key)) {
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
                 return console.error("unexpected settings key:", key);
             }
-            settingsDefault[key] = settingsConfig[key].default;
-            settingsConfig[key].local === true
+            settingsDefault[key] = settingsDefine[key].default;
+            // detach only locally stored settings
+            settingsDefine[key].local === true
                 ? areaKeys.local.push(key)
                 : areaKeys.sync.push(key);
+            // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
         return await complexGet(settingsDefault, areaKeys);
@@ -386,16 +401,18 @@ export async function get(keys, area) {
     if (typeof keys == "undefined" || keys === null) { // all settings
         const settingsDefault = {};
         const areaKeys = {local: [], sync: [], all: []};
-        for (const key in settingsConfig) {
-            settingsDefault[key] = settingsConfig[key].default;
-            settingsConfig[key].local === true
+        for (const key in settingsDefine) {
+            settingsDefault[key] = settingsDefine[key].default;
+            // detach only locally stored settings
+            settingsDefine[key].local === true
                 ? areaKeys.local.push(key)
                 : areaKeys.sync.push(key);
+            // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
         return await complexGet(settingsDefault, areaKeys);
     }
-    return console.error("Unexpected arg type:", keys);
+    return console.error("Unexpected keys type:", keys);
 }
 
 export async function set(keys, area) {
@@ -403,7 +420,7 @@ export async function set(keys, area) {
         return console.error("unexpected storage area:", area);
     }
     if (typeof keys != "object") {
-        return console.error("Unexpected arg type:", keys);
+        return console.error("Unexpected keys type:", keys);
     }
     if (!Object.keys(keys).length) {
         return console.error("Settings object empty:", keys);
@@ -411,19 +428,33 @@ export async function set(keys, area) {
     const areaKeys = {local: {}, sync: {}, all: {}};
     for (const k in keys) {
         const key = storageKey(k);
-        if (!settingsKeys.includes(key)) {
+        // check if key exist in settingsDefine
+        if (!Object.hasOwn(settingsDefine, key)) {
             return console.error("Unexpected settings keys:", key);
         }
-        const type = settingsConfig[key].type;
+        // check if value type conforms to settingsDefine
+        const type = settingsDefine[key].type;
         if (typeof keys[k] != type) {
-            return console.error(`Unexpected value type ${typeof(value)} should ${type}`);
+            if (type === "number" && !isNaN(keys[k])) { // compatible with string numbers
+                keys[k] = Number(keys[k]); // still store it as a number type
+            } else {
+                return console.error(`Unexpected ${k} value type '${typeof(keys[k])}' should '${type}'`);
+            }
         }
-        settingsConfig[key].local === true
+        // check if value conforms to settingsDefine
+        const values = settingsDefine[key].values;
+        if (values.length && !values.includes(keys[k])) {
+            return console.error(`Unexpected ${k} value '${keys[k]}' should one of '${values}'`);
+        }
+        // detach only locally stored settings
+        settingsDefine[key].local === true
             ? areaKeys.local[key] = keys[k]
             : areaKeys.sync[key] = keys[k];
+        // record all keys in case sync storage is not enabled
         areaKeys.all[key] = keys[k];
     }
     const storage = await storageRef(area);
+    // complexSet
     try {
         if (storage.area === "sync") {
             if (Object.keys(areaKeys.sync).length) {
@@ -448,10 +479,15 @@ export async function reset(keys, area) { // reset to default
     }
     if (typeof keys == "string") { // single setting
         const key = storageKey(keys);
-        if (!settingsKeys.includes(key)) {
+        // check if key exist in settingsDefine
+        if (!Object.hasOwn(settingsDefine, key)) {
             return console.error("unexpected settings key:", key);
         }
-        settingsConfig[key].local === true && (area = "local");
+        // check if key is protected
+        if (settingsDefine[key].protect === true) {
+            return console.error("protected settings key:", key);
+        }
+        settingsDefine[key].local === true && (area = "local");
         const storage = await storageRef(area);
         return storage.remove(key);
     }
@@ -481,53 +517,75 @@ export async function reset(keys, area) { // reset to default
         const areaKeys = {local: [], sync: [], all: []};
         for (const k of keys) {
             const key = storageKey(k);
-            if (!settingsKeys.includes(key)) {
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
                 return console.error("unexpected settings key:", key);
             }
-            settingsConfig[key].local === true
+            // check if key is protected
+            if (settingsDefine[key].protect === true) {
+                return console.error("protected settings key:", key);
+            }
+            // detach only locally stored settings
+            settingsDefine[key].local === true
                 ? areaKeys.local.push(key)
                 : areaKeys.sync.push(key);
+            // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
         return await complexRemove(areaKeys);
     }
     if (typeof keys == "undefined" || keys === null) { // all settings
         const areaKeys = {local: [], sync: [], all: []};
-        for (const key in settingsConfig) {
-            settingsConfig[key].local === true
+        for (const key in settingsDefine) {
+            // skip protected keys
+            if (settingsDefine[key].protect === true) continue;
+            // detach only locally stored settings
+            settingsDefine[key].local === true
                 ? areaKeys.local.push(key)
                 : areaKeys.sync.push(key);
+            // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
         return await complexRemove(areaKeys);
     }
-    return console.error("Unexpected arg type:", keys);
+    return console.error("Unexpected keys type:", keys);
 }
 
-export function onChanged(callback) {
-    const listener = (changes, area) => {
+// this function is convenient for the svelte store to update the state
+export function onChanged(callback) { // complex onChanged
+    if (typeof callback != "function") {
+        return console.error("Unexpected callback:", callback);
+    }
+    console.info("storage onChanged addListener");
+    const handle = (changes, area) => {
         // console.log(`storage.${area}.onChanged`, changes);
-        const settings = {};
-        for (const key in changes) {
-            if (!(key in settingsConfig)) continue;
-            settings[settingsConfig[key].name] = changes[key].newValue;
+        try {
+            const settings = {};
+            for (const key in changes) {
+                if (!Object.hasOwn(settingsDefine, key)) continue;
+                settings[settingsDefine[key].name] = changes[key].newValue;
+            }
+            callback(settings, area);
+        } catch (error) {
+            console.error("onChanged callback:", error);
         }
-        callback(settings, area);
     };
-    browser.storage.sync.onChanged.addListener(changes => {
-        listener(changes, "sync");
-    });
-    browser.storage.local.onChanged.addListener(changes => {
-        listener(changes, "local");
-    });
+    browser.storage.sync.onChanged.addListener(c => handle(c, "sync"));
+    browser.storage.local.onChanged.addListener(c => handle(c, "local"));
 }
+
+// the following functions are used only for compatibility transition periods
+// they are deliberately named in snake_case format
+// they will be deleted at some point in the future
 
 export async function legacy_get(keys) {
     const result = await get(keys);
     // console.log("legacy_get", keys, result);
-    return Object.entries(result).reduce((p, c) => (
-        p[settingsConfig[storageKey(c[0])].legacy || c[0]] = c[1], p
-    ), {});
+    for (const key in result) {
+        const legacy = settingsDefine[storageKey(key)]?.legacy;
+        if (legacy) result[legacy] = result[key];
+    }
+    return result;
 }
 
 export async function legacy_set(keys) {
@@ -538,38 +596,44 @@ export async function legacy_set(keys) {
         return console.error("Settings object empty:", keys);
     }
     const settings = {};
-    for (const obj of settingsDefine) {
-        if (!obj.legacy) continue;
-        if (obj.legacy in keys) {
-            settings[obj.name] = keys[obj.legacy];
+    for (const key in settingsDefine) {
+        const setting = settingsDefine[key];
+        if (!setting.legacy) continue;
+        if (setting.legacy in keys) {
+            settings[setting.name] = keys[setting.legacy];
         }
     }
     // console.log("legacy_set", keys, settings);
     return await set(settings);
 }
 
-export async function import_legacy_data() {
+export async function legacy_import() {
     const imported = await get("legacy_imported");
     if (imported) return console.info("Legacy settings has already imported");
     const result = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
     if (result.error) return console.error(result.error);
     console.info("Import settings data from legacy manifest file");
     const settings = {};
-    for (const key in settingsConfig) {
-        const legacy = settingsConfig[key].legacy;
+    for (const key in settingsDefine) {
+        const legacy = settingsDefine[key].legacy;
         if (legacy in result) {
             let value = result[legacy];
-            switch (settingsConfig[key].type) {
+            switch (settingsDefine[key].type) {
                 case "boolean": value = JSON.parse(value); break;
                 case "number": value = Number(value); break;
             }
             console.log(`Importing legacy setting: ${legacy}`, value);
-            settings[settingsConfig[key].name] = value;
+            settings[settingsDefine[key].name] = value;
         }
     }
-    if (!set(settings)) return console.error("Import legacy settings abort");
-    set({"legacy_imported": Date.now()});
-    console.info("Import legacy settings complete");
-    // Send a message to the Swift layer to safely clean up legacy data
-    browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
+    // import complete tag, to ensure will only be import once
+    Object.assign(settings, {"legacy_imported": Date.now()});
+    if (await set(settings, "local")) {
+        console.info("Import legacy settings complete");
+        // Send a message to the Swift layer to safely clean up legacy data
+        browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
+        return true;
+    } else {
+        return console.error("Import legacy settings abort");
+    }
 }

@@ -77,6 +77,27 @@ export const state = stateStore();
 
 function settingsStore() {
     const {subscribe, update, set} = writable({});
+    const init = async () => {
+        // import legacy settings data just one-time
+        await settingsStorage.legacy_import();
+        // for compatibility with legacy getting names only
+        // once all new name is used, use settingsStorage.get()
+        const settings = await settingsStorage.legacy_get();
+        console.info("store.js settingsStore init", settings);
+        set(settings);
+        // sync popup, backgound, etc... settings changes
+        settingsStorage.onChanged((settings, area) => {
+            console.log(`store.js storage.${area}.onChanged`, settings);
+            update(obj => Object.assign(obj, settings));
+        });
+    };
+    const reset = async keys => {
+        await settingsStorage.reset(keys);
+        // once all new name is used, use settingsStorage.get()
+        const settings = await settingsStorage.legacy_get();
+        console.info("store.js settingsStore reset", settings);
+        set(settings);
+    };
     const updateSingleSetting_old = (key, value) => {
         update(settings => {
             settings[key] = value;
@@ -95,24 +116,13 @@ function settingsStore() {
     };
     const updateSingleSetting = (key, value) => {
         update(settings => (settings[key] = value, settings));
-        // For compatibility with legacy setting names only
-        // Once the new name is used, use settingsStorage.set()
+        // for compatibility with legacy setting names only
+        // once all new name is used, use settingsStorage.set()
         settingsStorage.legacy_set({[key]: value}); // Durable Storage
-        // Temporarily keep the old storage method until it is confirmed that all dependencies are removed
+        // temporarily keep the old storage method until it is confirmed that all dependencies are removed
         updateSingleSetting_old(key, value);
     };
-    const init = async () => {
-        settingsStorage.import_legacy_data();
-        const settings = await settingsStorage.legacy_get();
-        // console.log("store.js settingsStore init", settings);
-        set(settings);
-        // sync popup, backgound, etc... settings changes
-        settingsStorage.onChanged((settings, area) => {
-            console.log(`storage.${area}.onChanged`, settings);
-            update(obj => Object.assign(obj, settings));
-        });
-    };
-    return {subscribe, set, init, updateSingleSetting};
+    return {subscribe, set, init, reset, updateSingleSetting};
 }
 export const settings = settingsStore();
 
