@@ -241,7 +241,6 @@ function processJS(userscript) {
 function wrapCode(preCode, code, filename) {
     return `
         (function() {
-            "use strict";
             ${preCode}
             (function() {
                 const US_filename = "${filename}";
@@ -331,9 +330,11 @@ browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
     }
     // save response locally in case CSP events occur
     data = response;
+    // combine regular and context-menu scripts
+    const scripts = [...data.files.js, ...data.files.menu];
     // loop through each userscript and prepare for processing
-    for (let i = 0; i < data.files.js.length; i++) {
-        const userscript = data.files.js[i];
+    for (let i = 0; i < scripts.length; i++) {
+        const userscript = scripts[i];
         userscript.preCode = "";
         // pass references to the api methods as needed
         const gmMethods = [];
@@ -451,7 +452,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const item = data.files.menu[i];
             if (item.scriptObject.filename === filename) {
                 console.info(`Injecting ${filename} %c(js)`, "color: #fff600");
-                sendResponse({code: item.code});
+                sendResponse({
+                    code: wrapCode(
+                        item.preCode,
+                        item.code,
+                        filename
+                    )
+                });
                 return;
             }
         }
