@@ -249,8 +249,8 @@ function wrapCode(preCode, code, filename) {
                 // userscript code below
                 ${code}
                 //# sourceURL=${filename.replace(/\s/g, "-")}
-            }).apply(window);
-        }).apply(window);
+            })();
+        })();
     `;
 }
 
