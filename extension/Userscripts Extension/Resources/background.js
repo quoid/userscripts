@@ -265,7 +265,7 @@ function handleMessage(request, sender, sendResponse) {
                 // sort files
                 response.files.js.sort(userscriptSort);
                 response.files.css.sort((a, b) => {
-                    return Number(a.scriptObject.weight) < Number(b.scriptObject.weight);
+                    return Number(a.weight) < Number(b.weight);
                 });
                 // return sorted files for injection
                 sendResponse(response);
