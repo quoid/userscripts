@@ -1950,11 +1950,6 @@ func popupInit() -> [String: String]? {
         err("Failed to updateDeclarativeNetRequest in popupInit")
         return nil
     }
-    let manifest = getManifest()
-    guard let active = manifest.settings["active"] else {
-        err("Failed at getManifest active in popupInit")
-        return nil
-    }
     // pass some info in response
     guard let saveLocation = getSaveLocation() else {
         err("Failed at getSaveLocation in popupInit")
@@ -1964,7 +1959,6 @@ func popupInit() -> [String: String]? {
     let requireLocation = getRequireLocation()
 
     return [
-        "active": active,
         "saveLocation": saveLocation.absoluteString,
         "documentsDirectory": documentsDirectory.absoluteString,
         "requireLocation": requireLocation.absoluteString

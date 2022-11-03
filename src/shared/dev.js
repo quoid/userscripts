@@ -86,6 +86,12 @@ const _browser = {
             let response = {};
             if (name === "PAGE_INIT_DATA") {
                 response = {
+                    saveLocation: "/Users/someone/Library/Directory",
+                    version: "4.0.0",
+                    build: "44"
+                };
+            } else if (name === "PAGE_LEGACY_IMPORT") {
+                response = {
                     active: "true",
                     autoCloseBrackets: "true",
                     autoHint: "true",
@@ -94,13 +100,10 @@ const _browser = {
                     languageCode: "en",
                     lint: "true",
                     log: "false",
-                    saveLocation: "/Users/someone/Library/Directory",
                     showCount: "true",
                     showInvisibles: "true",
                     sortOrder: "lastModifiedDesc",
-                    tabSize: "4",
-                    version: "4.0.0",
-                    build: "44"
+                    tabSize: "4"
                 };
             } else if (name === "PAGE_ALL_FILES") {
                 response = [];
@@ -416,6 +419,10 @@ const _browser = {
             },
             set() {
                 return new Promise(resolve => setTimeout(() => resolve(), _browser.delay));
+            },
+            remove: () => new Promise(resolve => setTimeout(() => resolve(), _browser.delay)),
+            onChanged: {
+                addListener: () => undefined
             }
         }
     }

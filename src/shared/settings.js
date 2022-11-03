@@ -2,18 +2,25 @@
 
 const storagePrefix = "US_";
 const storageKey = key => storagePrefix + key.toUpperCase();
-const storageRef = async area => { // dynamic storage reference
-    browser.storage.sync.area = "sync";
+// const storageRef = async area => { // dynamic storage reference
+//     browser.storage.sync.area = "sync";
+//     browser.storage.local.area = "local";
+//     if (area === "sync") return browser.storage.sync;
+//     if (area === "local") return browser.storage.local;
+//     const key = storageKey("settings_sync");
+//     const result = await browser.storage.local.get(key);
+//     if (result?.[key] === true) {
+//         return browser.storage.sync;
+//     } else {
+//         return browser.storage.local;
+//     }
+// };
+
+// https://developer.apple.com/documentation/safariservices/safari_web_extensions/assessing_your_safari_web_extension_s_browser_compatibility#3584139
+// since storage sync is not implemented in Safari, currently only returns using local storage
+const storageRef = async () => {
     browser.storage.local.area = "local";
-    if (area === "sync") return browser.storage.sync;
-    if (area === "local") return browser.storage.local;
-    const key = storageKey("settings_sync");
-    const result = await browser.storage.local.get(key);
-    if (result?.[key] === true) {
-        return browser.storage.sync;
-    } else {
-        return browser.storage.local;
-    }
+    return browser.storage.local;
 };
 
 const settingDefault = deepFreeze({
@@ -52,21 +59,54 @@ export const settingsDefine = deepFreeze([
         legacy: "languageCode"
     },
     {
-        name: "settings_sync",
-        type: "boolean",
-        local: true,
-        default: false,
-        protect: true,
+        name: "scripts_settings",
+        type: "object",
+        default: {},
         platforms: ["macos", "ipados", "ios"],
         langLabel: {
-            en: "Sync settings",
-            zh_hans: "同步设置"
+            en: "Scripts update check active",
+            zh_hans: "脚本更新检查激活"
         },
         langTitle: {
-            en: "Sync settings across devices",
-            zh_hans: "跨设备同步设置"
+            en: "Whether to enable each single script update check",
+            zh_hans: "是否开启单个脚本更新检查"
+        },
+        group: "Internal",
+        nodeType: "Subpage"
+    },
+    // {
+    //     name: "settings_sync",
+    //     type: "boolean",
+    //     local: true,
+    //     default: false,
+    //     protect: true,
+    //     platforms: ["macos", "ipados", "ios"],
+    //     langLabel: {
+    //         en: "Sync settings",
+    //         zh_hans: "同步设置"
+    //     },
+    //     langTitle: {
+    //         en: "Sync settings across devices",
+    //         zh_hans: "跨设备同步设置"
+    //     },
+    //     group: "General",
+    //     nodeType: "Toggle"
+    // },
+    {
+        name: "toolbar_badge_count",
+        type: "boolean",
+        default: true,
+        platforms: ["macos", "ipados"],
+        langLabel: {
+            en: "Show Toolbar Count",
+            zh_hans: "工具栏图标显示计数徽章"
+        },
+        langTitle: {
+            en: "displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on",
+            zh_hans: "简体中文描述"
         },
         group: "General",
+        legacy: "showCount",
         nodeType: "Toggle"
     },
     {
@@ -87,23 +127,6 @@ export const settingsDefine = deepFreeze([
         legacy: "active",
         nodeType: "Toggle",
         nodeClass: {red: false}
-    },
-    {
-        name: "toolbar_badge_count",
-        type: "boolean",
-        default: true,
-        platforms: ["macos", "ipados"],
-        langLabel: {
-            en: "Show Toolbar Count",
-            zh_hans: "工具栏图标显示计数徽章"
-        },
-        langTitle: {
-            en: "displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on",
-            zh_hans: "简体中文描述"
-        },
-        group: "General",
-        legacy: "showCount",
-        nodeType: "Toggle"
     },
     {
         name: "global_scripts_update_check",
@@ -132,9 +155,25 @@ export const settingsDefine = deepFreeze([
         },
         langTitle: {
             en: "The interval for script update check in background",
-            zh_hans: "后台脚本更新检查的间隔时间"
+            zh_hans: "脚本更新检查的间隔时间"
         },
         group: "General",
+        nodeType: "Toggle"
+    },
+    {
+        name: "scripts_update_check_lasttime",
+        type: "number",
+        default: 0,
+        platforms: ["macos", "ipados", "ios"],
+        langLabel: {
+            en: "Scripts update check lasttime",
+            zh_hans: "脚本更新上次检查时间"
+        },
+        langTitle: {
+            en: "The lasttime for script update check in background",
+            zh_hans: "后台脚本更新上次检查时间"
+        },
+        group: "Internal",
         nodeType: "Toggle"
     },
     {
@@ -570,7 +609,8 @@ export function onChanged(callback) { // complex onChanged
             console.error("onChanged callback:", error);
         }
     };
-    browser.storage.sync.onChanged.addListener(c => handle(c, "sync"));
+    // comment for now same reason as storageRef
+    // browser.storage.sync.onChanged.addListener(c => handle(c, "sync"));
     browser.storage.local.onChanged.addListener(c => handle(c, "local"));
 }
 

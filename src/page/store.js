@@ -96,7 +96,7 @@ function settingsStore() {
         // once all new name is used, use settingsStorage.get()
         const settings = await settingsStorage.legacy_get();
         console.info("store.js settingsStore reset", settings);
-        set(settings);
+        update(obj => Object.assign(obj, settings));
     };
     const updateSingleSetting_old = (key, value) => {
         // blacklist not stored in normal setting object in manifest, so handle differently
