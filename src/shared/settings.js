@@ -380,12 +380,13 @@ export async function get(keys, area) {
         // verified, pass original value
         return val;
     };
-    if (typeof keys == "string") { // single setting
+    if (typeof keys == "string") { // [single setting]
         const key = storageKey(keys);
         // check if key exist in settingsDefine
         if (!Object.hasOwn(settingsDefine, key)) {
             return console.error("unexpected settings key:", key);
         }
+        // check if only locally stored setting
         settingsDefine[key].local === true && (area = "local");
         const storage = await storageRef(area);
         const result = await storage.get(key);
@@ -415,7 +416,7 @@ export async function get(keys, area) {
             p[settingsDefine[c[0]].name] = valueFix(...c), p
         ), {});
     };
-    if (Array.isArray(keys)) { // muilt settings
+    if (Array.isArray(keys)) { // [muilt settings]
         if (!keys.length) {
             return console.error("Settings keys empty:", keys);
         }
@@ -437,7 +438,7 @@ export async function get(keys, area) {
         }
         return await complexGet(settingsDefault, areaKeys);
     }
-    if (typeof keys == "undefined" || keys === null) { // all settings
+    if (typeof keys == "undefined" || keys === null) { // [all settings]
         const settingsDefault = {};
         const areaKeys = {local: [], sync: [], all: []};
         for (const key in settingsDefine) {
@@ -516,7 +517,7 @@ export async function reset(keys, area) { // reset to default
     if (![undefined, "local", "sync"].includes(area)) {
         return console.error("unexpected storage area:", area);
     }
-    if (typeof keys == "string") { // single setting
+    if (typeof keys == "string") { // [single setting]
         const key = storageKey(keys);
         // check if key exist in settingsDefine
         if (!Object.hasOwn(settingsDefine, key)) {
@@ -549,7 +550,7 @@ export async function reset(keys, area) { // reset to default
             return console.error(error);
         }
     };
-    if (Array.isArray(keys)) { // muilt settings
+    if (Array.isArray(keys)) { // [muilt settings]
         if (!keys.length) {
             return console.error("Settings keys empty:", keys);
         }
@@ -573,7 +574,7 @@ export async function reset(keys, area) { // reset to default
         }
         return await complexRemove(areaKeys);
     }
-    if (typeof keys == "undefined" || keys === null) { // all settings
+    if (typeof keys == "undefined" || keys === null) { // [all settings]
         const areaKeys = {local: [], sync: [], all: []};
         for (const key in settingsDefine) {
             // skip protected keys
@@ -609,7 +610,7 @@ export function onChanged(callback) { // complex onChanged
             console.error("onChanged callback:", error);
         }
     };
-    // comment for now same reason as storageRef
+    // comment for now same reason as `storageRef` function
     // browser.storage.sync.onChanged.addListener(c => handle(c, "sync"));
     browser.storage.local.onChanged.addListener(c => handle(c, "local"));
 }
@@ -648,8 +649,10 @@ export async function legacy_set(keys) {
 }
 
 export async function legacy_import() {
+    // if legacy data has already been imported, skip this process
     const imported = await get("legacy_imported");
     if (imported) return console.info("Legacy settings has already imported");
+    // start the one-time import process
     const result = await browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORT"});
     if (result.error) return console.error(result.error);
     console.info("Import settings data from legacy manifest file");
@@ -670,8 +673,8 @@ export async function legacy_import() {
     Object.assign(settings, {"legacy_imported": Date.now()});
     if (await set(settings, "local")) {
         console.info("Import legacy settings complete");
-        // Send a message to the Swift layer to safely clean up legacy data
-        browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
+        // send a message to the Swift layer to safely clean up legacy data
+        // browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
         return true;
     } else {
         return console.error("Import legacy settings abort");
