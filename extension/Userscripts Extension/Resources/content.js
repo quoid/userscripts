@@ -322,154 +322,164 @@ function cspFallback(e) {
     }
 }
 
-const injection = () => browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
-    // cancel injection if errors detected
-    if (!response || response.error) {
-        console.error(response?.error || "REQ_USERSCRIPTS returned undefined");
-        return;
-    }
-    // save response locally in case CSP events occur
-    data = response;
-    // combine regular and context-menu scripts
-    const scripts = [...data.files.js, ...data.files.menu];
-    // loop through each userscript and prepare for processing
-    for (let i = 0; i < scripts.length; i++) {
-        const userscript = scripts[i];
-        userscript.preCode = "";
-        // pass references to the api methods as needed
-        const gmMethods = [];
-        const filename = userscript.scriptObject.filename;
-        const grants = userscript.scriptObject.grant;
-        const injectInto = userscript.scriptObject["inject-into"];
-        // create GM.info object
-        const scriptData = {
-            "script": userscript.scriptObject,
-            "scriptHandler": data.scriptHandler,
-            "scriptHandlerVersion": data.scriptHandlerVersion,
-            "scriptMetaStr": userscript.scriptMetaStr
-        };
-        // all userscripts get access to GM.info
-        gmMethods.push("info: GM_info");
-        // if @grant explicitly set to none, empty grants array
-        if (grants.includes("none")) grants.length = 0;
-        // @grant values exist for page scoped userscript
-        if (grants.length && injectInto === "page") {
-            // remove grants
-            grants.length = 0;
-            // log warning
-            console.warn(`${filename} @grant values removed due to @inject-into value: ${injectInto} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`);
+function injection() {
+    browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
+        // cancel injection if errors detected
+        if (!response || response.error) {
+            console.error(response?.error || "REQ_USERSCRIPTS returned undefined");
+            return;
         }
-        // @grant exist for auto scoped userscript
-        if (grants.length && injectInto === "auto") {
-            // change scope
-            userscript.scriptObject["inject-into"] = "content";
-            // log warning
-            console.warn(`${filename} @inject-into value set to 'content' due to @grant values: ${grants} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`);
-        }
-        // loop through each userscript @grant value, add methods as needed
-        for (let j = 0; j < grants.length; j++) {
-            const grant = grants[j];
-            const method = grant.split(".")[1] || grant.split(".")[0];
-            // ensure API method exists in apis object
-            if (!Object.keys(apis).includes(method)) continue;
-            // create the method string to be pushed to methods array
-            let methodStr = `${method}: apis.${method}`;
-            // add require variables to specific methods
-            switch (method) {
-                case "getValue":
-                case "setValue":
-                case "deleteValue":
-                case "listValues":
-                    methodStr += `.bind({"US_filename": "${filename}"})`;
-                    break;
-                case "info":
-                case "GM_info":
-                    continue;
-                case "xmlHttpRequest":
-                    gmMethods.push("xmlHttpRequest: apis.xhr");
-                    continue;
-                case "GM_xmlhttpRequest":
-                    userscript.preCode += "const GM_xmlhttpRequest = apis.xhr;";
-                    continue;
-            }
-            gmMethods.push(methodStr);
-        }
-        // add GM.info
-        userscript.preCode += `const GM_info = ${JSON.stringify(scriptData)};`;
-        // add other included GM API methods
-        userscript.preCode += `const GM = {${gmMethods.join(",")}};`;
-        // process file for injection
-        processJS(userscript);
-    }
-    for (let i = 0; i < data.files.css.length; i++) {
-        const userstyle = data.files.css[i];
-        injectCSS(userstyle.name, userstyle.code);
-    }
-});
-// listens for messages from background, popup, etc...
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    const name = request.name;
-    if (
-        name === "USERSCRIPT_INSTALL_00"
-        || name === "USERSCRIPT_INSTALL_01"
-        || name === "USERSCRIPT_INSTALL_02"
-    ) {
-        // only respond to top frame messages
-        if (window !== window.top) return;
-        const types = [
-            "text/plain",
-            "application/ecmascript",
-            "application/javascript",
-            "text/ecmascript",
-            "text/javascript"
-        ];
-        if (
-            !document.contentType
-            || types.indexOf(document.contentType) === -1
-            || !document.querySelector("pre")
-        ) {
-            sendResponse({invalid: true});
-        } else {
-            const message = {
-                name: name,
-                content:
-                document.querySelector("pre").innerText
+        // save response locally in case CSP events occur
+        data = response;
+        // combine regular and context-menu scripts
+        const scripts = [...data.files.js, ...data.files.menu];
+        // loop through each userscript and prepare for processing
+        for (let i = 0; i < scripts.length; i++) {
+            const userscript = scripts[i];
+            userscript.preCode = "";
+            // pass references to the api methods as needed
+            const gmMethods = [];
+            const filename = userscript.scriptObject.filename;
+            const grants = userscript.scriptObject.grant;
+            const injectInto = userscript.scriptObject["inject-into"];
+            // create GM.info object
+            const scriptData = {
+                "script": userscript.scriptObject,
+                "scriptHandler": data.scriptHandler,
+                "scriptHandlerVersion": data.scriptHandlerVersion,
+                "scriptMetaStr": userscript.scriptMetaStr
             };
-            browser.runtime.sendMessage(message, response => {
-                sendResponse(response);
-            });
-            return true;
-        }
-    } else if (name === "CONTEXT_RUN") {
-        // from bg script when context-menu item is clicked
-        // double check to ensure context-menu scripts only run in top windows
-        if (window !== window.top) return;
-
-        // loop through context-menu scripts saved to data object and find match
-        // if no match found, nothing will execute and error will log
-        const filename = request.menuItemId;
-        for (let i = 0; i < data.files.menu.length; i++) {
-            const item = data.files.menu[i];
-            if (item.scriptObject.filename === filename) {
-                console.info(`Injecting ${filename} %c(js)`, "color: #fff600");
-                sendResponse({
-                    code: wrapCode(
-                        item.preCode,
-                        item.code,
-                        filename
-                    )
-                });
-                return;
+            // all userscripts get access to GM.info
+            gmMethods.push("info: GM_info");
+            // if @grant explicitly set to none, empty grants array
+            if (grants.includes("none")) grants.length = 0;
+            // @grant values exist for page scoped userscript
+            if (grants.length && injectInto === "page") {
+                // remove grants
+                grants.length = 0;
+                // log warning
+                console.warn(`${filename} @grant values removed due to @inject-into value: ${injectInto} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`);
             }
+            // @grant exist for auto scoped userscript
+            if (grants.length && injectInto === "auto") {
+                // change scope
+                userscript.scriptObject["inject-into"] = "content";
+                // log warning
+                console.warn(`${filename} @inject-into value set to 'content' due to @grant values: ${grants} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`);
+            }
+            // loop through each userscript @grant value, add methods as needed
+            for (let j = 0; j < grants.length; j++) {
+                const grant = grants[j];
+                const method = grant.split(".")[1] || grant.split(".")[0];
+                // ensure API method exists in apis object
+                if (!Object.keys(apis).includes(method)) continue;
+                // create the method string to be pushed to methods array
+                let methodStr = `${method}: apis.${method}`;
+                // add require variables to specific methods
+                switch (method) {
+                    case "getValue":
+                    case "setValue":
+                    case "deleteValue":
+                    case "listValues":
+                        methodStr += `.bind({"US_filename": "${filename}"})`;
+                        break;
+                    case "info":
+                    case "GM_info":
+                        continue;
+                    case "xmlHttpRequest":
+                        gmMethods.push("xmlHttpRequest: apis.xhr");
+                        continue;
+                    case "GM_xmlhttpRequest":
+                        userscript.preCode += "const GM_xmlhttpRequest = apis.xhr;";
+                        continue;
+                }
+                gmMethods.push(methodStr);
+            }
+            // add GM.info
+            userscript.preCode += `const GM_info = ${JSON.stringify(scriptData)};`;
+            // add other included GM API methods
+            userscript.preCode += `const GM = {${gmMethods.join(",")}};`;
+            // process file for injection
+            processJS(userscript);
         }
-        console.error(`Couldn't find ${filename} code!`);
-    }
-});
-// listen for CSP violations
-document.addEventListener("securitypolicyviolation", cspFallback);
+        for (let i = 0; i < data.files.css.length; i++) {
+            const userstyle = data.files.css[i];
+            injectCSS(userstyle.name, userstyle.code);
+        }
+    });
+}
 
-// should import settings.js and use `settingsStorage.get("global_active")`
-browser.storage.local.get("US_GLOBAL_ACTIVE").then(results => {
+function listeners() {
+    // listens for messages from background, popup, etc...
+    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        const name = request.name;
+        if (
+            name === "USERSCRIPT_INSTALL_00"
+            || name === "USERSCRIPT_INSTALL_01"
+            || name === "USERSCRIPT_INSTALL_02"
+        ) {
+            // only respond to top frame messages
+            if (window !== window.top) return;
+            const types = [
+                "text/plain",
+                "application/ecmascript",
+                "application/javascript",
+                "text/ecmascript",
+                "text/javascript"
+            ];
+            if (
+                !document.contentType
+                || types.indexOf(document.contentType) === -1
+                || !document.querySelector("pre")
+            ) {
+                sendResponse({invalid: true});
+            } else {
+                const message = {
+                    name: name,
+                    content:
+                    document.querySelector("pre").innerText
+                };
+                browser.runtime.sendMessage(message, response => {
+                    sendResponse(response);
+                });
+                return true;
+            }
+        } else if (name === "CONTEXT_RUN") {
+            // from bg script when context-menu item is clicked
+            // double check to ensure context-menu scripts only run in top windows
+            if (window !== window.top) return;
+    
+            // loop through context-menu scripts saved to data object and find match
+            // if no match found, nothing will execute and error will log
+            const filename = request.menuItemId;
+            for (let i = 0; i < data.files.menu.length; i++) {
+                const item = data.files.menu[i];
+                if (item.scriptObject.filename === filename) {
+                    console.info(`Injecting ${filename} %c(js)`, "color: #fff600");
+                    sendResponse({
+                        code: wrapCode(
+                            item.preCode,
+                            item.code,
+                            filename
+                        )
+                    });
+                    return;
+                }
+            }
+            console.error(`Couldn't find ${filename} code!`);
+        }
+    });
+    // listen for CSP violations
+    document.addEventListener("securitypolicyviolation", cspFallback);
+}
+
+async function initialize() {
+    // should import settings.js and use `settings.get("global_active")`
+    const results = await browser.storage.local.get("US_GLOBAL_ACTIVE");
     if (results?.US_GLOBAL_ACTIVE === false) return console.info("Userscripts off");
+    // start the injection process and add the listeners
     injection();
-});
+    listeners();
+}
+
+initialize();
