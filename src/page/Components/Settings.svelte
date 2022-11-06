@@ -1,6 +1,6 @@
 <script>
     import {fade, fly} from "svelte/transition";
-    import {settings, state} from "../store.js";
+    import {settings, state, log} from "../store.js";
     import IconButton from "../../shared/Components/IconButton.svelte";
     import Toggle from "../../shared/Components/Toggle.svelte";
     import iconLoader from "../../shared/img/icon-loader.svg";
@@ -26,9 +26,10 @@
         for (const v of val) {
             if (re.exec(v) === null) {
                 blacklistError = true;
-                return console.warn("Global blacklist has wrong pattern:", v);
+                log.add(`Invalid match pattern: ${v}`, "error", true);
             }
         }
+        if (blacklistError) return console.warn("Global exclude includes invalid match patterns");
         blacklistError = false;
 
         // compare blacklist input to saved blacklist
@@ -68,10 +69,13 @@
 
 <div
     class="settings"
-    on:click|self={() => state.remove("settings")}
     in:fade={{duration: 150}}
     out:fade={{duration: 150, delay: 75}}
 >
+    <div
+        class="mask"
+        on:click|self={() => state.remove("settings")}
+    ></div>
     <div
         class="modal"
         in:fly={{y: 50, duration: 150, delay: 75}}
@@ -160,7 +164,7 @@
             </div>
             <div class="modal__row modal__row--wrap">
                 <div class="blacklist" class:red={blacklistError}>
-                    <span>Global Blacklist</span>
+                    <span>Global exclude match patterns</span>
                     { #if blacklistSaving}{@html iconLoader}{/if}
                 </div>
                 <textarea
@@ -202,6 +206,12 @@
         z-index: 90;
     }
 
+    .mask {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
     .modal {
         background-color: var(--color-bg-secondary);
         border-radius: var(--border-radius);
@@ -209,6 +219,7 @@
         max-height: 90%;
         overflow-y: auto;
         width: 32rem;
+        z-index: 99;
     }
 
     .modal__title {
