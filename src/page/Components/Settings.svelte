@@ -68,10 +68,13 @@
 
 <div
     class="settings"
-    on:click|self={() => state.remove("settings")}
     in:fade={{duration: 150}}
     out:fade={{duration: 150, delay: 75}}
 >
+    <div
+        class="mask"
+        on:click|self={() => state.remove("settings")}
+    ></div>
     <div
         class="modal"
         in:fly={{y: 50, duration: 150, delay: 75}}
@@ -202,6 +205,12 @@
         z-index: 90;
     }
 
+    .mask {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
     .modal {
         background-color: var(--color-bg-secondary);
         border-radius: var(--border-radius);
@@ -209,6 +218,7 @@
         max-height: 90%;
         overflow-y: auto;
         width: 32rem;
+        z-index: 99;
     }
 
     .modal__title {
