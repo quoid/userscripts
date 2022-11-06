@@ -1,6 +1,6 @@
 <script>
     import {fade, fly} from "svelte/transition";
-    import {settings, state} from "../store.js";
+    import {settings, state, log} from "../store.js";
     import IconButton from "../../shared/Components/IconButton.svelte";
     import Toggle from "../../shared/Components/Toggle.svelte";
     import iconLoader from "../../shared/img/icon-loader.svg";
@@ -26,9 +26,10 @@
         for (const v of val) {
             if (re.exec(v) === null) {
                 blacklistError = true;
-                return console.warn("Global blacklist has wrong pattern:", v);
+                log.add(`Wrong match pattern: ${v}`, "error", true);
             }
         }
+        if (blacklistError) return console.warn("Global exclude includes wrong match patterns");
         blacklistError = false;
 
         // compare blacklist input to saved blacklist
@@ -163,7 +164,7 @@
             </div>
             <div class="modal__row modal__row--wrap">
                 <div class="blacklist" class:red={blacklistError}>
-                    <span>Global Blacklist</span>
+                    <span>Global exclude match patterns</span>
                     { #if blacklistSaving}{@html iconLoader}{/if}
                 </div>
                 <textarea
