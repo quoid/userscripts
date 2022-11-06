@@ -26,10 +26,10 @@
         for (const v of val) {
             if (re.exec(v) === null) {
                 blacklistError = true;
-                log.add(`Wrong match pattern: ${v}`, "error", true);
+                log.add(`Invalid match pattern: ${v}`, "error", true);
             }
         }
-        if (blacklistError) return console.warn("Global exclude includes wrong match patterns");
+        if (blacklistError) return console.warn("Global exclude includes invalid match patterns");
         blacklistError = false;
 
         // compare blacklist input to saved blacklist

@@ -20715,11 +20715,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		for (const v of val) {
     			if (re.exec(v) === null) {
     				$$invalidate(3, blacklistError = true);
-    				log.add(`Wrong match pattern: ${v}`, "error", true);
+    				log.add(`Invalid match pattern: ${v}`, "error", true);
     			}
     		}
 
-    		if (blacklistError) return console.warn("Global exclude includes wrong match patterns");
+    		if (blacklistError) return console.warn("Global exclude includes invalid match patterns");
     		$$invalidate(3, blacklistError = false);
 
     		// compare blacklist input to saved blacklist
