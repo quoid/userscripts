@@ -68,7 +68,7 @@
 
 <div
     class="settings"
-    on:mousedown|self={() => state.remove("settings")}
+    on:click|self={() => state.remove("settings")}
     in:fade={{duration: 150}}
     out:fade={{duration: 150, delay: 75}}
 >
