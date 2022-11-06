@@ -1675,16 +1675,21 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
 
 // page
 func getInitData() -> [String: Any]? {
-    let manifest = getManifest()
     guard let saveLocation = getSaveLocation() else {
         err("getInitData failed at (1)")
         return nil
     }
+    return [
+        "saveLocation": saveLocation.path,
+        "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??",
+        "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
+    ]
+}
+
+func getLegacyData() -> [String: Any]? {
+    let manifest = getManifest()
     var data:[String: Any] = manifest.settings
     data["blacklist"] = manifest.blacklist
-    data["saveLocation"] = saveLocation.path
-    data["version"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
-    data["build"] = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     return data
 }
 
@@ -1945,11 +1950,6 @@ func popupInit() -> [String: String]? {
         err("Failed to updateDeclarativeNetRequest in popupInit")
         return nil
     }
-    let manifest = getManifest()
-    guard let active = manifest.settings["active"] else {
-        err("Failed at getManifest active in popupInit")
-        return nil
-    }
     // pass some info in response
     guard let saveLocation = getSaveLocation() else {
         err("Failed at getSaveLocation in popupInit")
@@ -1959,7 +1959,6 @@ func popupInit() -> [String: String]? {
     let requireLocation = getRequireLocation()
 
     return [
-        "active": active,
         "saveLocation": saveLocation.absoluteString,
         "documentsDirectory": documentsDirectory.absoluteString,
         "requireLocation": requireLocation.absoluteString

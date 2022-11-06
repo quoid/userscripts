@@ -1,5 +1,6 @@
 import {writable} from "svelte/store";
 import {uniqueId} from "./utils.js";
+import * as settingsStorage from "../shared/settings.js";
 
 function notificationStore() {
     const {subscribe, update} = writable([]);
@@ -76,40 +77,48 @@ export const state = stateStore();
 
 function settingsStore() {
     const {subscribe, update, set} = writable({});
-    const updateSingleSetting = (key, value) => {
-        update(settings => {
-            settings[key] = value;
-            // blacklist not stored in normal setting object in manifest, so handle differently
-            if (key === "blacklist") {
-                // update blacklist on swift side
-                const message = {name: "PAGE_UPDATE_BLACKLIST", blacklist: value};
-                browser.runtime.sendNativeMessage(message, response => {
-                    if (response.error) {
-                        log.add("Failed to save blacklist to disk", "error", true);
-                    }
-                });
-                return settings;
-            }
-            // settings are saved as strings on the swift side
-            // convert all booleans to strings before dispatching
-            const settingsClone = {...settings};
-            for (const [key, value] of Object.entries(settingsClone)) {
-                if (typeof value === "boolean") settingsClone[key] = value.toString();
-            }
-            // remove settings in clone that aren't save in user defaults
-            delete settingsClone.blacklist;
-            delete settingsClone.version;
-            // update settings on swift side
-            const message = {name: "PAGE_UPDATE_SETTINGS", settings: settingsClone};
-            browser.runtime.sendNativeMessage(message, response => {
-                if (response.error) {
-                    log.add(response.error, "error", true);
-                }
-            });
-            return settings;
+    const init = async initData => {
+        // import legacy settings data just one-time
+        await settingsStorage.legacy_import();
+        // for compatibility with legacy getting names only
+        // once all new name is used, use settingsStorage.get()
+        const settings = await settingsStorage.legacy_get();
+        console.info("store.js settingsStore init", initData, settings);
+        set(Object.assign({}, initData, settings));
+        // sync popup, backgound, etc... settings changes
+        settingsStorage.onChanged((settings, area) => {
+            console.log(`store.js storage.${area}.onChanged`, settings);
+            update(obj => Object.assign(obj, settings));
         });
     };
-    return {subscribe, set, updateSingleSetting};
+    const reset = async keys => {
+        await settingsStorage.reset(keys);
+        // once all new name is used, use settingsStorage.get()
+        const settings = await settingsStorage.legacy_get();
+        console.info("store.js settingsStore reset", settings);
+        update(obj => Object.assign(obj, settings));
+    };
+    const updateSingleSetting_old = (key, value) => {
+        // blacklist not stored in normal setting object in manifest, so handle differently
+        if (key === "blacklist") {
+            // update blacklist on swift side
+            const message = {name: "PAGE_UPDATE_BLACKLIST", blacklist: value};
+            browser.runtime.sendNativeMessage(message, response => {
+                if (response.error) {
+                    log.add("Failed to save blacklist to disk", "error", true);
+                }
+            });
+        }
+    };
+    const updateSingleSetting = (key, value) => {
+        update(settings => (settings[key] = value, settings));
+        // for compatibility with legacy setting names only
+        // once all new name is used, use settingsStorage.set()
+        settingsStorage.legacy_set({[key]: value}); // Durable Storage
+        // temporarily keep the old storage method until it is confirmed that all dependencies are removed
+        updateSingleSetting_old(key, value);
+    };
+    return {subscribe, set, init, reset, updateSingleSetting};
 }
 export const settings = settingsStore();
 

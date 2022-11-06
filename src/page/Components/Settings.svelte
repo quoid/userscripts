@@ -68,7 +68,7 @@
 
 <div
     class="settings"
-    on:mousedown|self={() => state.remove("settings")}
+    on:click|self={() => state.remove("settings")}
     in:fade={{duration: 150}}
     out:fade={{duration: 150, delay: 75}}
 >
@@ -120,11 +120,11 @@
             <div class="modal__row">
                 <div>Tab Size</div>
                 <select
-                    bind:value="{$settings.tabSize}"
+                    bind:value={$settings.tabSize}
                     on:blur={() => update("tabSize", $settings.tabSize)}
                 >
-                    <option value="2">2</option>
-                    <option value="4">4</option>
+                    <option value={2}>2</option>
+                    <option value={4}>4</option>
                 </select>
             </div>
         </div>

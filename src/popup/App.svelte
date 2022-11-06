@@ -12,6 +12,7 @@
     import iconUpdate from "../shared/img/icon-update.svg";
     import iconClear from "../shared/img/icon-clear.svg";
     import iconRefresh from "../shared/img/icon-refresh.svg";
+    import * as settingsStorage from "../shared/settings.js";
 
     let error = undefined;
     let active = true;
@@ -50,14 +51,9 @@
 
     $: if (platform) document.body.classList.add(platform);
 
-    function toggleExtension(e) {
-        e.preventDefault(); // prevent check state from changing on click
-        disabled = true;
-        browser.runtime.sendNativeMessage({name: "POPUP_TOGGLE_EXTENSION"}, response => {
-            disabled = false;
-            if (response.error) return error = response.error;
-            active = !active;
-        });
+    async function toggleExtension(e) {
+        await settingsStorage.set({"global_active": !active});
+        active = await settingsStorage.get("global_active");
     }
 
     function updateAll() {
@@ -259,9 +255,9 @@
             loading = false;
             disabled = false;
             return;
-        } else {
-            active = init.initData.active === "true" ? true : false;
         }
+        
+        active = await settingsStorage.get("global_active");
 
         // refresh session rules
         browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});

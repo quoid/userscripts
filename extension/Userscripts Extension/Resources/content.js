@@ -322,7 +322,7 @@ function cspFallback(e) {
     }
 }
 
-browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
+const injection = () => browser.runtime.sendMessage({name: "REQ_USERSCRIPTS"}, response => {
     // cancel injection if errors detected
     if (!response || response.error) {
         console.error(response?.error || "REQ_USERSCRIPTS returned undefined");
@@ -467,3 +467,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 // listen for CSP violations
 document.addEventListener("securitypolicyviolation", cspFallback);
+
+// should import settings.js and use `settingsStorage.get("global_active")`
+browser.storage.local.get("US_GLOBAL_ACTIVE").then(results => {
+    if (results?.US_GLOBAL_ACTIVE === false) return console.info("Userscripts off");
+    injection();
+});
