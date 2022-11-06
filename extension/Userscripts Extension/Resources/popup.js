@@ -56,12 +56,22 @@
         }
         return $$scope.dirty;
     }
-    function update_slot(slot, slot_definition, ctx, $$scope, dirty, get_slot_changes_fn, get_slot_context_fn) {
-        const slot_changes = get_slot_changes(slot_definition, $$scope, dirty, get_slot_changes_fn);
+    function update_slot_base(slot, slot_definition, ctx, $$scope, slot_changes, get_slot_context_fn) {
         if (slot_changes) {
             const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
             slot.p(slot_context, slot_changes);
         }
+    }
+    function get_all_dirty_from_scope($$scope) {
+        if ($$scope.ctx.length > 32) {
+            const dirty = [];
+            const length = $$scope.ctx.length / 32;
+            for (let i = 0; i < length; i++) {
+                dirty[i] = -1;
+            }
+            return dirty;
+        }
+        return -1;
     }
 
     const is_client = typeof window !== 'undefined';
@@ -98,9 +108,25 @@
             }
         };
     }
-
     function append(target, node) {
         target.appendChild(node);
+    }
+    function get_root_for_style(node) {
+        if (!node)
+            return document;
+        const root = node.getRootNode ? node.getRootNode() : node.ownerDocument;
+        if (root && root.host) {
+            return root;
+        }
+        return node.ownerDocument;
+    }
+    function append_empty_stylesheet(node) {
+        const style_element = element('style');
+        append_stylesheet(get_root_for_style(node), style_element);
+        return style_element.sheet;
+    }
+    function append_stylesheet(node, style) {
+        append(node.head || node, style);
     }
     function insert(target, node, anchor) {
         target.insertBefore(node, anchor || null);
@@ -116,6 +142,9 @@
     }
     function element(name) {
         return document.createElement(name);
+    }
+    function svg_element(name) {
+        return document.createElementNS('http://www.w3.org/2000/svg', name);
     }
     function text(data) {
         return document.createTextNode(data);
@@ -152,26 +181,38 @@
             text.data = data;
     }
     function set_style(node, key, value, important) {
-        node.style.setProperty(key, value, important ? 'important' : '');
+        if (value === null) {
+            node.style.removeProperty(key);
+        }
+        else {
+            node.style.setProperty(key, value, important ? 'important' : '');
+        }
     }
     function toggle_class(element, name, toggle) {
         element.classList[toggle ? 'add' : 'remove'](name);
     }
-    function custom_event(type, detail) {
+    function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
-        e.initCustomEvent(type, false, false, detail);
+        e.initCustomEvent(type, bubbles, cancelable, detail);
         return e;
     }
     class HtmlTag {
-        constructor(anchor = null) {
-            this.a = anchor;
+        constructor(is_svg = false) {
+            this.is_svg = false;
+            this.is_svg = is_svg;
             this.e = this.n = null;
+        }
+        c(html) {
+            this.h(html);
         }
         m(html, target, anchor = null) {
             if (!this.e) {
-                this.e = element(target.nodeName);
+                if (this.is_svg)
+                    this.e = svg_element(target.nodeName);
+                else
+                    this.e = element(target.nodeName);
                 this.t = target;
-                this.h(html);
+                this.c(html);
             }
             this.i(anchor);
         }
@@ -194,7 +235,9 @@
         }
     }
 
-    const active_docs = new Set();
+    // we need to store the information for multiple documents because a Svelte application could also contain iframes
+    // https://github.com/sveltejs/svelte/issues/3624
+    const managed_styles = new Map();
     let active = 0;
     // https://github.com/darkskyapp/string-hash/blob/master/index.js
     function hash(str) {
@@ -203,6 +246,11 @@
         while (i--)
             hash = ((hash << 5) - hash) ^ str.charCodeAt(i);
         return hash >>> 0;
+    }
+    function create_style_information(doc, node) {
+        const info = { stylesheet: append_empty_stylesheet(node), rules: {} };
+        managed_styles.set(doc, info);
+        return info;
     }
     function create_rule(node, a, b, duration, delay, ease, fn, uid = 0) {
         const step = 16.666 / duration;
@@ -213,16 +261,14 @@
         }
         const rule = keyframes + `100% {${fn(b, 1 - b)}}\n}`;
         const name = `__svelte_${hash(rule)}_${uid}`;
-        const doc = node.ownerDocument;
-        active_docs.add(doc);
-        const stylesheet = doc.__svelte_stylesheet || (doc.__svelte_stylesheet = doc.head.appendChild(element('style')).sheet);
-        const current_rules = doc.__svelte_rules || (doc.__svelte_rules = {});
-        if (!current_rules[name]) {
-            current_rules[name] = true;
+        const doc = get_root_for_style(node);
+        const { stylesheet, rules } = managed_styles.get(doc) || create_style_information(doc, node);
+        if (!rules[name]) {
+            rules[name] = true;
             stylesheet.insertRule(`@keyframes ${name} ${rule}`, stylesheet.cssRules.length);
         }
         const animation = node.style.animation || '';
-        node.style.animation = `${animation ? `${animation}, ` : ``}${name} ${duration}ms linear ${delay}ms 1 both`;
+        node.style.animation = `${animation ? `${animation}, ` : ''}${name} ${duration}ms linear ${delay}ms 1 both`;
         active += 1;
         return name;
     }
@@ -244,14 +290,14 @@
         raf(() => {
             if (active)
                 return;
-            active_docs.forEach(doc => {
-                const stylesheet = doc.__svelte_stylesheet;
+            managed_styles.forEach(info => {
+                const { stylesheet } = info;
                 let i = stylesheet.cssRules.length;
                 while (i--)
                     stylesheet.deleteRule(i);
-                doc.__svelte_rules = {};
+                info.rules = {};
             });
-            active_docs.clear();
+            managed_styles.clear();
         });
     }
 
@@ -261,7 +307,7 @@
     }
     function get_current_component() {
         if (!current_component)
-            throw new Error(`Function called outside component initialization`);
+            throw new Error('Function called outside component initialization');
         return current_component;
     }
     function onMount(fn) {
@@ -273,7 +319,8 @@
     function bubble(component, event) {
         const callbacks = component.$$.callbacks[event.type];
         if (callbacks) {
-            callbacks.slice().forEach(fn => fn(event));
+            // @ts-ignore
+            callbacks.slice().forEach(fn => fn.call(this, event));
         }
     }
 
@@ -292,22 +339,40 @@
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    let flushing = false;
+    // flush() calls callbacks in this order:
+    // 1. All beforeUpdate callbacks, in order: parents before children
+    // 2. All bind:this callbacks, in reverse order: children before parents.
+    // 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+    //    for afterUpdates called during the initial onMount, which are called in
+    //    reverse order: children before parents.
+    // Since callbacks might update component values, which could trigger another
+    // call to flush(), the following steps guard against this:
+    // 1. During beforeUpdate, any updated components will be added to the
+    //    dirty_components array and will cause a reentrant call to flush(). Because
+    //    the flush index is kept outside the function, the reentrant call will pick
+    //    up where the earlier call left off and go through all dirty components. The
+    //    current_component value is saved and restored so that the reentrant call will
+    //    not interfere with the "parent" flush() call.
+    // 2. bind:this callbacks cannot trigger new flush() calls.
+    // 3. During afterUpdate, any updated components will NOT have their afterUpdate
+    //    callback called a second time; the seen_callbacks set, outside the flush()
+    //    function, guarantees this behavior.
     const seen_callbacks = new Set();
+    let flushidx = 0; // Do *not* move this inside the flush() function
     function flush() {
-        if (flushing)
-            return;
-        flushing = true;
+        const saved_component = current_component;
         do {
             // first, call beforeUpdate functions
             // and update components
-            for (let i = 0; i < dirty_components.length; i += 1) {
-                const component = dirty_components[i];
+            while (flushidx < dirty_components.length) {
+                const component = dirty_components[flushidx];
+                flushidx++;
                 set_current_component(component);
                 update(component.$$);
             }
             set_current_component(null);
             dirty_components.length = 0;
+            flushidx = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
             // then, once components are updated, call
@@ -327,8 +392,8 @@
             flush_callbacks.pop()();
         }
         update_scheduled = false;
-        flushing = false;
         seen_callbacks.clear();
+        set_current_component(saved_component);
     }
     function update($$) {
         if ($$.fragment !== null) {
@@ -389,6 +454,9 @@
                 }
             });
             block.o(local);
+        }
+        else if (callback) {
+            callback();
         }
     }
     const null_transition = { duration: 0 };
@@ -459,7 +527,7 @@
                 delete_rule(node, animation_name);
         }
         function init(program, duration) {
-            const d = program.b - t;
+            const d = (program.b - t);
             duration *= Math.abs(d);
             return {
                 a: t,
@@ -647,22 +715,24 @@
     function create_component(block) {
         block && block.c();
     }
-    function mount_component(component, target, anchor) {
+    function mount_component(component, target, anchor, customElement) {
         const { fragment, on_mount, on_destroy, after_update } = component.$$;
         fragment && fragment.m(target, anchor);
-        // onMount happens before the initial afterUpdate
-        add_render_callback(() => {
-            const new_on_destroy = on_mount.map(run).filter(is_function);
-            if (on_destroy) {
-                on_destroy.push(...new_on_destroy);
-            }
-            else {
-                // Edge case - component was destroyed immediately,
-                // most likely as a result of a binding initialising
-                run_all(new_on_destroy);
-            }
-            component.$$.on_mount = [];
-        });
+        if (!customElement) {
+            // onMount happens before the initial afterUpdate
+            add_render_callback(() => {
+                const new_on_destroy = on_mount.map(run).filter(is_function);
+                if (on_destroy) {
+                    on_destroy.push(...new_on_destroy);
+                }
+                else {
+                    // Edge case - component was destroyed immediately,
+                    // most likely as a result of a binding initialising
+                    run_all(new_on_destroy);
+                }
+                component.$$.on_mount = [];
+            });
+        }
         after_update.forEach(add_render_callback);
     }
     function destroy_component(component, detaching) {
@@ -684,10 +754,9 @@
         }
         component.$$.dirty[(i / 31) | 0] |= (1 << (i % 31));
     }
-    function init(component, options, instance, create_fragment, not_equal, props, dirty = [-1]) {
+    function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty = [-1]) {
         const parent_component = current_component;
         set_current_component(component);
-        const prop_values = options.props || {};
         const $$ = component.$$ = {
             fragment: null,
             ctx: null,
@@ -699,17 +768,20 @@
             // lifecycle
             on_mount: [],
             on_destroy: [],
+            on_disconnect: [],
             before_update: [],
             after_update: [],
-            context: new Map(parent_component ? parent_component.$$.context : []),
+            context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
             // everything else
             callbacks: blank_object(),
             dirty,
-            skip_bound: false
+            skip_bound: false,
+            root: options.target || parent_component.$$.root
         };
+        append_styles && append_styles($$.root);
         let ready = false;
         $$.ctx = instance
-            ? instance(component, prop_values, (i, ret, ...rest) => {
+            ? instance(component, options.props || {}, (i, ret, ...rest) => {
                 const value = rest.length ? rest[0] : ret;
                 if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
                     if (!$$.skip_bound && $$.bound[i])
@@ -738,11 +810,14 @@
             }
             if (options.intro)
                 transition_in(component.$$.fragment);
-            mount_component(component, options.target, options.anchor);
+            mount_component(component, options.target, options.anchor, options.customElement);
             flush();
         }
         set_current_component(parent_component);
     }
+    /**
+     * Base class for Svelte components. Used when dev=false.
+     */
     class SvelteComponent {
         $destroy() {
             destroy_component(this, 1);
@@ -766,7 +841,7 @@
         }
     }
 
-    /* src/shared/Components/IconButton.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/IconButton.svelte generated by Svelte v3.49.0 */
 
     function create_fragment(ctx) {
     	let button;
@@ -827,15 +902,15 @@
     	let { notification = false } = $$props;
 
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("color" in $$props) $$invalidate(0, color = $$props.color);
-    		if ("disabled" in $$props) $$invalidate(1, disabled = $$props.disabled);
-    		if ("icon" in $$props) $$invalidate(2, icon = $$props.icon);
-    		if ("title" in $$props) $$invalidate(3, title = $$props.title);
-    		if ("notification" in $$props) $$invalidate(4, notification = $$props.notification);
+    		if ('color' in $$props) $$invalidate(0, color = $$props.color);
+    		if ('disabled' in $$props) $$invalidate(1, disabled = $$props.disabled);
+    		if ('icon' in $$props) $$invalidate(2, icon = $$props.icon);
+    		if ('title' in $$props) $$invalidate(3, title = $$props.title);
+    		if ('notification' in $$props) $$invalidate(4, notification = $$props.notification);
     	};
 
     	return [color, disabled, icon, title, notification, click_handler];
@@ -855,7 +930,7 @@
     	}
     }
 
-    /* src/shared/Components/Toggle.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Toggle.svelte generated by Svelte v3.49.0 */
 
     function create_fragment$1(ctx) {
     	let label;
@@ -933,7 +1008,7 @@
     	let { title = undefined } = $$props;
 
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	function input_change_handler() {
@@ -942,9 +1017,9 @@
     	}
 
     	$$self.$$set = $$props => {
-    		if ("checked" in $$props) $$invalidate(0, checked = $$props.checked);
-    		if ("disabled" in $$props) $$invalidate(1, disabled = $$props.disabled);
-    		if ("title" in $$props) $$invalidate(2, title = $$props.title);
+    		if ('checked' in $$props) $$invalidate(0, checked = $$props.checked);
+    		if ('disabled' in $$props) $$invalidate(1, disabled = $$props.disabled);
+    		if ('title' in $$props) $$invalidate(2, title = $$props.title);
     	};
 
     	return [checked, disabled, title, click_handler, input_change_handler];
@@ -963,7 +1038,7 @@
         return 0.5 * ((t -= 2) * t * t * t * t + 2);
     }
 
-    function fade(node, { delay = 0, duration = 400, easing = identity }) {
+    function fade(node, { delay = 0, duration = 400, easing = identity } = {}) {
         const o = +getComputedStyle(node).opacity;
         return {
             delay,
@@ -975,7 +1050,7 @@
 
     var iconLoader = '<svg viewBox="0 0 38 38" stroke="#fff">    <g fill="none" fill-rule="evenodd">        <g transform="translate(1 1)" stroke->            <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>            <path d="M36 18c0-9.94-8.06-18-18-18">                <animateTransform                    attributeName="transform"                    type="rotate"                    from="0 18 18"                    to="360 18 18"                    dur="750ms"                    repeatCount="indefinite"/>            </path>        </g>    </g></svg>';
 
-    /* src/shared/Components/Loader.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Loader.svelte generated by Svelte v3.49.0 */
 
     function create_if_block(ctx) {
     	let div;
@@ -1028,9 +1103,10 @@
     	return {
     		c() {
     			div = element("div");
+    			html_tag = new HtmlTag(false);
     			t = space();
     			if (if_block) if_block.c();
-    			html_tag = new HtmlTag(t);
+    			html_tag.a = t;
     			attr(div, "class", "loader svelte-tibcgr");
     			set_style(div, "background-color", /*backgroundColor*/ ctx[2]);
     		},
@@ -1086,9 +1162,9 @@
     	let { backgroundColor = "var(--color-bg-secondary)" } = $$props;
 
     	$$self.$$set = $$props => {
-    		if ("abort" in $$props) $$invalidate(0, abort = $$props.abort);
-    		if ("abortClick" in $$props) $$invalidate(1, abortClick = $$props.abortClick);
-    		if ("backgroundColor" in $$props) $$invalidate(2, backgroundColor = $$props.backgroundColor);
+    		if ('abort' in $$props) $$invalidate(0, abort = $$props.abort);
+    		if ('abortClick' in $$props) $$invalidate(1, abortClick = $$props.abortClick);
+    		if ('backgroundColor' in $$props) $$invalidate(2, backgroundColor = $$props.backgroundColor);
     	};
 
     	return [abort, abortClick, backgroundColor];
@@ -1106,7 +1182,7 @@
     	}
     }
 
-    /* src/shared/Components/Tag.svelte generated by Svelte v3.29.0 */
+    /* src/shared/Components/Tag.svelte generated by Svelte v3.49.0 */
 
     function create_fragment$3(ctx) {
     	let div;
@@ -1137,7 +1213,7 @@
     	let { type = undefined } = $$props;
 
     	$$self.$$set = $$props => {
-    		if ("type" in $$props) $$invalidate(0, type = $$props.type);
+    		if ('type' in $$props) $$invalidate(0, type = $$props.type);
     	};
 
     	return [type];
@@ -1150,7 +1226,7 @@
     	}
     }
 
-    /* src/popup/Components/PopupItem.svelte generated by Svelte v3.29.0 */
+    /* src/popup/Components/PopupItem.svelte generated by Svelte v3.49.0 */
 
     function create_if_block$1(ctx) {
     	let div;
@@ -1272,15 +1348,15 @@
     	let { request = false } = $$props;
 
     	function click_handler(event) {
-    		bubble($$self, event);
+    		bubble.call(this, $$self, event);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("enabled" in $$props) $$invalidate(0, enabled = $$props.enabled);
-    		if ("name" in $$props) $$invalidate(1, name = $$props.name);
-    		if ("type" in $$props) $$invalidate(2, type = $$props.type);
-    		if ("subframe" in $$props) $$invalidate(3, subframe = $$props.subframe);
-    		if ("request" in $$props) $$invalidate(4, request = $$props.request);
+    		if ('enabled' in $$props) $$invalidate(0, enabled = $$props.enabled);
+    		if ('name' in $$props) $$invalidate(1, name = $$props.name);
+    		if ('type' in $$props) $$invalidate(2, type = $$props.type);
+    		if ('subframe' in $$props) $$invalidate(3, subframe = $$props.subframe);
+    		if ('request' in $$props) $$invalidate(4, request = $$props.request);
     	};
 
     	return [enabled, name, type, subframe, request, click_handler];
@@ -1302,7 +1378,7 @@
 
     var iconArrowLeft = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 18"><path d="M8.4 17.5l1.692-1.712-5.496-5.574H24V7.786H4.596l5.508-5.574L8.4.5 0 9z" fill-rule="nonzero"/></svg>';
 
-    /* src/popup/Components/View.svelte generated by Svelte v3.29.0 */
+    /* src/popup/Components/View.svelte generated by Svelte v3.49.0 */
 
     function create_else_block(ctx) {
     	let current;
@@ -1323,8 +1399,17 @@
     		},
     		p(ctx, dirty) {
     			if (default_slot) {
-    				if (default_slot.p && dirty & /*$$scope*/ 128) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[7], dirty, null, null);
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 128)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[7],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[7])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[7], dirty, null),
+    						null
+    					);
     				}
     			}
     		},
@@ -1397,6 +1482,7 @@
     		m(target, anchor) {
     			insert(target, div, anchor);
     		},
+    		p: noop,
     		d(detaching) {
     			if (detaching) detach(div);
     		}
@@ -1481,6 +1567,8 @@
     				if (!if_block) {
     					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
     				}
 
     				transition_in(if_block, 1);
@@ -1537,13 +1625,13 @@
     	}
 
     	$$self.$$set = $$props => {
-    		if ("loading" in $$props) $$invalidate(0, loading = $$props.loading);
-    		if ("headerTitle" in $$props) $$invalidate(1, headerTitle = $$props.headerTitle);
-    		if ("closeClick" in $$props) $$invalidate(2, closeClick = $$props.closeClick);
-    		if ("showLoaderOnDisabled" in $$props) $$invalidate(3, showLoaderOnDisabled = $$props.showLoaderOnDisabled);
-    		if ("abort" in $$props) $$invalidate(4, abort = $$props.abort);
-    		if ("abortClick" in $$props) $$invalidate(5, abortClick = $$props.abortClick);
-    		if ("$$scope" in $$props) $$invalidate(7, $$scope = $$props.$$scope);
+    		if ('loading' in $$props) $$invalidate(0, loading = $$props.loading);
+    		if ('headerTitle' in $$props) $$invalidate(1, headerTitle = $$props.headerTitle);
+    		if ('closeClick' in $$props) $$invalidate(2, closeClick = $$props.closeClick);
+    		if ('showLoaderOnDisabled' in $$props) $$invalidate(3, showLoaderOnDisabled = $$props.showLoaderOnDisabled);
+    		if ('abort' in $$props) $$invalidate(4, abort = $$props.abort);
+    		if ('abortClick' in $$props) $$invalidate(5, abortClick = $$props.abortClick);
+    		if ('$$scope' in $$props) $$invalidate(7, $$scope = $$props.$$scope);
     	};
 
     	return [
@@ -1576,7 +1664,7 @@
 
     var iconUpdate = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 16"><path d="M19.35 6.04A7.49 7.49 0 0012 0C9.11 0 6.6 1.64 5.35 4.04A5.994 5.994 0 000 10c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 14H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95A5.469 5.469 0 0112 2c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11A2.98 2.98 0 0122 11c0 1.65-1.35 3-3 3zm-5.55-8h-2.9v3H8l4 4 4-4h-2.55V6z" fill-rule="nonzero"/></svg>';
 
-    /* src/popup/Components/Views/UpdateView.svelte generated by Svelte v3.29.0 */
+    /* src/popup/Components/Views/UpdateView.svelte generated by Svelte v3.49.0 */
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -1600,6 +1688,7 @@
     	return {
     		c() {
     			div2 = element("div");
+    			html_tag = new HtmlTag(false);
     			t0 = space();
     			div1 = element("div");
     			t1 = text("There are no file updates available\n            ");
@@ -1607,7 +1696,7 @@
     			t2 = space();
     			div0 = element("div");
     			div0.textContent = "Check Updates";
-    			html_tag = new HtmlTag(t0);
+    			html_tag.a = t0;
     			attr(div0, "class", "link svelte-1v987ms");
     			attr(div1, "class", "svelte-1v987ms");
     			attr(div2, "class", "none svelte-1v987ms");
@@ -1697,7 +1786,7 @@
     			ctx = new_ctx;
 
     			if (dirty & /*updateSingleClick, updates*/ 9) {
-    				const each_value = /*updates*/ ctx[0];
+    				each_value = /*updates*/ ctx[0];
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, t0.parentNode, destroy_block, create_each_block, t0, get_each_context);
     			}
     		},
@@ -1731,8 +1820,8 @@
     	let mounted;
     	let dispose;
 
-    	function click_handler(...args) {
-    		return /*click_handler*/ ctx[4](/*item*/ ctx[5], ...args);
+    	function click_handler() {
+    		return /*click_handler*/ ctx[4](/*item*/ ctx[5]);
     	}
 
     	return {
@@ -1837,10 +1926,10 @@
     	const click_handler = item => updateSingleClick(item);
 
     	$$self.$$set = $$props => {
-    		if ("updates" in $$props) $$invalidate(0, updates = $$props.updates);
-    		if ("updateClick" in $$props) $$invalidate(1, updateClick = $$props.updateClick);
-    		if ("checkClick" in $$props) $$invalidate(2, checkClick = $$props.checkClick);
-    		if ("updateSingleClick" in $$props) $$invalidate(3, updateSingleClick = $$props.updateSingleClick);
+    		if ('updates' in $$props) $$invalidate(0, updates = $$props.updates);
+    		if ('updateClick' in $$props) $$invalidate(1, updateClick = $$props.updateClick);
+    		if ('checkClick' in $$props) $$invalidate(2, checkClick = $$props.checkClick);
+    		if ('updateSingleClick' in $$props) $$invalidate(3, updateSingleClick = $$props.updateSingleClick);
     	};
 
     	return [updates, updateClick, checkClick, updateSingleClick, click_handler];
@@ -1863,7 +1952,7 @@
 
     var iconError = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.8 15.6h2.4V18h-2.4v-2.4zm0-9.6h2.4v7.2h-2.4V6zm1.188-6C5.364 0 0 5.376 0 12s5.364 12 11.988 12C18.624 24 24 18.624 24 12S18.624 0 11.988 0zM12 21.6A9.597 9.597 0 012.4 12c0-5.304 4.296-9.6 9.6-9.6 5.304 0 9.6 4.296 9.6 9.6 0 5.304-4.296 9.6-9.6 9.6z"/></svg>';
 
-    /* src/popup/Components/Views/InstallView.svelte generated by Svelte v3.29.0 */
+    /* src/popup/Components/Views/InstallView.svelte generated by Svelte v3.49.0 */
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -2093,13 +2182,14 @@
     	return {
     		c() {
     			div1 = element("div");
+    			html_tag = new HtmlTag(false);
     			t0 = space();
     			div0 = element("div");
     			div0.textContent = "Couldn't install userscript";
     			t2 = space();
     			p = element("p");
     			t3 = text(/*installError*/ ctx[1]);
-    			html_tag = new HtmlTag(t0);
+    			html_tag.a = t0;
     			attr(p, "class", "svelte-p5i392");
     			attr(div1, "class", "install__error svelte-p5i392");
     		},
@@ -2563,10 +2653,10 @@
     	let { installConfirmClick } = $$props;
 
     	$$self.$$set = $$props => {
-    		if ("userscript" in $$props) $$invalidate(0, userscript = $$props.userscript);
-    		if ("installError" in $$props) $$invalidate(1, installError = $$props.installError);
-    		if ("installCancelClick" in $$props) $$invalidate(2, installCancelClick = $$props.installCancelClick);
-    		if ("installConfirmClick" in $$props) $$invalidate(3, installConfirmClick = $$props.installConfirmClick);
+    		if ('userscript' in $$props) $$invalidate(0, userscript = $$props.userscript);
+    		if ('installError' in $$props) $$invalidate(1, installError = $$props.installError);
+    		if ('installCancelClick' in $$props) $$invalidate(2, installCancelClick = $$props.installCancelClick);
+    		if ('installConfirmClick' in $$props) $$invalidate(3, installConfirmClick = $$props.installConfirmClick);
     	};
 
     	return [userscript, installError, installCancelClick, installConfirmClick];
@@ -2585,7 +2675,7 @@
     	}
     }
 
-    /* src/popup/Components/Views/AllItemsView.svelte generated by Svelte v3.29.0 */
+    /* src/popup/Components/Views/AllItemsView.svelte generated by Svelte v3.49.0 */
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -2622,7 +2712,7 @@
     	let each_1_lookup = new Map();
     	let div_class_value;
     	let current;
-    	let each_value = /*list*/ ctx[3];
+    	let each_value = /*list*/ ctx[2];
     	const get_key = ctx => /*item*/ ctx[6].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -2639,7 +2729,7 @@
     				each_blocks[i].c();
     			}
 
-    			attr(div, "class", div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[2] || "") + " svelte-rd8r5o");
+    			attr(div, "class", div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[3] || "") + " svelte-rd8r5o");
     			toggle_class(div, "disabled", /*disabled*/ ctx[4]);
     		},
     		m(target, anchor) {
@@ -2652,18 +2742,18 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*list, allItemsToggleItem*/ 10) {
-    				const each_value = /*list*/ ctx[3];
+    			if (dirty & /*list, allItemsToggleItem*/ 6) {
+    				each_value = /*list*/ ctx[2];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$2, null, get_each_context$2);
     				check_outros();
     			}
 
-    			if (!current || dirty & /*rowColorsAll*/ 4 && div_class_value !== (div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[2] || "") + " svelte-rd8r5o")) {
+    			if (!current || dirty & /*rowColorsAll*/ 8 && div_class_value !== (div_class_value = "items view--all " + (/*rowColorsAll*/ ctx[3] || "") + " svelte-rd8r5o")) {
     				attr(div, "class", div_class_value);
     			}
 
-    			if (dirty & /*rowColorsAll, disabled*/ 20) {
+    			if (dirty & /*rowColorsAll, disabled*/ 24) {
     				toggle_class(div, "disabled", /*disabled*/ ctx[4]);
     			}
     		},
@@ -2699,8 +2789,8 @@
     	let popupitem;
     	let current;
 
-    	function click_handler(...args) {
-    		return /*click_handler*/ ctx[5](/*item*/ ctx[6], ...args);
+    	function click_handler() {
+    		return /*click_handler*/ ctx[5](/*item*/ ctx[6]);
     	}
 
     	popupitem = new PopupItem({
@@ -2731,11 +2821,11 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty & /*list*/ 8) popupitem_changes.enabled = !/*item*/ ctx[6].disabled;
-    			if (dirty & /*list*/ 8) popupitem_changes.name = /*item*/ ctx[6].name;
-    			if (dirty & /*list*/ 8) popupitem_changes.subframe = /*item*/ ctx[6].subframe;
-    			if (dirty & /*list*/ 8) popupitem_changes.type = /*item*/ ctx[6].type;
-    			if (dirty & /*list*/ 8) popupitem_changes.request = /*item*/ ctx[6].request ? true : false;
+    			if (dirty & /*list*/ 4) popupitem_changes.enabled = !/*item*/ ctx[6].disabled;
+    			if (dirty & /*list*/ 4) popupitem_changes.name = /*item*/ ctx[6].name;
+    			if (dirty & /*list*/ 4) popupitem_changes.subframe = /*item*/ ctx[6].subframe;
+    			if (dirty & /*list*/ 4) popupitem_changes.type = /*item*/ ctx[6].type;
+    			if (dirty & /*list*/ 4) popupitem_changes.request = /*item*/ ctx[6].request ? true : false;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -2799,6 +2889,8 @@
     				if (!if_block) {
     					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
     				}
 
     				transition_in(if_block, 1);
@@ -2822,6 +2914,7 @@
     }
 
     function instance$8($$self, $$props, $$invalidate) {
+    	let list;
     	let { allItems = [] } = $$props;
     	let { allItemsToggleItem } = $$props;
     	let disabled;
@@ -2829,29 +2922,27 @@
     	const click_handler = item => allItemsToggleItem(item);
 
     	$$self.$$set = $$props => {
-    		if ("allItems" in $$props) $$invalidate(0, allItems = $$props.allItems);
-    		if ("allItemsToggleItem" in $$props) $$invalidate(1, allItemsToggleItem = $$props.allItemsToggleItem);
+    		if ('allItems' in $$props) $$invalidate(0, allItems = $$props.allItems);
+    		if ('allItemsToggleItem' in $$props) $$invalidate(1, allItemsToggleItem = $$props.allItemsToggleItem);
     	};
-
-    	let list;
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*allItems*/ 1) {
-    			 $$invalidate(3, list = allItems.sort((a, b) => a.name.localeCompare(b.name)));
+    			 $$invalidate(2, list = allItems.sort((a, b) => a.name.localeCompare(b.name)));
     		}
 
-    		if ($$self.$$.dirty & /*list*/ 8) {
+    		if ($$self.$$.dirty & /*list*/ 4) {
     			 if (list.length > 1 && list.length % 2 === 0) {
-    				$$invalidate(2, rowColorsAll = "even--all");
+    				$$invalidate(3, rowColorsAll = "even--all");
     			} else if (list.length > 1 && list.length % 2 !== 0) {
-    				$$invalidate(2, rowColorsAll = "odd--all");
+    				$$invalidate(3, rowColorsAll = "odd--all");
     			} else {
-    				$$invalidate(2, rowColorsAll = undefined);
+    				$$invalidate(3, rowColorsAll = undefined);
     			}
     		}
     	};
 
-    	return [allItems, allItemsToggleItem, rowColorsAll, list, disabled, click_handler];
+    	return [allItems, allItemsToggleItem, list, rowColorsAll, disabled, click_handler];
     }
 
     class AllItemsView extends SvelteComponent {
@@ -2867,7 +2958,522 @@
 
     var iconRefresh = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M24 9.333V0l-3.52 3.52A11.916 11.916 0 0 0 12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12h-2.667c0 5.147-4.186 9.333-9.333 9.333S2.667 17.147 2.667 12 6.853 2.667 12 2.667A9.357 9.357 0 0 1 18.6 5.4l-3.933 3.933H24Z" fill-rule="nonzero"/></svg>';
 
-    /* src/popup/App.svelte generated by Svelte v3.29.0 */
+    // wrap a relatively independent settings storage with its own functions
+
+    const storagePrefix = "US_";
+    const storageKey = key => storagePrefix + key.toUpperCase();
+    // const storageRef = async area => { // dynamic storage reference
+    //     browser.storage.sync.area = "sync";
+    //     browser.storage.local.area = "local";
+    //     if (area === "sync") return browser.storage.sync;
+    //     if (area === "local") return browser.storage.local;
+    //     const key = storageKey("settings_sync");
+    //     const result = await browser.storage.local.get(key);
+    //     if (result?.[key] === true) {
+    //         return browser.storage.sync;
+    //     } else {
+    //         return browser.storage.local;
+    //     }
+    // };
+
+    // https://developer.apple.com/documentation/safariservices/safari_web_extensions/assessing_your_safari_web_extension_s_browser_compatibility#3584139
+    // since storage sync is not implemented in Safari, currently only returns using local storage
+    const storageRef = async () => {
+        browser.storage.local.area = "local";
+        return browser.storage.local;
+    };
+
+    const settingDefault = deepFreeze({
+        name: "setting_default",
+        type: undefined,
+        local: false,
+        values: [],
+        default: undefined,
+        protect: false,
+        confirm: false,
+        platforms: ["macos", "ipados", "ios"],
+        langLabel: {},
+        langTitle: {},
+        group: "",
+        legacy: "",
+        nodeType: "",
+        nodeClass: {}
+    });
+
+    const settingsDefine = deepFreeze([
+        {
+            name: "legacy_imported",
+            type: "number",
+            local: true,
+            default: 0,
+            protect: true,
+            platforms: ["macos"],
+            group: "Internal"
+        },
+        {
+            name: "language_code",
+            type: "string",
+            default: "en",
+            platforms: ["macos", "ipados", "ios"],
+            group: "Internal",
+            legacy: "languageCode"
+        },
+        {
+            name: "scripts_settings",
+            type: "object",
+            default: {},
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts update check active",
+                zh_hans: "脚本更新检查激活"
+            },
+            langTitle: {
+                en: "Whether to enable each single script update check",
+                zh_hans: "是否开启单个脚本更新检查"
+            },
+            group: "Internal",
+            nodeType: "Subpage"
+        },
+        // {
+        //     name: "settings_sync",
+        //     type: "boolean",
+        //     local: true,
+        //     default: false,
+        //     protect: true,
+        //     platforms: ["macos", "ipados", "ios"],
+        //     langLabel: {
+        //         en: "Sync settings",
+        //         zh_hans: "同步设置"
+        //     },
+        //     langTitle: {
+        //         en: "Sync settings across devices",
+        //         zh_hans: "跨设备同步设置"
+        //     },
+        //     group: "General",
+        //     nodeType: "Toggle"
+        // },
+        {
+            name: "toolbar_badge_count",
+            type: "boolean",
+            default: true,
+            platforms: ["macos", "ipados"],
+            langLabel: {
+                en: "Show Toolbar Count",
+                zh_hans: "工具栏图标显示计数徽章"
+            },
+            langTitle: {
+                en: "displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on",
+                zh_hans: "简体中文描述"
+            },
+            group: "General",
+            legacy: "showCount",
+            nodeType: "Toggle"
+        },
+        {
+            name: "global_active",
+            type: "boolean",
+            local: true,
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Enable Injection",
+                zh_hans: "启用注入"
+            },
+            langTitle: {
+                en: "toggle on/off script injection for the pages you visit",
+                zh_hans: "简体中文描述"
+            },
+            group: "General",
+            legacy: "active",
+            nodeType: "Toggle",
+            nodeClass: {red: false}
+        },
+        {
+            name: "global_scripts_update_check",
+            type: "boolean",
+            default: true,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Global scripts update check",
+                zh_hans: "全局脚本更新检查"
+            },
+            langTitle: {
+                en: "Whether to enable global periodic script update check",
+                zh_hans: "是否开启全局定期脚本更新检查"
+            },
+            group: "General",
+            nodeType: "Toggle"
+        },
+        {
+            name: "scripts_update_check_interval",
+            type: "number",
+            default: 86400000,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts update check interval",
+                zh_hans: "脚本更新检查间隔"
+            },
+            langTitle: {
+                en: "The interval for script update check in background",
+                zh_hans: "脚本更新检查的间隔时间"
+            },
+            group: "General",
+            nodeType: "Toggle"
+        },
+        {
+            name: "scripts_update_check_lasttime",
+            type: "number",
+            default: 0,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts update check lasttime",
+                zh_hans: "脚本更新上次检查时间"
+            },
+            langTitle: {
+                en: "The lasttime for script update check in background",
+                zh_hans: "后台脚本更新上次检查时间"
+            },
+            group: "Internal",
+            nodeType: "Toggle"
+        },
+        {
+            name: "scripts_auto_update",
+            type: "boolean",
+            default: false,
+            confirm: true,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts silent auto update",
+                zh_hans: "脚本后台静默自动更新"
+            },
+            langTitle: {
+                en: "Script silently auto-updates in the background, which is dangerous and may introduce unconfirmed malicious code",
+                zh_hans: "脚本在后台静默自动更新，这是危险的，可能引入未经确认的恶意代码"
+            },
+            group: "General",
+            nodeType: "Toggle",
+            nodeClass: {warn: true}
+        },
+        {
+            name: "global_exclude_match",
+            type: "object",
+            default: [],
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Global exclude match patterns",
+                zh_hans: "全局排除匹配模式列表"
+            },
+            langTitle: {
+                en: "this input accepts a comma separated list of @match patterns, a page url that matches against a pattern in this list will be ignored for script injection",
+                zh_hans: "简体中文描述"
+            },
+            group: "General",
+            legacy: "blacklist",
+            nodeType: "textarea",
+            nodeClass: {red: "blacklistError"}
+        },
+        {
+            name: "editor_close_brackets",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Auto Close Brackets",
+                zh_hans: "自动关闭括号"
+            },
+            langTitle: {
+                en: "toggles on/off auto closing of brackets in the editor, this affects the following characters: () [] {} \"\" ''",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "autoCloseBrackets",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_auto_hint",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Auto Hint",
+                zh_hans: "自动提示(Hint)"
+            },
+            langTitle: {
+                en: "automatically shows completion hints while editing",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "autoHint",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_list_sort",
+            type: "string",
+            values: ["nameAsc", "nameDesc", "lastModifiedAsc", "lastModifiedDesc"],
+            default: "lastModifiedDesc",
+            platforms: ["macos"],
+            langLabel: {
+                en: "Sort order",
+                zh_hans: "排序顺序"
+            },
+            langTitle: {
+                en: "Display order of items in sidebar",
+                zh_hans: "侧栏中项目的显示顺序"
+            },
+            group: "Editor",
+            legacy: "sortOrder",
+            nodeType: "Dropdown"
+        },
+        {
+            name: "editor_list_descriptions",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Show List Descriptions",
+                zh_hans: "显示列表项目描述"
+            },
+            langTitle: {
+                en: "show or hides the item descriptions in the sidebar",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "descriptions",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_javascript_lint",
+            type: "boolean",
+            default: false,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Javascript Linter",
+                zh_hans: "Javascript Linter"
+            },
+            langTitle: {
+                en: "toggles basic Javascript linting within the editor",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "lint",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_show_whitespace",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Show whitespace characters",
+                zh_hans: "显示空白字符"
+            },
+            langTitle: {
+                en: "toggles the display of invisible characters in the editor",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "showInvisibles",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_tab_size",
+            type: "number",
+            values: [2, 4],
+            default: 4,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Tab Size",
+                zh_hans: "制表符大小"
+            },
+            langTitle: {
+                en: "the number of spaces a tab is equal to while editing",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "tabSize",
+            nodeType: "select"
+        }
+    ].reduce(settingsDefineReduceCallback, {}));
+
+    // populate the settingsDefine with settingDefault
+    // and convert settingsDefine to storageKey object
+    function settingsDefineReduceCallback(settings, setting) {
+        setting.key = storageKey(setting.name);
+        settings[setting.key] = Object.assign({}, settingDefault, setting);
+        return settings;
+    }
+
+    // prevent settings define from being modified in any case
+    // otherwise user settings may be lost in the worst case
+    function deepFreeze(object) {
+        for (const p in object) {
+            if (typeof object[p] == "object") {
+                deepFreeze(object[p]);
+            }
+        }
+        return Object.freeze(object);
+    }
+
+    // export and define the operation method of settings storage
+    // they are similar to browser.storage but slightly different
+
+    async function get(keys, area) {
+        if (![undefined, "local", "sync"].includes(area)) {
+            return console.error("Unexpected storage area:", area);
+        }
+        // validate setting value and fix surprises to default
+        const valueFix = (key, val) => {
+            if (!key || !Object.hasOwn(settingsDefine, key)) return;
+            const def = settingsDefine[key].default;
+            // check if value type conforms to settingsDefine
+            const type = settingsDefine[key].type;
+            if (typeof val != type) {
+                console.warn(`Unexpected ${key} value type '${typeof(val)}' should '${type}', fix to default`);
+                return def;
+            }
+            // check if value conforms to settingsDefine
+            const values = settingsDefine[key].values;
+            if (values.length && !values.includes(val)) {
+                console.warn(`Unexpected ${key} value '${val}' should one of '${values}', fix to default`);
+                return def;
+            }
+            // verified, pass original value
+            return val;
+        };
+        if (typeof keys == "string") { // [single setting]
+            const key = storageKey(keys);
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
+                return console.error("unexpected settings key:", key);
+            }
+            // check if only locally stored setting
+            settingsDefine[key].local === true && (area = "local");
+            const storage = await storageRef();
+            const result = await storage.get(key);
+            if (Object.hasOwn(result, key)) {
+                return valueFix(key, result[key]);
+            } else {
+                return settingsDefine[key].default;
+            }
+        }
+        const complexGet = async (settingsDefault, areaKeys) => {
+            const storage = await storageRef();
+            let local = {}, sync = {};
+            if (storage.area === "sync") {
+                if (areaKeys.sync.length) {
+                    sync = await storage.get(areaKeys.sync);
+                }
+                if (areaKeys.local.length) {
+                    const storage = await storageRef();
+                    local = await storage.get(areaKeys.local);
+                }
+            } else {
+                local = await storage.get(areaKeys.all);
+            }
+            const result = Object.assign(settingsDefault, local, sync);
+            // revert settings object property name
+            return Object.entries(result).reduce((p, c) => (
+                p[settingsDefine[c[0]].name] = valueFix(...c), p
+            ), {});
+        };
+        if (Array.isArray(keys)) { // [muilt settings]
+            if (!keys.length) {
+                return console.error("Settings keys empty:", keys);
+            }
+            const settingsDefault = {};
+            const areaKeys = {local: [], sync: [], all: []};
+            for (const k of keys) {
+                const key = storageKey(k);
+                // check if key exist in settingsDefine
+                if (!Object.hasOwn(settingsDefine, key)) {
+                    return console.error("unexpected settings key:", key);
+                }
+                settingsDefault[key] = settingsDefine[key].default;
+                // detach only locally stored settings
+                settingsDefine[key].local === true
+                    ? areaKeys.local.push(key)
+                    : areaKeys.sync.push(key);
+                // record all keys in case sync storage is not enabled
+                areaKeys.all.push(key);
+            }
+            return await complexGet(settingsDefault, areaKeys);
+        }
+        if (typeof keys == "undefined" || keys === null) { // [all settings]
+            const settingsDefault = {};
+            const areaKeys = {local: [], sync: [], all: []};
+            for (const key in settingsDefine) {
+                settingsDefault[key] = settingsDefine[key].default;
+                // detach only locally stored settings
+                settingsDefine[key].local === true
+                    ? areaKeys.local.push(key)
+                    : areaKeys.sync.push(key);
+                // record all keys in case sync storage is not enabled
+                areaKeys.all.push(key);
+            }
+            return await complexGet(settingsDefault, areaKeys);
+        }
+        return console.error("Unexpected keys type:", keys);
+    }
+
+    async function set(keys, area) {
+        if (![undefined, "local", "sync"].includes(area)) {
+            return console.error("unexpected storage area:", area);
+        }
+        if (typeof keys != "object") {
+            return console.error("Unexpected keys type:", keys);
+        }
+        if (!Object.keys(keys).length) {
+            return console.error("Settings object empty:", keys);
+        }
+        const areaKeys = {local: {}, sync: {}, all: {}};
+        for (const k in keys) {
+            const key = storageKey(k);
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
+                return console.error("Unexpected settings keys:", key);
+            }
+            // check if value type conforms to settingsDefine
+            const type = settingsDefine[key].type;
+            if (typeof keys[k] != type) {
+                if (type === "number" && !isNaN(keys[k])) { // compatible with string numbers
+                    keys[k] = Number(keys[k]); // still store it as a number type
+                } else {
+                    return console.error(`Unexpected ${k} value type '${typeof(keys[k])}' should '${type}'`);
+                }
+            }
+            // check if value conforms to settingsDefine
+            const values = settingsDefine[key].values;
+            if (values.length && !values.includes(keys[k])) {
+                return console.error(`Unexpected ${k} value '${keys[k]}' should one of '${values}'`);
+            }
+            // detach only locally stored settings
+            settingsDefine[key].local === true
+                ? areaKeys.local[key] = keys[k]
+                : areaKeys.sync[key] = keys[k];
+            // record all keys in case sync storage is not enabled
+            areaKeys.all[key] = keys[k];
+        }
+        const storage = await storageRef();
+        // complexSet
+        try {
+            if (storage.area === "sync") {
+                if (Object.keys(areaKeys.sync).length) {
+                    await storage.set(areaKeys.sync);
+                }
+                if (Object.keys(areaKeys.local).length) {
+                    const storage = await storageRef("local");
+                    await storage.set(areaKeys.local);
+                }
+            } else {
+                await storage.set(areaKeys.all);
+            }
+            return true;
+        } catch (error) {
+            return console.error(error);
+        }
+    }
+
+    /* src/popup/App.svelte generated by Svelte v3.49.0 */
 
     const { window: window_1 } = globals;
 
@@ -2877,12 +3483,12 @@
     	return child_ctx;
     }
 
-    // (500:0) {#if !active}
+    // (496:0) {#if !active}
     function create_if_block_10(ctx) {
     	return { c: noop, m: noop, d: noop };
     }
 
-    // (503:0) {#if showInstallPrompt}
+    // (499:0) {#if showInstallPrompt}
     function create_if_block_9(ctx) {
     	let div;
     	let t0;
@@ -2896,7 +3502,7 @@
     			div = element("div");
     			t0 = text("Userscript Detected: ");
     			span = element("span");
-    			t1 = text(/*showInstallPrompt*/ ctx[15]);
+    			t1 = text(/*showInstallPrompt*/ ctx[16]);
     			attr(span, "class", "svelte-1w80sz6");
     			attr(div, "class", "warn svelte-1w80sz6");
     		},
@@ -2913,7 +3519,7 @@
     			}
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*showInstallPrompt*/ 32768) set_data(t1, /*showInstallPrompt*/ ctx[15]);
+    			if (dirty[0] & /*showInstallPrompt*/ 65536) set_data(t1, /*showInstallPrompt*/ ctx[16]);
     		},
     		d(detaching) {
     			if (detaching) detach(div);
@@ -2924,7 +3530,7 @@
     	};
     }
 
-    // (508:0) {#if error}
+    // (504:0) {#if error}
     function create_if_block_8(ctx) {
     	let div;
     	let t0;
@@ -2941,7 +3547,7 @@
     	return {
     		c() {
     			div = element("div");
-    			t0 = text(/*error*/ ctx[0]);
+    			t0 = text(/*error*/ ctx[3]);
     			t1 = space();
     			create_component(iconbutton.$$.fragment);
     			attr(div, "class", "error svelte-1w80sz6");
@@ -2955,7 +3561,7 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (!current || dirty[0] & /*error*/ 1) set_data(t0, /*error*/ ctx[0]);
+    			if (!current || dirty[0] & /*error*/ 8) set_data(t0, /*error*/ ctx[3]);
     		},
     		i(local) {
     			if (current) return;
@@ -2974,13 +3580,13 @@
     	};
     }
 
-    // (536:8) {:else}
+    // (532:8) {:else}
     function create_else_block$3(ctx) {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let current;
-    	let each_value = /*list*/ ctx[22];
+    	let each_value = /*list*/ ctx[2];
     	const get_key = ctx => /*item*/ ctx[48].filename;
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -2998,7 +3604,7 @@
     			}
 
     			attr(div, "class", "items svelte-1w80sz6");
-    			toggle_class(div, "disabled", /*disabled*/ ctx[3]);
+    			toggle_class(div, "disabled", /*disabled*/ ctx[6]);
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -3010,15 +3616,15 @@
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*list, toggleItem*/ 71303168) {
-    				const each_value = /*list*/ ctx[22];
+    			if (dirty[0] & /*list, toggleItem*/ 67108868) {
+    				each_value = /*list*/ ctx[2];
     				group_outros();
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$3, null, get_each_context$3);
     				check_outros();
     			}
 
-    			if (dirty[0] & /*disabled*/ 8) {
-    				toggle_class(div, "disabled", /*disabled*/ ctx[3]);
+    			if (dirty[0] & /*disabled*/ 64) {
+    				toggle_class(div, "disabled", /*disabled*/ ctx[6]);
     			}
     		},
     		i(local) {
@@ -3047,7 +3653,7 @@
     	};
     }
 
-    // (534:35) 
+    // (530:35) 
     function create_if_block_7(ctx) {
     	let div;
 
@@ -3069,7 +3675,7 @@
     	};
     }
 
-    // (524:28) 
+    // (520:28) 
     function create_if_block_6$1(ctx) {
     	let div;
     	let t0;
@@ -3107,7 +3713,7 @@
     	};
     }
 
-    // (522:8) {#if inactive}
+    // (518:8) {#if inactive}
     function create_if_block_5$1(ctx) {
     	let div;
 
@@ -3129,7 +3735,7 @@
     	};
     }
 
-    // (519:4) {#if loading}
+    // (515:4) {#if loading}
     function create_if_block_4$1(ctx) {
     	let loader;
     	let current;
@@ -3137,7 +3743,7 @@
     	loader = new Loader({
     			props: {
     				abortClick: abortUpdates,
-    				abort: /*abort*/ ctx[21]
+    				abort: /*abort*/ ctx[22]
     			}
     		});
 
@@ -3151,7 +3757,7 @@
     		},
     		p(ctx, dirty) {
     			const loader_changes = {};
-    			if (dirty[0] & /*abort*/ 2097152) loader_changes.abort = /*abort*/ ctx[21];
+    			if (dirty[0] & /*abort*/ 4194304) loader_changes.abort = /*abort*/ ctx[22];
     			loader.$set(loader_changes);
     		},
     		i(local) {
@@ -3169,14 +3775,14 @@
     	};
     }
 
-    // (538:16) {#each list as item (item.filename)}
+    // (534:16) {#each list as item (item.filename)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let popupitem;
     	let current;
 
-    	function click_handler_3(...args) {
-    		return /*click_handler_3*/ ctx[39](/*item*/ ctx[48], ...args);
+    	function click_handler_3() {
+    		return /*click_handler_3*/ ctx[39](/*item*/ ctx[48]);
     	}
 
     	popupitem = new PopupItem({
@@ -3207,11 +3813,11 @@
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const popupitem_changes = {};
-    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.enabled = !/*item*/ ctx[48].disabled;
-    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.name = /*item*/ ctx[48].name;
-    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.subframe = /*item*/ ctx[48].subframe;
-    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.type = /*item*/ ctx[48].type;
-    			if (dirty[0] & /*list*/ 4194304) popupitem_changes.request = /*item*/ ctx[48].request ? true : false;
+    			if (dirty[0] & /*list*/ 4) popupitem_changes.enabled = !/*item*/ ctx[48].disabled;
+    			if (dirty[0] & /*list*/ 4) popupitem_changes.name = /*item*/ ctx[48].name;
+    			if (dirty[0] & /*list*/ 4) popupitem_changes.subframe = /*item*/ ctx[48].subframe;
+    			if (dirty[0] & /*list*/ 4) popupitem_changes.type = /*item*/ ctx[48].type;
+    			if (dirty[0] & /*list*/ 4) popupitem_changes.request = /*item*/ ctx[48].request ? true : false;
     			popupitem.$set(popupitem_changes);
     		},
     		i(local) {
@@ -3230,7 +3836,7 @@
     	};
     }
 
-    // (552:0) {#if !inactive && platform === "macos"}
+    // (548:0) {#if !inactive && platform === "macos"}
     function create_if_block_3$1(ctx) {
     	let div1;
     	let div0;
@@ -3263,7 +3869,7 @@
     	};
     }
 
-    // (589:18) 
+    // (585:18) 
     function create_if_block_2$1(ctx) {
     	let view;
     	let current;
@@ -3271,7 +3877,7 @@
     	view = new View({
     			props: {
     				headerTitle: "All Userscripts",
-    				loading: /*disabled*/ ctx[3],
+    				loading: /*disabled*/ ctx[6],
     				closeClick: /*func_3*/ ctx[44],
     				showLoaderOnDisabled: false,
     				$$slots: { default: [create_default_slot_2] },
@@ -3289,10 +3895,10 @@
     		},
     		p(ctx, dirty) {
     			const view_changes = {};
-    			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
-    			if (dirty[0] & /*showAll*/ 524288) view_changes.closeClick = /*func_3*/ ctx[44];
+    			if (dirty[0] & /*disabled*/ 64) view_changes.loading = /*disabled*/ ctx[6];
+    			if (dirty[0] & /*showAll*/ 1048576) view_changes.closeClick = /*func_3*/ ctx[44];
 
-    			if (dirty[0] & /*allItems*/ 1048576 | dirty[1] & /*$$scope*/ 1048576) {
+    			if (dirty[0] & /*allItems*/ 2097152 | dirty[1] & /*$$scope*/ 1048576) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3313,7 +3919,7 @@
     	};
     }
 
-    // (575:22) 
+    // (571:22) 
     function create_if_block_1$1(ctx) {
     	let view;
     	let current;
@@ -3321,7 +3927,7 @@
     	view = new View({
     			props: {
     				headerTitle: "Install Userscript",
-    				loading: /*disabled*/ ctx[3],
+    				loading: /*disabled*/ ctx[6],
     				closeClick: /*func_2*/ ctx[43],
     				showLoaderOnDisabled: true,
     				$$slots: { default: [create_default_slot_1] },
@@ -3339,10 +3945,10 @@
     		},
     		p(ctx, dirty) {
     			const view_changes = {};
-    			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
-    			if (dirty[0] & /*showInstall*/ 65536) view_changes.closeClick = /*func_2*/ ctx[43];
+    			if (dirty[0] & /*disabled*/ 64) view_changes.loading = /*disabled*/ ctx[6];
+    			if (dirty[0] & /*showInstall*/ 131072) view_changes.closeClick = /*func_2*/ ctx[43];
 
-    			if (dirty[0] & /*installViewUserscript, installViewUserscriptError, showInstall*/ 458752 | dirty[1] & /*$$scope*/ 1048576) {
+    			if (dirty[0] & /*installViewUserscript, installViewUserscriptError, showInstall*/ 917504 | dirty[1] & /*$$scope*/ 1048576) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3363,7 +3969,7 @@
     	};
     }
 
-    // (559:0) {#if showUpdates}
+    // (555:0) {#if showUpdates}
     function create_if_block$6(ctx) {
     	let view;
     	let current;
@@ -3371,11 +3977,11 @@
     	view = new View({
     			props: {
     				headerTitle: "Updates",
-    				loading: /*disabled*/ ctx[3],
+    				loading: /*disabled*/ ctx[6],
     				closeClick: /*func*/ ctx[41],
     				showLoaderOnDisabled: true,
     				abortClick: abortUpdates,
-    				abort: /*showUpdates*/ ctx[5],
+    				abort: /*showUpdates*/ ctx[7],
     				$$slots: { default: [create_default_slot] },
     				$$scope: { ctx }
     			}
@@ -3391,11 +3997,11 @@
     		},
     		p(ctx, dirty) {
     			const view_changes = {};
-    			if (dirty[0] & /*disabled*/ 8) view_changes.loading = /*disabled*/ ctx[3];
-    			if (dirty[0] & /*showUpdates*/ 32) view_changes.closeClick = /*func*/ ctx[41];
-    			if (dirty[0] & /*showUpdates*/ 32) view_changes.abort = /*showUpdates*/ ctx[5];
+    			if (dirty[0] & /*disabled*/ 64) view_changes.loading = /*disabled*/ ctx[6];
+    			if (dirty[0] & /*showUpdates*/ 128) view_changes.closeClick = /*func*/ ctx[41];
+    			if (dirty[0] & /*showUpdates*/ 128) view_changes.abort = /*showUpdates*/ ctx[7];
 
-    			if (dirty[0] & /*updates*/ 64 | dirty[1] & /*$$scope*/ 1048576) {
+    			if (dirty[0] & /*updates*/ 256 | dirty[1] & /*$$scope*/ 1048576) {
     				view_changes.$$scope = { dirty, ctx };
     			}
 
@@ -3416,14 +4022,14 @@
     	};
     }
 
-    // (590:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
+    // (586:4) <View         headerTitle={"All Userscripts"}         loading={disabled}         closeClick={() => {             showAll = false;             refreshView();         }}         showLoaderOnDisabled={false}     >
     function create_default_slot_2(ctx) {
     	let allitemsview;
     	let current;
 
     	allitemsview = new AllItemsView({
     			props: {
-    				allItems: /*allItems*/ ctx[20],
+    				allItems: /*allItems*/ ctx[21],
     				allItemsToggleItem: /*toggleItem*/ ctx[26]
     			}
     		});
@@ -3438,7 +4044,7 @@
     		},
     		p(ctx, dirty) {
     			const allitemsview_changes = {};
-    			if (dirty[0] & /*allItems*/ 1048576) allitemsview_changes.allItems = /*allItems*/ ctx[20];
+    			if (dirty[0] & /*allItems*/ 2097152) allitemsview_changes.allItems = /*allItems*/ ctx[21];
     			allitemsview.$set(allitemsview_changes);
     		},
     		i(local) {
@@ -3456,15 +4062,15 @@
     	};
     }
 
-    // (576:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
+    // (572:4) <View         headerTitle={"Install Userscript"}         loading={disabled}         closeClick={() => showInstall = false}         showLoaderOnDisabled={true}     >
     function create_default_slot_1(ctx) {
     	let installview;
     	let current;
 
     	installview = new InstallView({
     			props: {
-    				userscript: /*installViewUserscript*/ ctx[17],
-    				installError: /*installViewUserscriptError*/ ctx[18],
+    				userscript: /*installViewUserscript*/ ctx[18],
+    				installError: /*installViewUserscriptError*/ ctx[19],
     				installCancelClick: /*func_1*/ ctx[42],
     				installConfirmClick: /*installConfirm*/ ctx[32]
     			}
@@ -3480,9 +4086,9 @@
     		},
     		p(ctx, dirty) {
     			const installview_changes = {};
-    			if (dirty[0] & /*installViewUserscript*/ 131072) installview_changes.userscript = /*installViewUserscript*/ ctx[17];
-    			if (dirty[0] & /*installViewUserscriptError*/ 262144) installview_changes.installError = /*installViewUserscriptError*/ ctx[18];
-    			if (dirty[0] & /*showInstall*/ 65536) installview_changes.installCancelClick = /*func_1*/ ctx[42];
+    			if (dirty[0] & /*installViewUserscript*/ 262144) installview_changes.userscript = /*installViewUserscript*/ ctx[18];
+    			if (dirty[0] & /*installViewUserscriptError*/ 524288) installview_changes.installError = /*installViewUserscriptError*/ ctx[19];
+    			if (dirty[0] & /*showInstall*/ 131072) installview_changes.installCancelClick = /*func_1*/ ctx[42];
     			installview.$set(installview_changes);
     		},
     		i(local) {
@@ -3500,7 +4106,7 @@
     	};
     }
 
-    // (560:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
+    // (556:4) <View         headerTitle={"Updates"}         loading={disabled}         closeClick={() => showUpdates = false}         showLoaderOnDisabled={true}         abortClick={abortUpdates}         abort={showUpdates}     >
     function create_default_slot(ctx) {
     	let updateview;
     	let current;
@@ -3510,7 +4116,7 @@
     				checkClick: /*checkForUpdates*/ ctx[27],
     				updateClick: /*updateAll*/ ctx[24],
     				updateSingleClick: /*updateItem*/ ctx[25],
-    				updates: /*updates*/ ctx[6]
+    				updates: /*updates*/ ctx[8]
     			}
     		});
 
@@ -3524,7 +4130,7 @@
     		},
     		p(ctx, dirty) {
     			const updateview_changes = {};
-    			if (dirty[0] & /*updates*/ 64) updateview_changes.updates = /*updates*/ ctx[6];
+    			if (dirty[0] & /*updates*/ 256) updateview_changes.updates = /*updates*/ ctx[8];
     			updateview.$set(updateview_changes);
     		},
     		i(local) {
@@ -3572,7 +4178,7 @@
     			props: {
     				icon: iconOpen,
     				title: "Open save location",
-    				disabled: /*disabled*/ ctx[3]
+    				disabled: /*disabled*/ ctx[6]
     			}
     		});
 
@@ -3581,9 +4187,9 @@
     	iconbutton1 = new IconButton({
     			props: {
     				icon: iconUpdate,
-    				notification: /*updates*/ ctx[6].length,
+    				notification: /*updates*/ ctx[8].length,
     				title: "Show updates",
-    				disabled: /*disabled*/ ctx[3]
+    				disabled: /*disabled*/ ctx[6]
     			}
     		});
 
@@ -3593,7 +4199,7 @@
     			props: {
     				icon: iconRefresh,
     				title: "Refresh view",
-    				disabled: /*disabled*/ ctx[3]
+    				disabled: /*disabled*/ ctx[6]
     			}
     		});
 
@@ -3601,16 +4207,16 @@
 
     	toggle = new Toggle({
     			props: {
-    				checked: /*active*/ ctx[1],
+    				checked: /*active*/ ctx[4],
     				title: "Toggle injection",
-    				disabled: /*disabled*/ ctx[3]
+    				disabled: /*disabled*/ ctx[6]
     			}
     		});
 
     	toggle.$on("click", /*toggleExtension*/ ctx[23]);
-    	let if_block0 = !/*active*/ ctx[1] && create_if_block_10();
-    	let if_block1 = /*showInstallPrompt*/ ctx[15] && create_if_block_9(ctx);
-    	let if_block2 = /*error*/ ctx[0] && create_if_block_8(ctx);
+    	let if_block0 = !/*active*/ ctx[4] && create_if_block_10();
+    	let if_block1 = /*showInstallPrompt*/ ctx[16] && create_if_block_9(ctx);
+    	let if_block2 = /*error*/ ctx[3] && create_if_block_8(ctx);
 
     	const if_block_creators = [
     		create_if_block_4$1,
@@ -3623,23 +4229,23 @@
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*loading*/ ctx[2]) return 0;
-    		if (/*inactive*/ ctx[9]) return 1;
-    		if (/*initError*/ ctx[11]) return 2;
-    		if (/*items*/ ctx[4].length < 1) return 3;
+    		if (/*loading*/ ctx[5]) return 0;
+    		if (/*inactive*/ ctx[11]) return 1;
+    		if (/*initError*/ ctx[12]) return 2;
+    		if (/*items*/ ctx[0].length < 1) return 3;
     		return 4;
     	}
 
     	current_block_type_index = select_block_type(ctx);
     	if_block3 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    	let if_block4 = !/*inactive*/ ctx[9] && /*platform*/ ctx[10] === "macos" && create_if_block_3$1();
+    	let if_block4 = !/*inactive*/ ctx[11] && /*platform*/ ctx[1] === "macos" && create_if_block_3$1();
     	const if_block_creators_1 = [create_if_block$6, create_if_block_1$1, create_if_block_2$1];
     	const if_blocks_1 = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*showUpdates*/ ctx[5]) return 0;
-    		if (/*showInstall*/ ctx[16]) return 1;
-    		if (/*showAll*/ ctx[19]) return 2;
+    		if (/*showUpdates*/ ctx[7]) return 0;
+    		if (/*showInstall*/ ctx[17]) return 1;
+    		if (/*showAll*/ ctx[20]) return 2;
     		return -1;
     	}
 
@@ -3672,7 +4278,7 @@
     			if (if_block5) if_block5.c();
     			if_block5_anchor = empty();
     			attr(div0, "class", "header svelte-1w80sz6");
-    			attr(div1, "class", div1_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-1w80sz6");
+    			attr(div1, "class", div1_class_value = "main " + (/*rowColors*/ ctx[10] || "") + " svelte-1w80sz6");
     		},
     		m(target, anchor) {
     			insert(target, div0, anchor);
@@ -3712,21 +4318,21 @@
     		},
     		p(ctx, dirty) {
     			const iconbutton0_changes = {};
-    			if (dirty[0] & /*disabled*/ 8) iconbutton0_changes.disabled = /*disabled*/ ctx[3];
+    			if (dirty[0] & /*disabled*/ 64) iconbutton0_changes.disabled = /*disabled*/ ctx[6];
     			iconbutton0.$set(iconbutton0_changes);
     			const iconbutton1_changes = {};
-    			if (dirty[0] & /*updates*/ 64) iconbutton1_changes.notification = /*updates*/ ctx[6].length;
-    			if (dirty[0] & /*disabled*/ 8) iconbutton1_changes.disabled = /*disabled*/ ctx[3];
+    			if (dirty[0] & /*updates*/ 256) iconbutton1_changes.notification = /*updates*/ ctx[8].length;
+    			if (dirty[0] & /*disabled*/ 64) iconbutton1_changes.disabled = /*disabled*/ ctx[6];
     			iconbutton1.$set(iconbutton1_changes);
     			const iconbutton2_changes = {};
-    			if (dirty[0] & /*disabled*/ 8) iconbutton2_changes.disabled = /*disabled*/ ctx[3];
+    			if (dirty[0] & /*disabled*/ 64) iconbutton2_changes.disabled = /*disabled*/ ctx[6];
     			iconbutton2.$set(iconbutton2_changes);
     			const toggle_changes = {};
-    			if (dirty[0] & /*active*/ 2) toggle_changes.checked = /*active*/ ctx[1];
-    			if (dirty[0] & /*disabled*/ 8) toggle_changes.disabled = /*disabled*/ ctx[3];
+    			if (dirty[0] & /*active*/ 16) toggle_changes.checked = /*active*/ ctx[4];
+    			if (dirty[0] & /*disabled*/ 64) toggle_changes.disabled = /*disabled*/ ctx[6];
     			toggle.$set(toggle_changes);
 
-    			if (!/*active*/ ctx[1]) {
+    			if (!/*active*/ ctx[4]) {
     				if (if_block0) ; else {
     					if_block0 = create_if_block_10();
     					if_block0.c();
@@ -3737,7 +4343,7 @@
     				if_block0 = null;
     			}
 
-    			if (/*showInstallPrompt*/ ctx[15]) {
+    			if (/*showInstallPrompt*/ ctx[16]) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
@@ -3750,11 +4356,11 @@
     				if_block1 = null;
     			}
 
-    			if (/*error*/ ctx[0]) {
+    			if (/*error*/ ctx[3]) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
 
-    					if (dirty[0] & /*error*/ 1) {
+    					if (dirty[0] & /*error*/ 8) {
     						transition_in(if_block2, 1);
     					}
     				} else {
@@ -3791,17 +4397,19 @@
     				if (!if_block3) {
     					if_block3 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     					if_block3.c();
+    				} else {
+    					if_block3.p(ctx, dirty);
     				}
 
     				transition_in(if_block3, 1);
     				if_block3.m(div1, null);
     			}
 
-    			if (!current || dirty[0] & /*rowColors*/ 256 && div1_class_value !== (div1_class_value = "main " + (/*rowColors*/ ctx[8] || "") + " svelte-1w80sz6")) {
+    			if (!current || dirty[0] & /*rowColors*/ 1024 && div1_class_value !== (div1_class_value = "main " + (/*rowColors*/ ctx[10] || "") + " svelte-1w80sz6")) {
     				attr(div1, "class", div1_class_value);
     			}
 
-    			if (!/*inactive*/ ctx[9] && /*platform*/ ctx[10] === "macos") {
+    			if (!/*inactive*/ ctx[11] && /*platform*/ ctx[1] === "macos") {
     				if (if_block4) {
     					if_block4.p(ctx, dirty);
     				} else {
@@ -3838,6 +4446,8 @@
     					if (!if_block5) {
     						if_block5 = if_blocks_1[current_block_type_index_1] = if_block_creators_1[current_block_type_index_1](ctx);
     						if_block5.c();
+    					} else {
+    						if_block5.p(ctx, dirty);
     					}
 
     					transition_in(if_block5, 1);
@@ -3984,6 +4594,7 @@
     }
 
     function instance$9($$self, $$props, $$invalidate) {
+    	let list;
     	let error = undefined;
     	let active = true;
     	let loading = true;
@@ -4009,37 +4620,31 @@
     	let resizeTimer;
     	let abort = false;
 
-    	function toggleExtension(e) {
-    		e.preventDefault(); // prevent check state from changing on click
-    		$$invalidate(3, disabled = true);
-
-    		browser.runtime.sendNativeMessage({ name: "POPUP_TOGGLE_EXTENSION" }, response => {
-    			$$invalidate(3, disabled = false);
-    			if (response.error) return $$invalidate(0, error = response.error);
-    			$$invalidate(1, active = !active);
-    		});
+    	async function toggleExtension(e) {
+    		await set({ "global_active": !active });
+    		$$invalidate(4, active = await get("global_active"));
     	}
 
     	function updateAll() {
-    		$$invalidate(5, showUpdates = false);
-    		$$invalidate(3, disabled = true);
-    		$$invalidate(2, loading = true);
+    		$$invalidate(7, showUpdates = false);
+    		$$invalidate(6, disabled = true);
+    		$$invalidate(5, loading = true);
 
     		browser.runtime.sendNativeMessage({ name: "POPUP_UPDATE_ALL" }, response => {
     			if (response.error) {
-    				$$invalidate(0, error = response.error);
+    				$$invalidate(3, error = response.error);
     			} else {
-    				if (response.items) $$invalidate(4, items = response.items);
-    				$$invalidate(6, updates = response.updates);
+    				if (response.items) $$invalidate(0, items = response.items);
+    				$$invalidate(8, updates = response.updates);
     			}
 
-    			$$invalidate(3, disabled = false);
-    			$$invalidate(2, loading = false);
+    			$$invalidate(6, disabled = false);
+    			$$invalidate(5, loading = false);
     		});
     	}
 
     	async function updateItem(item) {
-    		$$invalidate(3, disabled = true);
+    		$$invalidate(6, disabled = true);
     		const currentTab = await browser.tabs.getCurrent();
     		const url = currentTab.url;
     		const frameUrls = [];
@@ -4059,80 +4664,80 @@
     		const response = await browser.runtime.sendNativeMessage(message);
 
     		if (response.error) {
-    			$$invalidate(0, error = response.error);
-    			$$invalidate(5, showUpdates = false);
+    			$$invalidate(3, error = response.error);
+    			$$invalidate(7, showUpdates = false);
     		} else {
-    			$$invalidate(6, updates = updates.filter(e => e.filename !== item.filename));
-    			$$invalidate(4, items = response.items);
+    			$$invalidate(8, updates = updates.filter(e => e.filename !== item.filename));
+    			$$invalidate(0, items = response.items);
     		}
 
-    		$$invalidate(3, disabled = false);
+    		$$invalidate(6, disabled = false);
     	}
 
     	function toggleItem(item) {
     		if (disabled) return;
-    		$$invalidate(3, disabled = true);
+    		$$invalidate(6, disabled = true);
 
     		browser.runtime.sendNativeMessage({ name: "TOGGLE_ITEM", item }, response => {
     			if (response.error) {
-    				$$invalidate(0, error = response.error);
+    				$$invalidate(3, error = response.error);
     			} else {
     				const i = items.findIndex(el => el === item);
     				const j = allItems.findIndex(el => el === item);
     				item.disabled = !item.disabled;
-    				$$invalidate(4, items[i] = item, items);
-    				if (j >= 0) $$invalidate(20, allItems[j] = item, allItems);
+    				$$invalidate(0, items[i] = item, items);
+    				if (j >= 0) $$invalidate(21, allItems[j] = item, allItems);
     			}
 
-    			$$invalidate(3, disabled = false);
+    			$$invalidate(6, disabled = false);
     		});
     	}
 
     	function checkForUpdates() {
-    		$$invalidate(3, disabled = true);
-    		$$invalidate(11, initError = false);
+    		$$invalidate(6, disabled = true);
+    		$$invalidate(12, initError = false);
 
     		browser.runtime.sendNativeMessage({ name: "POPUP_CHECK_UPDATES" }, response => {
     			if (response.error) {
-    				$$invalidate(0, error = response.error);
-    				$$invalidate(5, showUpdates = false);
+    				$$invalidate(3, error = response.error);
+    				$$invalidate(7, showUpdates = false);
     			} else {
-    				$$invalidate(6, updates = response.updates);
+    				$$invalidate(8, updates = response.updates);
     			}
 
-    			$$invalidate(3, disabled = false);
+    			$$invalidate(6, disabled = false);
     		});
     	}
 
     	function refreshView() {
-    		$$invalidate(0, error = undefined);
-    		$$invalidate(2, loading = true);
-    		$$invalidate(3, disabled = true);
-    		$$invalidate(4, items = []);
-    		$$invalidate(5, showUpdates = false);
-    		$$invalidate(6, updates = []);
-    		$$invalidate(9, inactive = false);
-    		$$invalidate(21, abort = false);
+    		$$invalidate(3, error = undefined);
+    		$$invalidate(5, loading = true);
+    		$$invalidate(6, disabled = true);
+    		$$invalidate(0, items = []);
+    		$$invalidate(7, showUpdates = false);
+    		$$invalidate(8, updates = []);
+    		$$invalidate(11, inactive = false);
+    		$$invalidate(22, abort = false);
     		initialize();
     	}
 
     	async function openSaveLocation() {
-    		$$invalidate(3, disabled = true);
-    		$$invalidate(2, loading = true);
+    		$$invalidate(6, disabled = true);
+    		$$invalidate(5, loading = true);
     		const response = await browser.runtime.sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
 
     		if (response.success) {
     			window.close();
     		} else if (response.items) {
-    			$$invalidate(19, showAll = true);
-    			$$invalidate(20, allItems = response.items);
+    			$$invalidate(20, showAll = true);
+    			$$invalidate(21, allItems = response.items);
     		} else if (response.error) {
     			console.log(`Error opening save location: ${response.error}`);
-    			$$invalidate(0, error = response.error);
+    			$$invalidate(3, error = response.error);
     		}
 
-    		$$invalidate(3, disabled = false);
-    		$$invalidate(2, loading = false);
+    		$$invalidate(6, disabled = false);
+    		$$invalidate(5, loading = false);
     	}
 
     	async function initialize() {
@@ -4143,18 +4748,18 @@
     			pltfm = await browser.runtime.sendNativeMessage({ name: "REQ_PLATFORM" });
     		} catch(error) {
     			console.log(`Error for pltfm promise: ${error}`);
-    			$$invalidate(11, initError = true);
-    			$$invalidate(2, loading = false);
+    			$$invalidate(12, initError = true);
+    			$$invalidate(5, loading = false);
     			return;
     		}
 
     		if (pltfm.error) {
-    			$$invalidate(0, error = pltfm.error);
-    			$$invalidate(2, loading = false);
-    			$$invalidate(3, disabled = false);
+    			$$invalidate(3, error = pltfm.error);
+    			$$invalidate(5, loading = false);
+    			$$invalidate(6, disabled = false);
     			return;
     		} else {
-    			$$invalidate(10, platform = pltfm.platform);
+    			$$invalidate(1, platform = pltfm.platform);
     		}
 
     		// run init checks
@@ -4165,19 +4770,19 @@
     			init = await browser.runtime.sendNativeMessage({ name: "POPUP_INIT" });
     		} catch(error) {
     			console.log(`Error for init promise: ${error}`);
-    			$$invalidate(11, initError = true);
-    			$$invalidate(2, loading = false);
+    			$$invalidate(12, initError = true);
+    			$$invalidate(5, loading = false);
     			return;
     		}
 
     		if (init.error) {
-    			$$invalidate(0, error = init.error);
-    			$$invalidate(2, loading = false);
-    			$$invalidate(3, disabled = false);
+    			$$invalidate(3, error = init.error);
+    			$$invalidate(5, loading = false);
+    			$$invalidate(6, disabled = false);
     			return;
-    		} else {
-    			$$invalidate(1, active = init.initData.active === "true" ? true : false);
     		}
+
+    		$$invalidate(4, active = await get("global_active"));
 
     		// refresh session rules
     		browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
@@ -4195,16 +4800,16 @@
     		const url = currentTab.url;
 
     		if (!url) {
-    			$$invalidate(2, loading = false);
-    			$$invalidate(3, disabled = false);
+    			$$invalidate(5, loading = false);
+    			$$invalidate(6, disabled = false);
     			return;
     		}
 
     		if (url === extensionPageUrl) {
     			// disable popup on extension page
-    			$$invalidate(9, inactive = true);
+    			$$invalidate(11, inactive = true);
 
-    			$$invalidate(2, loading = false);
+    			$$invalidate(5, loading = false);
     			return;
     		}
 
@@ -4231,18 +4836,18 @@
     			matches = await browser.runtime.sendNativeMessage(message);
     		} catch(error) {
     			console.log(`Error for matches promise: ${error}`); // response = await browser.runtime.sendMessage(message);
-    			$$invalidate(11, initError = true);
-    			$$invalidate(2, loading = false);
+    			$$invalidate(12, initError = true);
+    			$$invalidate(5, loading = false);
     			return;
     		}
 
     		if (matches.error) {
-    			$$invalidate(0, error = matches.error);
-    			$$invalidate(2, loading = false);
-    			$$invalidate(3, disabled = false);
+    			$$invalidate(3, error = matches.error);
+    			$$invalidate(5, loading = false);
+    			$$invalidate(6, disabled = false);
     			return;
     		} else {
-    			$$invalidate(4, items = matches.matches);
+    			$$invalidate(0, items = matches.matches);
     		}
 
     		// get updates
@@ -4256,27 +4861,27 @@
     				const timestampMs = Date.now();
 
     				await browser.storage.local.set({ "lastUpdateCheck": timestampMs });
-    				$$invalidate(21, abort = true);
+    				$$invalidate(22, abort = true);
     				updatesResponse = await browser.runtime.sendNativeMessage({ name: "POPUP_UPDATES" });
     			} catch(error) {
     				console.error(`Error for updates promise: ${error}`);
-    				$$invalidate(11, initError = true);
-    				$$invalidate(2, loading = false);
-    				$$invalidate(21, abort = false);
+    				$$invalidate(12, initError = true);
+    				$$invalidate(5, loading = false);
+    				$$invalidate(22, abort = false);
     				return;
     			}
 
     			if (updatesResponse.error) {
-    				$$invalidate(0, error = updatesResponse.error);
-    				$$invalidate(2, loading = false);
-    				$$invalidate(3, disabled = false);
-    				$$invalidate(21, abort = false);
+    				$$invalidate(3, error = updatesResponse.error);
+    				$$invalidate(5, loading = false);
+    				$$invalidate(6, disabled = false);
+    				$$invalidate(22, abort = false);
     				return;
     			} else {
-    				$$invalidate(6, updates = updatesResponse.updates);
+    				$$invalidate(8, updates = updatesResponse.updates);
     			}
 
-    			$$invalidate(21, abort = false);
+    			$$invalidate(22, abort = false);
     		}
 
     		// check if current page url is a userscript
@@ -4298,18 +4903,18 @@
 
     			if (response.error) {
     				console.log(`Error checking .user.js url: ${response.error}`);
-    				$$invalidate(0, error = response.error);
+    				$$invalidate(3, error = response.error);
     			} else if (!response.invalid) {
     				// the response will contain the string to display
     				// ex: {success: "Click to install"}
     				const prompt = response.success;
 
-    				$$invalidate(15, showInstallPrompt = prompt);
+    				$$invalidate(16, showInstallPrompt = prompt);
     			}
     		}
 
-    		$$invalidate(2, loading = false);
-    		$$invalidate(3, disabled = false);
+    		$$invalidate(5, loading = false);
+    		$$invalidate(6, disabled = false);
     	}
 
     	async function resize() {
@@ -4327,7 +4932,7 @@
     						document.body.removeAttribute("style");
     						return;
     					} else {
-    						$$invalidate(7, main.style.maxHeight = "unset", main);
+    						$$invalidate(9, main.style.maxHeight = "unset", main);
     						document.body.style.width = "100vw";
     					}
     				}
@@ -4344,8 +4949,8 @@
 
     				if (err) addHeight += err.offsetHeight;
     				windowHeight = window.outerHeight - (headerHeight + addHeight);
-    				$$invalidate(7, main.style.height = `${windowHeight}px`, main);
-    				$$invalidate(7, main.style.paddingBottom = `${headerHeight + addHeight}px`, main);
+    				$$invalidate(9, main.style.height = `${windowHeight}px`, main);
+    				$$invalidate(9, main.style.paddingBottom = `${headerHeight + addHeight}px`, main);
     			},
     			25
     		);
@@ -4353,10 +4958,10 @@
 
     	async function showInstallView() {
     		// disable all buttons
-    		$$invalidate(3, disabled = true);
+    		$$invalidate(6, disabled = true);
 
     		// show the install view
-    		$$invalidate(16, showInstall = true);
+    		$$invalidate(17, showInstall = true);
 
     		// get the active tab
     		const currentTab = await browser.tabs.getCurrent();
@@ -4373,23 +4978,23 @@
     		// if the response includes an error, display it in the view
     		if (response.error) {
     			console.log(`Can not install userscript: ${response.error}`);
-    			$$invalidate(18, installViewUserscriptError = response.error);
+    			$$invalidate(19, installViewUserscriptError = response.error);
     		} else {
-    			$$invalidate(17, installViewUserscript = response);
+    			$$invalidate(18, installViewUserscript = response);
     		}
 
-    		$$invalidate(3, disabled = false);
+    		$$invalidate(6, disabled = false);
     	}
 
     	async function installConfirm() {
     		// disabled all buttons
-    		$$invalidate(3, disabled = true);
+    		$$invalidate(6, disabled = true);
 
     		// show loading element
-    		$$invalidate(2, loading = true);
+    		$$invalidate(5, loading = true);
 
     		// go back to main view
-    		$$invalidate(16, showInstall = false);
+    		$$invalidate(17, showInstall = false);
 
     		// get the active tab
     		const currentTab = await browser.tabs.getCurrent();
@@ -4398,9 +5003,9 @@
     		const response = await browser.tabs.sendMessage(currentTab.id, { name: "USERSCRIPT_INSTALL_02" });
 
     		if (response.error) {
-    			$$invalidate(0, error = response.error);
-    			$$invalidate(3, disabled = false);
-    			$$invalidate(2, loading = false);
+    			$$invalidate(3, error = response.error);
+    			$$invalidate(6, disabled = false);
+    			$$invalidate(5, loading = false);
     			return;
     		} else {
     			// if response did not have an error, userscript installed successfully
@@ -4416,28 +5021,28 @@
     		resize();
     	});
 
-    	const click_handler = () => $$invalidate(5, showUpdates = true);
+    	const click_handler = () => $$invalidate(7, showUpdates = true);
 
     	function div0_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			header = $$value;
-    			$$invalidate(12, header);
+    			$$invalidate(13, header);
     		});
     	}
 
     	function div_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			warn = $$value;
-    			$$invalidate(13, warn);
+    			$$invalidate(14, warn);
     		});
     	}
 
-    	const click_handler_1 = () => $$invalidate(0, error = undefined);
+    	const click_handler_1 = () => $$invalidate(3, error = undefined);
 
     	function div_binding_1($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			err = $$value;
-    			$$invalidate(14, err);
+    			$$invalidate(15, err);
     		});
     	}
 
@@ -4445,55 +5050,54 @@
     	const click_handler_3 = item => toggleItem(item);
 
     	function div1_binding($$value) {
-    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			main = $$value;
-    			$$invalidate(7, main);
+    			$$invalidate(9, main);
     		});
     	}
 
-    	const func = () => $$invalidate(5, showUpdates = false);
-    	const func_1 = () => $$invalidate(16, showInstall = false);
-    	const func_2 = () => $$invalidate(16, showInstall = false);
+    	const func = () => $$invalidate(7, showUpdates = false);
+    	const func_1 = () => $$invalidate(17, showInstall = false);
+    	const func_2 = () => $$invalidate(17, showInstall = false);
 
     	const func_3 = () => {
-    		$$invalidate(19, showAll = false);
+    		$$invalidate(20, showAll = false);
     		refreshView();
     	};
 
-    	let list;
-
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty[0] & /*items*/ 16) {
-    			 $$invalidate(22, list = items.sort((a, b) => a.name.localeCompare(b.name)));
+    		if ($$self.$$.dirty[0] & /*items*/ 1) {
+    			 $$invalidate(2, list = items.sort((a, b) => a.name.localeCompare(b.name)));
     		}
 
-    		if ($$self.$$.dirty[0] & /*list*/ 4194304) {
+    		if ($$self.$$.dirty[0] & /*list*/ 4) {
     			 if (list.length > 1 && list.length % 2 === 0) {
-    				$$invalidate(8, rowColors = "even");
+    				$$invalidate(10, rowColors = "even");
     			} else if (list.length > 1 && list.length % 2 !== 0) {
-    				$$invalidate(8, rowColors = "odd");
+    				$$invalidate(10, rowColors = "odd");
     			} else {
-    				$$invalidate(8, rowColors = undefined);
+    				$$invalidate(10, rowColors = undefined);
     			}
     		}
 
-    		if ($$self.$$.dirty[0] & /*platform*/ 1024) {
+    		if ($$self.$$.dirty[0] & /*platform*/ 2) {
     			 if (platform) document.body.classList.add(platform);
     		}
     	};
 
     	return [
+    		items,
+    		platform,
+    		list,
     		error,
     		active,
     		loading,
     		disabled,
-    		items,
     		showUpdates,
     		updates,
     		main,
     		rowColors,
     		inactive,
-    		platform,
     		initError,
     		header,
     		warn,
@@ -4505,7 +5109,6 @@
     		showAll,
     		allItems,
     		abort,
-    		list,
     		toggleExtension,
     		updateAll,
     		updateItem,
@@ -4534,7 +5137,7 @@
     class App extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$9, create_fragment$9, safe_not_equal, {}, [-1, -1]);
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, {}, null, [-1, -1]);
     	}
     }
 

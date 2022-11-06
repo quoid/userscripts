@@ -1167,6 +1167,689 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
         "weight"
     ]);
 
+    // wrap a relatively independent settings storage with its own functions
+
+    const storagePrefix = "US_";
+    const storageKey = key => storagePrefix + key.toUpperCase();
+    // const storageRef = async area => { // dynamic storage reference
+    //     browser.storage.sync.area = "sync";
+    //     browser.storage.local.area = "local";
+    //     if (area === "sync") return browser.storage.sync;
+    //     if (area === "local") return browser.storage.local;
+    //     const key = storageKey("settings_sync");
+    //     const result = await browser.storage.local.get(key);
+    //     if (result?.[key] === true) {
+    //         return browser.storage.sync;
+    //     } else {
+    //         return browser.storage.local;
+    //     }
+    // };
+
+    // https://developer.apple.com/documentation/safariservices/safari_web_extensions/assessing_your_safari_web_extension_s_browser_compatibility#3584139
+    // since storage sync is not implemented in Safari, currently only returns using local storage
+    const storageRef = async () => {
+        browser.storage.local.area = "local";
+        return browser.storage.local;
+    };
+
+    const settingDefault = deepFreeze({
+        name: "setting_default",
+        type: undefined,
+        local: false,
+        values: [],
+        default: undefined,
+        protect: false,
+        confirm: false,
+        platforms: ["macos", "ipados", "ios"],
+        langLabel: {},
+        langTitle: {},
+        group: "",
+        legacy: "",
+        nodeType: "",
+        nodeClass: {}
+    });
+
+    const settingsDefine = deepFreeze([
+        {
+            name: "legacy_imported",
+            type: "number",
+            local: true,
+            default: 0,
+            protect: true,
+            platforms: ["macos"],
+            group: "Internal"
+        },
+        {
+            name: "language_code",
+            type: "string",
+            default: "en",
+            platforms: ["macos", "ipados", "ios"],
+            group: "Internal",
+            legacy: "languageCode"
+        },
+        {
+            name: "scripts_settings",
+            type: "object",
+            default: {},
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts update check active",
+                zh_hans: "脚本更新检查激活"
+            },
+            langTitle: {
+                en: "Whether to enable each single script update check",
+                zh_hans: "是否开启单个脚本更新检查"
+            },
+            group: "Internal",
+            nodeType: "Subpage"
+        },
+        // {
+        //     name: "settings_sync",
+        //     type: "boolean",
+        //     local: true,
+        //     default: false,
+        //     protect: true,
+        //     platforms: ["macos", "ipados", "ios"],
+        //     langLabel: {
+        //         en: "Sync settings",
+        //         zh_hans: "同步设置"
+        //     },
+        //     langTitle: {
+        //         en: "Sync settings across devices",
+        //         zh_hans: "跨设备同步设置"
+        //     },
+        //     group: "General",
+        //     nodeType: "Toggle"
+        // },
+        {
+            name: "toolbar_badge_count",
+            type: "boolean",
+            default: true,
+            platforms: ["macos", "ipados"],
+            langLabel: {
+                en: "Show Toolbar Count",
+                zh_hans: "工具栏图标显示计数徽章"
+            },
+            langTitle: {
+                en: "displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on",
+                zh_hans: "简体中文描述"
+            },
+            group: "General",
+            legacy: "showCount",
+            nodeType: "Toggle"
+        },
+        {
+            name: "global_active",
+            type: "boolean",
+            local: true,
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Enable Injection",
+                zh_hans: "启用注入"
+            },
+            langTitle: {
+                en: "toggle on/off script injection for the pages you visit",
+                zh_hans: "简体中文描述"
+            },
+            group: "General",
+            legacy: "active",
+            nodeType: "Toggle",
+            nodeClass: {red: false}
+        },
+        {
+            name: "global_scripts_update_check",
+            type: "boolean",
+            default: true,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Global scripts update check",
+                zh_hans: "全局脚本更新检查"
+            },
+            langTitle: {
+                en: "Whether to enable global periodic script update check",
+                zh_hans: "是否开启全局定期脚本更新检查"
+            },
+            group: "General",
+            nodeType: "Toggle"
+        },
+        {
+            name: "scripts_update_check_interval",
+            type: "number",
+            default: 86400000,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts update check interval",
+                zh_hans: "脚本更新检查间隔"
+            },
+            langTitle: {
+                en: "The interval for script update check in background",
+                zh_hans: "脚本更新检查的间隔时间"
+            },
+            group: "General",
+            nodeType: "Toggle"
+        },
+        {
+            name: "scripts_update_check_lasttime",
+            type: "number",
+            default: 0,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts update check lasttime",
+                zh_hans: "脚本更新上次检查时间"
+            },
+            langTitle: {
+                en: "The lasttime for script update check in background",
+                zh_hans: "后台脚本更新上次检查时间"
+            },
+            group: "Internal",
+            nodeType: "Toggle"
+        },
+        {
+            name: "scripts_auto_update",
+            type: "boolean",
+            default: false,
+            confirm: true,
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Scripts silent auto update",
+                zh_hans: "脚本后台静默自动更新"
+            },
+            langTitle: {
+                en: "Script silently auto-updates in the background, which is dangerous and may introduce unconfirmed malicious code",
+                zh_hans: "脚本在后台静默自动更新，这是危险的，可能引入未经确认的恶意代码"
+            },
+            group: "General",
+            nodeType: "Toggle",
+            nodeClass: {warn: true}
+        },
+        {
+            name: "global_exclude_match",
+            type: "object",
+            default: [],
+            platforms: ["macos", "ipados", "ios"],
+            langLabel: {
+                en: "Global exclude match patterns",
+                zh_hans: "全局排除匹配模式列表"
+            },
+            langTitle: {
+                en: "this input accepts a comma separated list of @match patterns, a page url that matches against a pattern in this list will be ignored for script injection",
+                zh_hans: "简体中文描述"
+            },
+            group: "General",
+            legacy: "blacklist",
+            nodeType: "textarea",
+            nodeClass: {red: "blacklistError"}
+        },
+        {
+            name: "editor_close_brackets",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Auto Close Brackets",
+                zh_hans: "自动关闭括号"
+            },
+            langTitle: {
+                en: "toggles on/off auto closing of brackets in the editor, this affects the following characters: () [] {} \"\" ''",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "autoCloseBrackets",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_auto_hint",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Auto Hint",
+                zh_hans: "自动提示(Hint)"
+            },
+            langTitle: {
+                en: "automatically shows completion hints while editing",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "autoHint",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_list_sort",
+            type: "string",
+            values: ["nameAsc", "nameDesc", "lastModifiedAsc", "lastModifiedDesc"],
+            default: "lastModifiedDesc",
+            platforms: ["macos"],
+            langLabel: {
+                en: "Sort order",
+                zh_hans: "排序顺序"
+            },
+            langTitle: {
+                en: "Display order of items in sidebar",
+                zh_hans: "侧栏中项目的显示顺序"
+            },
+            group: "Editor",
+            legacy: "sortOrder",
+            nodeType: "Dropdown"
+        },
+        {
+            name: "editor_list_descriptions",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Show List Descriptions",
+                zh_hans: "显示列表项目描述"
+            },
+            langTitle: {
+                en: "show or hides the item descriptions in the sidebar",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "descriptions",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_javascript_lint",
+            type: "boolean",
+            default: false,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Javascript Linter",
+                zh_hans: "Javascript Linter"
+            },
+            langTitle: {
+                en: "toggles basic Javascript linting within the editor",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "lint",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_show_whitespace",
+            type: "boolean",
+            default: true,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Show whitespace characters",
+                zh_hans: "显示空白字符"
+            },
+            langTitle: {
+                en: "toggles the display of invisible characters in the editor",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "showInvisibles",
+            nodeType: "Toggle"
+        },
+        {
+            name: "editor_tab_size",
+            type: "number",
+            values: [2, 4],
+            default: 4,
+            platforms: ["macos"],
+            langLabel: {
+                en: "Tab Size",
+                zh_hans: "制表符大小"
+            },
+            langTitle: {
+                en: "the number of spaces a tab is equal to while editing",
+                zh_hans: "简体中文描述"
+            },
+            group: "Editor",
+            legacy: "tabSize",
+            nodeType: "select"
+        }
+    ].reduce(settingsDefineReduceCallback, {}));
+
+    // populate the settingsDefine with settingDefault
+    // and convert settingsDefine to storageKey object
+    function settingsDefineReduceCallback(settings, setting) {
+        setting.key = storageKey(setting.name);
+        settings[setting.key] = Object.assign({}, settingDefault, setting);
+        return settings;
+    }
+
+    // prevent settings define from being modified in any case
+    // otherwise user settings may be lost in the worst case
+    function deepFreeze(object) {
+        for (const p in object) {
+            if (typeof object[p] == "object") {
+                deepFreeze(object[p]);
+            }
+        }
+        return Object.freeze(object);
+    }
+
+    // export and define the operation method of settings storage
+    // they are similar to browser.storage but slightly different
+
+    async function get(keys, area) {
+        if (![undefined, "local", "sync"].includes(area)) {
+            return console.error("Unexpected storage area:", area);
+        }
+        // validate setting value and fix surprises to default
+        const valueFix = (key, val) => {
+            if (!key || !Object.hasOwn(settingsDefine, key)) return;
+            const def = settingsDefine[key].default;
+            // check if value type conforms to settingsDefine
+            const type = settingsDefine[key].type;
+            if (typeof val != type) {
+                console.warn(`Unexpected ${key} value type '${typeof(val)}' should '${type}', fix to default`);
+                return def;
+            }
+            // check if value conforms to settingsDefine
+            const values = settingsDefine[key].values;
+            if (values.length && !values.includes(val)) {
+                console.warn(`Unexpected ${key} value '${val}' should one of '${values}', fix to default`);
+                return def;
+            }
+            // verified, pass original value
+            return val;
+        };
+        if (typeof keys == "string") { // [single setting]
+            const key = storageKey(keys);
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
+                return console.error("unexpected settings key:", key);
+            }
+            // check if only locally stored setting
+            settingsDefine[key].local === true && (area = "local");
+            const storage = await storageRef();
+            const result = await storage.get(key);
+            if (Object.hasOwn(result, key)) {
+                return valueFix(key, result[key]);
+            } else {
+                return settingsDefine[key].default;
+            }
+        }
+        const complexGet = async (settingsDefault, areaKeys) => {
+            const storage = await storageRef();
+            let local = {}, sync = {};
+            if (storage.area === "sync") {
+                if (areaKeys.sync.length) {
+                    sync = await storage.get(areaKeys.sync);
+                }
+                if (areaKeys.local.length) {
+                    const storage = await storageRef();
+                    local = await storage.get(areaKeys.local);
+                }
+            } else {
+                local = await storage.get(areaKeys.all);
+            }
+            const result = Object.assign(settingsDefault, local, sync);
+            // revert settings object property name
+            return Object.entries(result).reduce((p, c) => (
+                p[settingsDefine[c[0]].name] = valueFix(...c), p
+            ), {});
+        };
+        if (Array.isArray(keys)) { // [muilt settings]
+            if (!keys.length) {
+                return console.error("Settings keys empty:", keys);
+            }
+            const settingsDefault = {};
+            const areaKeys = {local: [], sync: [], all: []};
+            for (const k of keys) {
+                const key = storageKey(k);
+                // check if key exist in settingsDefine
+                if (!Object.hasOwn(settingsDefine, key)) {
+                    return console.error("unexpected settings key:", key);
+                }
+                settingsDefault[key] = settingsDefine[key].default;
+                // detach only locally stored settings
+                settingsDefine[key].local === true
+                    ? areaKeys.local.push(key)
+                    : areaKeys.sync.push(key);
+                // record all keys in case sync storage is not enabled
+                areaKeys.all.push(key);
+            }
+            return await complexGet(settingsDefault, areaKeys);
+        }
+        if (typeof keys == "undefined" || keys === null) { // [all settings]
+            const settingsDefault = {};
+            const areaKeys = {local: [], sync: [], all: []};
+            for (const key in settingsDefine) {
+                settingsDefault[key] = settingsDefine[key].default;
+                // detach only locally stored settings
+                settingsDefine[key].local === true
+                    ? areaKeys.local.push(key)
+                    : areaKeys.sync.push(key);
+                // record all keys in case sync storage is not enabled
+                areaKeys.all.push(key);
+            }
+            return await complexGet(settingsDefault, areaKeys);
+        }
+        return console.error("Unexpected keys type:", keys);
+    }
+
+    async function set(keys, area) {
+        if (![undefined, "local", "sync"].includes(area)) {
+            return console.error("unexpected storage area:", area);
+        }
+        if (typeof keys != "object") {
+            return console.error("Unexpected keys type:", keys);
+        }
+        if (!Object.keys(keys).length) {
+            return console.error("Settings object empty:", keys);
+        }
+        const areaKeys = {local: {}, sync: {}, all: {}};
+        for (const k in keys) {
+            const key = storageKey(k);
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
+                return console.error("Unexpected settings keys:", key);
+            }
+            // check if value type conforms to settingsDefine
+            const type = settingsDefine[key].type;
+            if (typeof keys[k] != type) {
+                if (type === "number" && !isNaN(keys[k])) { // compatible with string numbers
+                    keys[k] = Number(keys[k]); // still store it as a number type
+                } else {
+                    return console.error(`Unexpected ${k} value type '${typeof(keys[k])}' should '${type}'`);
+                }
+            }
+            // check if value conforms to settingsDefine
+            const values = settingsDefine[key].values;
+            if (values.length && !values.includes(keys[k])) {
+                return console.error(`Unexpected ${k} value '${keys[k]}' should one of '${values}'`);
+            }
+            // detach only locally stored settings
+            settingsDefine[key].local === true
+                ? areaKeys.local[key] = keys[k]
+                : areaKeys.sync[key] = keys[k];
+            // record all keys in case sync storage is not enabled
+            areaKeys.all[key] = keys[k];
+        }
+        const storage = await storageRef();
+        // complexSet
+        try {
+            if (storage.area === "sync") {
+                if (Object.keys(areaKeys.sync).length) {
+                    await storage.set(areaKeys.sync);
+                }
+                if (Object.keys(areaKeys.local).length) {
+                    const storage = await storageRef("local");
+                    await storage.set(areaKeys.local);
+                }
+            } else {
+                await storage.set(areaKeys.all);
+            }
+            return true;
+        } catch (error) {
+            return console.error(error);
+        }
+    }
+
+    async function reset(keys, area) { // reset to default
+        if (![undefined, "local", "sync"].includes(area)) {
+            return console.error("unexpected storage area:", area);
+        }
+        if (typeof keys == "string") { // [single setting]
+            const key = storageKey(keys);
+            // check if key exist in settingsDefine
+            if (!Object.hasOwn(settingsDefine, key)) {
+                return console.error("unexpected settings key:", key);
+            }
+            // check if key is protected
+            if (settingsDefine[key].protect === true) {
+                return console.error("protected settings key:", key);
+            }
+            settingsDefine[key].local === true && (area = "local");
+            const storage = await storageRef();
+            return storage.remove(key);
+        }
+        const complexRemove = async areaKeys => {
+            const storage = await storageRef();
+            try {
+                if (storage.area === "sync") {
+                    if (areaKeys.sync.length) {
+                        await storage.remove(areaKeys.sync);
+                    }
+                    if (areaKeys.local.length) {
+                        const storage = await storageRef("local");
+                        await storage.remove(areaKeys.local);
+                    }
+                } else {
+                    await storage.remove(areaKeys.all);
+                }
+                return true;
+            } catch (error) {
+                return console.error(error);
+            }
+        };
+        if (Array.isArray(keys)) { // [muilt settings]
+            if (!keys.length) {
+                return console.error("Settings keys empty:", keys);
+            }
+            const areaKeys = {local: [], sync: [], all: []};
+            for (const k of keys) {
+                const key = storageKey(k);
+                // check if key exist in settingsDefine
+                if (!Object.hasOwn(settingsDefine, key)) {
+                    return console.error("unexpected settings key:", key);
+                }
+                // check if key is protected
+                if (settingsDefine[key].protect === true) {
+                    return console.error("protected settings key:", key);
+                }
+                // detach only locally stored settings
+                settingsDefine[key].local === true
+                    ? areaKeys.local.push(key)
+                    : areaKeys.sync.push(key);
+                // record all keys in case sync storage is not enabled
+                areaKeys.all.push(key);
+            }
+            return await complexRemove(areaKeys);
+        }
+        if (typeof keys == "undefined" || keys === null) { // [all settings]
+            const areaKeys = {local: [], sync: [], all: []};
+            for (const key in settingsDefine) {
+                // skip protected keys
+                if (settingsDefine[key].protect === true) continue;
+                // detach only locally stored settings
+                settingsDefine[key].local === true
+                    ? areaKeys.local.push(key)
+                    : areaKeys.sync.push(key);
+                // record all keys in case sync storage is not enabled
+                areaKeys.all.push(key);
+            }
+            return await complexRemove(areaKeys);
+        }
+        return console.error("Unexpected keys type:", keys);
+    }
+
+    // this function is convenient for the svelte store to update the state
+    function onChanged(callback) { // complex onChanged
+        if (typeof callback != "function") {
+            return console.error("Unexpected callback:", callback);
+        }
+        console.info("storage onChanged addListener");
+        const handle = (changes, area) => {
+            // console.log(`storage.${area}.onChanged`, changes);
+            try {
+                const settings = {};
+                for (const key in changes) {
+                    if (!Object.hasOwn(settingsDefine, key)) continue;
+                    settings[settingsDefine[key].name] = changes[key].newValue;
+                }
+                callback(settings, area);
+            } catch (error) {
+                console.error("onChanged callback:", error);
+            }
+        };
+        // comment for now same reason as `storageRef` function
+        // browser.storage.sync.onChanged.addListener(c => handle(c, "sync"));
+        browser.storage.local.onChanged.addListener(c => handle(c, "local"));
+    }
+
+    // the following functions are used only for compatibility transition periods
+    // they are deliberately named in snake_case format
+    // they will be deleted at some point in the future
+
+    async function legacy_get(keys) {
+        const result = await get(keys);
+        // console.log("legacy_get", keys, result);
+        for (const key in result) {
+            const legacy = settingsDefine[storageKey(key)]?.legacy;
+            if (legacy) result[legacy] = result[key];
+        }
+        return result;
+    }
+
+    async function legacy_set(keys) {
+        if (typeof keys != "object") {
+            return console.error("Unexpected arg type:", keys);
+        }
+        if (!Object.keys(keys).length) {
+            return console.error("Settings object empty:", keys);
+        }
+        const settings = {};
+        for (const key in settingsDefine) {
+            const setting = settingsDefine[key];
+            if (!setting.legacy) continue;
+            if (setting.legacy in keys) {
+                settings[setting.name] = keys[setting.legacy];
+            }
+        }
+        // console.log("legacy_set", keys, settings);
+        return await set(settings);
+    }
+
+    async function legacy_import() {
+        // if legacy data has already been imported, skip this process
+        const imported = await get("legacy_imported");
+        if (imported) return console.info("Legacy settings has already imported");
+        // start the one-time import process
+        const result = await browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORT"});
+        if (result.error) return console.error(result.error);
+        console.info("Import settings data from legacy manifest file");
+        const settings = {};
+        for (const key in settingsDefine) {
+            const legacy = settingsDefine[key].legacy;
+            if (legacy in result) {
+                let value = result[legacy];
+                switch (settingsDefine[key].type) {
+                    case "boolean": value = JSON.parse(value); break;
+                    case "number": value = Number(value); break;
+                }
+                console.log(`Importing legacy setting: ${legacy}`, value);
+                settings[settingsDefine[key].name] = value;
+            }
+        }
+        // import complete tag, to ensure will only be import once
+        Object.assign(settings, {"legacy_imported": Date.now()});
+        if (await set(settings, "local")) {
+            console.info("Import legacy settings complete");
+            // send a message to the Swift layer to safely clean up legacy data
+            // browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
+            return true;
+        } else {
+            return console.error("Import legacy settings abort");
+        }
+    }
+
     function notificationStore() {
         const {subscribe, update} = writable([]);
         const add = item => {
@@ -1242,40 +1925,48 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     function settingsStore() {
         const {subscribe, update, set} = writable({});
-        const updateSingleSetting = (key, value) => {
-            update(settings => {
-                settings[key] = value;
-                // blacklist not stored in normal setting object in manifest, so handle differently
-                if (key === "blacklist") {
-                    // update blacklist on swift side
-                    const message = {name: "PAGE_UPDATE_BLACKLIST", blacklist: value};
-                    browser.runtime.sendNativeMessage(message, response => {
-                        if (response.error) {
-                            log.add("Failed to save blacklist to disk", "error", true);
-                        }
-                    });
-                    return settings;
-                }
-                // settings are saved as strings on the swift side
-                // convert all booleans to strings before dispatching
-                const settingsClone = {...settings};
-                for (const [key, value] of Object.entries(settingsClone)) {
-                    if (typeof value === "boolean") settingsClone[key] = value.toString();
-                }
-                // remove settings in clone that aren't save in user defaults
-                delete settingsClone.blacklist;
-                delete settingsClone.version;
-                // update settings on swift side
-                const message = {name: "PAGE_UPDATE_SETTINGS", settings: settingsClone};
-                browser.runtime.sendNativeMessage(message, response => {
-                    if (response.error) {
-                        log.add(response.error, "error", true);
-                    }
-                });
-                return settings;
+        const init = async initData => {
+            // import legacy settings data just one-time
+            await legacy_import();
+            // for compatibility with legacy getting names only
+            // once all new name is used, use settingsStorage.get()
+            const settings = await legacy_get();
+            console.info("store.js settingsStore init", initData, settings);
+            set(Object.assign({}, initData, settings));
+            // sync popup, backgound, etc... settings changes
+            onChanged((settings, area) => {
+                console.log(`store.js storage.${area}.onChanged`, settings);
+                update(obj => Object.assign(obj, settings));
             });
         };
-        return {subscribe, set, updateSingleSetting};
+        const reset$1 = async keys => {
+            await reset(keys);
+            // once all new name is used, use settingsStorage.get()
+            const settings = await legacy_get();
+            console.info("store.js settingsStore reset", settings);
+            update(obj => Object.assign(obj, settings));
+        };
+        const updateSingleSetting_old = (key, value) => {
+            // blacklist not stored in normal setting object in manifest, so handle differently
+            if (key === "blacklist") {
+                // update blacklist on swift side
+                const message = {name: "PAGE_UPDATE_BLACKLIST", blacklist: value};
+                browser.runtime.sendNativeMessage(message, response => {
+                    if (response.error) {
+                        log.add("Failed to save blacklist to disk", "error", true);
+                    }
+                });
+            }
+        };
+        const updateSingleSetting = (key, value) => {
+            update(settings => (settings[key] = value, settings));
+            // for compatibility with legacy setting names only
+            // once all new name is used, use settingsStorage.set()
+            legacy_set({[key]: value}); // Durable Storage
+            // temporarily keep the old storage method until it is confirmed that all dependencies are removed
+            updateSingleSetting_old(key, value);
+        };
+        return {subscribe, set, init, reset: reset$1, updateSingleSetting};
     }
     const settings = settingsStore();
 
@@ -19419,107 +20110,111 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     }
 
     function create_fragment$b(ctx) {
-    	let div30;
-    	let div29;
-    	let div14;
-    	let div1;
+    	let div31;
     	let div0;
-    	let t1;
-    	let iconbutton0;
-    	let t2;
-    	let div3;
+    	let t0;
+    	let div30;
+    	let div15;
     	let div2;
-    	let t4;
-    	let toggle0;
-    	let t5;
-    	let div5;
+    	let div1;
+    	let t2;
+    	let iconbutton0;
+    	let t3;
     	let div4;
-    	let t7;
-    	let toggle1;
-    	let t8;
-    	let div7;
+    	let div3;
+    	let t5;
+    	let toggle0;
+    	let t6;
     	let div6;
-    	let t10;
-    	let toggle2;
-    	let t11;
-    	let div9;
+    	let div5;
+    	let t8;
+    	let toggle1;
+    	let t9;
     	let div8;
-    	let t13;
-    	let toggle3;
-    	let t14;
-    	let div11;
+    	let div7;
+    	let t11;
+    	let toggle2;
+    	let t12;
     	let div10;
-    	let t16;
-    	let toggle4;
-    	let t17;
-    	let div13;
+    	let div9;
+    	let t14;
+    	let toggle3;
+    	let t15;
     	let div12;
-    	let t19;
+    	let div11;
+    	let t17;
+    	let toggle4;
+    	let t18;
+    	let div14;
+    	let div13;
+    	let t20;
     	let select;
     	let option0;
+    	let option0_value_value;
     	let option1;
-    	let t22;
-    	let div26;
-    	let div16;
-    	let t24;
-    	let div18;
+    	let option1_value_value;
+    	let t23;
+    	let div27;
     	let div17;
-    	let t26;
-    	let toggle5;
-    	let t27;
-    	let div20;
+    	let t25;
     	let div19;
-    	let t29;
-    	let toggle6;
-    	let t30;
-    	let div23;
+    	let div18;
+    	let t27;
+    	let toggle5;
+    	let t28;
     	let div21;
-    	let t32;
-    	let div22;
-    	let t33_value = /*$settings*/ ctx[0].saveLocation + "";
-    	let t33;
-    	let t34;
-    	let iconbutton1;
-    	let t35;
-    	let div25;
+    	let div20;
+    	let t30;
+    	let toggle6;
+    	let t31;
     	let div24;
+    	let div22;
+    	let t33;
+    	let div23;
+    	let t34_value = /*$settings*/ ctx[0].saveLocation + "";
+    	let t34;
+    	let t35;
+    	let iconbutton1;
+    	let t36;
+    	let div26;
+    	let div25;
     	let span;
-    	let t37;
     	let t38;
+    	let t39;
     	let textarea;
     	let textarea_disabled_value;
-    	let t39;
+    	let t40;
+    	let div29;
     	let div28;
-    	let div27;
-    	let t41;
-    	let p;
     	let t42;
-    	let t43_value = /*$settings*/ ctx[0].version + "";
+    	let p;
     	let t43;
+    	let t44_value = /*$settings*/ ctx[0].version + "";
     	let t44;
-    	let t45_value = /*$settings*/ ctx[0].build + "";
     	let t45;
+    	let t46_value = /*$settings*/ ctx[0].build + "";
     	let t46;
+    	let t47;
     	let br0;
     	let br1;
-    	let t47;
+    	let t48;
     	let a0;
     	let br2;
     	let br3;
-    	let t49;
+    	let t50;
     	let a1;
-    	let t51;
+    	let t52;
     	let a2;
-    	let t53;
-    	let div29_intro;
-    	let div29_outro;
+    	let t54;
     	let div30_intro;
     	let div30_outro;
+    	let div31_intro;
+    	let div31_outro;
     	let current;
     	let mounted;
     	let dispose;
     	iconbutton0 = new IconButton({ props: { icon: iconClose } });
-    	iconbutton0.$on("click", /*click_handler*/ ctx[8]);
+    	iconbutton0.$on("click", /*click_handler_1*/ ctx[9]);
 
     	toggle0 = new Toggle({
     			props: {
@@ -19527,13 +20222,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		});
 
-    	toggle0.$on("click", /*click_handler_1*/ ctx[9]);
+    	toggle0.$on("click", /*click_handler_2*/ ctx[10]);
 
     	toggle1 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].autoHint }
     		});
 
-    	toggle1.$on("click", /*click_handler_2*/ ctx[10]);
+    	toggle1.$on("click", /*click_handler_3*/ ctx[11]);
 
     	toggle2 = new Toggle({
     			props: {
@@ -19541,13 +20236,13 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		});
 
-    	toggle2.$on("click", /*click_handler_3*/ ctx[11]);
+    	toggle2.$on("click", /*click_handler_4*/ ctx[12]);
 
     	toggle3 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].lint }
     		});
 
-    	toggle3.$on("click", /*click_handler_4*/ ctx[12]);
+    	toggle3.$on("click", /*click_handler_5*/ ctx[13]);
 
     	toggle4 = new Toggle({
     			props: {
@@ -19555,19 +20250,19 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
     		});
 
-    	toggle4.$on("click", /*click_handler_5*/ ctx[13]);
+    	toggle4.$on("click", /*click_handler_6*/ ctx[14]);
 
     	toggle5 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].active }
     		});
 
-    	toggle5.$on("click", /*click_handler_6*/ ctx[16]);
+    	toggle5.$on("click", /*click_handler_7*/ ctx[17]);
 
     	toggle6 = new Toggle({
     			props: { checked: /*$settings*/ ctx[0].showCount }
     		});
 
-    	toggle6.$on("click", /*click_handler_7*/ ctx[17]);
+    	toggle6.$on("click", /*click_handler_8*/ ctx[18]);
 
     	iconbutton1 = new IconButton({
     			props: {
@@ -19581,262 +20276,267 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
 
     	return {
     		c() {
-    			div30 = element("div");
-    			div29 = element("div");
-    			div14 = element("div");
-    			div1 = element("div");
+    			div31 = element("div");
     			div0 = element("div");
-    			div0.textContent = "Editor Settings";
-    			t1 = space();
-    			create_component(iconbutton0.$$.fragment);
-    			t2 = space();
-    			div3 = element("div");
+    			t0 = space();
+    			div30 = element("div");
+    			div15 = element("div");
     			div2 = element("div");
-    			div2.textContent = "Auto Close Brackets";
-    			t4 = space();
-    			create_component(toggle0.$$.fragment);
-    			t5 = space();
-    			div5 = element("div");
+    			div1 = element("div");
+    			div1.textContent = "Editor Settings";
+    			t2 = space();
+    			create_component(iconbutton0.$$.fragment);
+    			t3 = space();
     			div4 = element("div");
-    			div4.textContent = "Auto Hint";
-    			t7 = space();
-    			create_component(toggle1.$$.fragment);
-    			t8 = space();
-    			div7 = element("div");
+    			div3 = element("div");
+    			div3.textContent = "Auto Close Brackets";
+    			t5 = space();
+    			create_component(toggle0.$$.fragment);
+    			t6 = space();
     			div6 = element("div");
-    			div6.textContent = "Hide Descriptions";
-    			t10 = space();
-    			create_component(toggle2.$$.fragment);
-    			t11 = space();
-    			div9 = element("div");
+    			div5 = element("div");
+    			div5.textContent = "Auto Hint";
+    			t8 = space();
+    			create_component(toggle1.$$.fragment);
+    			t9 = space();
     			div8 = element("div");
-    			div8.textContent = "Javascript Linter";
-    			t13 = space();
-    			create_component(toggle3.$$.fragment);
-    			t14 = space();
-    			div11 = element("div");
+    			div7 = element("div");
+    			div7.textContent = "Hide Descriptions";
+    			t11 = space();
+    			create_component(toggle2.$$.fragment);
+    			t12 = space();
     			div10 = element("div");
-    			div10.textContent = "Show Invisibles";
-    			t16 = space();
-    			create_component(toggle4.$$.fragment);
-    			t17 = space();
-    			div13 = element("div");
+    			div9 = element("div");
+    			div9.textContent = "Javascript Linter";
+    			t14 = space();
+    			create_component(toggle3.$$.fragment);
+    			t15 = space();
     			div12 = element("div");
-    			div12.textContent = "Tab Size";
-    			t19 = space();
+    			div11 = element("div");
+    			div11.textContent = "Show Invisibles";
+    			t17 = space();
+    			create_component(toggle4.$$.fragment);
+    			t18 = space();
+    			div14 = element("div");
+    			div13 = element("div");
+    			div13.textContent = "Tab Size";
+    			t20 = space();
     			select = element("select");
     			option0 = element("option");
     			option0.textContent = "2";
     			option1 = element("option");
     			option1.textContent = "4";
-    			t22 = space();
-    			div26 = element("div");
-    			div16 = element("div");
-    			div16.innerHTML = `<div class="svelte-krvk46">General Settings</div>`;
-    			t24 = space();
-    			div18 = element("div");
-    			div17 = element("div");
-    			div17.textContent = "Enable Injection";
-    			t26 = space();
-    			create_component(toggle5.$$.fragment);
-    			t27 = space();
-    			div20 = element("div");
-    			div19 = element("div");
-    			div19.textContent = "Show Toolbar Count";
-    			t29 = space();
-    			create_component(toggle6.$$.fragment);
-    			t30 = space();
-    			div23 = element("div");
-    			div21 = element("div");
-    			div21.textContent = "Save Location";
-    			t32 = space();
-    			div22 = element("div");
-    			t33 = text(t33_value);
-    			t34 = space();
-    			create_component(iconbutton1.$$.fragment);
-    			t35 = space();
-    			div25 = element("div");
-    			div24 = element("div");
-    			span = element("span");
-    			span.textContent = "Global Blacklist";
-    			t37 = space();
-    			if (if_block) if_block.c();
-    			t38 = space();
-    			textarea = element("textarea");
-    			t39 = space();
-    			div28 = element("div");
+    			t23 = space();
     			div27 = element("div");
-    			div27.textContent = "Information";
-    			t41 = space();
+    			div17 = element("div");
+    			div17.innerHTML = `<div class="svelte-1d6jb7s">General Settings</div>`;
+    			t25 = space();
+    			div19 = element("div");
+    			div18 = element("div");
+    			div18.textContent = "Enable Injection";
+    			t27 = space();
+    			create_component(toggle5.$$.fragment);
+    			t28 = space();
+    			div21 = element("div");
+    			div20 = element("div");
+    			div20.textContent = "Show Toolbar Count";
+    			t30 = space();
+    			create_component(toggle6.$$.fragment);
+    			t31 = space();
+    			div24 = element("div");
+    			div22 = element("div");
+    			div22.textContent = "Save Location";
+    			t33 = space();
+    			div23 = element("div");
+    			t34 = text(t34_value);
+    			t35 = space();
+    			create_component(iconbutton1.$$.fragment);
+    			t36 = space();
+    			div26 = element("div");
+    			div25 = element("div");
+    			span = element("span");
+    			span.textContent = "Global exclude match patterns";
+    			t38 = space();
+    			if (if_block) if_block.c();
+    			t39 = space();
+    			textarea = element("textarea");
+    			t40 = space();
+    			div29 = element("div");
+    			div28 = element("div");
+    			div28.textContent = "Information";
+    			t42 = space();
     			p = element("p");
-    			t42 = text("Userscripts Safari Version ");
-    			t43 = text(t43_value);
-    			t44 = text(" (");
-    			t45 = text(t45_value);
-    			t46 = text(")");
+    			t43 = text("Userscripts Safari Version ");
+    			t44 = text(t44_value);
+    			t45 = text(" (");
+    			t46 = text(t46_value);
+    			t47 = text(")");
     			br0 = element("br");
     			br1 = element("br");
-    			t47 = text("You can review the documentation, report bugs and get more information about this extension by visiting ");
+    			t48 = text("You can review the documentation, report bugs and get more information about this extension by visiting ");
     			a0 = element("a");
     			a0.textContent = "the code repository.";
     			br2 = element("br");
     			br3 = element("br");
-    			t49 = text("If you enjoy using this extension, please consider ");
+    			t50 = text("If you enjoy using this extension, please consider ");
     			a1 = element("a");
     			a1.textContent = "leaving a review";
-    			t51 = text(" on the App Store or ");
+    			t52 = text(" on the App Store or ");
     			a2 = element("a");
     			a2.textContent = "supporting the project";
-    			t53 = text(".");
-    			attr(div0, "class", "svelte-krvk46");
-    			attr(div1, "class", "modal__title svelte-krvk46");
-    			attr(div2, "class", "svelte-krvk46");
-    			attr(div3, "class", "modal__row svelte-krvk46");
-    			attr(div4, "class", "svelte-krvk46");
-    			attr(div5, "class", "modal__row svelte-krvk46");
-    			attr(div6, "class", "svelte-krvk46");
-    			attr(div7, "class", "modal__row svelte-krvk46");
-    			attr(div8, "class", "svelte-krvk46");
-    			attr(div9, "class", "modal__row svelte-krvk46");
-    			attr(div10, "class", "svelte-krvk46");
-    			attr(div11, "class", "modal__row svelte-krvk46");
-    			attr(div12, "class", "svelte-krvk46");
-    			option0.__value = "2";
+    			t54 = text(".");
+    			attr(div0, "class", "mask svelte-1d6jb7s");
+    			attr(div1, "class", "svelte-1d6jb7s");
+    			attr(div2, "class", "modal__title svelte-1d6jb7s");
+    			attr(div3, "class", "svelte-1d6jb7s");
+    			attr(div4, "class", "modal__row svelte-1d6jb7s");
+    			attr(div5, "class", "svelte-1d6jb7s");
+    			attr(div6, "class", "modal__row svelte-1d6jb7s");
+    			attr(div7, "class", "svelte-1d6jb7s");
+    			attr(div8, "class", "modal__row svelte-1d6jb7s");
+    			attr(div9, "class", "svelte-1d6jb7s");
+    			attr(div10, "class", "modal__row svelte-1d6jb7s");
+    			attr(div11, "class", "svelte-1d6jb7s");
+    			attr(div12, "class", "modal__row svelte-1d6jb7s");
+    			attr(div13, "class", "svelte-1d6jb7s");
+    			option0.__value = option0_value_value = 2;
     			option0.value = option0.__value;
-    			option1.__value = "4";
+    			option1.__value = option1_value_value = 4;
     			option1.value = option1.__value;
-    			if (/*$settings*/ ctx[0].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[14].call(select));
-    			attr(div13, "class", "modal__row svelte-krvk46");
-    			attr(div14, "class", "modal__section");
-    			attr(div16, "class", "modal__title svelte-krvk46");
-    			attr(div17, "class", "svelte-krvk46");
-    			toggle_class(div17, "red", !/*$settings*/ ctx[0].active);
-    			attr(div18, "class", "modal__row svelte-krvk46");
-    			attr(div19, "class", "svelte-krvk46");
-    			attr(div20, "class", "modal__row svelte-krvk46");
-    			attr(div21, "class", "svelte-krvk46");
-    			attr(div22, "class", "truncate svelte-krvk46");
-    			attr(div23, "class", "modal__row saveLocation svelte-krvk46");
-    			attr(div24, "class", "blacklist svelte-krvk46");
-    			toggle_class(div24, "red", /*blacklistError*/ ctx[3]);
+    			if (/*$settings*/ ctx[0].tabSize === void 0) add_render_callback(() => /*select_change_handler*/ ctx[15].call(select));
+    			attr(div14, "class", "modal__row svelte-1d6jb7s");
+    			attr(div15, "class", "modal__section");
+    			attr(div17, "class", "modal__title svelte-1d6jb7s");
+    			attr(div18, "class", "svelte-1d6jb7s");
+    			toggle_class(div18, "red", !/*$settings*/ ctx[0].active);
+    			attr(div19, "class", "modal__row svelte-1d6jb7s");
+    			attr(div20, "class", "svelte-1d6jb7s");
+    			attr(div21, "class", "modal__row svelte-1d6jb7s");
+    			attr(div22, "class", "svelte-1d6jb7s");
+    			attr(div23, "class", "truncate svelte-1d6jb7s");
+    			attr(div24, "class", "modal__row saveLocation svelte-1d6jb7s");
+    			attr(div25, "class", "blacklist svelte-1d6jb7s");
+    			toggle_class(div25, "red", /*blacklistError*/ ctx[3]);
     			attr(textarea, "placeholder", "Comma separated list of @match patterns");
     			attr(textarea, "spellcheck", "false");
     			textarea.value = /*blacklisted*/ ctx[4];
     			textarea.disabled = textarea_disabled_value = /*$state*/ ctx[5].includes("blacklist-saving") || /*blacklistSaving*/ ctx[2];
-    			attr(textarea, "class", "svelte-krvk46");
+    			attr(textarea, "class", "svelte-1d6jb7s");
     			toggle_class(textarea, "error", /*blacklistError*/ ctx[3]);
-    			attr(div25, "class", "modal__row modal__row--wrap svelte-krvk46");
-    			attr(div26, "class", "modal__section");
-    			attr(div27, "class", "modal__title svelte-krvk46");
+    			attr(div26, "class", "modal__row modal__row--wrap svelte-1d6jb7s");
+    			attr(div27, "class", "modal__section");
+    			attr(div28, "class", "modal__title svelte-1d6jb7s");
     			attr(a0, "href", "https://github.com/quoid/userscripts");
     			attr(a1, "href", "https://apps.apple.com/us/app/userscripts/id1463298887");
     			attr(a2, "href", "https://github.com/quoid/userscripts#support");
-    			attr(p, "class", "svelte-krvk46");
-    			attr(div28, "class", "modal__section");
-    			attr(div29, "class", "modal svelte-krvk46");
-    			attr(div30, "class", "settings svelte-krvk46");
+    			attr(p, "class", "svelte-1d6jb7s");
+    			attr(div29, "class", "modal__section");
+    			attr(div30, "class", "modal svelte-1d6jb7s");
+    			attr(div31, "class", "settings svelte-1d6jb7s");
     		},
     		m(target, anchor) {
-    			insert(target, div30, anchor);
-    			append(div30, div29);
-    			append(div29, div14);
-    			append(div14, div1);
-    			append(div1, div0);
-    			append(div1, t1);
-    			mount_component(iconbutton0, div1, null);
-    			append(div14, t2);
-    			append(div14, div3);
-    			append(div3, div2);
-    			append(div3, t4);
-    			mount_component(toggle0, div3, null);
-    			append(div14, t5);
-    			append(div14, div5);
-    			append(div5, div4);
-    			append(div5, t7);
-    			mount_component(toggle1, div5, null);
-    			append(div14, t8);
-    			append(div14, div7);
-    			append(div7, div6);
-    			append(div7, t10);
-    			mount_component(toggle2, div7, null);
-    			append(div14, t11);
-    			append(div14, div9);
-    			append(div9, div8);
-    			append(div9, t13);
-    			mount_component(toggle3, div9, null);
-    			append(div14, t14);
-    			append(div14, div11);
-    			append(div11, div10);
-    			append(div11, t16);
-    			mount_component(toggle4, div11, null);
-    			append(div14, t17);
+    			insert(target, div31, anchor);
+    			append(div31, div0);
+    			append(div31, t0);
+    			append(div31, div30);
+    			append(div30, div15);
+    			append(div15, div2);
+    			append(div2, div1);
+    			append(div2, t2);
+    			mount_component(iconbutton0, div2, null);
+    			append(div15, t3);
+    			append(div15, div4);
+    			append(div4, div3);
+    			append(div4, t5);
+    			mount_component(toggle0, div4, null);
+    			append(div15, t6);
+    			append(div15, div6);
+    			append(div6, div5);
+    			append(div6, t8);
+    			mount_component(toggle1, div6, null);
+    			append(div15, t9);
+    			append(div15, div8);
+    			append(div8, div7);
+    			append(div8, t11);
+    			mount_component(toggle2, div8, null);
+    			append(div15, t12);
+    			append(div15, div10);
+    			append(div10, div9);
+    			append(div10, t14);
+    			mount_component(toggle3, div10, null);
+    			append(div15, t15);
+    			append(div15, div12);
+    			append(div12, div11);
+    			append(div12, t17);
+    			mount_component(toggle4, div12, null);
+    			append(div15, t18);
+    			append(div15, div14);
     			append(div14, div13);
-    			append(div13, div12);
-    			append(div13, t19);
-    			append(div13, select);
+    			append(div14, t20);
+    			append(div14, select);
     			append(select, option0);
     			append(select, option1);
     			select_option(select, /*$settings*/ ctx[0].tabSize);
-    			append(div29, t22);
-    			append(div29, div26);
-    			append(div26, div16);
-    			append(div26, t24);
-    			append(div26, div18);
-    			append(div18, div17);
-    			append(div18, t26);
-    			mount_component(toggle5, div18, null);
-    			append(div26, t27);
-    			append(div26, div20);
-    			append(div20, div19);
-    			append(div20, t29);
-    			mount_component(toggle6, div20, null);
-    			append(div26, t30);
-    			append(div26, div23);
-    			append(div23, div21);
-    			append(div23, t32);
-    			append(div23, div22);
-    			append(div22, t33);
+    			append(div30, t23);
+    			append(div30, div27);
+    			append(div27, div17);
+    			append(div27, t25);
+    			append(div27, div19);
+    			append(div19, div18);
+    			append(div19, t27);
+    			mount_component(toggle5, div19, null);
+    			append(div27, t28);
+    			append(div27, div21);
+    			append(div21, div20);
+    			append(div21, t30);
+    			mount_component(toggle6, div21, null);
+    			append(div27, t31);
+    			append(div27, div24);
+    			append(div24, div22);
+    			append(div24, t33);
+    			append(div24, div23);
     			append(div23, t34);
-    			mount_component(iconbutton1, div23, null);
-    			append(div26, t35);
+    			append(div24, t35);
+    			mount_component(iconbutton1, div24, null);
+    			append(div27, t36);
+    			append(div27, div26);
     			append(div26, div25);
-    			append(div25, div24);
-    			append(div24, span);
-    			append(div24, t37);
-    			if (if_block) if_block.m(div24, null);
+    			append(div25, span);
     			append(div25, t38);
-    			append(div25, textarea);
-    			/*textarea_binding*/ ctx[18](textarea);
-    			append(div29, t39);
+    			if (if_block) if_block.m(div25, null);
+    			append(div26, t39);
+    			append(div26, textarea);
+    			/*textarea_binding*/ ctx[19](textarea);
+    			append(div30, t40);
+    			append(div30, div29);
     			append(div29, div28);
-    			append(div28, div27);
-    			append(div28, t41);
-    			append(div28, p);
-    			append(p, t42);
+    			append(div29, t42);
+    			append(div29, p);
     			append(p, t43);
     			append(p, t44);
     			append(p, t45);
     			append(p, t46);
+    			append(p, t47);
     			append(p, br0);
     			append(p, br1);
-    			append(p, t47);
+    			append(p, t48);
     			append(p, a0);
     			append(p, br2);
     			append(p, br3);
-    			append(p, t49);
+    			append(p, t50);
     			append(p, a1);
-    			append(p, t51);
+    			append(p, t52);
     			append(p, a2);
-    			append(p, t53);
+    			append(p, t54);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen(select, "change", /*select_change_handler*/ ctx[14]),
-    					listen(select, "blur", /*blur_handler*/ ctx[15]),
-    					listen(div22, "click", openSaveLocation),
-    					listen(textarea, "blur", /*saveBlacklist*/ ctx[6]),
-    					listen(div30, "mousedown", self$1(/*mousedown_handler*/ ctx[19]))
+    					listen(div0, "click", self$1(/*click_handler*/ ctx[8])),
+    					listen(select, "change", /*select_change_handler*/ ctx[15]),
+    					listen(select, "blur", /*blur_handler*/ ctx[16]),
+    					listen(div23, "click", openSaveLocation),
+    					listen(textarea, "blur", /*saveBlacklist*/ ctx[6])
     				];
 
     				mounted = true;
@@ -19864,7 +20564,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
 
     			if (dirty & /*$settings*/ 1) {
-    				toggle_class(div17, "red", !/*$settings*/ ctx[0].active);
+    				toggle_class(div18, "red", !/*$settings*/ ctx[0].active);
     			}
 
     			const toggle5_changes = {};
@@ -19873,7 +20573,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			const toggle6_changes = {};
     			if (dirty & /*$settings*/ 1) toggle6_changes.checked = /*$settings*/ ctx[0].showCount;
     			toggle6.$set(toggle6_changes);
-    			if ((!current || dirty & /*$settings*/ 1) && t33_value !== (t33_value = /*$settings*/ ctx[0].saveLocation + "")) set_data(t33, t33_value);
+    			if ((!current || dirty & /*$settings*/ 1) && t34_value !== (t34_value = /*$settings*/ ctx[0].saveLocation + "")) set_data(t34, t34_value);
 
     			if (/*blacklistSaving*/ ctx[2]) {
     				if (if_block) {
@@ -19881,7 +20581,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				} else {
     					if_block = create_if_block$7();
     					if_block.c();
-    					if_block.m(div24, null);
+    					if_block.m(div25, null);
     				}
     			} else if (if_block) {
     				if_block.d(1);
@@ -19889,7 +20589,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			}
 
     			if (dirty & /*blacklistError*/ 8) {
-    				toggle_class(div24, "red", /*blacklistError*/ ctx[3]);
+    				toggle_class(div25, "red", /*blacklistError*/ ctx[3]);
     			}
 
     			if (!current || dirty & /*blacklisted*/ 16) {
@@ -19904,8 +20604,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     				toggle_class(textarea, "error", /*blacklistError*/ ctx[3]);
     			}
 
-    			if ((!current || dirty & /*$settings*/ 1) && t43_value !== (t43_value = /*$settings*/ ctx[0].version + "")) set_data(t43, t43_value);
-    			if ((!current || dirty & /*$settings*/ 1) && t45_value !== (t45_value = /*$settings*/ ctx[0].build + "")) set_data(t45, t45_value);
+    			if ((!current || dirty & /*$settings*/ 1) && t44_value !== (t44_value = /*$settings*/ ctx[0].version + "")) set_data(t44, t44_value);
+    			if ((!current || dirty & /*$settings*/ 1) && t46_value !== (t46_value = /*$settings*/ ctx[0].build + "")) set_data(t46, t46_value);
     		},
     		i(local) {
     			if (current) return;
@@ -19920,15 +20620,15 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			transition_in(iconbutton1.$$.fragment, local);
 
     			add_render_callback(() => {
-    				if (div29_outro) div29_outro.end(1);
-    				div29_intro = create_in_transition(div29, fly, { y: 50, duration: 150, delay: 75 });
-    				div29_intro.start();
+    				if (div30_outro) div30_outro.end(1);
+    				div30_intro = create_in_transition(div30, fly, { y: 50, duration: 150, delay: 75 });
+    				div30_intro.start();
     			});
 
     			add_render_callback(() => {
-    				if (div30_outro) div30_outro.end(1);
-    				div30_intro = create_in_transition(div30, fade, { duration: 150 });
-    				div30_intro.start();
+    				if (div31_outro) div31_outro.end(1);
+    				div31_intro = create_in_transition(div31, fade, { duration: 150 });
+    				div31_intro.start();
     			});
 
     			current = true;
@@ -19943,14 +20643,14 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			transition_out(toggle5.$$.fragment, local);
     			transition_out(toggle6.$$.fragment, local);
     			transition_out(iconbutton1.$$.fragment, local);
-    			if (div29_intro) div29_intro.invalidate();
-    			div29_outro = create_out_transition(div29, fly, { y: 50, duration: 150, delay: 0 });
     			if (div30_intro) div30_intro.invalidate();
-    			div30_outro = create_out_transition(div30, fade, { duration: 150, delay: 75 });
+    			div30_outro = create_out_transition(div30, fly, { y: 50, duration: 150, delay: 0 });
+    			if (div31_intro) div31_intro.invalidate();
+    			div31_outro = create_out_transition(div31, fade, { duration: 150, delay: 75 });
     			current = false;
     		},
     		d(detaching) {
-    			if (detaching) detach(div30);
+    			if (detaching) detach(div31);
     			destroy_component(iconbutton0);
     			destroy_component(toggle0);
     			destroy_component(toggle1);
@@ -19961,9 +20661,9 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			destroy_component(toggle6);
     			destroy_component(iconbutton1);
     			if (if_block) if_block.d();
-    			/*textarea_binding*/ ctx[18](null);
-    			if (detaching && div29_outro) div29_outro.end();
+    			/*textarea_binding*/ ctx[19](null);
     			if (detaching && div30_outro) div30_outro.end();
+    			if (detaching && div31_outro) div31_outro.end();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -20015,10 +20715,11 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		for (const v of val) {
     			if (re.exec(v) === null) {
     				$$invalidate(3, blacklistError = true);
-    				return console.warn("Global blacklist has wrong pattern:", v);
+    				log.add(`Wrong match pattern: ${v}`, "error", true);
     			}
     		}
 
+    		if (blacklistError) return console.warn("Global exclude includes wrong match patterns");
     		$$invalidate(3, blacklistError = false);
 
     		// compare blacklist input to saved blacklist
@@ -20040,11 +20741,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	const click_handler = () => state.remove("settings");
-    	const click_handler_1 = () => update("autoCloseBrackets", !$settings.autoCloseBrackets);
-    	const click_handler_2 = () => update("autoHint", !$settings.autoHint);
-    	const click_handler_3 = () => update("descriptions", !$settings.descriptions);
-    	const click_handler_4 = () => update("lint", !$settings.lint);
-    	const click_handler_5 = () => update("showInvisibles", !$settings.showInvisibles);
+    	const click_handler_1 = () => state.remove("settings");
+    	const click_handler_2 = () => update("autoCloseBrackets", !$settings.autoCloseBrackets);
+    	const click_handler_3 = () => update("autoHint", !$settings.autoHint);
+    	const click_handler_4 = () => update("descriptions", !$settings.descriptions);
+    	const click_handler_5 = () => update("lint", !$settings.lint);
+    	const click_handler_6 = () => update("showInvisibles", !$settings.showInvisibles);
 
     	function select_change_handler() {
     		$settings.tabSize = select_value(this);
@@ -20052,8 +20754,8 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	}
 
     	const blur_handler = () => update("tabSize", $settings.tabSize);
-    	const click_handler_6 = () => update("active", !$settings.active);
-    	const click_handler_7 = () => update("showCount", !$settings.showCount);
+    	const click_handler_7 = () => update("active", !$settings.active);
+    	const click_handler_8 = () => update("showCount", !$settings.showCount);
 
     	function textarea_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
@@ -20061,8 +20763,6 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     			$$invalidate(1, blacklist);
     		});
     	}
-
-    	const mousedown_handler = () => state.remove("settings");
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$settings*/ 1) {
@@ -20086,12 +20786,12 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		click_handler_3,
     		click_handler_4,
     		click_handler_5,
+    		click_handler_6,
     		select_change_handler,
     		blur_handler,
-    		click_handler_6,
     		click_handler_7,
-    		textarea_binding,
-    		mousedown_handler
+    		click_handler_8,
+    		textarea_binding
     	];
     }
 
@@ -20380,7 +21080,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	return child_ctx;
     }
 
-    // (65:0) {#if $state.includes("init")}
+    // (60:0) {#if $state.includes("init")}
     function create_if_block_1$2(ctx) {
     	let div;
     	let html_tag;
@@ -20443,7 +21143,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (70:8) {:else}
+    // (65:8) {:else}
     function create_else_block$1(ctx) {
     	let span;
 
@@ -20462,7 +21162,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (68:8) {#if $state.includes("init-error")}
+    // (63:8) {#if $state.includes("init-error")}
     function create_if_block_2$1(ctx) {
     	let span;
 
@@ -20481,7 +21181,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (80:4) {#each $notifications as item (item.id)}
+    // (75:4) {#each $notifications as item (item.id)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let notification;
@@ -20529,7 +21229,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     	};
     }
 
-    // (84:0) {#if $state.includes("settings")}
+    // (79:0) {#if $state.includes("settings")}
     function create_if_block$8(ctx) {
     	let settings_1;
     	let current;
@@ -20777,14 +21477,7 @@ var JSHINT;"undefined"==typeof window&&(window={}),function(){var f=function u(o
     		log.add("Requesting initialization data", "info", false);
     		const initData = await browser.runtime.sendNativeMessage({ name: "PAGE_INIT_DATA" });
     		if (initData.error) return console.error(initData.error);
-
-    		for (const [key, value] of Object.entries(initData)) {
-    			if (value === "true" || value === "false") {
-    				initData[key] = JSON.parse(value);
-    			}
-    		}
-
-    		settings.set(initData);
+    		await settings.init(initData);
     		state.add("items-loading");
     		state.remove("init");
     		log.add("Requesting all files in save location", "info", false);
