@@ -23,6 +23,7 @@
 
         // check if val matches `match patterns`, if not, return a warning
         const re = /^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$/;
+        blacklistError = false;
         for (const v of val) {
             if (re.exec(v) === null) {
                 blacklistError = true;
@@ -30,7 +31,6 @@
             }
         }
         if (blacklistError) return console.warn("Global exclude includes invalid match patterns");
-        blacklistError = false;
 
         // compare blacklist input to saved blacklist
         if ([...val].sort().toString() !== [...$settings.blacklist].sort().toString()) {
