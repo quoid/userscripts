@@ -1,5 +1,5 @@
 import {writable} from "svelte/store";
-import {uniqueId} from "./utils.js";
+import {uniqueId} from "../shared/utils.js";
 import * as settingsStorage from "../shared/settings.js";
 
 function notificationStore() {

@@ -2,14 +2,14 @@
     import {tick} from "svelte";
     import {fade} from "svelte/transition";
     import {items, log, settings, state} from "../../store.js";
-    import {newScriptDefault, sortBy, uniqueId} from "../../utils.js";
+    import {newScriptDefault, sortBy, uniqueId} from "../../../shared/utils.js";
     import SidebarFilter from "./SidebarFilter.svelte";
     import IconButton from "../../../shared/Components/IconButton.svelte";
     import Dropdown from "../../../shared/Components/Dropdown.svelte";
     import Loader from "../../../shared/Components/Loader.svelte";
     import SidebarItem from "./SidebarItem.svelte";
-    import iconPlus from "../../../shared/img/icon-plus.svg";
-    import iconSettings from "../../../shared/img/icon-settings.svg";
+    import iconPlus from "../../../shared/img/icon-plus.svg?raw";
+    import iconSettings from "../../../shared/img/icon-settings.svg?raw";
     import {
         cmChanged,
         cmGetInstance,

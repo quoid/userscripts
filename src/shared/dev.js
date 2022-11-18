@@ -1,4 +1,4 @@
-import {parse, uniqueId, wait} from "../page/utils";
+import {parse, uniqueId, wait} from "./utils";
 
 /**
  *
@@ -87,8 +87,8 @@ const _browser = {
             if (name === "PAGE_INIT_DATA") {
                 response = {
                     saveLocation: "/Users/someone/Library/Directory",
-                    version: "4.0.0",
-                    build: "44"
+                    version: "5.0.0",
+                    build: "55"
                 };
             } else if (name === "PAGE_LEGACY_IMPORT") {
                 response = {
@@ -458,4 +458,8 @@ function saveFile(content, lastMod, newFilename, oldName) {
     }
 }
 
-window.browser = _browser;
+export const browser = _browser;
+
+export default {
+    browser: _browser
+};

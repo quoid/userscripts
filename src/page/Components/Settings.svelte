@@ -3,9 +3,9 @@
     import {settings, state, log} from "../store.js";
     import IconButton from "../../shared/Components/IconButton.svelte";
     import Toggle from "../../shared/Components/Toggle.svelte";
-    import iconLoader from "../../shared/img/icon-loader.svg";
-    import iconClose from "../../shared/img/icon-close.svg";
-    import iconEdit from "../../shared/img/icon-edit.svg";
+    import iconLoader from "../../shared/img/icon-loader.svg?raw";
+    import iconClose from "../../shared/img/icon-close.svg?raw";
+    import iconEdit from "../../shared/img/icon-edit.svg?raw";
 
     // bound to blacklist textarea element, to easily get value when saving
     let blacklist;

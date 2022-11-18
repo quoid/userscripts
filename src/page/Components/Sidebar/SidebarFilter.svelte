@@ -2,8 +2,8 @@
     import {items, settings, state} from "../../store.js";
     import Dropdown from "../../../shared/Components/Dropdown.svelte";
     import IconButton from "../../../shared/Components/IconButton.svelte";
-    import iconSort from "../../../shared/img/icon-sort.svg";
-    import iconClear from "../../../shared/img/icon-clear.svg";
+    import iconSort from "../../../shared/img/icon-sort.svg?raw";
+    import iconClear from "../../../shared/img/icon-clear.svg?raw";
 
     $: disabled = !$state.includes("ready") ? true : false;
 

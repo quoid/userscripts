@@ -1,12 +1,14 @@
 {
     "env": {
         "browser": true,
+        "node": true,
         "es2021": true,
-        "node": true
+        "es2022": true,
+        "webextensions": true
     },
     "extends": ["eslint:recommended"],
     "parserOptions": {
-        "ecmaVersion": 12,
+        "ecmaVersion": "latest",
         "sourceType": "module"
     },
     "plugins": ["svelte3"],
@@ -20,14 +22,6 @@
         "_browser": "writable",
         "browser": "readonly"
     },
-    "ignorePatterns": [
-        "node_modules/",
-        "public/*/build/",
-        "codemirror/",
-        "etc/",
-        "extension/Userscripts Extension/Resources/page.js",
-        "extension/Userscripts Extension/Resources/popup.js"
-    ],
     "rules": {
         "array-bracket-spacing": ["error", "never"],
         "arrow-parens": ["error", "as-needed"],

@@ -8,10 +8,10 @@
     import UpdateView from "./Components/Views/UpdateView.svelte";
     import InstallView from "./Components/Views/InstallView.svelte";
     import AllItemsView from "./Components/Views/AllItemsView.svelte";
-    import iconOpen from "../shared/img/icon-open.svg";
-    import iconUpdate from "../shared/img/icon-update.svg";
-    import iconClear from "../shared/img/icon-clear.svg";
-    import iconRefresh from "../shared/img/icon-refresh.svg";
+    import iconOpen from "../shared/img/icon-open.svg?raw";
+    import iconUpdate from "../shared/img/icon-update.svg?raw";
+    import iconClear from "../shared/img/icon-clear.svg?raw";
+    import iconRefresh from "../shared/img/icon-refresh.svg?raw";
     import * as settingsStorage from "../shared/settings.js";
 
     let error = undefined;
@@ -142,7 +142,7 @@
     }
 
     async function openExtensionPage() {
-        const url = browser.runtime.getURL("page.html");
+        const url = browser.runtime.getURL("dist/entry-page.html");
         const tabs = await browser.tabs.query({});
         for (let i = 0; i < tabs.length; i++) {
             if (tabs[i].url === url) {

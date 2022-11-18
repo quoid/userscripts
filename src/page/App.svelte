@@ -6,7 +6,7 @@
     import Editor from "./Components/Editor/Editor.svelte";
     import Settings from "./Components/Settings.svelte";
     import Notification from "./Components/Notification.svelte";
-    import logo from "../shared/img/logo.svg";
+    import logo from "../shared/img/logo.svg?raw";
 
     const logger = [];
 

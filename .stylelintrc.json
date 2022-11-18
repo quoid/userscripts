@@ -3,7 +3,6 @@
         "stylelint-config-standard",
         "stylelint-config-html/svelte"
     ],
-    "ignoreFiles": ["**/codemirror/*", "**/reset.css", "**/*.js"],
     "rules": {
         "alpha-value-notation": "number",
         "comment-empty-line-before": ["always",{

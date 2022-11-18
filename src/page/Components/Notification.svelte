@@ -6,10 +6,10 @@
     import {linear} from "svelte/easing";
     import {notifications} from "../store.js";
     import IconButton from "../../shared/Components/IconButton.svelte";
-    import iconClose from "../../shared/img/icon-close.svg";
-    import iconError from "../../shared/img/icon-error.svg";
-    import iconInfo from "../../shared/img/icon-info.svg";
-    import iconWarn from "../../shared/img/icon-warn.svg";
+    import iconClose from "../../shared/img/icon-close.svg?raw";
+    import iconError from "../../shared/img/icon-error.svg?raw";
+    import iconInfo from "../../shared/img/icon-info.svg?raw";
+    import iconWarn from "../../shared/img/icon-warn.svg?raw";
 
     export let item;
 

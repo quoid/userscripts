@@ -13,5 +13,11 @@
     "svelte.plugin.svelte.compilerWarnings": {
         "a11y-missing-attribute": "error"
     },
-    "svelte.plugin.svelte.rename.enable": false
+    "svelte.plugin.svelte.rename.enable": false,
+    "[svelte]": {
+        "editor.defaultFormatter": "svelte.svelte-vscode"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "stylelint.vscode-stylelint"
+    }
 }
