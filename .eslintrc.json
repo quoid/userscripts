@@ -6,74 +6,40 @@
         "es2022": true,
         "webextensions": true
     },
-    "extends": ["eslint:recommended"],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
+    "extends": ["eslint:recommended", "airbnb-base"],
+    "globals": {
+        "_browser": "writable",
+        "browser": "readonly"
     },
-    "plugins": ["svelte3"],
+    "ignorePatterns": [
+        "/etc",
+        "build",
+        "dist",
+        "node_modules"
+    ],
     "overrides": [
         {
             "files": ["*.svelte"],
             "processor": "svelte3/svelte3"
         }
     ],
-    "globals": {
-        "_browser": "writable",
-        "browser": "readonly"
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
     },
+    "plugins": ["svelte3"],
     "rules": {
-        "array-bracket-spacing": ["error", "never"],
-        "arrow-parens": ["error", "as-needed"],
-        "brace-style": ["error", "1tbs", {"allowSingleLine": false}],
         "comma-dangle": ["error", "never"],
-        "comma-spacing": ["error", {
-            "before": false,
-            "after": true
+        "global-require": "off",
+        "import/extensions": "off",
+        "import/first": "off",
+        "import/no-mutable-exports": "off",
+        "import/no-extraneous-dependencies": ["error", {
+            "devDependencies": true
         }],
-        "curly": ["error", "multi-line"],
-        "dot-notation": "error",
-        "eqeqeq": ["error", "smart"],
-        "indent": ["error", 4, {"SwitchCase": 1}],
-        "linebreak-style": ["error","unix"],
-        "key-spacing": ["error", {"afterColon": true}],
-        "keyword-spacing": ["error", {
-            "after": true,
-            "before": true
-        }],
-        "no-bitwise": "error",
-        "no-mixed-operators": "error",
-        "no-multi-spaces": "error",
-        "no-multi-str": "error",
-        "no-multiple-empty-lines": ["error", {"max": 1, "maxBOF": 2}], // https://github.com/sveltejs/eslint-plugin-svelte3/issues/41
-        "no-tabs": "error",
-        "no-useless-concat": "error",
-        "no-unused-vars": ["error", {"args": "none"}],
-        "no-use-before-define": ["error", {
-            "classes": true,
-            "functions": false,
-            "variables": true
-        }],
-        "no-var": "error",
-        "nonblock-statement-body-position": ["error", "below", {
-            "overrides": {"if": "any"}
-        }],
-        "object-curly-spacing": ["error", "never"],
-        "operator-assignment": ["error", "always"],
-        "operator-linebreak": ["error", "before"],
-        "prefer-const": "error",
-        "prefer-template": "error",
-        "quotes": ["error", "double"],
-        "semi": ["error", "always", {"omitLastInOneLineBlock": true}],
-        "space-before-blocks": "error",
-        "space-before-function-paren": ["error", {
-            "anonymous": "never",
-            "named": "never",
-            "asyncArrow": "always"
-        }],
-        "space-in-parens": ["error", "never"],
-        "template-curly-spacing": ["error", "never"],
-        "space-infix-ops": "error",
-        "jsx-a11y/a11y-missing-attribute": "off"
+        "import/prefer-default-export": "off",
+        "import/no-unresolved": "off",
+        "indent": ["error", 4],
+        "quotes": ["error", "double"]
     }
 }

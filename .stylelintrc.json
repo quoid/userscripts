@@ -3,6 +3,13 @@
         "stylelint-config-standard",
         "stylelint-config-html/svelte"
     ],
+    "ignoreFiles": [
+        "**/build/**",
+        "**/dist/**",
+        "**/etc/**",
+        "**/node_modules/**",
+        "**/reset.css"
+    ],
     "rules": {
         "alpha-value-notation": "number",
         "comment-empty-line-before": ["always",{
