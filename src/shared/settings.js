@@ -367,8 +367,9 @@ export async function get(keys, area) {
         const def = settingsDefine[key].default;
         // check if value type conforms to settingsDefine
         const type = settingsDefine[key].type;
+        // eslint-disable-next-line valid-typeof -- type var known to be a string literal
         if (typeof val != type) {
-            console.warn(`Unexpected ${key} value type '${typeof(val)}' should '${type}', fix to default`);
+            console.warn(`Unexpected ${key} value type '${typeof (val)}' should '${type}', fix to default`);
             return def;
         }
         // check if value conforms to settingsDefine
@@ -392,9 +393,8 @@ export async function get(keys, area) {
         const result = await storage.get(key);
         if (Object.hasOwn(result, key)) {
             return valueFix(key, result[key]);
-        } else {
-            return settingsDefine[key].default;
         }
+        return settingsDefine[key].default;
     }
     const complexGet = async (settingsDefault, areaKeys) => {
         const storage = await storageRef(area);
@@ -404,8 +404,8 @@ export async function get(keys, area) {
                 sync = await storage.get(areaKeys.sync);
             }
             if (areaKeys.local.length) {
-                const storage = await storageRef("local");
-                local = await storage.get(areaKeys.local);
+                const storageLocal = await storageRef("local");
+                local = await storageLocal.get(areaKeys.local);
             }
         } else {
             local = await storage.get(areaKeys.all);
@@ -413,7 +413,7 @@ export async function get(keys, area) {
         const result = Object.assign(settingsDefault, local, sync);
         // revert settings object property name
         return Object.entries(result).reduce((p, c) => (
-            p[settingsDefine[c[0]].name] = valueFix(...c), p
+            p[settingsDefine[c[0]].name] = (valueFix(...c), p)
         ), {});
     };
     if (Array.isArray(keys)) { // [muilt settings]
@@ -436,7 +436,7 @@ export async function get(keys, area) {
             // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
-        return await complexGet(settingsDefault, areaKeys);
+        return complexGet(settingsDefault, areaKeys);
     }
     if (typeof keys == "undefined" || keys === null) { // [all settings]
         const settingsDefault = {};
@@ -450,7 +450,7 @@ export async function get(keys, area) {
             // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
-        return await complexGet(settingsDefault, areaKeys);
+        return complexGet(settingsDefault, areaKeys);
     }
     return console.error("Unexpected keys type:", keys);
 }
@@ -474,11 +474,12 @@ export async function set(keys, area) {
         }
         // check if value type conforms to settingsDefine
         const type = settingsDefine[key].type;
+        // eslint-disable-next-line valid-typeof -- type known to be valid string literal
         if (typeof keys[k] != type) {
-            if (type === "number" && !isNaN(keys[k])) { // compatible with string numbers
+            if (type === "number" && !Number.isNaN(keys[k])) { // compatible with string numbers
                 keys[k] = Number(keys[k]); // still store it as a number type
             } else {
-                return console.error(`Unexpected ${k} value type '${typeof(keys[k])}' should '${type}'`);
+                return console.error(`Unexpected ${k} value type '${typeof (keys[k])}' should '${type}'`);
             }
         }
         // check if value conforms to settingsDefine
@@ -501,8 +502,8 @@ export async function set(keys, area) {
                 await storage.set(areaKeys.sync);
             }
             if (Object.keys(areaKeys.local).length) {
-                const storage = await storageRef("local");
-                await storage.set(areaKeys.local);
+                const storageLocal = await storageRef("local");
+                await storageLocal.set(areaKeys.local);
             }
         } else {
             await storage.set(areaKeys.all);
@@ -539,8 +540,8 @@ export async function reset(keys, area) { // reset to default
                     await storage.remove(areaKeys.sync);
                 }
                 if (areaKeys.local.length) {
-                    const storage = await storageRef("local");
-                    await storage.remove(areaKeys.local);
+                    const storageLocal = await storageRef("local");
+                    await storageLocal.remove(areaKeys.local);
                 }
             } else {
                 await storage.remove(areaKeys.all);
@@ -572,7 +573,7 @@ export async function reset(keys, area) { // reset to default
             // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
-        return await complexRemove(areaKeys);
+        return complexRemove(areaKeys);
     }
     if (typeof keys == "undefined" || keys === null) { // [all settings]
         const areaKeys = {local: [], sync: [], all: []};
@@ -586,7 +587,7 @@ export async function reset(keys, area) { // reset to default
             // record all keys in case sync storage is not enabled
             areaKeys.all.push(key);
         }
-        return await complexRemove(areaKeys);
+        return complexRemove(areaKeys);
     }
     return console.error("Unexpected keys type:", keys);
 }
@@ -619,7 +620,7 @@ export function onChanged(callback) { // complex onChanged
 // they are deliberately named in snake_case format
 // they will be deleted at some point in the future
 
-export async function legacy_get(keys) {
+export async function legacyGet(keys) {
     const result = await get(keys);
     // console.log("legacy_get", keys, result);
     for (const key in result) {
@@ -629,7 +630,7 @@ export async function legacy_get(keys) {
     return result;
 }
 
-export async function legacy_set(keys) {
+export async function legacySet(keys) {
     if (typeof keys != "object") {
         return console.error("Unexpected arg type:", keys);
     }
@@ -645,10 +646,10 @@ export async function legacy_set(keys) {
         }
     }
     // console.log("legacy_set", keys, settings);
-    return await set(settings);
+    return set(settings);
 }
 
-export async function legacy_import() {
+export async function legacyImport() {
     // if legacy data has already been imported, skip this process
     const imported = await get("legacy_imported");
     if (imported) return console.info("Legacy settings has already imported");
@@ -670,13 +671,12 @@ export async function legacy_import() {
         }
     }
     // import complete tag, to ensure will only be import once
-    Object.assign(settings, {"legacy_imported": Date.now()});
+    Object.assign(settings, {legacy_imported: Date.now()});
     if (await set(settings, "local")) {
         console.info("Import legacy settings complete");
         // send a message to the Swift layer to safely clean up legacy data
         // browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});
         return true;
-    } else {
-        return console.error("Import legacy settings abort");
     }
+    return console.error("Import legacy settings abort");
 }

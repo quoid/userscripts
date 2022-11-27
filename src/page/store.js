@@ -78,10 +78,10 @@ function settingsStore() {
     const {subscribe, update, set} = writable({});
     const init = async initData => {
         // import legacy settings data just one-time
-        await settingsStorage.legacy_import();
+        await settingsStorage.legacyImport();
         // for compatibility with legacy getting names only
         // once all new name is used, use settingsStorage.get()
-        const settings = await settingsStorage.legacy_get();
+        const settings = await settingsStorage.legacyGet();
         console.info("store.js settingsStore init", initData, settings);
         set(Object.assign({}, initData, settings));
         // sync popup, backgound, etc... settings changes
@@ -93,7 +93,7 @@ function settingsStore() {
     const reset = async keys => {
         await settingsStorage.reset(keys);
         // once all new name is used, use settingsStorage.get()
-        const settings = await settingsStorage.legacy_get();
+        const settings = await settingsStorage.legacyGet();
         console.info("store.js settingsStore reset", settings);
         update(obj => Object.assign(obj, settings));
     };
@@ -118,7 +118,7 @@ function settingsStore() {
         });
         // for compatibility with legacy setting names only
         // once all new name is used, use settingsStorage.set()
-        settingsStorage.legacy_set({[key]: value}); // Durable Storage
+        settingsStorage.legacySet({[key]: value}); // Durable Storage
         // temporarily keep the old storage method until it is confirmed that all dependencies are removed
         updateSingleSettingOld(key, value);
     };

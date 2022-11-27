@@ -80,7 +80,9 @@
             }
         ],
         "no-return-assign": "off",
+        "no-sequences": "error",
         "no-underscore-dangle":"off",
+        "no-unused-expressions": "off",
         "no-use-before-define": ["error", {
             "functions": false,
             "classes": true,
@@ -89,8 +91,11 @@
         }],
         "object-curly-newline": ["error", {"consistent": true}],
         "object-curly-spacing": ["error", "never"],
+        "one-var": "off",
+        "one-var-declaration-per-line": "off",
         "prefer-destructuring": "off",
         "prefer-object-spread": "warn",
-        "quotes": ["error", "double"]
+        "quotes": ["error", "double"],
+        "import/no-namespace": "warn"
     }
 }
