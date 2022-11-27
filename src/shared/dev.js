@@ -8,6 +8,7 @@ import {parse, uniqueId, wait} from "./utils";
  * @returns
  */
 function generateFile(type, updates = false, longName = false, request = false) {
+    let canUpdate = updates;
     const uid = uniqueId();
     let name = request ? `${uid}-request-${type}` : `${uid}-example-${type}`;
     if (longName) name = `${uid}${uid}${uid}-example-${type}`;
@@ -29,12 +30,12 @@ function generateFile(type, updates = false, longName = false, request = false) 
             `console.log("I am ${name}");`,
             "#id,\n.class\n.pseudo-element::after {\n    color: red\n}"
         );
-        updates = false;
+        canUpdate = false;
     }
     if (request) {
         content = content.replace("// @noframes", "// @noframes\n// @run-at request");
     }
-    if (updates) {
+    if (canUpdate) {
         content = content.replace(
             "1.0",
             "1.0\n// @updateURL     https://www.k21p.com/example.user.js"
@@ -45,12 +46,12 @@ function generateFile(type, updates = false, longName = false, request = false) 
         );
     }
     return {
-        content: content,
+        content,
         filename: `${name}.${type}`,
         lastModified: randomDate,
-        name: name,
-        request: request,
-        type: type
+        name,
+        request,
+        type
     };
 }
 
@@ -58,7 +59,7 @@ const files = [
     generateFile("js", true, true),
     generateFile("css"),
     generateFile("js", false, false, true),
-    ...Array.from({length: 7}, (_, i) => generateFile("js"))
+    ...Array.from({length: 7}, () => generateFile("js"))
 ];
 
 const _browser = {
@@ -76,7 +77,9 @@ const _browser = {
                 response = {success: true};
             }
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(response), _browser.delay);
+                });
             }
             setTimeout(() => responseCallback(response), _browser.delay);
         },
@@ -111,15 +114,15 @@ const _browser = {
                     const content = file.content;
                     const parsed = parse(content);
                     const metadata = parsed.metadata;
-                    const canUpdate = (metadata.version && metadata.updateURL) ? true : false;
+                    const canUpdate = !!(metadata.version && metadata.updateURL);
                     const scriptData = {
-                        canUpdate: canUpdate,
-                        content: content,
+                        canUpdate,
+                        content,
                         description: metadata.description ? metadata.description[0] : "",
                         disabled: false,
                         filename: file.filename,
                         lastModified: file.lastModified,
-                        metadata: metadata,
+                        metadata,
                         name: metadata.name[0],
                         request: file.request,
                         // type: file.filename.substring(file.filename.lastIndexOf(".") + 1)
@@ -129,7 +132,7 @@ const _browser = {
                 });
             } else if (name === "TOGGLE_ITEM") {
                 response = {success: true};
-                //response = {error: true};
+                // response = {error: true};
             } else if (name === "PAGE_UPDATE_SETTINGS") {
                 response = {success: true};
             } else if (name === "PAGE_UPDATE_BLACKLIST") {
@@ -147,8 +150,8 @@ const _browser = {
                 if (!parsed) {
                     return {error: "save failed, file has invalid metadata"};
                 }
-                const name = parsed.metadata.name[0];
-                const newFilename = `${name}.${message.item.type}`;
+                const metaName = parsed.metadata.name[0];
+                const newFilename = `${metaName}.${message.item.type}`;
                 // filename length too long
                 if (newFilename.length > 255) {
                     return {error: "save failed, filename too long!"};
@@ -160,15 +163,16 @@ const _browser = {
                 }
 
                 const success = {
-                    canUpdate: canUpdate,
+                    canUpdate,
                     content: newContent,
                     filename: newFilename,
-                    lastModified: lastModified,
-                    name: name
+                    lastModified,
+                    name
                 };
 
                 // add description if in file metadata
                 if (parsed.metadata.description) {
+                    // const foo = parsed.metadata;
                     success.description = parsed.metadata.description[0];
                 }
                 // check if declarative network request
@@ -200,7 +204,7 @@ const _browser = {
                 // response.error = "Something went wrong!";
                 // response.info = "No updates found";
             } else if (name === "POPUP_TOGGLE_EXTENSION") {
-                //response = {error: "Failed toggle extension"};
+                // response = {error: "Failed toggle extension"};
                 response = {success: true};
             } else if (name === "POPUP_UPDATE_ALL" || name === "POPUP_UPDATE_SINGLE") {
                 // response = {error: "Failed refresh scripts"};
@@ -293,7 +297,6 @@ const _browser = {
                     ]
                 };
             } else if (name === "POPUP_MATCHES") {
-                console.log(files);
                 response = {
                     matches: [
                         ...files,
@@ -359,29 +362,34 @@ const _browser = {
                 }
             }
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(response), _browser.delay);
+                });
             }
             setTimeout(() => responseCallback(response), _browser.delay);
         }
     },
     tabs: {
-        getCurrent(responseCallback) {
+        getCurrent(/* responseCallback */) {
             const response = {url: "https://www.filmgarb.com/foo.user.js", id: 101};
-            return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+            return new Promise(resolve => {
+                setTimeout(() => resolve(response), _browser.delay);
+            });
         },
         query(message, responseCallback) {
             const response = [{url: "https://www.filmgarb.com/foo.user.js", id: 101}];
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(response), _browser.delay);
+                });
             }
             setTimeout(() => responseCallback(response), _browser.delay);
         },
         sendMessage(tabId, message, responseCallback) {
-            console.log(`Tab ${tabId} got message: ${message.name}`);
             let response = {};
             if (message.name === "USERSCRIPT_INSTALL_00") {
                 response = {success: "Click to install"};
-                //response.error = "something went wrong";
+                // response.error = "something went wrong";
             } else if (message.name === "USERSCRIPT_INSTALL_01") {
                 response = {
                     description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
@@ -391,10 +399,12 @@ const _browser = {
                     require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
                     source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
                 };
-                //response = {error: "a userscript with this @name value already exists, @name needs to be unique"};
+                // response = {error: "a userscript with this @name value already exists, @name needs to be unique"};
             }
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(response), _browser.delay);
+                });
             }
             setTimeout(() => responseCallback(response), _browser.delay);
         }
@@ -403,7 +413,9 @@ const _browser = {
         getAllFrames(message, responseCallback) {
             const response = [];
             if (!responseCallback) {
-                return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(response), _browser.delay);
+                });
             }
             setTimeout(() => responseCallback(response), _browser.delay);
         }
@@ -413,14 +425,20 @@ const _browser = {
             get(items, responseCallback) {
                 const response = {};
                 if (!responseCallback) {
-                    return new Promise(resolve => setTimeout(() => resolve(response), _browser.delay));
+                    return new Promise(resolve => {
+                        setTimeout(() => resolve(response), _browser.delay);
+                    });
                 }
                 setTimeout(() => responseCallback(response), _browser.delay);
             },
             set() {
-                return new Promise(resolve => setTimeout(() => resolve(), _browser.delay));
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(), _browser.delay);
+                });
             },
-            remove: () => new Promise(resolve => setTimeout(() => resolve(), _browser.delay)),
+            remove: () => new Promise(resolve => {
+                setTimeout(() => resolve(), _browser.delay);
+            }),
             onChanged: {
                 addListener: () => undefined
             }
@@ -436,7 +454,7 @@ async function getRemoteFileContents(url) {
     }).then(text => {
         result.content = text;
     }).catch(error => {
-        console.log(error);
+        console.error(error);
         result.error = "Remote url bad response!";
     });
     return result;
@@ -445,7 +463,7 @@ async function getRemoteFileContents(url) {
 function saveFile(content, lastMod, newFilename, oldName) {
     const ind = files.findIndex(f => f.filename === oldName);
     const s = {
-        content: content,
+        content,
         filename: newFilename,
         lastModified: lastMod
     };

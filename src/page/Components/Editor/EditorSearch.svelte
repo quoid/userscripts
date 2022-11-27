@@ -56,7 +56,7 @@
         const cm = instance;
         // set up regex pattern, replace certain characters
         const pattern = new RegExp(
-            //query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),\
+            // query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),\
             query.replace(/[-[\]/{}()*+?.\\^$|]/g, "\\$&"),
             "gi"
         );
@@ -65,7 +65,7 @@
         if (query.length > 0) {
             // create the overlay
             searchOverlay = {
-                token: function(stream) {
+                token(stream) {
                     pattern.lastIndex = stream.pos;
                     const match = pattern.exec(stream.string);
                     if (match && match.index === stream.pos) {
@@ -99,7 +99,10 @@
         let i = rangesIndex;
         if (ranges.length) {
             // at the end of the results, reset to top
-            if (i === ranges.length) i = rangesIndex = 0;
+            if (i === ranges.length) {
+                i = 0;
+                rangesIndex = 0;
+            }
             cm.setSelection(ranges[i].anchor, ranges[i].head);
             cm.scrollIntoView({from: ranges[i].anchor, to: ranges[i].head}, 20);
             // mark currently selected element

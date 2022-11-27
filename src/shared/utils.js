@@ -22,7 +22,9 @@ export function uniqueId() {
  * @returns {Promise<void>}
  */
 export function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
 }
 
 // TODO: describe the items array that should get passed to this function
@@ -56,9 +58,8 @@ export function sortBy(array, order) {
 export function newScriptDefault(description, name, type) {
     if (type === "css") {
         return `/* ==UserStyle==\n@name        ${name}\n@description ${description}\n@match       <all_urls>\n==/UserStyle== */`;
-    } else if (type === "js") {
-        return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// @match       *://*/*\n// ==/UserScript==`;
     }
+    return `// ==UserScript==\n// @name        ${name}\n// @description ${description}\n// @match       *://*/*\n// ==/UserScript==`;
 }
 
 /**
@@ -78,7 +79,7 @@ export function parse(str) {
 
     const metadata = {};
     const metaArray = metas.split("\n");
-    metaArray.forEach(function(m) {
+    metaArray.forEach(m => {
         const parts = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)([\w-]+)[ \t]+([^\s]+[^\r\n\t\v\f]*)/);
         const parts2 = m.trim().match(/^(?:[ \t]*(?:\/\/)?[ \t]*@)(noframes)[ \t]*$/);
         if (parts) {
@@ -88,16 +89,15 @@ export function parse(str) {
             metadata[parts2[1]] = metadata[parts2[1]] || [];
             metadata[parts2[1]].push(true);
         }
-
     });
     // fail if @name is missing or name is empty
     if (!metadata.name || metadata.name[0].length < 2) return;
 
     return {
-        code: code,
+        code,
         content: str,
-        metablock: metablock,
-        metadata: metadata
+        metablock,
+        metadata
     };
 }
 
@@ -157,7 +157,7 @@ export const validGrants = new Set([
     "none"
 ]);
 
-export const validKeys = new Set([
+export const validMetaKeys = new Set([
     "author",
     "description",
     "downloadURL",

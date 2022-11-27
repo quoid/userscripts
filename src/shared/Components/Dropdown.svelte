@@ -3,7 +3,7 @@
 
     export let icon = "plus";
     export let disabled = false;
-    export let title = undefined;
+    export let title;
 
     let active = false;
 
@@ -36,7 +36,7 @@
 </script>
 
 <div class:active>
-    <IconButton icon={icon} on:click={dropdownClick} {title} {disabled}/>
+    <IconButton {icon} on:click={dropdownClick} {title} {disabled} />
     <ul>
         <slot>
             <li>At least one slot is required...</li>
@@ -97,5 +97,4 @@
             color: var(--color-black);
         }
     }
-
 </style>

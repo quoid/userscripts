@@ -18,9 +18,8 @@ export const notifications = notificationStore();
 function logStore() {
     const {subscribe, set, update} = writable([]);
     const add = (message, type, notify) => {
-        const item = {id: uniqueId(), message: message, time: Date.now(), type: type};
-        if (type === "error") notify = true; // always notify on error
-        if (notify) notifications.add(item);
+        const item = {id: uniqueId(), message, time: Date.now(), type};
+        if (notify || type === "error") notifications.add(item); // always notify on error
         update(a => {
             a.push(item);
             return a;
@@ -86,9 +85,9 @@ function settingsStore() {
         console.info("store.js settingsStore init", initData, settings);
         set(Object.assign({}, initData, settings));
         // sync popup, backgound, etc... settings changes
-        settingsStorage.onChanged((settings, area) => {
-            console.log(`store.js storage.${area}.onChanged`, settings);
-            update(obj => Object.assign(obj, settings));
+        settingsStorage.onChanged((s, area) => {
+            console.log(`store.js storage.${area}.onChanged`, s);
+            update(obj => Object.assign(obj, s));
         });
     };
     const reset = async keys => {
@@ -98,7 +97,8 @@ function settingsStore() {
         console.info("store.js settingsStore reset", settings);
         update(obj => Object.assign(obj, settings));
     };
-    const updateSingleSetting_old = (key, value) => {
+
+    const updateSingleSettingOld = (key, value) => {
         // blacklist not stored in normal setting object in manifest, so handle differently
         if (key === "blacklist") {
             // update blacklist on swift side
@@ -111,12 +111,16 @@ function settingsStore() {
         }
     };
     const updateSingleSetting = (key, value) => {
-        update(settings => (settings[key] = value, settings));
+        // update(settings => (settings[key] = value, settings));
+        update(settings => {
+            settings[key] = value;
+            return settings;
+        });
         // for compatibility with legacy setting names only
         // once all new name is used, use settingsStorage.set()
         settingsStorage.legacy_set({[key]: value}); // Durable Storage
         // temporarily keep the old storage method until it is confirmed that all dependencies are removed
-        updateSingleSetting_old(key, value);
+        updateSingleSettingOld(key, value);
     };
     return {subscribe, set, init, reset, updateSingleSetting};
 }

@@ -1,7 +1,9 @@
 <script>
     import {onMount, tick} from "svelte";
     import {blur} from "svelte/transition";
-    import {items, log, notifications, settings, state} from "./store.js";
+    import {
+        items, log, notifications, settings, state
+    } from "./store.js";
     import Sidebar from "./Components/Sidebar/Sidebar.svelte";
     import Editor from "./Components/Editor/Editor.svelte";
     import Settings from "./Components/Settings.svelte";
@@ -12,6 +14,7 @@
 
     $: $log.some(item => {
         if (!logger.includes(item)) {
+            // eslint-disable-next-line no-console -- not arbitrary console command
             console[item.type](item.message);
             logger.push(item);
         }

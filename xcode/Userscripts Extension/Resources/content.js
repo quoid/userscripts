@@ -11,7 +11,7 @@ const apis = {
         return new Promise(resolve => {
             const message = {
                 name: "API_CLOSE_TAB",
-                tabId: tabId
+                tabId
             };
             browser.runtime.sendMessage(message, response => resolve(response));
         });
@@ -21,7 +21,7 @@ const apis = {
         return new Promise(resolve => {
             const message = {
                 name: "API_OPEN_TAB",
-                url: url,
+                url,
                 active: !openInBackground
             };
             browser.runtime.sendMessage(message, response => resolve(response));
@@ -92,7 +92,7 @@ const apis = {
         return new Promise(resolve => {
             const message = {
                 name: "API_ADD_STYLE",
-                css: css
+                css
             };
             browser.runtime.sendMessage(message, response => resolve(response));
         });
@@ -110,19 +110,19 @@ const apis = {
         return new Promise(resolve => {
             const message = {
                 name: "API_SAVE_TAB",
-                tab: tab
+                tab
             };
             browser.runtime.sendMessage(message, response => {
                 resolve(response);
             });
         });
     },
-    setClipboard(data, type) {
+    setClipboard(clipboardData, type) {
         return new Promise(resolve => {
             const message = {
                 name: "API_SET_CLIPBOARD",
-                data: data,
-                type: type
+                clipboardData,
+                type
             };
             browser.runtime.sendMessage(message, response => {
                 resolve(response);
@@ -139,7 +139,7 @@ const apis = {
         // get all the "on" events from XMLHttpRequest object
         const events = [];
         for (const k in XMLHttpRequest.prototype) {
-            k.slice(0, 2) === "on" && events.push(k);
+            if (k.slice(0, 2) === "on") events.push(k);
         }
         // check which functions are included in the original details object
         // add a bool to indicate if event listeners should be attached
@@ -172,8 +172,8 @@ const apis = {
                     } else if (r.responseType === "blob" && r.response.data) {
                         // blob responses had their data converted in background
                         // convert it back to blob
-                        const response = await fetch(r.response.data);
-                        const b = await response.blob();
+                        const resp = await fetch(r.response.data);
+                        const b = await resp.blob();
                         r.response = b;
                     }
                     // call userscript method
@@ -188,7 +188,9 @@ const apis = {
 
             // handle port disconnect and clean tasks
             port.onDisconnect.addListener(p => {
-                p.error && console.error(`port disconnected due to an error: ${p.error.message}`);
+                if (p.error) {
+                    console.error(`port disconnected due to an error: ${p.error.message}`);
+                }
                 browser.runtime.onConnect.removeListener(listener);
             });
             // fill the method returned to the user script
@@ -200,8 +202,8 @@ const apis = {
         const message = {
             name: "API_XHR",
             details: detailsParsed,
-            xhrPortName: xhrPortName,
-            events: events
+            xhrPortName,
+            events
         };
         browser.runtime.sendMessage(message);
         return response;
@@ -274,6 +276,7 @@ function injectJS(userscript) {
         document.head.appendChild(tag);
     } else {
         try {
+            // eslint-disable-next-line no-new-func
             return Function(code)();
         } catch (error) {
             console.error(`${filename} error`, error);
@@ -344,10 +347,10 @@ function injection() {
             const injectInto = userscript.scriptObject["inject-into"];
             // create GM.info object
             const scriptData = {
-                "script": userscript.scriptObject,
-                "scriptHandler": data.scriptHandler,
-                "scriptHandlerVersion": data.scriptHandlerVersion,
-                "scriptMetaStr": userscript.scriptMetaStr
+                script: userscript.scriptObject,
+                scriptHandler: data.scriptHandler,
+                scriptHandlerVersion: data.scriptHandlerVersion,
+                scriptMetaStr: userscript.scriptMetaStr
             };
             // all userscripts get access to GM.info
             gmMethods.push("info: GM_info");
@@ -435,7 +438,7 @@ function listeners() {
                 sendResponse({invalid: true});
             } else {
                 const message = {
-                    name: name,
+                    name,
                     content:
                     document.querySelector("pre").innerText
                 };
@@ -448,7 +451,7 @@ function listeners() {
             // from bg script when context-menu item is clicked
             // double check to ensure context-menu scripts only run in top windows
             if (window !== window.top) return;
-    
+
             // loop through context-menu scripts saved to data object and find match
             // if no match found, nothing will execute and error will log
             const filename = request.menuItemId;

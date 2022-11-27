@@ -2,7 +2,8 @@
     // once initialized, references the codemirror instance
     let instance;
     // saved and session code vars are used to track unsaved changes
-    let savedCode = null, sessionCode = null;
+    let savedCode = null;
+    let sessionCode = null;
 
     export function cmChanged() {
         if (sessionCode === null || sessionCode.localeCompare(savedCode) === 0) {
@@ -28,7 +29,7 @@
     import CodeMirror from "../../codemirror.js";
     import {settings, state} from "../../store.js";
     import EditorSearch from "./EditorSearch.svelte";
-    import {parseMetadata, validGrants, validKeys} from "../../../shared/utils.js";
+    import {parseMetadata, validGrants, validMetaKeys} from "../../../shared/utils.js";
 
     // the function to be called when save keybind is pressed
     export let saveHandler = () => {};
@@ -42,7 +43,7 @@
     // used to determine whether or not to auto hint
     let keysPressed = [];
 
-    // store cursor location on save, when re-enabling restore cursor position
+    // , 10, 10store cursor location on save, when re-enabling restore cursor position
     let cursor;
 
     // bound to the search component
@@ -60,8 +61,8 @@
     $: if (instance) {
         instance.setOption("autoCloseBrackets", $settings.autoCloseBrackets);
         instance.setOption("showInvisibles", $settings.showInvisibles);
-        instance.setOption("tabSize", parseInt($settings.tabSize));
-        instance.setOption("indentUnit", parseInt($settings.tabSize));
+        instance.setOption("tabSize", parseInt($settings.tabSize, 10));
+        instance.setOption("indentUnit", parseInt($settings.tabSize, 10));
     }
 
     // store cursor position and disable on save
@@ -114,11 +115,11 @@
             matchBrackets: true,
             smartIndent: true,
             styleActiveLine: true,
-            indentUnit: parseInt($settings.tabSize),
+            indentUnit: parseInt($settings.tabSize, 10),
             showInvisibles: $settings.showInvisibles,
-            tabSize: parseInt($settings.tabSize),
+            tabSize: parseInt($settings.tabSize, 10),
             highlightSelectionMatches: false,
-            lint: lint,
+            lint,
             hintOptions: {
                 useGlobalScope: true
             },
@@ -128,7 +129,7 @@
                 "Cmd-/": "toggleComment",
                 "Cmd-S": () => saveHandler(),
                 "Cmd-F": () => activateSearch(),
-                "Esc": () => searchActive = false,
+                Esc: () => searchActive = false,
                 Tab: cm => {
                     // convert tabs to spaces and add invisible elements
                     const s = Array(cm.getOption("indentUnit") + 1).join(" ");
@@ -241,17 +242,17 @@
      */
     function makeErrors({set, setName, message}) {
         const errors = [];
-        //for (let i = 0; i < array.length; i++) {
+        // for (let i = 0; i < array.length; i++) {
         set.forEach(el => {
-            //const el = array[i];
+            // const el = array[i];
             let regex = new RegExp(`^${el}$`);
             if (setName === "invalidKeys") {
                 regex = new RegExp(`^// @${el}.*?$`);
             }
-            const cursor = instance.getSearchCursor(regex);
+            const instanceCursor = instance.getSearchCursor(regex);
             const ranges = [];
-            while (cursor.findNext()) {
-                ranges.push({anchor: cursor.from(), head: cursor.to()});
+            while (instanceCursor.findNext()) {
+                ranges.push({anchor: instanceCursor.from(), head: instanceCursor.to()});
             }
             for (let j = 0; j < ranges.length; j++) {
                 const range = ranges[j];
@@ -259,7 +260,7 @@
                     from: range?.anchor,
                     to: range?.head,
                     severity: "warning",
-                    message: message
+                    message
                 };
                 errors.push(err);
             }
@@ -267,7 +268,7 @@
         return errors;
     }
 
-    function linter(text, updateLinting, options) {
+    function linter(text, updateLinting) {
         // toggle for custom metadata linting
         const customLinter = true;
         // only lint in javascript mode
@@ -321,21 +322,21 @@
             if (Array.isArray(parsedMetadata)) {
                 // find invalid keys or empty key values
                 for (let i = 0; i < parsedMetadata.length; i++) {
-                    const {key, value: val, text} = parsedMetadata[i];
-                    if (!validKeys.has(key)) {
+                    const {key, value: val, text: metaText} = parsedMetadata[i];
+                    if (!validMetaKeys.has(key)) {
                         invalidKeys.add(key);
                     }
                     if (key !== "noframes" && !invalidKeys.has(key) && !val) {
-                        emptyKeyValues.add(text);
+                        emptyKeyValues.add(metaText);
                     }
                 }
 
                 // find unsupported @grant methods
                 const grants = parsedMetadata.filter(a => a.key === "grant");
                 for (let i = 0; i < grants.length; i++) {
-                    const {value, text} = grants[i];
-                    if (!validGrants.has(value)) {
-                        invalidGrants.add(text);
+                    const {value: val, text: grantText} = grants[i];
+                    if (!validGrants.has(val)) {
+                        invalidGrants.add(grantText);
                     }
                 }
             }

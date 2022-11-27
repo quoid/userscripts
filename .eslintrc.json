@@ -29,8 +29,15 @@
     },
     "plugins": ["svelte3"],
     "rules": {
+        "array-callback-return": "off",
+        "arrow-body-style": "off",
+        "arrow-parens": ["error", "as-needed"],
         "comma-dangle": ["error", "never"],
+        "consistent-return": "off",
+        "default-case": "off",
+        "eqeqeq": ["error", "smart"],
         "global-require": "off",
+        "guard-for-in": "warn",
         "import/extensions": "off",
         "import/first": "off",
         "import/no-mutable-exports": "off",
@@ -39,7 +46,51 @@
         }],
         "import/prefer-default-export": "off",
         "import/no-unresolved": "off",
-        "indent": ["error", 4],
+        "indent": ["error", 4, {"SwitchCase": 1}],
+        "max-len": "off",
+        "no-alert":"off",
+        "no-await-in-loop":"warn",
+        "no-confusing-arrow": ["warn", {
+            "allowParens": true,
+            "onlyOneSimpleParam": true
+        }],
+        "no-console": ["warn", {"allow": ["warn", "error", "info"]}],
+        "no-continue": "off",
+        "no-else-return": ["error", {"allowElseIf": true}],
+        "no-nested-ternary": "off",
+        "no-param-reassign": "warn",
+        "no-plusplus": "off",
+        "no-restricted-syntax": [
+            "warn",
+            {
+                "selector": "ForInStatement",
+                "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+            },
+            {
+                "selector": "ForOfStatement",
+                "message": "iterators/generators require regenerator-runtime, which is too heavyweight for this guide to allow them. Separately, loops should be avoided in favor of array iterations."
+            },
+            {
+                "selector": "LabeledStatement",
+                "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+            },
+            {
+                "selector": "WithStatement",
+                "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+            }
+        ],
+        "no-return-assign": "off",
+        "no-underscore-dangle":"off",
+        "no-use-before-define": ["error", {
+            "functions": false,
+            "classes": true,
+            "variables": true,
+            "allowNamedExports": false
+        }],
+        "object-curly-newline": ["error", {"consistent": true}],
+        "object-curly-spacing": ["error", "never"],
+        "prefer-destructuring": "off",
+        "prefer-object-spread": "warn",
         "quotes": ["error", "double"]
     }
 }

@@ -56,7 +56,7 @@
     // called when the user clicks the icon next to the save location link
     async function changeSaveLocation() {
         const m = "Changing the save location requires all instances of the extension to be closed and the host application to be opened. This will be automatically attempted.\n\nDo you wish to continue?";
-        if (!confirm(m)) return;
+        if (!window.confirm(m)) return;
         window.open("userscriptsurlscheme://changesavelocation");
         // close all open extension pages
         const url = browser.runtime.getURL("page.html");

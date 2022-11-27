@@ -10,7 +10,12 @@
     import iconSync from "../../../shared/img/icon-sync.svg?raw";
 
     // the data the populates editor elements
-    let canUpdate, name, type, lastModified, remote, temp;
+    let canUpdate;
+    let name;
+    let type;
+    let lastModified;
+    let remote;
+    let temp;
 
     // binds to codemirror component, allows accessing of component's exported functions
     let codemirror;
@@ -57,13 +62,13 @@
             // overwrite item in items store
             items.update(i => {
                 const index = i.findIndex(a => a.active);
-                const disabled = i[index].disabled !== undefined ? i[index].disabled : false;
-                const type = i[index].type;
+                const d = i[index].disabled !== undefined ? i[index].disabled : false;
+                const t = i[index].type;
                 const visible = i[index].visible !== undefined ? i[index].visible : true;
                 i[index] = response;
                 i[index].active = true;
-                i[index].disabled = disabled;
-                i[index].type = type;
+                i[index].disabled = d;
+                i[index].type = t;
                 i[index].visible = visible;
                 return i;
             });
@@ -115,11 +120,11 @@
 
     async function trash() {
         const m = "Are you sure you want to trash this file?";
-        const temp = activeItem.temp;
-        if (!confirm(m)) return;
+        const temporary = activeItem.temp;
+        if (!window.confirm(m)) return;
         state.add("trashing");
-        // since temp files are not yet saved to the file system, can be trashed immediately
-        if (temp) {
+        // since temporary files are not yet saved to the file system, can be trashed immediately
+        if (temporary) {
             // can only trash an active script, update items filtering out the active one
             items.update(i => i.filter(a => !a.active));
         } else {
@@ -141,11 +146,11 @@
     }
 
     function handleMessage(e) {
-        const name = e.detail.name;
+        const n = e.detail.name;
         // temp files keep save button enabled until save
-        if (name === "enableButtons" && !temp) {
+        if (n === "enableButtons" && !temp) {
             toggleButtons(false, false);
-        } else if (name === "disableButtons" && !temp) {
+        } else if (n === "disableButtons" && !temp) {
             toggleButtons(true, true);
         }
     }

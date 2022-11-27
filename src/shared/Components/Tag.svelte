@@ -1,5 +1,5 @@
 <script>
-    export let type = undefined;
+    export let type;
 </script>
 
 <div class="script__tag {`script__tag--${type}`}"></div>

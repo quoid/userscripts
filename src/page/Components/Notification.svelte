@@ -123,7 +123,7 @@
     }
 
     .icon :global(svg) {
-        fill: currentColor;
+        fill: currentcolor;
         height: auto;
         pointer-events: none;
         width: 66.7%;

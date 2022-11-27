@@ -1,4 +1,4 @@
-import * as settingsStorage from "../shared/settings.js";
+// import * as settingsStorage from "../shared/settings.js";
 
 // first sorts files by run-at value, then by weight value
 function userscriptSort(a, b) {
@@ -94,7 +94,7 @@ async function setBadgeCount() {
     }
     const message = {
         name: "POPUP_BADGE_COUNT",
-        url: url,
+        url,
         frameUrls: Array.from(frameUrls)
     };
     browser.runtime.sendNativeMessage(message, response => {
@@ -125,7 +125,7 @@ async function setSessionRules() {
         const code = JSON.parse(rule.code);
         // check if an array or single rule
         if (Array.isArray(code)) {
-            code.forEach(rule => rules.push(rule));
+            code.forEach(r => rules.push(r));
             console.info(`Setting session rule: ${rule.name} (${code.length})`);
         } else {
             rules.push(code);
@@ -258,9 +258,9 @@ function handleMessage(request, sender, sendResponse) {
             const url = sender.url;
             // use frameId to determine if request came from top level window
             // if @noframes true, and isTop false, swift layer won't return code
-            const isTop = sender.frameId === 0 ? true : false;
+            const isTop = sender.frameId === 0;
             // send request to swift layer to provide code for page url
-            const message = {name: "REQ_USERSCRIPTS", url: url, isTop: isTop};
+            const message = {name: "REQ_USERSCRIPTS", url, isTop};
             browser.runtime.sendNativeMessage(message, response => {
                 // if request failed, send error to content script for logging
                 if (response.error) return sendResponse(response);
@@ -388,7 +388,7 @@ function handleMessage(request, sender, sendResponse) {
                             type: xhr.responseType
                         };
                     }
-                    port.postMessage({name: e, event: event, response: x});
+                    port.postMessage({name: e, event, response: x});
                 };
             }
             xhr.open(method, details.url, true, user, password);
@@ -401,12 +401,14 @@ function handleMessage(request, sender, sendResponse) {
             }
             // receive messages from content script and process them
             port.onMessage.addListener(msg => {
-                msg.name === "ABORT" && xhr.abort();
-                msg.name === "DISCONNECT" && port.disconnect();
+                if (msg.name === "ABORT") xhr.abort();
+                if (msg.name === "DISCONNECT") port.disconnect();
             });
             // handle port disconnect and clean tasks
             port.onDisconnect.addListener(p => {
-                p.error && console.error(`port disconnected due to an error: ${p.error.message}`);
+                if (p.error) {
+                    console.error(`port disconnected due to an error: ${p.error.message}`);
+                }
             });
             xhr.send(body);
             // if onloadend not set in xhr details
@@ -415,7 +417,7 @@ function handleMessage(request, sender, sendResponse) {
             // if details lacks onloadend attach listener
             if (!details.onloadend) {
                 xhr.onloadend = event => {
-                    port.postMessage({name: "onloadend", event: event});
+                    port.postMessage({name: "onloadend", event});
                 };
             }
             break;

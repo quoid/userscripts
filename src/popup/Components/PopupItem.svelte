@@ -1,5 +1,6 @@
 <script>
     import Tag from "../../shared/Components/Tag.svelte";
+    
     export let enabled = false;
     export let name;
     export let type;
