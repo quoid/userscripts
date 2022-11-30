@@ -339,7 +339,7 @@ export const settingsDefine = deepFreeze([
 // and convert settingsDefine to storageKey object
 function settingsDefineReduceCallback(settings, setting) {
     setting.key = storageKey(setting.name);
-    settings[setting.key] = Object.assign({}, settingDefault, setting);
+    settings[setting.key] = {...settingDefault, ...setting};
     return settings;
 }
 
@@ -367,9 +367,9 @@ export async function get(keys, area) {
         const def = settingsDefine[key].default;
         // check if value type conforms to settingsDefine
         const type = settingsDefine[key].type;
-        // eslint-disable-next-line valid-typeof -- type var known to be a string literal
+        // eslint-disable-next-line valid-typeof -- type known to be valid string literal
         if (typeof val != type) {
-            console.warn(`Unexpected ${key} value type '${typeof (val)}' should '${type}', fix to default`);
+            console.warn(`Unexpected ${key} value type '${typeof val}' should '${type}', fix to default`);
             return def;
         }
         // check if value conforms to settingsDefine
@@ -388,12 +388,11 @@ export async function get(keys, area) {
             return console.error("unexpected settings key:", key);
         }
         // check if only locally stored setting
+        // eslint-disable-next-line no-param-reassign -- change the area is expected
         settingsDefine[key].local === true && (area = "local");
         const storage = await storageRef(area);
         const result = await storage.get(key);
-        if (Object.hasOwn(result, key)) {
-            return valueFix(key, result[key]);
-        }
+        if (Object.hasOwn(result, key)) return valueFix(key, result[key]);
         return settingsDefine[key].default;
     }
     const complexGet = async (settingsDefault, areaKeys) => {
@@ -412,9 +411,10 @@ export async function get(keys, area) {
         }
         const result = Object.assign(settingsDefault, local, sync);
         // revert settings object property name
-        return Object.entries(result).reduce((p, c) => (
-            p[settingsDefine[c[0]].name] = (valueFix(...c), p)
-        ), {});
+        return Object.entries(result).reduce((p, c) => {
+            p[settingsDefine[c[0]].name] = valueFix(...c);
+            return p;
+        }, {});
     };
     if (Array.isArray(keys)) { // [muilt settings]
         if (!keys.length) {
@@ -441,7 +441,7 @@ export async function get(keys, area) {
     if (typeof keys == "undefined" || keys === null) { // [all settings]
         const settingsDefault = {};
         const areaKeys = {local: [], sync: [], all: []};
-        for (const key in settingsDefine) {
+        for (const key of Object.keys(settingsDefine)) {
             settingsDefault[key] = settingsDefine[key].default;
             // detach only locally stored settings
             settingsDefine[key].local === true
@@ -466,7 +466,7 @@ export async function set(keys, area) {
         return console.error("Settings object empty:", keys);
     }
     const areaKeys = {local: {}, sync: {}, all: {}};
-    for (const k in keys) {
+    for (const k of Object.keys(keys)) {
         const key = storageKey(k);
         // check if key exist in settingsDefine
         if (!Object.hasOwn(settingsDefine, key)) {
@@ -476,7 +476,7 @@ export async function set(keys, area) {
         const type = settingsDefine[key].type;
         // eslint-disable-next-line valid-typeof -- type known to be valid string literal
         if (typeof keys[k] != type) {
-            if (type === "number" && !Number.isNaN(keys[k])) { // compatible with string numbers
+            if (type === "number" && !Number.isNaN(Number(keys[k]))) { // compatible with string numbers
                 keys[k] = Number(keys[k]); // still store it as a number type
             } else {
                 return console.error(`Unexpected ${k} value type '${typeof (keys[k])}' should '${type}'`);
@@ -528,6 +528,7 @@ export async function reset(keys, area) { // reset to default
         if (settingsDefine[key].protect === true) {
             return console.error("protected settings key:", key);
         }
+        // eslint-disable-next-line no-param-reassign -- change the area is expected
         settingsDefine[key].local === true && (area = "local");
         const storage = await storageRef(area);
         return storage.remove(key);
@@ -617,13 +618,12 @@ export function onChanged(callback) { // complex onChanged
 }
 
 // the following functions are used only for compatibility transition periods
-// they are deliberately named in snake_case format
-// they will be deleted at some point in the future
+// these functions will be removed in the future, perhaps in version 5.0
 
 export async function legacyGet(keys) {
     const result = await get(keys);
     // console.log("legacy_get", keys, result);
-    for (const key in result) {
+    for (const key of Object.keys(result)) {
         const legacy = settingsDefine[storageKey(key)]?.legacy;
         if (legacy) result[legacy] = result[key];
     }
@@ -638,7 +638,7 @@ export async function legacySet(keys) {
         return console.error("Settings object empty:", keys);
     }
     const settings = {};
-    for (const key in settingsDefine) {
+    for (const key of Object.keys(settingsDefine)) {
         const setting = settingsDefine[key];
         if (!setting.legacy) continue;
         if (setting.legacy in keys) {
@@ -658,7 +658,7 @@ export async function legacyImport() {
     if (result.error) return console.error(result.error);
     console.info("Import settings data from legacy manifest file");
     const settings = {};
-    for (const key in settingsDefine) {
+    for (const key of Object.keys(settingsDefine)) {
         const legacy = settingsDefine[key].legacy;
         if (legacy in result) {
             let value = result[legacy];
@@ -666,7 +666,7 @@ export async function legacyImport() {
                 case "boolean": value = JSON.parse(value); break;
                 case "number": value = Number(value); break;
             }
-            console.log(`Importing legacy setting: ${legacy}`, value);
+            console.info(`Importing legacy setting: ${legacy}`, value);
             settings[settingsDefine[key].name] = value;
         }
     }
