@@ -7,7 +7,7 @@ import {svelte} from "@sveltejs/vite-plugin-svelte";
 // https://github.com/vitejs/vite/issues/1204
 // import fs from "fs";
 // import svgpkg from "svg-inline-loader";
-// export function svgInline() {
+// export function svgInline() { // custom plugin
 //     return {
 //         name: "transform-file",
 //         transform(code, id) {
@@ -26,6 +26,7 @@ import {svelte} from "@sveltejs/vite-plugin-svelte";
 // [autoprefixer]
 // https://vitejs.dev/guide/features.html#postcss
 // have config with `.postcssrc.json` file
+// about `missing peer postcss` error, ignore it
 
 // https://vitejs.dev/config/
 export default defineConfig({
