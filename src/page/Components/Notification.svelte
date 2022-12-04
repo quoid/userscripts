@@ -88,7 +88,7 @@
     }
 
     .error progress::-webkit-progress-value {
-        background-color: var(--color-red);;
+        background-color: var(--color-red);
     }
 
     .warn progress::-webkit-progress-value {

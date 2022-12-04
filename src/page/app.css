@@ -9,7 +9,7 @@ body {
     color: var(--text-color-primary);
     font: var(--text-default);
     height: 100%;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizelegibility;
     -webkit-font-smoothing: antialiased;
 }
 

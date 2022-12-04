@@ -9,7 +9,7 @@ body {
     font: var(--text-medium);
     letter-spacing: var(--letter-spacing-medium);
     position: relative;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizelegibility;
     width: 18rem;
     -webkit-font-smoothing: antialiased;
 }
