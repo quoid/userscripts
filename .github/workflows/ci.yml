@@ -1,4 +1,4 @@
-name: CI
+name: lint
 on:
   - pull_request
 jobs:
@@ -7,6 +7,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install modules
-      run: yarn
+      run: npm install
     - name: Run ESLint
-      run: yarn run eslint . --ext .js,.jsx,.ts,.tsx
+      run: npm run lint-js
+    - name: Run Stylelint
+      run: npm run lint-css
