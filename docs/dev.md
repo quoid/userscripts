@@ -17,7 +17,7 @@ The `xcode` directory is the root of the Xcode project where the Safari extensio
 - `xcodebuild` or build with Xcode App
 
 # Contribute
-[Contribution Guidelines](contribute.md)
+[Contributing guide](contributing.md)
 
 # About
-Userscripts @ 2022
+[Userscripts](https://github.com/quoid/userscripts) @ 2022
