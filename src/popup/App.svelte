@@ -13,7 +13,8 @@
     import iconClear from "../shared/img/icon-clear.svg?raw";
     import iconRefresh from "../shared/img/icon-refresh.svg?raw";
     import * as settingsStorage from "../shared/settings.js";
-
+    
+    const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
     let errorNotification;
     let active = true;
     let loading = true;
@@ -149,17 +150,16 @@
     }
 
     async function openExtensionPage() {
-        const url = browser.runtime.getURL("dist/entry-page.html");
         const tabs = await browser.tabs.query({});
         for (let i = 0; i < tabs.length; i++) {
-            if (tabs[i].url === url) {
+            if (tabs[i].url === extensionPageUrl) {
                 await browser.windows.update(tabs[i].windowId, {focused: true});
                 await browser.tabs.update(tabs[i].id, {active: true});
                 window.close();
                 return;
             }
         }
-        await browser.tabs.create({url});
+        await browser.tabs.create({extensionPageUrl});
     }
 
     async function shouldCheckForUpdates() {
@@ -274,7 +274,6 @@
         resize();
 
         // get matches
-        const extensionPageUrl = browser.runtime.getURL("page.html");
         const currentTab = await browser.tabs.getCurrent();
         const url = currentTab.url;
         if (!url) {

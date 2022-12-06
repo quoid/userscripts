@@ -59,7 +59,7 @@
         if (!window.confirm(m)) return;
         window.open("userscriptsurlscheme://changesavelocation");
         // close all open extension pages
-        const url = browser.runtime.getURL("page.html");
+        const url = window.location.href;
         const close = [];
         const tabs = await browser.tabs.query({});
         tabs.forEach(tab => tab.url === url && close.push(tab.id));

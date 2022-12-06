@@ -479,7 +479,7 @@ export async function set(keys, area) {
             if (type === "number" && !Number.isNaN(Number(keys[k]))) { // compatible with string numbers
                 keys[k] = Number(keys[k]); // still store it as a number type
             } else {
-                return console.error(`Unexpected ${k} value type '${typeof (keys[k])}' should '${type}'`);
+                return console.error(`Unexpected ${k} value type '${typeof keys[k]}' should '${type}'`);
             }
         }
         // check if value conforms to settingsDefine
