@@ -159,7 +159,7 @@
                 return;
             }
         }
-        await browser.tabs.create({extensionPageUrl});
+        await browser.tabs.create({url: extensionPageUrl});
     }
 
     async function shouldCheckForUpdates() {
