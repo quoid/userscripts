@@ -75,7 +75,7 @@ class ViewController: NSViewController {
         panel.canCreateDirectories = true
         panel.canChooseFiles = false
         panel.beginSheetModal(for: window, completionHandler: { response in
-            if let url: URL = panel.urls.first {
+            if response == .OK, let url: URL = panel.urls.first {
                 // check it is a writeable path
                 let canWrite = FileManager.default.isWritableFile(atPath: url.path)
                 if !canWrite {
