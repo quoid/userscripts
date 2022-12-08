@@ -1,85 +1,82 @@
 {
     "env": {
         "browser": true,
+        "node": true,
         "es2021": true,
-        "node": true
+        "es2022": true,
+        "webextensions": true
     },
-    "extends": ["eslint:recommended"],
-    "parserOptions": {
-        "ecmaVersion": 12,
-        "sourceType": "module"
+    "extends": ["eslint:recommended", "airbnb-base"],
+    "globals": {
+        "_browser": "writable",
+        "browser": "readonly"
     },
-    "plugins": ["svelte3"],
+    "ignorePatterns": [
+        "/etc",
+        "build",
+        "dist",
+        "node_modules"
+    ],
     "overrides": [
         {
             "files": ["*.svelte"],
             "processor": "svelte3/svelte3"
         }
     ],
-    "globals": {
-        "_browser": "writable",
-        "browser": "readonly"
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
     },
-    "ignorePatterns": [
-        "node_modules/",
-        "public/*/build/",
-        "codemirror/",
-        "etc/",
-        "extension/Userscripts Extension/Resources/page.js",
-        "extension/Userscripts Extension/Resources/popup.js"
-    ],
+    "plugins": ["svelte3"],
     "rules": {
-        "array-bracket-spacing": ["error", "never"],
+        "array-callback-return": "off",
+        "arrow-body-style": "off",
         "arrow-parens": ["error", "as-needed"],
-        "brace-style": ["error", "1tbs", {"allowSingleLine": false}],
         "comma-dangle": ["error", "never"],
-        "comma-spacing": ["error", {
-            "before": false,
-            "after": true
-        }],
-        "curly": ["error", "multi-line"],
-        "dot-notation": "error",
+        "consistent-return": "off",
+        "default-case": "off",
         "eqeqeq": ["error", "smart"],
+        "global-require": "off",
+        "guard-for-in": "warn",
+        "import/extensions": "off",
+        "import/first": "off",
+        "import/no-mutable-exports": "off",
+        "import/no-extraneous-dependencies": ["error", {
+            "devDependencies": true
+        }],
+        "import/prefer-default-export": "off",
+        "import/no-unresolved": "off",
         "indent": ["error", 4, {"SwitchCase": 1}],
-        "linebreak-style": ["error","unix"],
-        "key-spacing": ["error", {"afterColon": true}],
-        "keyword-spacing": ["error", {
-            "after": true,
-            "before": true
+        "max-len": "off",
+        "no-alert":"off",
+        "no-await-in-loop":"warn",
+        "no-confusing-arrow": ["warn", {
+            "allowParens": true,
+            "onlyOneSimpleParam": true
         }],
-        "no-bitwise": "error",
-        "no-mixed-operators": "error",
-        "no-multi-spaces": "error",
-        "no-multi-str": "error",
-        "no-multiple-empty-lines": ["error", {"max": 1, "maxBOF": 2}], // https://github.com/sveltejs/eslint-plugin-svelte3/issues/41
-        "no-tabs": "error",
-        "no-useless-concat": "error",
-        "no-unused-vars": ["error", {"args": "none"}],
+        "no-console": ["warn", {"allow": ["info", "warn", "error"]}],
+        "no-continue": "off",
+        "no-else-return": ["error", {"allowElseIf": true}],
+        "no-nested-ternary": "off",
+        "no-param-reassign": ["warn", { "props": false }],
+        "no-plusplus": "off",
+        "no-restricted-syntax": "off",
+        "no-return-assign": "off",
+        "no-underscore-dangle":"off",
+        "no-unused-expressions": "off",
         "no-use-before-define": ["error", {
-            "classes": true,
             "functions": false,
-            "variables": true
+            "classes": true,
+            "variables": true,
+            "allowNamedExports": false
         }],
-        "no-var": "error",
-        "nonblock-statement-body-position": ["error", "below", {
-            "overrides": {"if": "any"}
-        }],
+        "object-curly-newline": ["error", {"consistent": true}],
         "object-curly-spacing": ["error", "never"],
-        "operator-assignment": ["error", "always"],
-        "operator-linebreak": ["error", "before"],
-        "prefer-const": "error",
-        "prefer-template": "error",
+        "one-var": "off",
+        "one-var-declaration-per-line": "off",
+        "prefer-destructuring": "off",
+        "prefer-object-spread": "warn",
         "quotes": ["error", "double"],
-        "semi": ["error", "always", {"omitLastInOneLineBlock": true}],
-        "space-before-blocks": "error",
-        "space-before-function-paren": ["error", {
-            "anonymous": "never",
-            "named": "never",
-            "asyncArrow": "always"
-        }],
-        "space-in-parens": ["error", "never"],
-        "template-curly-spacing": ["error", "never"],
-        "space-infix-ops": "error",
-        "jsx-a11y/a11y-missing-attribute": "off"
+        "import/no-namespace": "warn"
     }
 }

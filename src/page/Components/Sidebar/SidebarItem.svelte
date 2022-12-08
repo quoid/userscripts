@@ -15,10 +15,9 @@
         if (str && str.length > 120) {
             showTitle = true;
             return `${str.substring(0, 120).trim()}...`;
-        } else {
-            showTitle = false;
-            return str;
         }
+        showTitle = false;
+        return str;
     }
 
     $: description = formatDescription(data.description);

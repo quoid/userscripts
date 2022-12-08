@@ -1,7 +1,7 @@
 <script>
     export let checked = false;
     export let disabled = false;
-    export let title = undefined;
+    export let title;
 </script>
 
 <!-- prevent toggle label clicks from triggering parent element on:click -->

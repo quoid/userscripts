@@ -8,13 +8,14 @@
     import UpdateView from "./Components/Views/UpdateView.svelte";
     import InstallView from "./Components/Views/InstallView.svelte";
     import AllItemsView from "./Components/Views/AllItemsView.svelte";
-    import iconOpen from "../shared/img/icon-open.svg";
-    import iconUpdate from "../shared/img/icon-update.svg";
-    import iconClear from "../shared/img/icon-clear.svg";
-    import iconRefresh from "../shared/img/icon-refresh.svg";
+    import iconOpen from "../shared/img/icon-open.svg?raw";
+    import iconUpdate from "../shared/img/icon-update.svg?raw";
+    import iconClear from "../shared/img/icon-clear.svg?raw";
+    import iconRefresh from "../shared/img/icon-refresh.svg?raw";
     import * as settingsStorage from "../shared/settings.js";
-
-    let error = undefined;
+    
+    const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
+    let errorNotification;
     let active = true;
     let loading = true;
     let disabled = true;
@@ -51,8 +52,8 @@
 
     $: if (platform) document.body.classList.add(platform);
 
-    async function toggleExtension(e) {
-        await settingsStorage.set({"global_active": !active});
+    async function toggleExtension() {
+        await settingsStorage.set({global_active: !active});
         active = await settingsStorage.get("global_active");
     }
 
@@ -62,7 +63,7 @@
         loading = true;
         browser.runtime.sendNativeMessage({name: "POPUP_UPDATE_ALL"}, response => {
             if (response.error) {
-                error = response.error;
+                errorNotification = response.error;
             } else {
                 if (response.items) items = response.items;
                 updates = response.updates;
@@ -78,18 +79,20 @@
         const url = currentTab.url;
         const frameUrls = [];
         if (url) {
-            const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
+            const frames = await browser.webNavigation.getAllFrames({
+                tabId: currentTab.id
+            });
             frames.forEach(frame => frameUrls.push(frame.url));
         }
         const message = {
             name: "POPUP_UPDATE_SINGLE",
             filename: item.filename,
-            url: url,
-            frameUrls: frameUrls
+            url,
+            frameUrls
         };
         const response = await browser.runtime.sendNativeMessage(message);
         if (response.error) {
-            error = response.error;
+            errorNotification = response.error;
             showUpdates = false;
         } else {
             updates = updates.filter(e => e.filename !== item.filename);
@@ -101,9 +104,12 @@
     function toggleItem(item) {
         if (disabled) return;
         disabled = true;
-        browser.runtime.sendNativeMessage({name: "TOGGLE_ITEM", item: item}, response => {
+        browser.runtime.sendNativeMessage({
+            name: "TOGGLE_ITEM",
+            item
+        }, response => {
             if (response.error) {
-                error = response.error;
+                errorNotification = response.error;
             } else {
                 const i = items.findIndex(el => el === item);
                 const j = allItems.findIndex(el => el === item);
@@ -118,9 +124,11 @@
     function checkForUpdates() {
         disabled = true;
         initError = false;
-        browser.runtime.sendNativeMessage({name: "POPUP_CHECK_UPDATES"}, response => {
+        browser.runtime.sendNativeMessage({
+            name: "POPUP_CHECK_UPDATES"
+        }, response => {
             if (response.error) {
-                error = response.error;
+                errorNotification = response.error;
                 showUpdates = false;
             } else {
                 updates = response.updates;
@@ -130,7 +138,7 @@
     }
 
     function refreshView() {
-        error = undefined;
+        errorNotification = undefined;
         loading = true;
         disabled = true;
         items = [];
@@ -142,23 +150,22 @@
     }
 
     async function openExtensionPage() {
-        const url = browser.runtime.getURL("page.html");
         const tabs = await browser.tabs.query({});
         for (let i = 0; i < tabs.length; i++) {
-            if (tabs[i].url === url) {
+            if (tabs[i].url === extensionPageUrl) {
                 await browser.windows.update(tabs[i].windowId, {focused: true});
                 await browser.tabs.update(tabs[i].id, {active: true});
                 window.close();
                 return;
             }
         }
-        await browser.tabs.create({url: url});
+        await browser.tabs.create({url: extensionPageUrl});
     }
 
     async function shouldCheckForUpdates() {
         // if there's no network connectivity, do not check for updates
         if (!window || !window.navigator || !window.navigator.onLine) {
-            console.log("user is offline, not running update check");
+            console.info("user is offline, not running update check");
             return false;
         }
         // when an update check is run, a timestamp is saved to extension storage
@@ -178,13 +185,13 @@
         // if extension storage doesn't have key, run the check
         // key/val will be saved after the update check runs
         if (Object.keys(lastUpdateCheckObj).length === 0) {
-            console.log("no last check saved, running update check");
+            console.info("no last check saved, running update check");
             return true;
         }
         // if the val is not a number, something went wrong, check anyway
         // when update re-runs, new val of the proper type will be saved
         if (!Number.isFinite(lastUpdateCheckObj.lastUpdateCheck)) {
-            console.log("run check saved with wrong type, running update check");
+            console.info("run check saved with wrong type, running update check");
             return true;
         }
         // at this point it is known that key exists and value is a number
@@ -192,12 +199,12 @@
         lastUpdateCheck = lastUpdateCheckObj.lastUpdateCheck;
         // if less than n milliseconds have passed, don't check
         if ((timestampMs - lastUpdateCheck) < checkInterval) {
-            console.log("not enough time has passed, not running update check");
+            console.info("not enough time has passed, not running update check");
             return false;
         }
 
-        console.log(`${(timestampMs - lastUpdateCheck) / (1000 * 60 * 60)} hours have passed`);
-        console.log("running update check");
+        console.info(`${(timestampMs - lastUpdateCheck) / (1000 * 60 * 60)} hours have passed`);
+        console.info("running update check");
         // otherwise run the check
         return true;
     }
@@ -212,8 +219,8 @@
             showAll = true;
             allItems = response.items;
         } else if (response.error) {
-            console.log(`Error opening save location: ${response.error}`);
-            error = response.error;
+            console.error(`Error opening save location: ${response.error}`);
+            errorNotification = response.error;
         }
         disabled = false;
         loading = false;
@@ -225,19 +232,18 @@
         try {
             pltfm = await browser.runtime.sendNativeMessage({name: "REQ_PLATFORM"});
         } catch (error) {
-            console.log(`Error for pltfm promise: ${error}`);
+            console.error(`Error for pltfm promise: ${error}`);
             initError = true;
             loading = false;
             return;
         }
         if (pltfm.error) {
-            error = pltfm.error;
+            errorNotification = pltfm.error;
             loading = false;
             disabled = false;
             return;
-        } else {
-            platform = pltfm.platform;
         }
+        platform = pltfm.platform;
 
         // run init checks
         // const init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"}).catch(error => {});
@@ -245,18 +251,18 @@
         try {
             init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"});
         } catch (error) {
-            console.log(`Error for init promise: ${error}`);
+            console.error(`Error for init promise: ${error}`);
             initError = true;
             loading = false;
             return;
         }
         if (init.error) {
-            error = init.error;
+            errorNotification = init.error;
             loading = false;
             disabled = false;
             return;
         }
-        
+
         active = await settingsStorage.get("global_active");
 
         // refresh session rules
@@ -268,7 +274,6 @@
         resize();
 
         // get matches
-        const extensionPageUrl = browser.runtime.getURL("page.html");
         const currentTab = await browser.tabs.getCurrent();
         const url = currentTab.url;
         if (!url) {
@@ -290,25 +295,24 @@
                 frameUrls.add(frameUrl);
             }
         }
-        const message = {name: "POPUP_MATCHES", url: url, frameUrls: Array.from(frameUrls)};
+        const message = {name: "POPUP_MATCHES", url, frameUrls: Array.from(frameUrls)};
         let matches;
         try {
             matches = await browser.runtime.sendNativeMessage(message);
             // response = await browser.runtime.sendMessage(message);
         } catch (error) {
-            console.log(`Error for matches promise: ${error}`);
+            console.error(`Error for matches promise: ${error}`);
             initError = true;
             loading = false;
             return;
         }
         if (matches.error) {
-            error = matches.error;
+            errorNotification = matches.error;
             loading = false;
             disabled = false;
             return;
-        } else {
-            items = matches.matches;
         }
+        items = matches.matches;
 
         // get updates
         const checkUpdates = await shouldCheckForUpdates();
@@ -317,7 +321,7 @@
             try {
                 // save timestamp in ms to extension storage
                 const timestampMs = Date.now();
-                await browser.storage.local.set({"lastUpdateCheck": timestampMs});
+                await browser.storage.local.set({lastUpdateCheck: timestampMs});
                 abort = true;
                 updatesResponse = await browser.runtime.sendNativeMessage({name: "POPUP_UPDATES"});
             } catch (error) {
@@ -328,14 +332,13 @@
                 return;
             }
             if (updatesResponse.error) {
-                error = updatesResponse.error;
+                errorNotification = updatesResponse.error;
                 loading = false;
                 disabled = false;
                 abort = false;
                 return;
-            } else {
-                updates = updatesResponse.updates;
             }
+            updates = updatesResponse.updates;
             abort = false;
         }
 
@@ -355,8 +358,8 @@
             // https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
             const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_00"});
             if (response.error) {
-                console.log(`Error checking .user.js url: ${response.error}`);
-                error = response.error;
+                console.error(`Error checking .user.js url: ${response.error}`);
+                errorNotification = response.error;
             } else if (!response.invalid) {
                 // the response will contain the string to display
                 // ex: {success: "Click to install"}
@@ -390,10 +393,9 @@
                     main.removeAttribute("style");
                     document.body.removeAttribute("style");
                     return;
-                } else {
-                    main.style.maxHeight = "unset";
-                    document.body.style.width = "100vw";
                 }
+                main.style.maxHeight = "unset";
+                document.body.style.width = "100vw";
             }
             // on ios and ipados (split view) programmatically set the height of the scrollable container
             // first get the header height
@@ -427,7 +429,7 @@
 
         // if the response includes an error, display it in the view
         if (response.error) {
-            console.log(`Can not install userscript: ${response.error}`);
+            console.error(`Can not install userscript: ${response.error}`);
             installViewUserscriptError = response.error;
         } else {
             installViewUserscript = response;
@@ -447,15 +449,14 @@
         // send content script a message on the active tab, which will start the install process
         const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_02"});
         if (response.error) {
-            error = response.error;
+            errorNotification = response.error;
             disabled = false;
             loading = false;
             return;
-        } else {
-            // if response did not have an error, userscript installed successfully
-            // refresh popup
-            refreshView();
         }
+        // if response did not have an error, userscript installed successfully
+        // refresh popup
+        refreshView();
     }
 
     onMount(async () => {
@@ -501,12 +502,12 @@
         Userscript Detected: <span on:click={showInstallView}>{showInstallPrompt}</span>
     </div>
 {/if}
-{#if error}
+{#if errorNotification}
     <div class="error" bind:this={err}>
-        {error}
+        {errorNotification}
         <IconButton
             icon={iconClear}
-            on:click={() => error = undefined}
+            on:click={() => errorNotification = undefined}
             title={"Clear error"}
         />
     </div>
@@ -537,7 +538,7 @@
                         name={item.name}
                         subframe={item.subframe}
                         type={item.type}
-                        request={item.request ? true : false}
+                        request={!!item.request}
                         on:click={() => toggleItem(item)}
                     />
                 {/each}

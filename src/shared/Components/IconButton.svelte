@@ -2,13 +2,15 @@
     export let color = "currentColor";
     export let disabled = false;
     export let icon;
-    export let title = undefined;
+    export let title;
     export let notification = false;
 </script>
 
 <button
-    class:notification={notification}
-    on:click {disabled} style="--svg-fill: {color};"
+    class:notification
+    on:click
+    {disabled}
+    style="--svg-fill: {color};"
     {title}
 >
     {@html icon}

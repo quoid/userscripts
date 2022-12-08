@@ -2,10 +2,10 @@
     import {items, settings, state} from "../../store.js";
     import Dropdown from "../../../shared/Components/Dropdown.svelte";
     import IconButton from "../../../shared/Components/IconButton.svelte";
-    import iconSort from "../../../shared/img/icon-sort.svg";
-    import iconClear from "../../../shared/img/icon-clear.svg";
+    import iconSort from "../../../shared/img/icon-sort.svg?raw";
+    import iconClear from "../../../shared/img/icon-clear.svg?raw";
 
-    $: disabled = !$state.includes("ready") ? true : false;
+    $: disabled = !$state.includes("ready");
 
     $: sortOrder = $settings.sortOrder;
 
@@ -13,9 +13,9 @@
 
     $: filter(query);
 
-    function filter(query) {
+    function filter(q) {
         $items = $items.map(item => {
-            const visible = item.filename.toLowerCase().includes(query.trim().toLowerCase());
+            const visible = item.filename.toLowerCase().includes(q.trim().toLowerCase());
             if (visible !== item.visible) return {...item, visible};
             return item;
         });

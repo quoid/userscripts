@@ -1,0 +1,63 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "pnpm: install",
+            "detail": "Install dev dependencies",
+            "type": "shell",
+            "command": "pnpm install",
+            "group": "build",
+            "options": {
+                "cwd": "./"
+            }
+        },
+        {
+            "label": "pnpm: dev",
+            "detail": "Run dev server",
+            "type": "shell",
+            "command": "pnpm dev",
+            "group": "build",
+            "options": {
+                "cwd": "./"
+            }
+        },
+        {
+            "label": "pnpm: build",
+            "detail": "Build to xcode dist path",
+            "type": "shell",
+            "command": "pnpm build",
+            "group": "build",
+            "options": {
+                "cwd": "./"
+            }
+        },
+        {
+            "label": "xcode: build",
+            "detail": "xcodebuild",
+            "type": "shell",
+            "command": "xcodebuild -scheme Userscripts build",
+            "group": "build",
+            "options": {
+                "cwd": "./xcode/"
+            }
+        },
+        {
+            "label": "xcode: rebuild",
+            "detail": "pnpm build + xcodebuild",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "pnpm: build",
+                "xcode: build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

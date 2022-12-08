@@ -1,15 +1,17 @@
 <script>
     import {tick} from "svelte";
     import {fade} from "svelte/transition";
-    import {items, log, settings, state} from "../../store.js";
-    import {newScriptDefault, sortBy, uniqueId} from "../../utils.js";
+    import {
+        items, log, settings, state
+    } from "../../store.js";
+    import {newScriptDefault, sortBy, uniqueId} from "../../../shared/utils.js";
     import SidebarFilter from "./SidebarFilter.svelte";
     import IconButton from "../../../shared/Components/IconButton.svelte";
     import Dropdown from "../../../shared/Components/Dropdown.svelte";
     import Loader from "../../../shared/Components/Loader.svelte";
     import SidebarItem from "./SidebarItem.svelte";
-    import iconPlus from "../../../shared/img/icon-plus.svg";
-    import iconSettings from "../../../shared/img/icon-settings.svg";
+    import iconPlus from "../../../shared/img/icon-plus.svg?raw";
+    import iconSettings from "../../../shared/img/icon-settings.svg?raw";
     import {
         cmChanged,
         cmGetInstance,
@@ -47,18 +49,18 @@
         const description = "This is your new file, start writing code";
         const item = {
             content: content || newScriptDefault(description, name, type),
-            description: description,
+            description,
             disabled: false,
-            filename: filename,
+            filename,
             lastModified: Date.now(),
-            name: name,
+            name,
             temp: true,
-            type: type
+            type
         };
         // if it's a remotely added script add prop to item object
         // is used to display url in editor and will be removed on save
         if (remote) item.remote = remote;
-        items.update(items => [item, ...items]);
+        items.update(i => [item, ...i]);
         await tick(); // if omitted invalid arg in activate function
         activate(item);
     }
@@ -112,9 +114,8 @@
         // stop execution is user cancels prompt
         if (!url) return;
         state.add("fetching");
-        const message = {name: "PAGE_NEW_REMOTE", url: url};
+        const message = {name: "PAGE_NEW_REMOTE", url};
         const response = await browser.runtime.sendNativeMessage(message);
-        console.log(response);
         if (response.error) {
             log.add(response.error, "error", true);
         } else {
@@ -138,11 +139,11 @@
         // disable the checkbox to prevent multiple toggle messages from being sent
         const input = e.target;
         input.disabled = true;
-        browser.runtime.sendNativeMessage({name: "TOGGLE_ITEM", item: item}, response => {
+        browser.runtime.sendNativeMessage({name: "TOGGLE_ITEM", item}, response => {
             if (!response.error) {
                 items.update(allItems => {
-                    const i = allItems.find(i => i.filename === item.filename);
-                    i.disabled = !i.disabled;
+                    const ind = allItems.find(i => i.filename === item.filename);
+                    ind.disabled = !ind.disabled;
                     return allItems;
                 });
             } else {
@@ -155,7 +156,7 @@
     function warn() {
         // warn when trying to navigate away from an item with unsaved changes
         const m = "You have unsaved changes which will be lost if you continue. Are you sure you'd like to continue?";
-        if (confirm(m)) return true;
+        if (window.confirm(m)) return true;
         return false;
     }
 

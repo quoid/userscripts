@@ -2,7 +2,7 @@
     import {quintInOut} from "svelte/easing";
     import IconButton from "../../shared/Components/IconButton.svelte";
     import Loader from "../../shared/Components/Loader.svelte";
-    import iconArrowLeft from "../../shared/img/icon-arrow-left.svg";
+    import iconArrowLeft from "../../shared/img/icon-arrow-left.svg?raw";
 
     export let loading = false;
     export let headerTitle = "View Header";
@@ -16,7 +16,7 @@
             delay: params.delay || 0,
             duration: params.duration || 150,
             easing: params.easing || quintInOut,
-            css: t => `transform: translateX(${(t-1)*18}rem);`
+            css: t => `transform: translateX(${(t - 1) * 18}rem);`
         };
     }
 </script>

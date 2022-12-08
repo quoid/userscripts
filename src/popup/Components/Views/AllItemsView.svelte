@@ -1,5 +1,6 @@
 <script>
     import PopupItem from "../PopupItem.svelte";
+
     export let allItems = [];
     export let allItemsToggleItem;
 
@@ -25,7 +26,7 @@
                 name={item.name}
                 subframe={item.subframe}
                 type={item.type}
-                request={item.request ? true : false}
+                request={!!item.request}
                 on:click={() => allItemsToggleItem(item)}
             />
         {/each}
