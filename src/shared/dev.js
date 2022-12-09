@@ -367,7 +367,12 @@ const _browser = {
                 });
             }
             setTimeout(() => responseCallback(response), _browser.delay);
-        }
+        },
+        connectNative: () => ({
+            onMessage: {
+                addListener: () => console.info("connectNative - addListener")
+            }
+        })
     },
     tabs: {
         getCurrent(/* responseCallback */) {
