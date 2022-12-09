@@ -78,6 +78,8 @@ class ViewController: NSViewController {
         panel.directoryURL = URL(fileURLWithPath: saveLocationDecode, isDirectory: true)
         panel.beginSheetModal(for: window, completionHandler: { response in
             if response == .OK, let url: URL = panel.urls.first {
+                // check if path has changed
+                if url.absoluteString == self.saveLocation.stringValue { return }
                 // check it is a writeable path
                 let canWrite = FileManager.default.isWritableFile(atPath: url.path)
                 if !canWrite {
@@ -92,6 +94,14 @@ class ViewController: NSViewController {
                     }
                     self.saveLocation.stringValue = url.absoluteString
                     self.saveLocation.toolTip = url.absoluteString
+                    SFSafariApplication.dispatchMessage(
+                        withName: "SAVE_LOCATION_CHANGED",
+                        toExtensionWithIdentifier: self.extensionID,
+                        userInfo: ["saveLocation": url.absoluteString.removingPercentEncoding ?? "??"]
+                    ) { error in
+                        if error == nil { return }
+                        debugPrint("Message attempted. Error info: \(String.init(describing: error))")
+                    }
                 }
             }
         })

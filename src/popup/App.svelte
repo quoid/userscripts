@@ -464,6 +464,15 @@
         // run resize again for good measure
         resize();
     });
+
+    // handle native app messages
+    const port = browser.runtime.connectNative();
+    port.onMessage.addListener(message => {
+        // console.info(message); // DEBUG
+        if (message.name === "SAVE_LOCATION_CHANGED") {
+            window.location.reload();
+        }
+    });
 </script>
 
 <svelte:window on:resize={resize}/>
