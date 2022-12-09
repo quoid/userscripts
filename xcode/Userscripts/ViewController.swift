@@ -98,9 +98,10 @@ class ViewController: NSViewController {
                         withName: "SAVE_LOCATION_CHANGED",
                         toExtensionWithIdentifier: self.extensionID,
                         userInfo: ["saveLocation": url.absoluteString.removingPercentEncoding ?? "??"]
-                    ) { error in
-                        if error == nil { return }
-                        debugPrint("Message attempted. Error info: \(String.init(describing: error))")
+                    ) { error in // always be called
+                        if error != nil {
+                            debugPrint("Message attempted. Error info: \(String.init(describing: error))")
+                        }
                     }
                 }
             }
