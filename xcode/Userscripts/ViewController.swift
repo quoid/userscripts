@@ -74,7 +74,8 @@ class ViewController: NSViewController {
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.canChooseFiles = false
-        panel.directoryURL = NSURL.fileURL(withPath: self.saveLocation.stringValue, isDirectory: true)
+        let saveLocationDecode = self.saveLocation.stringValue.removingPercentEncoding ?? "??"
+        panel.directoryURL = URL(fileURLWithPath: saveLocationDecode, isDirectory: true)
         panel.beginSheetModal(for: window, completionHandler: { response in
             if response == .OK, let url: URL = panel.urls.first {
                 // check it is a writeable path
