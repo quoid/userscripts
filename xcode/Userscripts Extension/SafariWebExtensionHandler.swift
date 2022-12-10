@@ -162,6 +162,13 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 }
             #endif
         }
+        else if name == "CHANGE_SAVE_LOCATION" {
+            #if os(macOS)
+                if let url = URL(string: "userscriptsurlscheme://changesavelocation") {
+                    NSWorkspace.shared.open(url)
+                }
+            #endif
+        }
         else if name == "USERSCRIPT_INSTALL_00" {
             if
                 let content = message?["content"] as? String,

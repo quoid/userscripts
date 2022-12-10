@@ -13,8 +13,6 @@
     let blacklistSaving = false;
     // indicates that a blacklist value has error
     let blacklistError = false;
-    // a hidden iframe used to evoke the app interface
-    let iframeCallApp;
 
     // the saved blacklisted domain patterns
     $: blacklisted = $settings.blacklist.join(", ");
@@ -57,12 +55,7 @@
 
     // called when the user clicks the icon next to the save location link
     async function changeSaveLocation() {
-        if (!iframeCallApp) {
-            iframeCallApp = document.createElement("iframe");
-            iframeCallApp.style.display = "none";
-            document.body.append(iframeCallApp);
-        }
-        iframeCallApp.src = "userscriptsurlscheme://changesavelocation";
+        browser.runtime.sendNativeMessage({name: "CHANGE_SAVE_LOCATION"});
     }
 </script>
 
