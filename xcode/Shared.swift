@@ -2,6 +2,8 @@ import Foundation
 import SafariServices
 import os
 
+let extensionIdentifier = "com.userscripts.macos.Userscripts-Extension"
+
 struct SharedDefaults {
     // https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_application-groups
     #if os(iOS)

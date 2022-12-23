@@ -1,3 +1,4 @@
+import {openExtensionPage} from "../shared/utils.js";
 // import * as settingsStorage from "../shared/settings.js";
 
 // first sorts files by run-at value, then by weight value
@@ -458,3 +459,16 @@ browser.runtime.onMessage.addListener(handleMessage);
 browser.tabs.onActivated.addListener(setBadgeCount);
 browser.windows.onFocusChanged.addListener(setBadgeCount);
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
+
+// handle native app messages
+const port = browser.runtime.connectNative();
+port.onMessage.addListener(message => {
+    console.info(message); // DEBUG
+    if (message.name === "SAVE_LOCATION_CHANGED") {
+        openExtensionPage();
+        if (message?.userInfo?.returnApp === true) browser.runtime.sendNativeMessage({name: "OPEN_APP"});
+    }
+    if (message.name === "OPEN_EXTENSION_PAGE") {
+        openExtensionPage();
+    }
+});

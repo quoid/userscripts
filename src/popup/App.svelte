@@ -12,9 +12,9 @@
     import iconUpdate from "../shared/img/icon-update.svg?raw";
     import iconClear from "../shared/img/icon-clear.svg?raw";
     import iconRefresh from "../shared/img/icon-refresh.svg?raw";
+    import {extensionPageUrl, openExtensionPage} from "../shared/utils.js";
     import * as settingsStorage from "../shared/settings.js";
     
-    const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
     let errorNotification;
     let active = true;
     let loading = true;
@@ -147,19 +147,6 @@
         inactive = false;
         abort = false;
         initialize();
-    }
-
-    async function openExtensionPage() {
-        const tabs = await browser.tabs.query({});
-        for (let i = 0; i < tabs.length; i++) {
-            if (tabs[i].url === extensionPageUrl) {
-                await browser.windows.update(tabs[i].windowId, {focused: true});
-                await browser.tabs.update(tabs[i].id, {active: true});
-                window.close();
-                return;
-            }
-        }
-        await browser.tabs.create({url: extensionPageUrl});
     }
 
     async function shouldCheckForUpdates() {

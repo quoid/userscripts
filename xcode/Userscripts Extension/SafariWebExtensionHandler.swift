@@ -17,10 +17,16 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         // these if/else if statement are formatted so that they can be neatly collapsed in Xcode
         // typically the "else if" would be on the same line as the preceding statements close bracket
         // ie. } else if {
-        if name == "REQ_PLATFORM" {
+        if name == "OPEN_APP" {
+            if let url = URL(string: "userscriptsurlscheme://") {
+                NSWorkspace.shared.open(url)
+            }
+        }
+        else if name == "REQ_PLATFORM" {
             let platform = getPlatform()
             response.userInfo = [SFExtensionMessageKey: ["platform": platform]]
-        } else if name == "REQ_USERSCRIPTS" {
+        }
+        else if name == "REQ_USERSCRIPTS" {
             if let url = message?["url"] as? String, let isTop = message?["isTop"] as? Bool {
                 if
                     let matches = getInjectionFilenames(url),
