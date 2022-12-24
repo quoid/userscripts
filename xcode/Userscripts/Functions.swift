@@ -74,9 +74,7 @@ func changeSaveLocationPanel(directoryURL: URL? = nil) -> NSOpenPanel {
 
 func schemeChangeSaveLocation() {
     let saveLocationURL = getSaveLocationURL()
-    let panel = changeSaveLocationPanel()
-    
-    panel.directoryURL = saveLocationURL
+    let panel = changeSaveLocationPanel(directoryURL: saveLocationURL)
     // shows the path selection panel
     let response = panel.runModal()
     // check if clicked open button and there is a valid result
