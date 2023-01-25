@@ -12,8 +12,7 @@
 
     <p>
         <a href="/entry-page.html" target="_blank" rel="noreferrer">page</a>,
-        <a href="/entry-popup.html" target="_blank" rel="noreferrer">popup</a>,
-        <a href="/entry-background.html" target="_blank" rel="noreferrer">background</a>
+        <a href="/entry-popup.html" target="_blank" rel="noreferrer">popup</a>
     </p>
 
     <p class="read-the-docs">
