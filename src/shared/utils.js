@@ -177,9 +177,13 @@ export const validMetaKeys = new Set([
     "weight"
 ]);
 
-export const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
+export const extensionPaths = {
+    page: "/dist/entry-page.html",
+    popup: "/dist/entry-popup.html"
+};
 
 export async function openExtensionPage() {
+    const extensionPageUrl = browser.runtime.getURL(extensionPaths.page);
     const tabs = await browser.tabs.query({});
     for (let i = 0; i < tabs.length; i++) {
         if (tabs[i].url === extensionPageUrl) {

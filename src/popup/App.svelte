@@ -12,7 +12,7 @@
     import iconUpdate from "../shared/img/icon-update.svg?raw";
     import iconClear from "../shared/img/icon-clear.svg?raw";
     import iconRefresh from "../shared/img/icon-refresh.svg?raw";
-    import {extensionPageUrl, openExtensionPage} from "../shared/utils.js";
+    import {extensionPaths, openExtensionPage} from "../shared/utils.js";
     import * as settingsStorage from "../shared/settings.js";
     
     let errorNotification;
@@ -268,7 +268,9 @@
             disabled = false;
             return;
         }
-        if (url === extensionPageUrl) {
+        // strip fragments and query params
+        const strippedUrl = url.split(/[?#]/)[0];
+        if (strippedUrl === browser.runtime.getURL(extensionPaths.page)) {
             // disable popup on extension page
             inactive = true;
             loading = false;
@@ -330,8 +332,6 @@
         }
 
         // check if current page url is a userscript
-        // strip fragments and query params
-        const strippedUrl = url.split(/[?#]/)[0];
         if (strippedUrl.endsWith(".user.js")) {
             // if it does, send message to content script
             // context script will check the document contentType
