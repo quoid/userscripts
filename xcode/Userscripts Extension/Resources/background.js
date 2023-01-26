@@ -1,5 +1,18 @@
-import {openExtensionPage} from "../shared/utils.js";
-// import * as settingsStorage from "../shared/settings.js";
+// functions from "src/shared/utils.js";
+async function openExtensionPage() {
+    const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
+    const tabs = await browser.tabs.query({});
+    for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].url === extensionPageUrl) {
+            await browser.windows.update(tabs[i].windowId, {focused: true});
+            await browser.tabs.update(tabs[i].id, {active: true});
+            return;
+        }
+    }
+    await browser.tabs.create({url: extensionPageUrl});
+}
+
+// functions from "src/shared/settings.js";
 
 // first sorts files by run-at value, then by weight value
 function userscriptSort(a, b) {

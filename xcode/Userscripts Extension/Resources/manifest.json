@@ -13,7 +13,7 @@
         "512": "images/icon-512.png"
     },
     "background": {
-        "page": "dist/entry-background.html",
+        "scripts": ["background.js"],
         "persistent": false
     },
     "browser_action": {

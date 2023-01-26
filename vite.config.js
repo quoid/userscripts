@@ -37,8 +37,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 page: resolve(__dirname, "entry-page.html"),
-                popup: resolve(__dirname, "entry-popup.html"),
-                background: resolve(__dirname, "entry-background.html")
+                popup: resolve(__dirname, "entry-popup.html")
             }
         }
     }
