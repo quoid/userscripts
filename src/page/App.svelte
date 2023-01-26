@@ -56,6 +56,15 @@
         items.set(files);
         state.remove("items-loading");
     });
+
+    // handle native app messages
+    const port = browser.runtime.connectNative();
+    port.onMessage.addListener(message => {
+        // console.info(message); // DEBUG
+        if (message.name === "SAVE_LOCATION_CHANGED") {
+            window.location.reload();
+        }
+    });
 </script>
 
 <svelte:window on:keydown={preventKeyCommands} on:resize={windowResize}/>

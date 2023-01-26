@@ -12,9 +12,9 @@
     import iconUpdate from "../shared/img/icon-update.svg?raw";
     import iconClear from "../shared/img/icon-clear.svg?raw";
     import iconRefresh from "../shared/img/icon-refresh.svg?raw";
+    import {extensionPaths, openExtensionPage} from "../shared/utils.js";
     import * as settingsStorage from "../shared/settings.js";
     
-    const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
     let errorNotification;
     let active = true;
     let loading = true;
@@ -149,19 +149,6 @@
         initialize();
     }
 
-    async function openExtensionPage() {
-        const tabs = await browser.tabs.query({});
-        for (let i = 0; i < tabs.length; i++) {
-            if (tabs[i].url === extensionPageUrl) {
-                await browser.windows.update(tabs[i].windowId, {focused: true});
-                await browser.tabs.update(tabs[i].id, {active: true});
-                window.close();
-                return;
-            }
-        }
-        await browser.tabs.create({url: extensionPageUrl});
-    }
-
     async function shouldCheckForUpdates() {
         // if there's no network connectivity, do not check for updates
         if (!window || !window.navigator || !window.navigator.onLine) {
@@ -281,7 +268,9 @@
             disabled = false;
             return;
         }
-        if (url === extensionPageUrl) {
+        // strip fragments and query params
+        const strippedUrl = url.split(/[?#]/)[0];
+        if (strippedUrl === browser.runtime.getURL(extensionPaths.page)) {
             // disable popup on extension page
             inactive = true;
             loading = false;
@@ -343,8 +332,6 @@
         }
 
         // check if current page url is a userscript
-        // strip fragments and query params
-        const strippedUrl = url.split(/[?#]/)[0];
         if (strippedUrl.endsWith(".user.js")) {
             // if it does, send message to content script
             // context script will check the document contentType
@@ -463,6 +450,15 @@
         await initialize();
         // run resize again for good measure
         resize();
+    });
+
+    // handle native app messages
+    const port = browser.runtime.connectNative();
+    port.onMessage.addListener(message => {
+        // console.info(message); // DEBUG
+        if (message.name === "SAVE_LOCATION_CHANGED") {
+            window.location.reload();
+        }
     });
 </script>
 

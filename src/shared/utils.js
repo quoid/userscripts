@@ -176,3 +176,21 @@ export const validMetaKeys = new Set([
     "version",
     "weight"
 ]);
+
+export const extensionPaths = {
+    page: "/dist/entry-page.html",
+    popup: "/dist/entry-popup.html"
+};
+
+export async function openExtensionPage() {
+    const extensionPageUrl = browser.runtime.getURL(extensionPaths.page);
+    const tabs = await browser.tabs.query({});
+    for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].url === extensionPageUrl) {
+            await browser.windows.update(tabs[i].windowId, {focused: true});
+            await browser.tabs.update(tabs[i].id, {active: true});
+            return;
+        }
+    }
+    await browser.tabs.create({url: extensionPageUrl});
+}

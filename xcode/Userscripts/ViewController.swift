@@ -10,45 +10,20 @@ class ViewController: NSViewController {
 
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
     let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
-    let hostID = Bundle.main.bundleIdentifier!
-    let foo = Bundle.main.bundleIdentifier
-    let extensionID = "com.userscripts.macos.Userscripts-Extension"
-    let documentsDirectory = getDocumentsDirectory().appendingPathComponent("scripts").absoluteString
+    let extensionID = extensionIdentifier
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let location = documentsDirectory.replacingOccurrences(of: hostID, with: extensionID)
         self.appName.stringValue = "Userscripts Safari Version \(appVersion) (\(buildNumber))"
         setExtensionState()
         NotificationCenter.default.addObserver(
-            self, selector: #selector(setExtensionState), name: NSApplication.didBecomeActiveNotification, object: nil
+            self,
+            selector: #selector(setExtensionState),
+            name: NSApplication.didBecomeActiveNotification,
+            object: nil
         )
-        // set the save location url to default location
-        self.saveLocation.stringValue = location
-        self.saveLocation.toolTip = location
-        // check if bookmark data exists
-        guard
-            let sharedBookmark = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName)
-        else {
-            // bookmark data doesn't exist, no need to update url
-            return
-        }
-        // at this point it's known bookmark data does exist, try to read it
-        guard let url = readBookmark(data: sharedBookmark, isSecure: false) else {
-            // bookmark data does exist, but it can not be read, log an error
-            err("shared bookmark data exists, but it can not be read")
-            return
-        }
-        // shared bookmark data does exist and it can be read, check if the directory where it leads to exists
-        guard directoryExists(path: url.path) else {
-            // sharedBookmark removed, or in trash
-            // renamed directories retain association
-            // moved directories retain association
-            UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-            NSLog("removed shared bookmark because it's directory is non-existent, permanently deleted or in trash")
-            return
-        }
-        // shared bookmark can be read and directory exists, update url
+        // set the save location url display
+        let url = getSaveLocationURL()
         self.saveLocation.stringValue = url.absoluteString
         self.saveLocation.toolTip = url.absoluteString
     }
@@ -67,31 +42,28 @@ class ViewController: NSViewController {
         }
     }
 
-    @IBAction func changeSaveLocation(_ sender: NSButton) {
+    @IBAction func changeSaveLocation(_ sender: AnyObject?) {
         guard let window = self.view.window else { return }
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = true
-        panel.canCreateDirectories = true
-        panel.canChooseFiles = false
+        let saveLocationURL = getSaveLocationURL()
+        let panel = changeSaveLocationPanel(directoryURL: saveLocationURL)
         panel.beginSheetModal(for: window, completionHandler: { response in
-            if let url: URL = panel.urls.first {
-                // check it is a writeable path
-                let canWrite = FileManager.default.isWritableFile(atPath: url.path)
-                if !canWrite {
-                    // display error message
-                    let alert = NSAlert()
-                    alert.messageText = "Can not write to path. Choose a different path."
-                    alert.runModal()
-                } else {
-                    if !saveBookmark(url: url, isShared: true, keyName: SharedDefaults.keyName, isSecure: false) {
-                        err("couldn't save new location from host app")
-                        return
-                    }
-                    self.saveLocation.stringValue = url.absoluteString
-                    self.saveLocation.toolTip = url.absoluteString
-                }
-            }
+            // check if clicked open button and there is a valid result
+            guard response == .OK, let url: URL = panel.urls.first else { return }
+            // check if path has indeed changed
+            if url.absoluteString == saveLocationURL.absoluteString { return }
+            // try set new save location path to bookmark
+            guard setSaveLocationURL(url: url) else { return }
+            // update user interface text display
+            self.saveLocation.stringValue = url.absoluteString
+            self.saveLocation.toolTip = url.absoluteString
+            // notify browser extension of relevant updates
+            sendExtensionMessage(
+                name: "SAVE_LOCATION_CHANGED",
+                userInfo: [
+                    "saveLocation": url.absoluteString.removingPercentEncoding ?? url.absoluteString,
+                    "returnApp": true
+                ]
+            )
         })
     }
 
