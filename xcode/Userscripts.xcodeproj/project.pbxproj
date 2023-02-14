@@ -136,6 +136,12 @@
 		7878ED25299BA30B00E36A24 /* Shared */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shared; sourceTree = "<group>"; };
 		7878ED2C299BA40800E36A24 /* iOS.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = iOS.Info.plist; sourceTree = "<group>"; };
 		7878ED2D299BA40800E36A24 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
+		7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-Safari-Extension.xcconfig"; sourceTree = "<group>"; };
+		7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-Tests.xcconfig"; sourceTree = "<group>"; };
+		7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-Safari-Extension.xcconfig"; sourceTree = "<group>"; };
+		7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-App.xcconfig"; sourceTree = "<group>"; };
+		7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Userscripts.xcconfig; sourceTree = "<group>"; };
+		7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-App.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +219,7 @@
 		4A57B9E3227235CD008A9763 = {
 			isa = PBXGroup;
 			children = (
+				7878ED2E299BBEBF00E36A24 /* xcconfig */,
 				7878ED25299BA30B00E36A24 /* Shared */,
 				4A57BA06227235CE008A9763 /* Safari-Extension */,
 				4A57B9EE227235CD008A9763 /* Mac-App */,
@@ -274,6 +281,19 @@
 				4AB22357268B9B9200D551C6 /* content.js */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		7878ED2E299BBEBF00E36A24 /* xcconfig */ = {
+			isa = PBXGroup;
+			children = (
+				7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */,
+				7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */,
+				7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */,
+				7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */,
+				7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */,
+				7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */,
+			);
+			path = xcconfig;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -602,6 +622,7 @@
 /* Begin XCBuildConfiguration section */
 		4A143AAF279DE6FF0029BFD0 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -621,6 +642,7 @@
 		};
 		4A143AB0279DE6FF0029BFD0 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -640,6 +662,7 @@
 		};
 		4A4CF711270A38BF00111584 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -681,6 +704,7 @@
 		};
 		4A4CF712270A38BF00111584 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -723,6 +747,7 @@
 		};
 		4A4CF714270A38BF00111584 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
@@ -756,6 +781,7 @@
 		};
 		4A4CF715270A38BF00111584 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
@@ -790,6 +816,7 @@
 		};
 		4A57BA14227235CE008A9763 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -853,6 +880,7 @@
 		};
 		4A57BA15227235CE008A9763 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -909,6 +937,7 @@
 		};
 		4A57BA17227235CE008A9763 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -933,6 +962,7 @@
 		};
 		4A57BA18227235CE008A9763 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -957,6 +987,7 @@
 		};
 		4A57BA1B227235CE008A9763 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -982,6 +1013,7 @@
 		};
 		4A57BA1C227235CE008A9763 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
