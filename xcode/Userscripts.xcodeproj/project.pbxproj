@@ -14,7 +14,6 @@
 		03E20D07291E170000B4F692 /* dist in Resources */ = {isa = PBXBuildFile; fileRef = 03E20D05291E170000B4F692 /* dist */; };
 		4A143AAC279DE6FF0029BFD0 /* UserscriptsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */; };
 		4A143AB2279DEA170029BFD0 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
-		4A143AB3279DEA370029BFD0 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
 		4A301B2A270A474400C7E9E1 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4A301B2B270A474F00C7E9E1 /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A617268266B30018536B /* _locales */; };
 		4A301B2C270A475200C7E9E1 /* images in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A616268266B30018536B /* images */; };
@@ -32,8 +31,6 @@
 		4A4CF6F0270A38BD00111584 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EE270A38BD00111584 /* Main.storyboard */; };
 		4A4CF6F8270A38BF00111584 /* Userscripts-iOS Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6F1270A38BF00111584 /* Assets.xcassets */; };
-		4A4CF71A270A3A4900111584 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
-		4A4CF71B270A3A4900111584 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
 		4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F1227235CD008A9763 /* AppDelegate.swift */; };
 		4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F3227235CD008A9763 /* Main.storyboard */; };
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
@@ -41,11 +38,16 @@
 		4A57BA00227235CE008A9763 /* Userscripts Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A57BA04227235CE008A9763 /* Cocoa.framework */; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
-		4A6E19EE268CC84A00E0270C /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
-		4A6E19EF268CC84A00E0270C /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E19ED268CC84A00E0270C /* Shared.swift */; };
 		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
 		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
 		4AED6492268CDB58001794BF /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
+		7878ED24299BA27B00E36A24 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
+		7878ED26299BA30B00E36A24 /* Shared in Resources */ = {isa = PBXBuildFile; fileRef = 7878ED25299BA30B00E36A24 /* Shared */; };
+		7878ED27299BA30B00E36A24 /* Shared in Resources */ = {isa = PBXBuildFile; fileRef = 7878ED25299BA30B00E36A24 /* Shared */; };
+		7878ED28299BA30B00E36A24 /* Shared in Resources */ = {isa = PBXBuildFile; fileRef = 7878ED25299BA30B00E36A24 /* Shared */; };
+		7878ED29299BA30B00E36A24 /* Shared in Resources */ = {isa = PBXBuildFile; fileRef = 7878ED25299BA30B00E36A24 /* Shared */; };
+		7878ED2A299BA30B00E36A24 /* Shared in Resources */ = {isa = PBXBuildFile; fileRef = 7878ED25299BA30B00E36A24 /* Shared */; };
+		7878ED2B299BA36800E36A24 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 0376905A29808EEA00F3474D /* background.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,11 +119,9 @@
 		4A4CF6F1270A38BF00111584 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A4CF6F2270A38BF00111584 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts-iOS Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4A4CF70F270A38BF00111584 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A4CF718270A38C700111584 /* Userscripts-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts-iOS.entitlements"; sourceTree = "<group>"; };
-		4A4CF719270A38CB00111584 /* Userscripts-iOS Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts-iOS Extension.entitlements"; sourceTree = "<group>"; };
+		4A4CF718270A38C700111584 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		4A57B9EC227235CD008A9763 /* Userscripts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Userscripts.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4A57B9EF227235CD008A9763 /* Userscripts.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Userscripts.entitlements; sourceTree = "<group>"; };
+		4A57B9EF227235CD008A9763 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		4A57B9F1227235CD008A9763 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A57B9F4227235CD008A9763 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A57B9F6227235CD008A9763 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -130,12 +130,14 @@
 		4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57BA04227235CE008A9763 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		4A57BA0E227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Userscripts Extension.entitlements"; sourceTree = "<group>"; };
-		4A6E19ED268CC84A00E0270C /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		4A57BA0E227235CE008A9763 /* Mac.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Mac.Info.plist; sourceTree = "<group>"; };
+		4A57BA1D227235E6008A9763 /* Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mac.entitlements; sourceTree = "<group>"; };
 		4AB22357268B9B9200D551C6 /* content.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
 		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		4AED6491268CDB58001794BF /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		7878ED25299BA30B00E36A24 /* Shared */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shared; sourceTree = "<group>"; };
+		7878ED2C299BA40800E36A24 /* iOS.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = iOS.Info.plist; sourceTree = "<group>"; };
+		7878ED2D299BA40800E36A24 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -178,57 +180,47 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4A143AAA279DE6FF0029BFD0 /* UserscriptsTests */ = {
+		4A143AAA279DE6FF0029BFD0 /* Mac-Tests */ = {
 			isa = PBXGroup;
 			children = (
 				4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */,
 			);
-			path = UserscriptsTests;
+			path = "Mac-Tests";
 			sourceTree = "<group>";
 		};
-		4A4CF6DC270A38BD00111584 /* Userscripts-iOS */ = {
+		4A4CF6DC270A38BD00111584 /* iOS-App */ = {
 			isa = PBXGroup;
 			children = (
-				4A4CF718270A38C700111584 /* Userscripts-iOS.entitlements */,
+				4A4CF6F2270A38BF00111584 /* Info.plist */,
+				4A4CF718270A38C700111584 /* App.entitlements */,
+				4A4CF6DF270A38BD00111584 /* Resources */,
+				4A4CF6F1270A38BF00111584 /* Assets.xcassets */,
 				4A4CF6DD270A38BD00111584 /* AppDelegate.swift */,
 				4A4CF6E7270A38BD00111584 /* SceneDelegate.swift */,
 				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
 				4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */,
 				4A4CF6EE270A38BD00111584 /* Main.storyboard */,
-				4A4CF6F1270A38BF00111584 /* Assets.xcassets */,
-				4A4CF6F2270A38BF00111584 /* Info.plist */,
-				4A4CF6DF270A38BD00111584 /* Resources */,
 			);
-			path = "Userscripts-iOS";
+			path = "iOS-App";
 			sourceTree = "<group>";
 		};
 		4A4CF6DF270A38BD00111584 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				4A4CF6E0270A38BD00111584 /* Main.html */,
 				4A4CF6E3270A38BD00111584 /* Icon.png */,
+				4A4CF6E0270A38BD00111584 /* Main.html */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		4A4CF6FB270A38BF00111584 /* Userscripts-iOS Extension */ = {
-			isa = PBXGroup;
-			children = (
-				4A4CF719270A38CB00111584 /* Userscripts-iOS Extension.entitlements */,
-				4A4CF70F270A38BF00111584 /* Info.plist */,
-			);
-			path = "Userscripts-iOS Extension";
 			sourceTree = "<group>";
 		};
 		4A57B9E3227235CD008A9763 = {
 			isa = PBXGroup;
 			children = (
-				4A6E19ED268CC84A00E0270C /* Shared.swift */,
-				4A57B9EE227235CD008A9763 /* Userscripts */,
-				4A57BA06227235CE008A9763 /* Userscripts Extension */,
-				4A4CF6DC270A38BD00111584 /* Userscripts-iOS */,
-				4A4CF6FB270A38BF00111584 /* Userscripts-iOS Extension */,
-				4A143AAA279DE6FF0029BFD0 /* UserscriptsTests */,
+				7878ED25299BA30B00E36A24 /* Shared */,
+				4A57BA06227235CE008A9763 /* Safari-Extension */,
+				4A57B9EE227235CD008A9763 /* Mac-App */,
+				4A4CF6DC270A38BD00111584 /* iOS-App */,
+				4A143AAA279DE6FF0029BFD0 /* Mac-Tests */,
 				4A57BA03227235CE008A9763 /* Frameworks */,
 				4A57B9ED227235CD008A9763 /* Products */,
 			);
@@ -246,19 +238,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4A57B9EE227235CD008A9763 /* Userscripts */ = {
+		4A57B9EE227235CD008A9763 /* Mac-App */ = {
 			isa = PBXGroup;
 			children = (
-				4A57B9EF227235CD008A9763 /* Userscripts.entitlements */,
-				4A57B9F1227235CD008A9763 /* AppDelegate.swift */,
-				4A57B9F3227235CD008A9763 /* Main.storyboard */,
-				4A57B9F6227235CD008A9763 /* ViewController.swift */,
-				033661A329510B7900CFE179 /* View.storyboard */,
-				4A57B9F8227235CE008A9763 /* Assets.xcassets */,
 				4A57B9FA227235CE008A9763 /* Info.plist */,
+				4A57B9EF227235CD008A9763 /* App.entitlements */,
+				4A57B9F8227235CE008A9763 /* Assets.xcassets */,
+				4A57B9F1227235CD008A9763 /* AppDelegate.swift */,
+				4A57B9F6227235CD008A9763 /* ViewController.swift */,
 				0336619E294DF7C900CFE179 /* Functions.swift */,
+				4A57B9F3227235CD008A9763 /* Main.storyboard */,
+				033661A329510B7900CFE179 /* View.storyboard */,
 			);
-			path = Userscripts;
+			path = "Mac-App";
 			sourceTree = "<group>";
 		};
 		4A57BA03227235CE008A9763 /* Frameworks */ = {
@@ -269,27 +261,29 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		4A57BA06227235CE008A9763 /* Userscripts Extension */ = {
+		4A57BA06227235CE008A9763 /* Safari-Extension */ = {
 			isa = PBXGroup;
 			children = (
-				4AED6491268CDB58001794BF /* Functions.swift */,
-				4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */,
-				4A57BA0E227235CE008A9763 /* Info.plist */,
-				4A57BA1D227235E6008A9763 /* Userscripts Extension.entitlements */,
 				4AF1DD0D268265DB00086E88 /* Resources */,
+				4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */,
+				4AED6491268CDB58001794BF /* Functions.swift */,
+				4A57BA0E227235CE008A9763 /* Mac.Info.plist */,
+				4A57BA1D227235E6008A9763 /* Mac.entitlements */,
+				7878ED2C299BA40800E36A24 /* iOS.Info.plist */,
+				7878ED2D299BA40800E36A24 /* iOS.entitlements */,
 			);
-			path = "Userscripts Extension";
+			path = "Safari-Extension";
 			sourceTree = "<group>";
 		};
 		4AF1DD0D268265DB00086E88 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				0376905A29808EEA00F3474D /* background.js */,
-				03E20D05291E170000B4F692 /* dist */,
 				4A36A617268266B30018536B /* _locales */,
 				4A36A616268266B30018536B /* images */,
-				4AB22357268B9B9200D551C6 /* content.js */,
+				03E20D05291E170000B4F692 /* dist */,
 				4AD66D2026826D8100B004E8 /* manifest.json */,
+				0376905A29808EEA00F3474D /* background.js */,
+				4AB22357268B9B9200D551C6 /* content.js */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -447,6 +441,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7878ED2A299BA30B00E36A24 /* Shared in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,6 +454,7 @@
 				4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */,
 				4A4CF6E2270A38BD00111584 /* Main.html in Resources */,
 				4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */,
+				7878ED28299BA30B00E36A24 /* Shared in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,9 +464,11 @@
 			files = (
 				4A301B2E270A475D00C7E9E1 /* content.js in Resources */,
 				4A301B2C270A475200C7E9E1 /* images in Resources */,
+				7878ED2B299BA36800E36A24 /* background.js in Resources */,
 				03E20D07291E170000B4F692 /* dist in Resources */,
 				4A301B2F270A476000C7E9E1 /* manifest.json in Resources */,
 				4A301B2B270A474F00C7E9E1 /* _locales in Resources */,
+				7878ED29299BA30B00E36A24 /* Shared in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -479,6 +477,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */,
+				7878ED26299BA30B00E36A24 /* Shared in Resources */,
 				033661A529510B7900CFE179 /* View.storyboard in Resources */,
 				4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */,
 			);
@@ -490,6 +489,7 @@
 			files = (
 				4AD66D2326826D8100B004E8 /* manifest.json in Resources */,
 				4AB22358268B9B9200D551C6 /* content.js in Resources */,
+				7878ED27299BA30B00E36A24 /* Shared in Resources */,
 				03E20D06291E170000B4F692 /* dist in Resources */,
 				4A36A61A268266B30018536B /* images in Resources */,
 				0376905B29808EEA00F3474D /* background.js in Resources */,
@@ -504,7 +504,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A143AB3279DEA370029BFD0 /* Shared.swift in Sources */,
+				7878ED24299BA27B00E36A24 /* SafariWebExtensionHandler.swift in Sources */,
 				4A143AB2279DEA170029BFD0 /* Functions.swift in Sources */,
 				4A143AAC279DE6FF0029BFD0 /* UserscriptsTests.swift in Sources */,
 			);
@@ -516,7 +516,6 @@
 			files = (
 				4A4CF6EA270A38BD00111584 /* ViewController.swift in Sources */,
 				4A4CF6DE270A38BD00111584 /* AppDelegate.swift in Sources */,
-				4A4CF71A270A3A4900111584 /* Shared.swift in Sources */,
 				4A4CF6E8270A38BD00111584 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -525,7 +524,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A4CF71B270A3A4900111584 /* Shared.swift in Sources */,
 				4A301B2A270A474400C7E9E1 /* SafariWebExtensionHandler.swift in Sources */,
 				4A301B32270A49F200C7E9E1 /* Functions.swift in Sources */,
 			);
@@ -535,7 +533,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A6E19EE268CC84A00E0270C /* Shared.swift in Sources */,
 				4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */,
 				4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */,
 				0336619F294DF7C900CFE179 /* Functions.swift in Sources */,
@@ -546,7 +543,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A6E19EF268CC84A00E0270C /* Shared.swift in Sources */,
 				4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */,
 				4AED6492268CDB58001794BF /* Functions.swift in Sources */,
 			);
