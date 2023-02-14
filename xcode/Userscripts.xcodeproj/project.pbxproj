@@ -305,7 +305,7 @@
 				4A143AAE279DE6FF0029BFD0 /* PBXTargetDependency */,
 			);
 			name = "Mac-Tests";
-			productName = UserscriptsTests;
+			productName = "Mac-Tests";
 			productReference = 4A143AA9279DE6FF0029BFD0 /* Mac-Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -324,7 +324,7 @@
 				4A4CF6FA270A38BF00111584 /* PBXTargetDependency */,
 			);
 			name = "iOS-App";
-			productName = "Userscripts-iOS";
+			productName = "iOS-App";
 			productReference = 4A4CF6DB270A38BD00111584 /* iOS-App.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -341,7 +341,7 @@
 			dependencies = (
 			);
 			name = "iOS-Safari-Extension";
-			productName = "Userscripts-iOS Extension";
+			productName = "iOS-Safari-Extension";
 			productReference = 4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
@@ -360,7 +360,7 @@
 				4A57BA02227235CE008A9763 /* PBXTargetDependency */,
 			);
 			name = "Mac-App";
-			productName = Userscripts;
+			productName = "Mac-App";
 			productReference = 4A57B9EC227235CD008A9763 /* Mac-App.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -377,7 +377,7 @@
 			dependencies = (
 			);
 			name = "Mac-Safari-Extension";
-			productName = "Userscripts Extension";
+			productName = "Mac-Safari-Extension";
 			productReference = 4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
