@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A57B9FE227235CE008A9763"
-               BuildableName = "Userscripts Extension.appex"
-               BlueprintName = "Userscripts Extension"
+               BuildableName = "Mac-Safari-Extension.appex"
+               BlueprintName = "Mac-Safari-Extension"
                ReferencedContainer = "container:Userscripts.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -30,8 +30,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A57B9EB227235CD008A9763"
-               BuildableName = "Userscripts.app"
-               BlueprintName = "Userscripts"
+               BuildableName = "Mac-App.app"
+               BlueprintName = "Mac-App"
                ReferencedContainer = "container:Userscripts.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,8 +46,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A57B9FE227235CE008A9763"
-            BuildableName = "Userscripts Extension.appex"
-            BlueprintName = "Userscripts Extension"
+            BuildableName = "Mac-Safari-Extension.appex"
+            BlueprintName = "Mac-Safari-Extension"
             ReferencedContainer = "container:Userscripts.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -57,8 +57,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A143AA8279DE6FF0029BFD0"
-               BuildableName = "UserscriptsTests.xctest"
-               BlueprintName = "UserscriptsTests"
+               BuildableName = "Mac-Tests.xctest"
+               BlueprintName = "Mac-Tests"
                ReferencedContainer = "container:Userscripts.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -85,8 +85,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A57B9EB227235CD008A9763"
-            BuildableName = "Userscripts.app"
-            BlueprintName = "Userscripts"
+            BuildableName = "Mac-App.app"
+            BlueprintName = "Mac-App"
             ReferencedContainer = "container:Userscripts.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -111,8 +111,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A57B9EB227235CD008A9763"
-            BuildableName = "Userscripts.app"
-            BlueprintName = "Userscripts"
+            BuildableName = "Mac-App.app"
+            BlueprintName = "Mac-App"
             ReferencedContainer = "container:Userscripts.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

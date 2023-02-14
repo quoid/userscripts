@@ -29,13 +29,13 @@
 		4A4CF6EA270A38BD00111584 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E9270A38BD00111584 /* ViewController.swift */; };
 		4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */; };
 		4A4CF6F0270A38BD00111584 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EE270A38BD00111584 /* Main.storyboard */; };
-		4A4CF6F8270A38BF00111584 /* Userscripts-iOS Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4A4CF6F8270A38BF00111584 /* iOS-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6F1270A38BF00111584 /* Assets.xcassets */; };
 		4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F1227235CD008A9763 /* AppDelegate.swift */; };
 		4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F3227235CD008A9763 /* Main.storyboard */; };
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
 		4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F8227235CE008A9763 /* Assets.xcassets */; };
-		4A57BA00227235CE008A9763 /* Userscripts Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4A57BA00227235CE008A9763 /* Mac-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A57BA04227235CE008A9763 /* Cocoa.framework */; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
@@ -81,7 +81,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4A4CF6F8270A38BF00111584 /* Userscripts-iOS Extension.appex in Embed App Extensions */,
+				4A4CF6F8270A38BF00111584 /* iOS-Safari-Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -92,7 +92,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4A57BA00227235CE008A9763 /* Userscripts Extension.appex in Embed App Extensions */,
+				4A57BA00227235CE008A9763 /* Mac-Safari-Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -104,11 +104,11 @@
 		033661A429510B7900CFE179 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/View.storyboard; sourceTree = "<group>"; };
 		0376905A29808EEA00F3474D /* background.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		03E20D05291E170000B4F692 /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
-		4A143AA9279DE6FF0029BFD0 /* UserscriptsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UserscriptsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A143AA9279DE6FF0029BFD0 /* Mac-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Mac-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserscriptsTests.swift; sourceTree = "<group>"; };
 		4A36A616268266B30018536B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		4A36A617268266B30018536B /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; path = _locales; sourceTree = "<group>"; };
-		4A4CF6DB270A38BD00111584 /* Userscripts-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Userscripts-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4CF6DB270A38BD00111584 /* iOS-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iOS-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4CF6DD270A38BD00111584 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A4CF6E1270A38BD00111584 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
 		4A4CF6E3270A38BD00111584 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
@@ -118,16 +118,16 @@
 		4A4CF6EF270A38BD00111584 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A4CF6F1270A38BF00111584 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A4CF6F2270A38BF00111584 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts-iOS Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "iOS-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4CF718270A38C700111584 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		4A57B9EC227235CD008A9763 /* Userscripts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Userscripts.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A57B9EC227235CD008A9763 /* Mac-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mac-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57B9EF227235CD008A9763 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		4A57B9F1227235CD008A9763 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A57B9F4227235CD008A9763 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A57B9F6227235CD008A9763 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		4A57B9F8227235CE008A9763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A57B9FA227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Mac-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57BA04227235CE008A9763 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Mac.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Mac.Info.plist; sourceTree = "<group>"; };
@@ -229,11 +229,11 @@
 		4A57B9ED227235CD008A9763 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A57B9EC227235CD008A9763 /* Userscripts.app */,
-				4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */,
-				4A4CF6DB270A38BD00111584 /* Userscripts-iOS.app */,
-				4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */,
-				4A143AA9279DE6FF0029BFD0 /* UserscriptsTests.xctest */,
+				4A57B9EC227235CD008A9763 /* Mac-App.app */,
+				4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */,
+				4A4CF6DB270A38BD00111584 /* iOS-App.app */,
+				4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */,
+				4A143AA9279DE6FF0029BFD0 /* Mac-Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -291,9 +291,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4A143AA8279DE6FF0029BFD0 /* UserscriptsTests */ = {
+		4A143AA8279DE6FF0029BFD0 /* Mac-Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A143AB1279DE6FF0029BFD0 /* Build configuration list for PBXNativeTarget "UserscriptsTests" */;
+			buildConfigurationList = 4A143AB1279DE6FF0029BFD0 /* Build configuration list for PBXNativeTarget "Mac-Tests" */;
 			buildPhases = (
 				4A143AA5279DE6FF0029BFD0 /* Sources */,
 				4A143AA6279DE6FF0029BFD0 /* Frameworks */,
@@ -304,14 +304,14 @@
 			dependencies = (
 				4A143AAE279DE6FF0029BFD0 /* PBXTargetDependency */,
 			);
-			name = UserscriptsTests;
+			name = "Mac-Tests";
 			productName = UserscriptsTests;
-			productReference = 4A143AA9279DE6FF0029BFD0 /* UserscriptsTests.xctest */;
+			productReference = 4A143AA9279DE6FF0029BFD0 /* Mac-Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4A4CF6DA270A38BD00111584 /* Userscripts-iOS */ = {
+		4A4CF6DA270A38BD00111584 /* iOS-App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A4CF717270A38BF00111584 /* Build configuration list for PBXNativeTarget "Userscripts-iOS" */;
+			buildConfigurationList = 4A4CF717270A38BF00111584 /* Build configuration list for PBXNativeTarget "iOS-App" */;
 			buildPhases = (
 				4A4CF6D7270A38BD00111584 /* Sources */,
 				4A4CF6D8270A38BD00111584 /* Frameworks */,
@@ -323,14 +323,14 @@
 			dependencies = (
 				4A4CF6FA270A38BF00111584 /* PBXTargetDependency */,
 			);
-			name = "Userscripts-iOS";
+			name = "iOS-App";
 			productName = "Userscripts-iOS";
-			productReference = 4A4CF6DB270A38BD00111584 /* Userscripts-iOS.app */;
+			productReference = 4A4CF6DB270A38BD00111584 /* iOS-App.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4A4CF6F6270A38BF00111584 /* Userscripts-iOS Extension */ = {
+		4A4CF6F6270A38BF00111584 /* iOS-Safari-Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A4CF716270A38BF00111584 /* Build configuration list for PBXNativeTarget "Userscripts-iOS Extension" */;
+			buildConfigurationList = 4A4CF716270A38BF00111584 /* Build configuration list for PBXNativeTarget "iOS-Safari-Extension" */;
 			buildPhases = (
 				4A4CF6F3270A38BF00111584 /* Sources */,
 				4A4CF6F4270A38BF00111584 /* Frameworks */,
@@ -340,14 +340,14 @@
 			);
 			dependencies = (
 			);
-			name = "Userscripts-iOS Extension";
+			name = "iOS-Safari-Extension";
 			productName = "Userscripts-iOS Extension";
-			productReference = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS Extension.appex */;
+			productReference = 4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		4A57B9EB227235CD008A9763 /* Userscripts */ = {
+		4A57B9EB227235CD008A9763 /* Mac-App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A57BA1A227235CE008A9763 /* Build configuration list for PBXNativeTarget "Userscripts" */;
+			buildConfigurationList = 4A57BA1A227235CE008A9763 /* Build configuration list for PBXNativeTarget "Mac-App" */;
 			buildPhases = (
 				4A57B9E8227235CD008A9763 /* Sources */,
 				4A57B9E9227235CD008A9763 /* Frameworks */,
@@ -359,14 +359,14 @@
 			dependencies = (
 				4A57BA02227235CE008A9763 /* PBXTargetDependency */,
 			);
-			name = Userscripts;
+			name = "Mac-App";
 			productName = Userscripts;
-			productReference = 4A57B9EC227235CD008A9763 /* Userscripts.app */;
+			productReference = 4A57B9EC227235CD008A9763 /* Mac-App.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4A57B9FE227235CE008A9763 /* Userscripts Extension */ = {
+		4A57B9FE227235CE008A9763 /* Mac-Safari-Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A57BA16227235CE008A9763 /* Build configuration list for PBXNativeTarget "Userscripts Extension" */;
+			buildConfigurationList = 4A57BA16227235CE008A9763 /* Build configuration list for PBXNativeTarget "Mac-Safari-Extension" */;
 			buildPhases = (
 				4A57B9FB227235CE008A9763 /* Sources */,
 				4A57B9FC227235CE008A9763 /* Frameworks */,
@@ -376,9 +376,9 @@
 			);
 			dependencies = (
 			);
-			name = "Userscripts Extension";
+			name = "Mac-Safari-Extension";
 			productName = "Userscripts Extension";
-			productReference = 4A57B9FF227235CE008A9763 /* Userscripts Extension.appex */;
+			productReference = 4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -427,11 +427,11 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4A57B9EB227235CD008A9763 /* Userscripts */,
-				4A57B9FE227235CE008A9763 /* Userscripts Extension */,
-				4A4CF6DA270A38BD00111584 /* Userscripts-iOS */,
-				4A4CF6F6270A38BF00111584 /* Userscripts-iOS Extension */,
-				4A143AA8279DE6FF0029BFD0 /* UserscriptsTests */,
+				4A57B9EB227235CD008A9763 /* Mac-App */,
+				4A57B9FE227235CE008A9763 /* Mac-Safari-Extension */,
+				4A4CF6DA270A38BD00111584 /* iOS-App */,
+				4A4CF6F6270A38BF00111584 /* iOS-Safari-Extension */,
+				4A143AA8279DE6FF0029BFD0 /* Mac-Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -553,17 +553,17 @@
 /* Begin PBXTargetDependency section */
 		4A143AAE279DE6FF0029BFD0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4A57B9EB227235CD008A9763 /* Userscripts */;
+			target = 4A57B9EB227235CD008A9763 /* Mac-App */;
 			targetProxy = 4A143AAD279DE6FF0029BFD0 /* PBXContainerItemProxy */;
 		};
 		4A4CF6FA270A38BF00111584 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4A4CF6F6270A38BF00111584 /* Userscripts-iOS Extension */;
+			target = 4A4CF6F6270A38BF00111584 /* iOS-Safari-Extension */;
 			targetProxy = 4A4CF6F9270A38BF00111584 /* PBXContainerItemProxy */;
 		};
 		4A57BA02227235CE008A9763 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4A57B9FE227235CE008A9763 /* Userscripts Extension */;
+			target = 4A57B9FE227235CE008A9763 /* Mac-Safari-Extension */;
 			targetProxy = 4A57BA01227235CE008A9763 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1020,7 +1020,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4A143AB1279DE6FF0029BFD0 /* Build configuration list for PBXNativeTarget "UserscriptsTests" */ = {
+		4A143AB1279DE6FF0029BFD0 /* Build configuration list for PBXNativeTarget "Mac-Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A143AAF279DE6FF0029BFD0 /* Debug */,
@@ -1029,7 +1029,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4A4CF716270A38BF00111584 /* Build configuration list for PBXNativeTarget "Userscripts-iOS Extension" */ = {
+		4A4CF716270A38BF00111584 /* Build configuration list for PBXNativeTarget "iOS-Safari-Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A4CF714270A38BF00111584 /* Debug */,
@@ -1038,7 +1038,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4A4CF717270A38BF00111584 /* Build configuration list for PBXNativeTarget "Userscripts-iOS" */ = {
+		4A4CF717270A38BF00111584 /* Build configuration list for PBXNativeTarget "iOS-App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A4CF711270A38BF00111584 /* Debug */,
@@ -1056,7 +1056,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4A57BA16227235CE008A9763 /* Build configuration list for PBXNativeTarget "Userscripts Extension" */ = {
+		4A57BA16227235CE008A9763 /* Build configuration list for PBXNativeTarget "Mac-Safari-Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A57BA17227235CE008A9763 /* Debug */,
@@ -1065,7 +1065,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4A57BA1A227235CE008A9763 /* Build configuration list for PBXNativeTarget "Userscripts" */ = {
+		4A57BA1A227235CE008A9763 /* Build configuration list for PBXNativeTarget "Mac-App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A57BA1B227235CE008A9763 /* Debug */,
