@@ -36,7 +36,6 @@
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
 		4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F8227235CE008A9763 /* Assets.xcassets */; };
 		4A57BA00227235CE008A9763 /* Mac-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A57BA04227235CE008A9763 /* Cocoa.framework */; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
 		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
@@ -128,7 +127,6 @@
 		4A57B9F8227235CE008A9763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A57B9FA227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Mac-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4A57BA04227235CE008A9763 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Mac.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Mac.Info.plist; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mac.entitlements; sourceTree = "<group>"; };
@@ -173,7 +171,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A57BA05227235CE008A9763 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,7 +218,6 @@
 				4A57B9EE227235CD008A9763 /* Mac-App */,
 				4A4CF6DC270A38BD00111584 /* iOS-App */,
 				4A143AAA279DE6FF0029BFD0 /* Mac-Tests */,
-				4A57BA03227235CE008A9763 /* Frameworks */,
 				4A57B9ED227235CD008A9763 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -251,14 +247,6 @@
 				033661A329510B7900CFE179 /* View.storyboard */,
 			);
 			path = "Mac-App";
-			sourceTree = "<group>";
-		};
-		4A57BA03227235CE008A9763 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				4A57BA04227235CE008A9763 /* Cocoa.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		4A57BA06227235CE008A9763 /* Safari-Extension */ = {
