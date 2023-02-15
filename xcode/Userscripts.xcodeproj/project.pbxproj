@@ -128,12 +128,11 @@
 		4A57B9FA227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts-Mac-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		4A57BA0E227235CE008A9763 /* Mac.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Mac.Info.plist; sourceTree = "<group>"; };
+		4A57BA0E227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mac.entitlements; sourceTree = "<group>"; };
 		4AB22357268B9B9200D551C6 /* content.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
 		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		4AED6491268CDB58001794BF /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
-		7878ED2C299BA40800E36A24 /* iOS.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = iOS.Info.plist; sourceTree = "<group>"; };
 		7878ED2D299BA40800E36A24 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
 		7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-Safari-Extension.xcconfig"; sourceTree = "<group>"; };
 		7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-Tests.xcconfig"; sourceTree = "<group>"; };
@@ -262,9 +261,8 @@
 				4AF1DD0D268265DB00086E88 /* Resources */,
 				4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */,
 				4AED6491268CDB58001794BF /* Functions.swift */,
-				4A57BA0E227235CE008A9763 /* Mac.Info.plist */,
+				4A57BA0E227235CE008A9763 /* Info.plist */,
 				4A57BA1D227235E6008A9763 /* Mac.entitlements */,
-				7878ED2C299BA40800E36A24 /* iOS.Info.plist */,
 				7878ED2D299BA40800E36A24 /* iOS.entitlements */,
 			);
 			path = "Safari-Extension";

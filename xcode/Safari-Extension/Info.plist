@@ -4,8 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>Userscripts</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,8 +27,6 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).SafariWebExtensionHandler</string>
 	</dict>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2021 Justin Wasack. All rights reserved.</string>
 	<key>NSHumanReadableDescription</key>
 	<string>Save and run javascript for the web pages you visit</string>
 </dict>
