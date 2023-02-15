@@ -19,7 +19,9 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         // ie. } else if {
         if name == "OPEN_APP" {
             if let url = URL(string: "userscriptsurlscheme://") {
-                NSWorkspace.shared.open(url)
+                #if os(macOS)
+                    NSWorkspace.shared.open(url)
+                #endif
             }
         }
         else if name == "REQ_PLATFORM" {
