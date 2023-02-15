@@ -29,13 +29,13 @@
 		4A4CF6EA270A38BD00111584 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E9270A38BD00111584 /* ViewController.swift */; };
 		4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */; };
 		4A4CF6F0270A38BD00111584 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EE270A38BD00111584 /* Main.storyboard */; };
-		4A4CF6F8270A38BF00111584 /* iOS-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4A4CF6F8270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6F1270A38BF00111584 /* Assets.xcassets */; };
 		4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F1227235CD008A9763 /* AppDelegate.swift */; };
 		4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F3227235CD008A9763 /* Main.storyboard */; };
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
 		4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F8227235CE008A9763 /* Assets.xcassets */; };
-		4A57BA00227235CE008A9763 /* Mac-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
 		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
@@ -80,7 +80,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4A4CF6F8270A38BF00111584 /* iOS-Safari-Extension.appex in Embed App Extensions */,
+				4A4CF6F8270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,7 +91,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4A57BA00227235CE008A9763 /* Mac-Safari-Extension.appex in Embed App Extensions */,
+				4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -107,7 +107,7 @@
 		4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserscriptsTests.swift; sourceTree = "<group>"; };
 		4A36A616268266B30018536B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		4A36A617268266B30018536B /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; path = _locales; sourceTree = "<group>"; };
-		4A4CF6DB270A38BD00111584 /* iOS-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iOS-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4CF6DB270A38BD00111584 /* Userscripts-iOS-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Userscripts-iOS-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4CF6DD270A38BD00111584 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A4CF6E1270A38BD00111584 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
 		4A4CF6E3270A38BD00111584 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
@@ -117,16 +117,16 @@
 		4A4CF6EF270A38BD00111584 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A4CF6F1270A38BF00111584 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A4CF6F2270A38BF00111584 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "iOS-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts-iOS-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4CF718270A38C700111584 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		4A57B9EC227235CD008A9763 /* Mac-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mac-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A57B9EC227235CD008A9763 /* Userscripts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Userscripts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57B9EF227235CD008A9763 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		4A57B9F1227235CD008A9763 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A57B9F4227235CD008A9763 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A57B9F6227235CD008A9763 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		4A57B9F8227235CE008A9763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A57B9FA227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Mac-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts-Mac-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Mac.Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Mac.Info.plist; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mac.entitlements; sourceTree = "<group>"; };
@@ -232,10 +232,10 @@
 		4A57B9ED227235CD008A9763 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A57B9EC227235CD008A9763 /* Mac-App.app */,
-				4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */,
-				4A4CF6DB270A38BD00111584 /* iOS-App.app */,
-				4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */,
+				4A57B9EC227235CD008A9763 /* Userscripts.app */,
+				4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */,
+				4A4CF6DB270A38BD00111584 /* Userscripts-iOS-App.app */,
+				4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */,
 				4A143AA9279DE6FF0029BFD0 /* Mac-Tests.xctest */,
 			);
 			name = Products;
@@ -333,7 +333,7 @@
 			);
 			name = "iOS-App";
 			productName = "iOS-App";
-			productReference = 4A4CF6DB270A38BD00111584 /* iOS-App.app */;
+			productReference = 4A4CF6DB270A38BD00111584 /* Userscripts-iOS-App.app */;
 			productType = "com.apple.product-type.application";
 		};
 		4A4CF6F6270A38BF00111584 /* iOS-Safari-Extension */ = {
@@ -350,7 +350,7 @@
 			);
 			name = "iOS-Safari-Extension";
 			productName = "iOS-Safari-Extension";
-			productReference = 4A4CF6F7270A38BF00111584 /* iOS-Safari-Extension.appex */;
+			productReference = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		4A57B9EB227235CD008A9763 /* Mac-App */ = {
@@ -369,7 +369,7 @@
 			);
 			name = "Mac-App";
 			productName = "Mac-App";
-			productReference = 4A57B9EC227235CD008A9763 /* Mac-App.app */;
+			productReference = 4A57B9EC227235CD008A9763 /* Userscripts.app */;
 			productType = "com.apple.product-type.application";
 		};
 		4A57B9FE227235CE008A9763 /* Mac-Safari-Extension */ = {
@@ -386,7 +386,7 @@
 			);
 			name = "Mac-Safari-Extension";
 			productName = "Mac-Safari-Extension";
-			productReference = 4A57B9FF227235CE008A9763 /* Mac-Safari-Extension.appex */;
+			productReference = 4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -624,19 +624,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.UserscriptsTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Userscripts.app/Contents/MacOS/Userscripts";
 			};
 			name = Debug;
 		};
@@ -644,19 +631,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.UserscriptsTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Userscripts.app/Contents/MacOS/Userscripts";
 			};
 			name = Release;
 		};
@@ -664,41 +638,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Userscripts;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIStatusBarHidden = NO;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.3.3;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-					"-framework",
-					WebKit,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -706,42 +645,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS/Userscripts-iOS.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Userscripts-iOS/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Userscripts;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIStatusBarHidden = NO;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.3.3;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-					"-framework",
-					WebKit,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -749,33 +652,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Userscripts Extension";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 Justin Wasack. All rights reserved.";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.3.3;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -783,34 +659,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_ENTITLEMENTS = "Userscripts-iOS Extension/Userscripts-iOS Extension.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Userscripts-iOS Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Userscripts Extension";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 Justin Wasack. All rights reserved.";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.3.3;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -818,63 +666,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -882,56 +673,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				SDKROOT = macosx;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
@@ -939,24 +680,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 65;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 4.3.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -964,24 +687,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Userscripts Extension/Userscripts Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 65;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = "Userscripts Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 4.3.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.userscripts.macos.Userscripts-Extension";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -989,25 +694,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Userscripts/Userscripts.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 65;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = Userscripts/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 4.3.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -1015,25 +701,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Userscripts/Userscripts.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 65;
-				DEVELOPMENT_TEAM = J74Q8V8V8N;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = Userscripts/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 4.3.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.userscripts.macos;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
