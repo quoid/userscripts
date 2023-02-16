@@ -43,5 +43,7 @@
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>US_SHARED_GID</key>
+	<string>$(MAC_SHARED_GID)</string>
 </dict>
 </plist>

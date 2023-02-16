@@ -29,5 +29,9 @@
 	</dict>
 	<key>NSHumanReadableDescription</key>
 	<string>Save and run javascript for the web pages you visit</string>
+	<key>US_SHARED_GID-macos</key>
+	<string>$(MAC_SHARED_GID)</string>
+	<key>US_SHARED_GID-iphoneos</key>
+	<string>$(IOS_SHARED_GID)</string>
 </dict>
 </plist>

@@ -25,5 +25,7 @@
 	<string>UIStatusBarStyleLightContent</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>US_SHARED_GID</key>
+	<string>$(IOS_SHARED_GID)</string>
 </dict>
 </plist>
