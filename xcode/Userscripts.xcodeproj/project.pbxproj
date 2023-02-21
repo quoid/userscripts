@@ -133,12 +133,13 @@
 		4AB22357268B9B9200D551C6 /* content.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
 		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		4AED6491268CDB58001794BF /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		78391D4629A4CB3C00979E34 /* Userscripts-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Userscripts-Debug.xcconfig"; sourceTree = "<group>"; };
+		78391D4729A4CB3C00979E34 /* Userscripts-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Userscripts-Release.xcconfig"; sourceTree = "<group>"; };
 		7878ED2D299BA40800E36A24 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
 		7878ED2F299BBEBF00E36A24 /* iOS-Safari-Extension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-Safari-Extension.xcconfig"; sourceTree = "<group>"; };
 		7878ED31299BBEBF00E36A24 /* Mac-Tests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-Tests.xcconfig"; sourceTree = "<group>"; };
 		7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-Safari-Extension.xcconfig"; sourceTree = "<group>"; };
 		7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-App.xcconfig"; sourceTree = "<group>"; };
-		7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Userscripts.xcconfig; sourceTree = "<group>"; };
 		7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-App.xcconfig"; sourceTree = "<group>"; };
 		78B25582299D4C27000B2E9B /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -284,7 +285,8 @@
 		7878ED2E299BBEBF00E36A24 /* xcconfig */ = {
 			isa = PBXGroup;
 			children = (
-				7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */,
+				78391D4629A4CB3C00979E34 /* Userscripts-Debug.xcconfig */,
+				78391D4729A4CB3C00979E34 /* Userscripts-Release.xcconfig */,
 				7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */,
 				7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */,
 				7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */,
@@ -670,14 +672,14 @@
 		};
 		4A57BA14227235CE008A9763 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */;
+			baseConfigurationReference = 78391D4629A4CB3C00979E34 /* Userscripts-Debug.xcconfig */;
 			buildSettings = {
 			};
 			name = Debug;
 		};
 		4A57BA15227235CE008A9763 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7878ED37299BBEBF00E36A24 /* Userscripts.xcconfig */;
+			baseConfigurationReference = 78391D4729A4CB3C00979E34 /* Userscripts-Release.xcconfig */;
 			buildSettings = {
 			};
 			name = Release;
