@@ -29,13 +29,13 @@
 		4A4CF6EA270A38BD00111584 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E9270A38BD00111584 /* ViewController.swift */; };
 		4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */; };
 		4A4CF6F0270A38BD00111584 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EE270A38BD00111584 /* Main.storyboard */; };
-		4A4CF6F8270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4A4CF6F8270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6F1270A38BF00111584 /* Assets.xcassets */; };
 		4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F1227235CD008A9763 /* AppDelegate.swift */; };
 		4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F3227235CD008A9763 /* Main.storyboard */; };
 		4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57B9F6227235CD008A9763 /* ViewController.swift */; };
 		4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F8227235CE008A9763 /* Assets.xcassets */; };
-		4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
 		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
@@ -74,26 +74,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		4A4CF713270A38BF00111584 /* Embed App Extensions */ = {
+		4A4CF713270A38BF00111584 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4A4CF6F8270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex in Embed App Extensions */,
+				4A4CF6F8270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4A57BA19227235CE008A9763 /* Embed App Extensions */ = {
+		4A57BA19227235CE008A9763 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed App Extensions */,
+				4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -119,7 +119,7 @@
 		4A4CF6F2270A38BF00111584 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Userscripts-iOS-Safari-Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4CF718270A38C700111584 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		4A57B9EC227235CD008A9763 /* Userscripts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Userscripts.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A57B9EC227235CD008A9763 /* Userscripts-Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Userscripts-Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A57B9EF227235CD008A9763 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		4A57B9F1227235CD008A9763 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A57B9F4227235CD008A9763 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -232,7 +232,7 @@
 		4A57B9ED227235CD008A9763 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A57B9EC227235CD008A9763 /* Userscripts.app */,
+				4A57B9EC227235CD008A9763 /* Userscripts-Debug.app */,
 				4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */,
 				4A4CF6DB270A38BD00111584 /* Userscripts-iOS-App.app */,
 				4A4CF6F7270A38BF00111584 /* Userscripts-iOS-Safari-Extension.appex */,
@@ -332,7 +332,7 @@
 				4A4CF6D7270A38BD00111584 /* Sources */,
 				4A4CF6D8270A38BD00111584 /* Frameworks */,
 				4A4CF6D9270A38BD00111584 /* Resources */,
-				4A4CF713270A38BF00111584 /* Embed App Extensions */,
+				4A4CF713270A38BF00111584 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -368,7 +368,7 @@
 				4A57B9E8227235CD008A9763 /* Sources */,
 				4A57B9E9227235CD008A9763 /* Frameworks */,
 				4A57B9EA227235CD008A9763 /* Resources */,
-				4A57BA19227235CE008A9763 /* Embed App Extensions */,
+				4A57BA19227235CE008A9763 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -377,7 +377,7 @@
 			);
 			name = "Mac-App";
 			productName = "Mac-App";
-			productReference = 4A57B9EC227235CD008A9763 /* Userscripts.app */;
+			productReference = 4A57B9EC227235CD008A9763 /* Userscripts-Debug.app */;
 			productType = "com.apple.product-type.application";
 		};
 		4A57B9FE227235CE008A9763 /* Mac-Safari-Extension */ = {
@@ -404,7 +404,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1320;
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = "Justin Wasack";
 				TargetAttributes = {
 					4A143AA8279DE6FF0029BFD0 = {
