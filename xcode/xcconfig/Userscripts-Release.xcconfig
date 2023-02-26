@@ -1,0 +1,24 @@
+#include "Userscripts-Base.xcconfig"
+
+INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2021 Justin Wasack. All rights reserved.
+IOS_APP_BUILD = 38
+IOS_APP_VERSION = 1.3.3
+MAC_APP_BUILD = 65
+MAC_APP_VERSION = 4.3.3
+
+// Developer Team ID
+DEVELOPMENT_TEAM = J74Q8V8V8N
+// Organization Identifier
+ORG_IDENTIFIER = com.userscripts
+// Application Identifier
+APP_IDENTIFIER = com.userscripts.macos
+// Safari Extension Identifier
+EXT_IDENTIFIER = $(APP_IDENTIFIER).Userscripts-Extension
+// App Groups and Group Containers
+IOS_SHARED_GID = group.com.userscripts.ios
+MAC_SHARED_GID = $(DEVELOPMENT_TEAM).com.userscripts.macos
+// App URL Scheme
+APP_URL_SCHEME = userscriptsurlscheme
+
+// Override this file
+#include? "Userscripts-Release.dev.xcconfig"

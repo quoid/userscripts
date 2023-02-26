@@ -1,0 +1,30 @@
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor
+CODE_SIGN_ENTITLEMENTS = iOS-App/App.entitlements
+CURRENT_PROJECT_VERSION = $(IOS_APP_BUILD)
+GENERATE_INFOPLIST_FILE = YES
+INFOPLIST_FILE = iOS-App/Info.plist
+INFOPLIST_KEY_CFBundleDisplayName = $(PROJECT_NAME)
+INFOPLIST_KEY_CFBundleDisplayName[config=Debug] = $(PROJECT_NAME)-D
+INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES
+INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen
+INFOPLIST_KEY_UIMainStoryboardFile = Main
+INFOPLIST_KEY_UIStatusBarHidden = NO
+INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks
+MARKETING_VERSION = $(IOS_APP_VERSION)
+OTHER_LDFLAGS = -framework SafariServices -framework WebKit
+PRODUCT_BUNDLE_IDENTIFIER = $(APP_IDENTIFIER)
+PRODUCT_NAME = $(PROJECT_NAME)-$(TARGET_NAME)
+SDKROOT = iphoneos
+SWIFT_EMIT_LOC_STRINGS = YES
+SUPPORTED_PLATFORMS = iphoneos iphonesimulator
+SUPPORTS_MACCATALYST = NO
+SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO
+TARGETED_DEVICE_FAMILY = 1,2
+VALIDATE_PRODUCT[config=Release] = YES
+
+// Override this file
+#include? "iOS-App.dev.xcconfig"
