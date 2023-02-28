@@ -28,7 +28,23 @@ The Xcode project contains two configurations, which have independent `xcconfig`
 ### xcconfig
 All `xcconfig` files are in the `./xcconfig/` directory. Each `.xcconfig` file can be overridden by `.dev.xcconfig` in the same path, they will be ignored by `git`, so you can override any build settings locally.
 
-For example, you can create an `Userscripts-Release.dev.xcconfig` file to override `Userscripts-Release.xcconfig` and fill in your own developer account information there.
+For example, you can create an `Userscripts-Release.dev.xcconfig` file to override `Userscripts-Release.xcconfig` and fill in your own developer account information there:
+
+`Userscripts-Release.dev.xcconfig`
+
+```
+DEVELOPMENT_TEAM = XXXXXXXXXX
+```
+
+Another example, if you want `Debug` builds to be also signed, so instead of enabling `Allow Unsigned Extensions` every time in Safari, you can create: 
+
+`Userscripts-Debug.dev.xcconfig`
+```
+CODE_SIGN_IDENTITY = Apple Development
+DEVELOPMENT_TEAM = XXXXXXXXXX
+```
+
+Note that all existing `.xcconfig` files already include `.dev.xcconfig` files of the same name, so they will be applied automatically once you create them. You only need to fill in the setting items that need to be overridden or added.
 
 # Contribute
 [Contributing guide](contributing.md)
