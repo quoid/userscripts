@@ -24,10 +24,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>CFBundleURLName</key>
-			<string>com.userscripts.macos</string>
+			<string>$(APP_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>userscriptsurlscheme</string>
+				<string>$(APP_URL_SCHEME)</string>
 			</array>
 		</dict>
 	</array>
@@ -43,5 +43,9 @@
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>US_SHARED_GID</key>
+	<string>$(MAC_SHARED_GID)</string>
+	<key>US_EXT_IDENTIFIER</key>
+	<string>$(EXT_IDENTIFIER)</string>
 </dict>
 </plist>

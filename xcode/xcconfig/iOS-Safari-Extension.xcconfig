@@ -1,0 +1,19 @@
+CODE_SIGN_ENTITLEMENTS = Safari-Extension/iOS.entitlements
+CURRENT_PROJECT_VERSION = $(IOS_APP_BUILD)
+GENERATE_INFOPLIST_FILE = YES
+INFOPLIST_FILE = Safari-Extension/Info.plist
+INFOPLIST_KEY_CFBundleDisplayName = $(PRODUCT_NAME)
+INFOPLIST_KEY_CFBundleDisplayName[config=Debug] = $(PROJECT_NAME)-D
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks @executable_path/../../Frameworks
+MARKETING_VERSION = $(IOS_APP_VERSION)
+OTHER_LDFLAGS = -framework SafariServices
+PRODUCT_BUNDLE_IDENTIFIER = $(EXT_IDENTIFIER)
+PRODUCT_NAME = $(PROJECT_NAME)-$(TARGET_NAME)
+SDKROOT = iphoneos
+SKIP_INSTALL = YES
+SWIFT_EMIT_LOC_STRINGS = YES
+TARGETED_DEVICE_FAMILY = 1,2
+VALIDATE_PRODUCT[config=Release] = YES
+
+// Override this file
+#include? "iOS-Safari-Extension.dev.xcconfig"

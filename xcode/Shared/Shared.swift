@@ -2,15 +2,12 @@ import Foundation
 import SafariServices
 import os
 
-let extensionIdentifier = "com.userscripts.macos.Userscripts-Extension"
-
 struct SharedDefaults {
     // https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_application-groups
+    static let suiteName = Bundle.main.infoDictionary?["US_SHARED_GID"] as? String
     #if os(iOS)
-        static let suiteName = "group.com.userscripts.ios"
         static let keyName = "iosReadLocation"
     #elseif os(macOS)
-        static let suiteName = "J74Q8V8V8N.com.userscripts.macos"
         static let keyName = "hostSelectedSaveLocation"
     #endif
 }

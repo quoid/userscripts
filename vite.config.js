@@ -33,7 +33,7 @@ export default defineConfig({
     plugins: [svelte()],
     base: "./",
     build: {
-        outDir: "xcode/Userscripts Extension/Resources/dist/",
+        outDir: "xcode/Safari-Extension/Resources/dist/",
         rollupOptions: {
             input: {
                 page: resolve(__dirname, "entry-page.html"),

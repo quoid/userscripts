@@ -1,6 +1,8 @@
 import AppKit
 import SafariServices
 
+let extensionIdentifier = Bundle.main.infoDictionary?["US_EXT_IDENTIFIER"] as! String
+
 func getSaveLocationURL() -> URL {
     var url: URL
     // default url

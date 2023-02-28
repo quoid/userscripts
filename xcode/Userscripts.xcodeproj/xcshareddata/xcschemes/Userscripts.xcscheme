@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1200"
+   LastUpgradeVersion = "1420"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A57B9EB227235CD008A9763"
                BuildableName = "Userscripts.app"
-               BlueprintName = "Userscripts"
+               BlueprintName = "Mac-App"
                ReferencedContainer = "container:Userscripts.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,7 +32,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A57B9EB227235CD008A9763"
             BuildableName = "Userscripts.app"
-            BlueprintName = "Userscripts"
+            BlueprintName = "Mac-App"
             ReferencedContainer = "container:Userscripts.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -42,8 +42,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A143AA8279DE6FF0029BFD0"
-               BuildableName = "UserscriptsTests.xctest"
-               BlueprintName = "UserscriptsTests"
+               BuildableName = "Mac-Tests.xctest"
+               BlueprintName = "Mac-Tests"
                ReferencedContainer = "container:Userscripts.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -65,7 +65,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A57B9EB227235CD008A9763"
             BuildableName = "Userscripts.app"
-            BlueprintName = "Userscripts"
+            BlueprintName = "Mac-App"
             ReferencedContainer = "container:Userscripts.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -82,7 +82,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A57B9EB227235CD008A9763"
             BuildableName = "Userscripts.app"
-            BlueprintName = "Userscripts"
+            BlueprintName = "Mac-App"
             ReferencedContainer = "container:Userscripts.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

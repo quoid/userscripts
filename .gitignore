@@ -37,6 +37,7 @@ Thumbs.db
 # xcode
 xcuserdata/
 *.xcuserstate
+*.dev.xcconfig
 XCBuildData
 xcode/**/build/
 xcode/**/dist/

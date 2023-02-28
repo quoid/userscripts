@@ -18,8 +18,11 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         // typically the "else if" would be on the same line as the preceding statements close bracket
         // ie. } else if {
         if name == "OPEN_APP" {
-            if let url = URL(string: "userscriptsurlscheme://") {
-                NSWorkspace.shared.open(url)
+            if let scheme = Bundle.main.infoDictionary?["US_URL_SCHEME"],
+               let url = URL(string: "\(scheme):") {
+                #if os(macOS)
+                    NSWorkspace.shared.open(url)
+                #endif
             }
         }
         else if name == "REQ_PLATFORM" {
@@ -170,7 +173,8 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "CHANGE_SAVE_LOCATION" {
             #if os(macOS)
-                if let url = URL(string: "userscriptsurlscheme://changesavelocation") {
+                if let scheme = Bundle.main.infoDictionary?["US_URL_SCHEME"],
+                   let url = URL(string: "\(scheme)://changesavelocation") {
                     NSWorkspace.shared.open(url)
                 }
             #endif

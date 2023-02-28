@@ -4,7 +4,7 @@ Thank you for investing your time in contributing to this open source project!
 
 We hope this guide will helps you understand how to contribute to this project.
 
-For development and build environments please refer to [this document](dev.md).
+For development and build environments please refer to [development guide](dev.md).
 
 # Branches
 
@@ -63,7 +63,7 @@ More Examples:
 
 Almost all features and fixes will be merged into the master branch via pull requests (PRs).
 
-We will improve the guidelines for creating PRs in the future, like creat [`pull request template`](https://docs.github.com/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository).
+We will improve the guidelines for creating PRs in the future, like create [`pull request template`](https://docs.github.com/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository).
 
 # Workflow
 
@@ -93,4 +93,4 @@ If you are not a member of the project, first you need to fork the master branch
 - Despite various tests, we may still find bugs through user feedback in the public version, and we will fix those minor bugs through hotfixes.
 
 # About
-[Userscripts](https://github.com/quoid/userscripts) @ 2022
+[Userscripts](https://github.com/quoid/userscripts) @ 2018-2023
