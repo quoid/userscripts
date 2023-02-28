@@ -26,12 +26,11 @@ The Xcode project contains two configurations, which have independent `xcconfig`
 - `Release`: A developer account is required, which means it can be used for distribution as well as running on real iOS/iPadOS devices. You will need to override your developer account information in `xcconfig` to complete the build.
 
 ### xcconfig
-All `xcconfig` files are in the `./xcconfig/` directory. Each `.xcconfig` file can be overridden by `.dev.xcconfig` in the same path, they will be ignored by `git`, so you can override any build settings locally.
+All `xcconfig` files are in the `./xcode/xcconfig/` directory. Each `.xcconfig` file can be overridden by `.dev.xcconfig` in the same path, they will be ignored by `git`, so you can override any build settings locally.
 
 For example, you can create an `Userscripts-Release.dev.xcconfig` file to override `Userscripts-Release.xcconfig` and fill in your own developer account information there:
 
 `Userscripts-Release.dev.xcconfig`
-
 ```
 DEVELOPMENT_TEAM = XXXXXXXXXX
 ```
