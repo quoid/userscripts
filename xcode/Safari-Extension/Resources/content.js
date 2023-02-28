@@ -220,7 +220,7 @@ const label = randomLabel();
 
 function randomLabel() {
     const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", r = Math.random();
-    return a[Math.floor(r * a.length)] + r.toString().slice(5,6);
+    return a[Math.floor(r * a.length)] + r.toString().slice(5, 6);
 }
 
 function processJS(userscript) {
@@ -271,17 +271,13 @@ function injectJS(userscript) {
     const name = userscript.scriptObject.name;
     let injectInto = userscript.scriptObject["inject-into"];
     // change scope to content since strict CSP event detected
-    if (injectInto === "auto"
-        && (userscript.fallback || cspFallbackAttempted)
-    ) {
+    if (injectInto === "auto" && (userscript.fallback || cspFallbackAttempted)) {
         injectInto = "content";
         console.warn(`Attempting fallback injection for ${name}`);
+    } else if (window.self === window.top) {
+        console.info(`Injecting ${name} %c(js)`, "color: #fff600");
     } else {
-        if (window.self === window.top) {
-            console.info(`Injecting ${name} %c(js)`, "color: #fff600");
-        } else {
-            console.info(`Injecting ${name} %c(js)%c - %cframe(${label})(${location})`, "color: #fff600", "color: inherit", "color: #006fff");
-        }
+        console.info(`Injecting ${name} %c(js)%c - %cframe(${label})(${window.location})`, "color: #fff600", "color: inherit", "color: #006fff");
     }
     if (injectInto !== "content") {
         const tag = document.createElement("script");
@@ -301,7 +297,7 @@ function injectCSS(name, code) {
     if (window.self === window.top) {
         console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
     } else {
-        console.info(`Injecting ${name} %c(css)%c - %cframe(${label})(${location})`, "color: #60f36c", "color: inherit", "color: #006fff");
+        console.info(`Injecting ${name} %c(css)%c - %cframe(${label})(${window.location})`, "color: #60f36c", "color: inherit", "color: #006fff");
     }
     // Safari lacks full support for tabs.insertCSS
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/insertCSS
