@@ -4,7 +4,7 @@ Thank you for investing your time in contributing to this open source project!
 
 We hope this guide will helps you understand how to contribute to this project.
 
-For development and build environments please refer to [this document](dev.md).
+For development and build environments please refer to [development guide](dev.md).
 
 # Branches
 
