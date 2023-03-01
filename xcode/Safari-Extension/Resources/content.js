@@ -215,6 +215,14 @@ const apis = {
 // remote window's browser object
 delete window.browser;
 
+// label used to distinguish frames in console
+const label = randomLabel();
+
+function randomLabel() {
+    const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", r = Math.random();
+    return a[Math.floor(r * a.length)] + r.toString().slice(5, 6);
+}
+
 function processJS(userscript) {
     const runAt = userscript.scriptObject["run-at"];
     if (runAt === "document-start") {
@@ -241,6 +249,7 @@ function processJS(userscript) {
 }
 
 function wrapCode(preCode, code, filename) {
+    const tag = window.self === window.top ? "" : `(${label})`;
     return `
         (function() {
             ${preCode}
@@ -250,7 +259,7 @@ function wrapCode(preCode, code, filename) {
                 const browser = undefined;
                 // userscript code below
                 ${code}
-                //# sourceURL=${filename.replace(/\s/g, "-")}
+                //# sourceURL=${filename.replace(/\s/g, "-") + tag}
             })();
         })();
     `;
@@ -262,13 +271,13 @@ function injectJS(userscript) {
     const name = userscript.scriptObject.name;
     let injectInto = userscript.scriptObject["inject-into"];
     // change scope to content since strict CSP event detected
-    if (injectInto === "auto"
-        && (userscript.fallback || cspFallbackAttempted)
-    ) {
+    if (injectInto === "auto" && (userscript.fallback || cspFallbackAttempted)) {
         injectInto = "content";
         console.warn(`Attempting fallback injection for ${name}`);
-    } else {
+    } else if (window.self === window.top) {
         console.info(`Injecting ${name} %c(js)`, "color: #fff600");
+    } else {
+        console.info(`Injecting ${name} %c(js)%c - %cframe(${label})(${window.location})`, "color: #fff600", "color: inherit", "color: #006fff");
     }
     if (injectInto !== "content") {
         const tag = document.createElement("script");
@@ -285,7 +294,11 @@ function injectJS(userscript) {
 }
 
 function injectCSS(name, code) {
-    console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
+    if (window.self === window.top) {
+        console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
+    } else {
+        console.info(`Injecting ${name} %c(css)%c - %cframe(${label})(${window.location})`, "color: #60f36c", "color: inherit", "color: #006fff");
+    }
     // Safari lacks full support for tabs.insertCSS
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/insertCSS
     // specifically frameId and cssOrigin
