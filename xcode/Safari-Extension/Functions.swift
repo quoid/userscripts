@@ -1718,7 +1718,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     var name = sanitize(n)
 
     // construct new file name
-    let newFilename = "\(name).\(type)"
+    let newFilename = "\(name).user.\(type)"
 
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
@@ -2028,7 +2028,7 @@ func installUserscript(_ content: String) -> [String: Any]? {
         return nil
     }
     let name = sanitize(n)
-    let filename = "\(name).js"
+    let filename = "\(name).user.js"
 
     let saved = saveFile(["filename": filename, "type": "js"], content)
     return saved
