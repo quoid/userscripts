@@ -395,7 +395,9 @@
         const res = await fetch(currentTab.url);
         if (!res.ok) {
             console.error(`Error fetching .user.js url: httpcode-${res.status}`);
-            errorNotification = "Error fetching, please retry.";
+            errorNotification = `Fetching failed, refresh to retry. (${res.status})`;
+            showInstallPrompt = undefined;
+            return;
         }
         const content = await res.text();
         // caching script data
