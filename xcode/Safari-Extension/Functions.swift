@@ -1718,7 +1718,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     var name = sanitize(n)
 
     // construct new file name
-    let newFilename = "\(name).user.\(type)"
+    let newFilename = "\(name).\(type)"
 
     // security scope
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
