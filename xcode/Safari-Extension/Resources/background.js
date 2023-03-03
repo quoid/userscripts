@@ -436,15 +436,6 @@ function handleMessage(request, sender, sendResponse) {
             }
             break;
         }
-        case "USERSCRIPT_INSTALL_00":
-        case "USERSCRIPT_INSTALL_01":
-        case "USERSCRIPT_INSTALL_02": {
-            const message = {name: request.name, content: request.content};
-            browser.runtime.sendNativeMessage(message, response => {
-                sendResponse(response);
-            });
-            return true;
-        }
         case "REFRESH_SESSION_RULES": {
             setSessionRules();
             break;
