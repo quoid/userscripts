@@ -1966,12 +1966,12 @@ func popupInit() -> [String: String]? {
 }
 
 // userscript install
-func installCheck(_ content: String) -> [String: String]? {
+func installCheck(_ content: String) -> [String: String] {
     // this func checks a userscript's metadata to determine if it's already installed
 
     guard let files = getAllFiles() else {
         err("installCheck failed at (1)")
-        return nil
+        return ["error": "installCheck failed at (1)"]
     }
 
     guard
@@ -2018,14 +2018,14 @@ func installParse(_ content: String) -> [String: Any]? {
     return metadata
 }
 
-func installUserscript(_ content: String) -> [String: Any]? {
+func installUserscript(_ content: String) -> [String: Any] {
     guard
         let parsed = parse(content),
         let metadata = parsed["metadata"] as? [String: [String]],
         let n = metadata["name"]?[0]
     else {
         err("installUserscript failed at (1)")
-        return nil
+        return ["error": "installUserscript failed at (1)"]
     }
     let name = sanitize(n)
     let filename = "\(name).user.js"
