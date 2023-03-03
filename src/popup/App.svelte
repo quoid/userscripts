@@ -31,9 +31,12 @@
     let header;
     let warn;
     let err;
+    let scriptChecking;
+    let scriptInstalled;
     let showInstallPrompt;
     let showInstall;
-    let installViewUserscript;
+    let installUserscript; // url, content
+    let installViewUserscript; // metadata
     let installViewUserscriptError;
     let showAll;
     let allItems = [];
@@ -139,6 +142,9 @@
 
     function refreshView() {
         errorNotification = undefined;
+        scriptChecking = undefined;
+        scriptInstalled = undefined;
+        showInstallPrompt = undefined;
         loading = true;
         disabled = true;
         items = [];
@@ -333,26 +339,12 @@
 
         // check if current page url is a userscript
         if (strippedUrl.endsWith(".user.js")) {
-            // if it does, send message to content script
-            // context script will check the document contentType
-            // if it's not an applicable type, it'll return {invalid: true} response and no install prompt shown
-            // if the contentType is applicable, what is mentioned below happens
-            // content script will get dom content, and send it to the bg page
-            // the bg page will send the content to the swift side for parsing
-            // when swift side parses and returns, the bg page will send a response to the content script
-            // then the content script will send response to the popup
-            // Content scripts that are injected into web content cannot send messages to the native app
-            // https://developer.apple.com/documentation/safariservices/safari_web_extensions/messaging_between_the_app_and_javascript_in_a_safari_web_extension
-            const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_00"});
-            if (response.error) {
-                console.error(`Error checking .user.js url: ${response.error}`);
-                errorNotification = response.error;
-            } else if (!response.invalid) {
-                // the response will contain the string to display
-                // ex: {success: "Click to install"}
-                const prompt = response.success;
-                showInstallPrompt = prompt;
-            }
+            // set checking state
+            scriptChecking = true;
+            // show checking banner
+            showInstallPrompt = "checking...";
+            // start async check
+            installCheck(currentTab);
         }
 
         loading = false;
@@ -398,43 +390,67 @@
         }, 25);
     }
 
-    async function showInstallView() {
-        // disable all buttons
-        disabled = true;
-        // show the install view
-        showInstall = true;
-        // get the active tab
-        const currentTab = await browser.tabs.getCurrent();
-        // send content script a message on the active tab
-        const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_01"});
-        // when above message is sent, content script will get active tab's stringified dom content
-        // and then send that content and a message to the bg page
-        // the bg page will send a message and the content to the swift side for parsing
-        // swift side will parse then send a response to the bg page
-        // the bg page will then send the response to the content script
-        // the content script will then send a response here
-
-        // if the response includes an error, display it in the view
+    async function installCheck(currentTab) {
+        // refetch script from URL to avoid tampered DOM content
+        const res = await fetch(currentTab.url);
+        if (!res.ok) {
+            console.error(`Error fetching .user.js url: httpcode-${res.status}`);
+            errorNotification = "Error fetching, please retry.";
+        }
+        const content = await res.text();
+        // caching script data
+        installUserscript = {url: currentTab.url, content};
+        // send native swift a message, parse metadata and check if installed
+        const response = await browser.runtime.sendNativeMessage({name: "POPUP_INSTALL_CHECK", content});
+        console.info("POPUP_INSTALL_CHECK:", response);
         if (response.error) {
-            console.error(`Can not install userscript: ${response.error}`);
+            console.error(`Error checking .user.js url: ${response.error}`);
+            // errorNotification = response.error;
             installViewUserscriptError = response.error;
         } else {
-            installViewUserscript = response;
+            scriptInstalled = response.installed;
+            // caching script metadata
+            installViewUserscript = response.metadata;
+            // the response will contain the string to display
+            // ex: {success: "Click to install"}
+            showInstallPrompt = response.success;
         }
-        disabled = false;
+        scriptChecking = false;
+    }
+
+    async function showInstallView() {
+        // show the install view
+        showInstall = true;
     }
 
     async function installConfirm() {
+        // clear all banner during installation
+        errorNotification = undefined;
+        showInstallPrompt = undefined;
         // disabled all buttons
         disabled = true;
         // show loading element
         loading = true;
         // go back to main view
         showInstall = false;
-        // get the active tab
+        // double check before send install message
+        if (!installUserscript || !installUserscript.content) {
+            errorNotification = "install failed: userscript missing";
+        }
         const currentTab = await browser.tabs.getCurrent();
-        // send content script a message on the active tab, which will start the install process
-        const response = await browser.tabs.sendMessage(currentTab.id, {name: "USERSCRIPT_INSTALL_02"});
+        if (currentTab.url !== installUserscript.url) {
+            errorNotification = "install failed: tab changed unexpectedly";
+        }
+        if (errorNotification) {
+            disabled = false;
+            loading = false;
+            return;
+        }
+        // send native swift a message, which will start the install process
+        const response = await browser.runtime.sendNativeMessage({
+            name: "POPUP_INSTALL_SCRIPT",
+            content: installUserscript.content
+        });
         if (response.error) {
             errorNotification = response.error;
             disabled = false;
@@ -494,8 +510,14 @@
     <!-- <div class="warn" bind:this={warn}>Injection disabled</div> -->
 {/if}
 {#if showInstallPrompt}
-    <div class="warn" bind:this={warn}>
-        Userscript Detected: <span on:click={showInstallView}>{showInstallPrompt}</span>
+    <div class="warn" class:done={scriptInstalled} bind:this={warn}>
+        Userscript
+        {#if scriptChecking}
+            {showInstallPrompt}
+        {:else}
+            {scriptInstalled ? "Installed" : "Detected"}:
+            <span on:click={showInstallView}>{showInstallPrompt}</span>
+        {/if}
     </div>
 {/if}
 {#if errorNotification}
@@ -648,6 +670,10 @@
 
     .warn {
         background-color: var(--color-yellow);
+    }
+
+    .warn.done {
+        background-color: var(--color-green);
     }
 
     .warn span {
