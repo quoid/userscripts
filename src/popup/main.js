@@ -17,6 +17,7 @@ body {
     box-sizing: content-box;
     border: 2px solid #0c0e0f;
     border-radius: 10px;
+    box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.2);
 }
 body:before {
     content: "";
