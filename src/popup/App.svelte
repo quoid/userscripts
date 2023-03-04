@@ -440,11 +440,11 @@
         showInstall = false;
         // double check before send install message
         if (!installUserscript || !installUserscript.content) {
-            errorNotification = "install failed: userscript missing";
+            errorNotification = "Install failed: userscript missing";
         }
         const currentTab = await browser.tabs.getCurrent();
         if (currentTab.url !== installUserscript.url) {
-            errorNotification = "install failed: tab changed unexpectedly";
+            errorNotification = "Install failed: tab changed unexpectedly";
         }
         if (errorNotification) {
             disabled = false;
