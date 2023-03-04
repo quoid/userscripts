@@ -392,19 +392,19 @@ const _browser = {
         },
         sendMessage(tabId, message, responseCallback) {
             let response = {};
-            if (message.name === "USERSCRIPT_INSTALL_00") {
-                response = {success: "Click to install"};
-                // response.error = "something went wrong";
-            } else if (message.name === "USERSCRIPT_INSTALL_01") {
+            if (message.name === "POPUP_INSTALL_CHECK") {
                 response = {
-                    description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
-                    grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
-                    match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
-                    name: "Test Install Userscript",
-                    require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
-                    source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
+                    success: "Click to install (test)",
+                    metadata: {
+                        description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
+                        grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
+                        match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
+                        name: "Test Install Userscript",
+                        require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
+                        source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
+                    }
                 };
-                // response = {error: "a userscript with this @name value already exists, @name needs to be unique"};
+                // response.error = "something went wrong (dev)";
             }
             if (!responseCallback) {
                 return new Promise(resolve => {

@@ -179,28 +179,18 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 }
             #endif
         }
-        else if name == "USERSCRIPT_INSTALL_00" {
-            if
-                let content = message?["content"] as? String,
-                let reply = installCheck(content)
-            {
-                response.userInfo = [SFExtensionMessageKey: reply]
+        else if name == "POPUP_INSTALL_CHECK" {
+            if let content = message?["content"] as? String {
+                response.userInfo = [SFExtensionMessageKey: installCheck(content)]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get script content"]]
             }
         }
-        else if name == "USERSCRIPT_INSTALL_01" {
-            if
-                let content = message?["content"] as? String,
-                let reply = installParse(content)
-            {
-                response.userInfo = [SFExtensionMessageKey: reply]
-            }
-        }
-        else if name == "USERSCRIPT_INSTALL_02" {
-            if
-                let content = message?["content"] as? String,
-                let reply = installUserscript(content)
-            {
-                response.userInfo = [SFExtensionMessageKey: reply]
+        else if name == "POPUP_INSTALL_SCRIPT" {
+            if let content = message?["content"] as? String {
+                response.userInfo = [SFExtensionMessageKey: installUserscript(content)]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get script content (2)"]]
             }
         }
         else if name == "PAGE_INIT_DATA" {

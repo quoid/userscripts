@@ -429,38 +429,7 @@ function listeners() {
     // listens for messages from background, popup, etc...
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const name = request.name;
-        if (
-            name === "USERSCRIPT_INSTALL_00"
-            || name === "USERSCRIPT_INSTALL_01"
-            || name === "USERSCRIPT_INSTALL_02"
-        ) {
-            // only respond to top frame messages
-            if (window !== window.top) return;
-            const types = [
-                "text/plain",
-                "application/ecmascript",
-                "application/javascript",
-                "text/ecmascript",
-                "text/javascript"
-            ];
-            if (
-                !document.contentType
-                || types.indexOf(document.contentType) === -1
-                || !document.querySelector("pre")
-            ) {
-                sendResponse({invalid: true});
-            } else {
-                const message = {
-                    name,
-                    content:
-                    document.querySelector("pre").innerText
-                };
-                browser.runtime.sendMessage(message, response => {
-                    sendResponse(response);
-                });
-                return true;
-            }
-        } else if (name === "CONTEXT_RUN") {
+        if (name === "CONTEXT_RUN") {
             // from bg script when context-menu item is clicked
             // double check to ensure context-menu scripts only run in top windows
             if (window !== window.top) return;
