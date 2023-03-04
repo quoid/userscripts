@@ -2028,7 +2028,7 @@ func installUserscript(_ content: String) -> [String: Any]? {
         return nil
     }
     let name = sanitize(n)
-    let filename = "\(name).js"
+    let filename = "\(name).user.js"
 
     let saved = saveFile(["filename": filename, "type": "js"], content)
     return saved
