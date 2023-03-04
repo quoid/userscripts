@@ -7,7 +7,29 @@ if (import.meta.env.DEV) { // vite feat that only import in dev mode
     const modules = import.meta.glob("../shared/dev.js", {eager: true});
     // eslint-disable-next-line no-global-assign
     browser = modules["../shared/dev.js"].browser;
-    console.log(import.meta.env, modules, browser);
+    console.info("DEV-ENV", import.meta.env, modules, browser);
+    // macos popup style
+    const style = document.createElement("style");
+    style.textContent = `
+body {
+    top: 20px;
+    left: 20px;
+    box-sizing: content-box;
+    border: 2px solid #0c0e0f;
+    border-radius: 10px;
+}
+body:before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border: 1px solid #54575a;
+    border-radius: 9px;
+}
+`;
+    browser.platform === "macos" && document.head.append(style);
 }
 
 const app = new App({

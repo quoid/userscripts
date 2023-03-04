@@ -64,7 +64,7 @@ const files = [
 
 const _browser = {
     delay: 200,
-    platform: "ios",
+    platform: "macos", // ios || macos
     runtime: {
         getURL() {
             return "https://www.example.com/";
@@ -360,6 +360,20 @@ const _browser = {
                         ]
                     };
                 }
+            } else if (name === "POPUP_INSTALL_CHECK") {
+                response = random([
+                    {success: "Click to install", installed: false},
+                    {success: "Click to re-install", installed: true}
+                ]);
+                response.metadata = {
+                    description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
+                    grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
+                    match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
+                    name: "Test Install Userscript",
+                    require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
+                    source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
+                };
+                // response.error = "something went wrong (dev)";
             }
             if (!responseCallback) {
                 return new Promise(resolve => {
@@ -376,7 +390,13 @@ const _browser = {
     },
     tabs: {
         getCurrent(/* responseCallback */) {
-            const response = {url: "https://www.filmgarb.com/foo.user.js", id: 101};
+            const response = random([
+                {url: "https://www.filmgarb.com/foo.user.js", id: 101},
+                {url: `${window.location.origin}/src/shared/dev/DEMO.Alert-URL.user.js`, id: 102},
+                {url: `${window.location.origin}/src/shared/dev/DEMO.Alert-URL.user.js`, id: 103}, // increase probability
+                {url: window.location.href, id: 10}
+            ]);
+            console.info("browser.tabs.getCurrent", response);
             return new Promise(resolve => {
                 setTimeout(() => resolve(response), _browser.delay);
             });
@@ -392,18 +412,8 @@ const _browser = {
         },
         sendMessage(tabId, message, responseCallback) {
             let response = {};
-            if (message.name === "POPUP_INSTALL_CHECK") {
-                response = {
-                    success: "Click to install (test)",
-                    metadata: {
-                        description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
-                        grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
-                        match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
-                        name: "Test Install Userscript",
-                        require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
-                        source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
-                    }
-                };
+            if (message.name === "DEMO_MSG") {
+                response = {};
                 // response.error = "something went wrong (dev)";
             }
             if (!responseCallback) {
@@ -479,6 +489,10 @@ function saveFile(content, lastMod, newFilename, oldName) {
         // add to beginning of array
         files.unshift(s);
     }
+}
+
+function random(array) {
+    return array[Math.floor(Math.random() * array.length)];
 }
 
 export const browser = _browser;
