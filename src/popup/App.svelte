@@ -392,10 +392,13 @@
 
     async function installCheck(currentTab) {
         // refetch script from URL to avoid tampered DOM content
-        const res = await fetch(currentTab.url);
-        if (!res.ok) {
-            console.error(`Error fetching .user.js url: httpcode-${res.status}`);
-            errorNotification = `Fetching failed, refresh to retry. (${res.status})`;
+        let res; // fetch response
+        try {
+            res = await fetch(currentTab.url);
+            if (!res.ok) throw new Error(`httpcode-${res.status}`);
+        } catch (error) {
+            console.error("Error fetching .user.js url", error);
+            errorNotification = "Fetching failed, refresh to retry.";
             showInstallPrompt = undefined;
             return;
         }
