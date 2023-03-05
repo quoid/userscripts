@@ -85,7 +85,7 @@
                                 </textFieldCell>
                             </textField>
                             <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pKD-4w-JK7">
-                                <rect key="frame" x="144" y="24" width="192" height="16"/>
+                                <rect key="frame" x="144" y="24" width="193" height="16"/>
                                 <subviews>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Pik-Ho-vD1">
                                         <rect key="frame" x="-2" y="2" width="78" height="12"/>
@@ -107,7 +107,7 @@
                                         </textFieldCell>
                                     </textField>
                                     <button horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WiE-Qy-xne">
-                                        <rect key="frame" x="129" y="-7" width="69" height="27"/>
+                                        <rect key="frame" x="129" y="-7" width="70" height="27"/>
                                         <constraints>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="57" id="KfI-LD-AaS"/>
                                         </constraints>
@@ -204,6 +204,7 @@
                         <outlet property="appName" destination="gGD-M9-Dwj" id="WOi-mP-IbI"/>
                         <outlet property="enabledIcon" destination="i4K-xO-vlx" id="M8i-Qj-l6w"/>
                         <outlet property="enabledText" destination="v0r-qO-55O" id="wNQ-gC-2zf"/>
+                        <outlet property="openButton" destination="vjm-rq-99e" id="Mc0-Do-3jr"/>
                         <outlet property="saveLocation" destination="6k5-Oz-mOV" id="pgz-od-dyH"/>
                     </connections>
                 </viewController>

@@ -7,7 +7,8 @@ class ViewController: NSViewController {
     @IBOutlet var saveLocation: NSTextField!
     @IBOutlet weak var enabledText: NSTextField!
     @IBOutlet weak var enabledIcon: NSView!
-
+	@IBOutlet weak var openButton: NSButton!
+	
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
     let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
     let extensionID = extensionIdentifier
@@ -22,10 +23,12 @@ class ViewController: NSViewController {
             name: NSApplication.didBecomeActiveNotification,
             object: nil
         )
-        // set the save location url display
         let url = getSaveLocationURL()
         self.saveLocation.stringValue = url.absoluteString
         self.saveLocation.toolTip = url.absoluteString
+		if #available(macOS 13, *) {
+			self.openButton.title = "Open Safari Settings"
+		}
     }
 
     @objc func setExtensionState() {
