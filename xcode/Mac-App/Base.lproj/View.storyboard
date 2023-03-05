@@ -163,7 +163,7 @@
                                     </textField>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vjm-rq-99e">
                                         <rect key="frame" x="152" y="-7" width="156" height="27"/>
-                                        <buttonCell key="cell" type="push" title="Open Safari Settings" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="gl1-ZS-OQH">
+                                        <buttonCell key="cell" type="push" title="Open Safari Extensions list" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="gl1-ZS-OQH">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="message" size="11"/>
                                         </buttonCell>
