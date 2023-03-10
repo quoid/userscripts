@@ -30,10 +30,6 @@
         user-select: none;
     }
 
-    .item:active {
-        background-color: rgb(255 255 255 / 0.15);
-    }
-
     .item.light {
         background-color: var(--color-bg-primary);
     }
@@ -42,6 +38,10 @@
         .item:hover {
             background-color: rgb(255 255 255 / 0.075);
         }
+    }
+
+    .item:active {
+        background-color: rgb(255 255 255 / 0.15);
     }
 
     span {
