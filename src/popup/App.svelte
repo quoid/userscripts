@@ -123,6 +123,10 @@
         });
     }
 
+    function detailItem(item) {
+
+    }
+
     function checkForUpdates() {
         disabled = true;
         initError = false;
@@ -562,7 +566,8 @@
                         subframe={item.subframe}
                         type={item.type}
                         request={!!item.request}
-                        on:click={() => toggleItem(item)}
+                        toggleItem={() => toggleItem(item)}
+                        detailItem={() => detailItem(item)}
                     />
                 {/each}
             </div>

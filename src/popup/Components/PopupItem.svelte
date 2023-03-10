@@ -7,16 +7,21 @@
     export let type;
     export let subframe;
     export let request = false;
+    export let toggleItem;
+    export let detailItem;
 </script>
 
 <div
     class="item {enabled ? "enabled" : "disabled"} {background ?? ""}"
     on:click
 >
-    <span></span>
-    <div class="truncate">{name}</div>
-    {#if subframe}<div class="subframe">SUB</div>{/if}
-    <Tag type={request ? "request" : type}/>
+    <div class="base" on:click={toggleItem}>
+        <Tag type={request ? "request" : type}/>
+        <span></span>
+        <div class="truncate">{name}</div>
+        {#if subframe}<div class="subframe">SUB</div>{/if}
+    </div>
+    <div class="more" on:click={detailItem}>ⓘ</div>
 </div>
 
 <style>
@@ -24,7 +29,6 @@
         align-items: center;
         cursor: pointer;
         display: flex;
-        padding: 0.5rem 1rem;
         position: relative;
         -webkit-user-select: none;
         user-select: none;
@@ -35,13 +39,32 @@
     }
 
     @media (hover: hover) {
-        .item:hover {
+        .item:hover,
+        .item .base:hover,
+        .item .more:hover {
             background-color: rgb(255 255 255 / 0.075);
         }
     }
 
     .item:active {
         background-color: rgb(255 255 255 / 0.15);
+    }
+
+    .item .base {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+        padding: .5rem 0 .5rem .75rem;
+        position: relative;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .item .more {
+        padding: .5rem 1rem;
+        font-weight: bold;
     }
 
     span {
