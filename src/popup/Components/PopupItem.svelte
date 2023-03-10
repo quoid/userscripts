@@ -1,6 +1,7 @@
 <script>
     import Tag from "../../shared/Components/Tag.svelte";
-    
+
+    export let background;
     export let enabled = false;
     export let name;
     export let type;
@@ -8,7 +9,10 @@
     export let request = false;
 </script>
 
-<div class="item {enabled ? "enabled" : "disabled"}" on:click>
+<div
+    class="item {enabled ? "enabled" : "disabled"} {background ?? ""}"
+    on:click
+>
     <span></span>
     <div class="truncate">{name}</div>
     {#if subframe}<div class="subframe">SUB</div>{/if}
@@ -26,14 +30,18 @@
         user-select: none;
     }
 
-    @media (hover: hover) {
-        .item.item:hover {
-            background-color: rgb(255 255 255 / 0.075);
-        }
+    .item:active {
+        background-color: rgb(255 255 255 / 0.15);
     }
 
-    .item.item:active {
-        background-color: rgb(255 255 255 / 0.15);
+    .item.light {
+        background-color: var(--color-bg-primary);
+    }
+
+    @media (hover: hover) {
+        .item:hover {
+            background-color: rgb(255 255 255 / 0.075);
+        }
     }
 
     span {
