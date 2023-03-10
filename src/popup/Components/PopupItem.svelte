@@ -44,10 +44,10 @@
         .item .more:hover {
             background-color: rgb(255 255 255 / 0.075);
         }
-    }
-
-    .item:active {
-        background-color: rgb(255 255 255 / 0.15);
+        
+        .item:active {
+            background-color: rgb(255 255 255 / 0.15);
+        }
     }
 
     .item .base {
