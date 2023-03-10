@@ -5,10 +5,9 @@ import App from "./App.svelte";
 
 if (import.meta.env.DEV) { // vite feat that only import in dev mode
     const modules = import.meta.glob("../shared/dev.js", {eager: true});
-    // eslint-disable-next-line no-global-assign
-    browser = modules["../shared/dev.js"].browser;
+    window.browser = modules["../shared/dev.js"].browser;
     console.info("DEV-ENV", import.meta.env, modules, browser);
-    // macos popup style
+    // macos popup simulation
     const style = document.createElement("style");
     style.textContent = `
 body {
