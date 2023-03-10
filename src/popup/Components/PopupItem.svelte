@@ -8,7 +8,7 @@
     export let request = false;
 </script>
 
-<div class="item self {enabled ? "enabled" : "disabled"}" on:click>
+<div class="item {enabled ? "enabled" : "disabled"}" on:click>
     <span></span>
     <div class="truncate">{name}</div>
     {#if subframe}<div class="subframe">SUB</div>{/if}
@@ -27,12 +27,12 @@
     }
 
     @media (hover: hover) {
-        .item.self:hover {
+        .item.item:hover {
             background-color: rgb(255 255 255 / 0.075);
         }
     }
 
-    .item.self:active {
+    .item.item:active {
         background-color: rgb(255 255 255 / 0.15);
     }
 
