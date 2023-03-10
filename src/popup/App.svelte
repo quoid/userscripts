@@ -14,7 +14,7 @@
     import iconRefresh from "../shared/img/icon-refresh.svg?raw";
     import {extensionPaths, openExtensionPage} from "../shared/utils.js";
     import * as settingsStorage from "../shared/settings.js";
-    
+
     let errorNotification;
     let active = true;
     let loading = true;
@@ -45,15 +45,14 @@
 
     $: list = items.sort((a, b) => a.name.localeCompare(b.name));
 
-    $: if (list.length > 1 && list.length % 2 === 0) {
-        rowColors = "even";
-    } else if (list.length > 1 && list.length % 2 !== 0) {
-        rowColors = "odd";
-    } else {
-        rowColors = undefined;
-    }
-
     $: if (platform) document.body.classList.add(platform);
+
+    function getItemBackgroundColor(elements, index) {
+        if (elements.length < 2) return null;
+        if (elements.length % 2 === 0 && index % 2 === 0) return "light";
+        if (elements.length % 2 !== 0 && index % 2 !== 0) return "light";
+        return null;
+    }
 
     async function toggleExtension() {
         await settingsStorage.set({global_active: !active});
@@ -555,8 +554,9 @@
             <div class="none">No matched userscripts</div>
         {:else}
             <div class="items" class:disabled={disabled}>
-                {#each list as item (item.filename)}
+                {#each list as item, i (item.filename)}
                     <PopupItem
+                        background={getItemBackgroundColor(list, i)}
                         enabled={!item.disabled}
                         name={item.name}
                         subframe={item.subframe}
@@ -699,11 +699,6 @@
 
     :global(body:not(.ios) .main) {
         max-height: 20rem;
-    }
-
-    .main.even :global(.item:nth-of-type(odd)),
-    .main.odd :global(.item:nth-of-type(even)) {
-        background-color: var(--color-bg-primary);
     }
 
     .none {
