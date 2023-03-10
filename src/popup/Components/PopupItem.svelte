@@ -50,6 +50,12 @@
         }
     }
 
+    @media not (hover: hover) {
+        .item .more {
+            border-left: .1rem solid rgb(255 255 255 / 0.075);
+        }
+    }
+
     .item .base {
         align-items: center;
         cursor: pointer;
