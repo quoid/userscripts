@@ -7,6 +7,7 @@
     import View from "./Components/View.svelte";
     import UpdateView from "./Components/Views/UpdateView.svelte";
     import InstallView from "./Components/Views/InstallView.svelte";
+    import DetailView from "./Components/Views/DetailView.svelte";
     import AllItemsView from "./Components/Views/AllItemsView.svelte";
     import iconOpen from "../shared/img/icon-open.svg?raw";
     import iconUpdate from "../shared/img/icon-update.svg?raw";
@@ -38,6 +39,9 @@
     let installUserscript; // url, content
     let installViewUserscript; // metadata
     let installViewUserscriptError;
+    let showDetail;
+    let showDetailTitle;
+    let detailViewItem;
     let showAll;
     let allItems = [];
     let resizeTimer;
@@ -124,7 +128,9 @@
     }
 
     function detailItem(item) {
-
+        detailViewItem = item;
+        showDetailTitle = "Userscript Detail";
+        showDetail = true;
     }
 
     function checkForUpdates() {
@@ -470,6 +476,14 @@
         refreshView();
     }
 
+    async function updateConfirm() {
+        console.log("updateConfirm");
+    }
+
+    async function deleteConfirm() {
+        console.log("deleteConfirm");
+    }
+
     onMount(async () => {
         await initialize();
         // run resize again for good measure
@@ -609,6 +623,21 @@
             installError={installViewUserscriptError}
             installCancelClick={() => showInstall = false}
             installConfirmClick={installConfirm}
+        />
+    </View>
+{:else if showDetail}
+    <View
+        headerTitle={showDetailTitle}
+        loading={disabled}
+        closeClick={() => showDetail = false}
+        showLoaderOnDisabled={true}
+    >
+        <DetailView
+            itemdata={detailViewItem}
+            cancelClick={() => showDetail = false}
+            installConfirmClick={installConfirm}
+            updateConfirmClick={updateConfirm}
+            deleteConfirmClick={deleteConfirm}
         />
     </View>
 {:else if showAll}
