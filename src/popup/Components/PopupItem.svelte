@@ -50,7 +50,7 @@
         }
     }
 
-    @media not (hover: hover) {
+    @media (hover: none) {
         .item .more {
             border-left: .1rem solid rgb(255 255 255 / 0.075);
         }
