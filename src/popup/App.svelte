@@ -636,7 +636,8 @@
     >
         <AllItemsView
             allItems={allItems}
-            allItemsToggleItem={toggleItem}
+            toggleItem={toggleItem}
+            detailItem={detailItem}
         />
     </View>
 {/if}

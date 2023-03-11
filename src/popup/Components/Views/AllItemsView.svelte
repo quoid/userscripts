@@ -2,7 +2,8 @@
     import PopupItem from "../PopupItem.svelte";
 
     export let allItems = [];
-    export let allItemsToggleItem;
+    export let toggleItem;
+    export let detailItem;
 
     let disabled;
     let rowColorsAll;
@@ -27,7 +28,8 @@
                 subframe={item.subframe}
                 type={item.type}
                 request={!!item.request}
-                on:click={() => allItemsToggleItem(item)}
+                toggleItem={() => toggleItem(item)}
+                detailItem={() => detailItem(item)}
             />
         {/each}
     </div>
