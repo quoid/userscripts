@@ -18,8 +18,6 @@
     ];
     let errormsg = itemdata.error;
     let metadata = itemdata.metadata;
-    let variableButton;
-    let variableButtonClick;
 
     function metadataInit() {
         if (metadata) return;
@@ -38,18 +36,6 @@
     if (!errormsg) {
         if (!metadata) {
             metadataInit();
-        }
-        if (itemdata.update) {
-            variableButton = "Update";
-            variableButtonClick = updateConfirmClick;
-        }
-        if (itemdata.filename) {
-            variableButton = "Delete";
-            variableButtonClick = deleteConfirmClick;
-        }
-        if (itemdata.url) {
-            variableButton = "Install";
-            variableButtonClick = installConfirmClick;
         }
     }
 </script>
@@ -81,7 +67,7 @@
                 {/if}
             {/each}
         </ul>
-        {#if !itemdata.filename}
+        {#if itemdata.url}
         <div class="badge">
             <div class="badge--icon">{@html iconWarn}</div>
             <div class="badge--text">Be sure you trust the author before installing. Nefarious code can exploit your security and privacy.</div>
@@ -91,9 +77,21 @@
             <button class="cancel" on:click={cancelClick}>
                 Cancel
             </button>
-            <button class={variableButton} on:click={variableButtonClick}>
-                {variableButton}
-            </button>
+            {#if itemdata.url}
+                <button class="install" on:click={installConfirmClick}>
+                    {itemdata.installed ? "Reinstall" : "Install"}
+                </button>
+            {/if}
+            {#if itemdata.filename}
+                <button class="delete" on:click={deleteConfirmClick}>
+                    Delete
+                </button>
+            {/if}
+            {#if itemdata.update}
+                <button class="update" on:click={updateConfirmClick}>
+                    Update
+                </button>
+            {/if}
         </div>
     {/if}
 </div>
@@ -201,19 +199,20 @@
         background-color: #ffffffa6; /* -text-color-secondary */
         border-radius: var(--border-radius);
         color: var(--color-bg-primary);
+        font-weight: 600;
         flex-grow: 1;
         height: 2rem;
     }
 
-    button.Install {
+    button.install {
         background-color: var(--color-blue);
     }
 
-    button.Update {
+    button.update {
         background-color: var(--color-yellow);
     }
 
-    button.Delete {
+    button.delete {
         background-color: var(--color-red);
     }
 </style>
