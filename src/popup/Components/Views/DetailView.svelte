@@ -4,10 +4,10 @@
     import {parse} from "../../../shared/utils";
     
     export let itemdata;
-    export let cancelClick;
+    export let goBackClick;
     export let installConfirmClick;
     export let updateConfirmClick;
-    export let deleteConfirmClick;
+    export let trashConfirmClick;
 
     const showItems = [
         "version",
@@ -18,6 +18,18 @@
     ];
     let errormsg = itemdata.error;
     let metadata = itemdata.metadata;
+    let checking;
+    let trashing;
+    let updating; // TODO
+
+    $: checking = trashing || updating;
+
+    function cancelClick() {
+        if (trashing) {
+            return trashing = undefined;
+        }
+        goBackClick();
+    }
 
     function metadataInit() {
         if (metadata) return;
@@ -53,19 +65,21 @@
             {#if itemdata.filename}
                 <li class="item--filename">{itemdata.filename}</li>
             {/if}
-            {#if metadata.description}
-                <li class="item--description">{metadata.description}</li>
-            {/if}
-            {#each showItems as key}
-                {#if metadata[key]}
-                    <li class="item--field">
-                        <div>@{key}</div>
-                        {#each metadata[key] as val}
-                            <div class="truncate">{val}</div>
-                        {/each}
-                    </li>
+            {#if !checking}
+                {#if metadata.description}
+                    <li class="item--description">{metadata.description}</li>
                 {/if}
-            {/each}
+                {#each showItems as key}
+                    {#if metadata[key]}
+                        <li class="item--field">
+                            <div>@{key}</div>
+                            {#each metadata[key] as val}
+                                <div class="truncate">{val}</div>
+                            {/each}
+                        </li>
+                    {/if}
+                {/each}
+            {/if}
         </ul>
         {#if itemdata.url}
         <div class="badge">
@@ -73,7 +87,18 @@
             <div class="badge--text">Be sure you trust the author before installing. Nefarious code can exploit your security and privacy.</div>
         </div>
         {/if}
+        {#if trashing}
+        <div class="badge">
+            <div class="badge--icon">{@html iconWarn}</div>
+            <div class="badge--text">Are you sure you want to trash this file?</div>
+        </div>
+        {/if}
         <div class="buttons">
+            {#if trashing}
+                <button class="trash" on:click={trashConfirmClick}>
+                    Confirm
+                </button>
+            {/if}
             <button class="cancel" on:click={cancelClick}>
                 Cancel
             </button>
@@ -82,12 +107,12 @@
                     {itemdata.installed ? "Reinstall" : "Install"}
                 </button>
             {/if}
-            {#if itemdata.filename}
-                <button class="delete" on:click={deleteConfirmClick}>
-                    Delete
+            {#if itemdata.filename && !checking}
+                <button class="trash" on:click={() => trashing = true}>
+                    Trash
                 </button>
             {/if}
-            {#if itemdata.update}
+            {#if itemdata.update && !checking}
                 <button class="update" on:click={updateConfirmClick}>
                     Update
                 </button>
@@ -190,6 +215,7 @@
 
     .buttons {
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-between;
         gap: 1rem;
         padding-bottom: 1rem;
@@ -200,7 +226,7 @@
         border-radius: var(--border-radius);
         color: var(--color-bg-primary);
         font-weight: 600;
-        flex-grow: 1;
+        flex: 1 0 calc(33.333% - 1rem);
         height: 2rem;
     }
 
@@ -212,7 +238,8 @@
         background-color: var(--color-yellow);
     }
 
-    button.delete {
+    button.trash {
+        color: var(--text-color-primary);
         background-color: var(--color-red);
     }
 </style>

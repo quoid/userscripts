@@ -476,10 +476,25 @@
 
     async function updateConfirm() {
         console.log("updateConfirm");
+        // TODO
+        // will be implement after the new async update check is implemented
     }
 
-    async function deleteConfirm() {
-        console.log("deleteConfirm");
+    async function trashConfirm() {
+        disabled = true;
+        const message = {name: "POPUP_TRASH", item: detailViewItem};
+        const response = await browser.runtime.sendNativeMessage(message);
+        if (response.error) {
+            errorNotification = response.error;
+        } else {
+            // delete the item in the cache array after success
+            allItems = allItems.filter(obj => obj.filename !== detailViewItem.filename);
+            // refresh main view
+            refreshView();
+        }
+        disabled = false;
+        // exit detail view
+        showDetailView = undefined;
     }
 
     onMount(async () => {
@@ -618,10 +633,10 @@
     >
         <DetailView
             itemdata={detailViewItem}
-            cancelClick={() => showDetailView = false}
+            goBackClick={() => showDetailView = false}
             installConfirmClick={installConfirm}
             updateConfirmClick={updateConfirm}
-            deleteConfirmClick={deleteConfirm}
+            trashConfirmClick={trashConfirm}
         />
     </View>
 {:else if showAll}
