@@ -1,5 +1,7 @@
 <script>
+    import IconButton from "../../shared/Components/IconButton.svelte";
     import Tag from "../../shared/Components/Tag.svelte";
+    import iconInfo from "../../shared/img/icon-info.svg?raw";
 
     export let background;
     export let enabled = false;
@@ -21,7 +23,12 @@
         <div class="truncate">{name}</div>
         {#if subframe}<div class="subframe">SUB</div>{/if}
     </div>
-    <div class="more" on:click={detailItem}>ⓘ</div>
+    <div class="more" on:click={detailItem}>
+        <IconButton
+            icon={iconInfo}
+            title="Show user script details"
+        />
+    </div>
 </div>
 
 <style>
@@ -39,20 +46,12 @@
     }
 
     @media (hover: hover) {
-        .item:hover,
-        .item .base:hover,
-        .item .more:hover {
+        .item:hover {
             background-color: rgb(255 255 255 / 0.075);
         }
-        
+
         .item:active {
             background-color: rgb(255 255 255 / 0.15);
-        }
-    }
-
-    @media (hover: none) {
-        .item .more {
-            border-left: .1rem solid rgb(255 255 255 / 0.075);
         }
     }
 
@@ -69,8 +68,23 @@
     }
 
     .item .more {
-        padding: .5rem 1rem;
+        padding: .5rem;
         font-weight: bold;
+    }
+
+    .more :global(button svg) {
+        opacity: 1;
+        transform: scale(0.75);
+    }
+
+    @media (hover: hover) {
+        .more :global(button svg:not(:hover)) {
+            opacity: 0.25;
+        }
+
+        .more:hover :global(button svg) {
+            opacity: 1;
+        }
     }
 
     span {
