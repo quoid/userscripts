@@ -6,8 +6,6 @@ IOS_APP_VERSION = 1.3.3
 MAC_APP_BUILD = 65
 MAC_APP_VERSION = 4.3.3
 
-// Developer Team ID
-DEVELOPMENT_TEAM = J74Q8V8V8N
 // Organization Identifier
 ORG_IDENTIFIER = com.userscripts
 // Application Identifier
