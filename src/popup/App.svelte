@@ -703,15 +703,12 @@
 
     .none {
         align-items: center;
-        bottom: 0;
         color: var(--text-color-disabled);
         display: flex;
         font-weight: 600;
         justify-content: center;
-        left: 0;
+        inset: 0;
         position: absolute;
-        right: 0;
-        top: 0;
     }
 
     .items.disabled {
