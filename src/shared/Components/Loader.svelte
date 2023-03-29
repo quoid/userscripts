@@ -19,14 +19,11 @@
 <style>
     .loader {
         align-items: center;
-        bottom: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        left: 0;
+        inset: 0;
         position: absolute;
-        right: 0;
-        top: 0;
         z-index: 90;
     }
 
