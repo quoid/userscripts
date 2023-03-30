@@ -36,6 +36,7 @@
         "clipboardWrite",
         "contextMenus",
         "declarativeNetRequest",
+        "declarativeNetRequestWithHostAccess",
         "menus",
         "nativeMessaging",
         "storage",
