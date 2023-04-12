@@ -1072,7 +1072,17 @@ func getUrlProps(_ url: String) -> [String: String]? {
         err("failed to parse url in getUrlProps")
         return nil
     }
-    return ["protocol": "\(ptcl):", "host": host, "pathname": parts.path, "href": url]
+    var search = ""
+    if let query = parts.query {
+        search = "?" + query
+    }
+    return [
+        "protocol": "\(ptcl):",
+        "host": host,
+        "pathname": parts.path,
+        "search": search,
+        "href": url
+    ]
 }
 
 func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
@@ -1085,7 +1095,23 @@ func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
     return regex
 }
 
-func match(_ ptcl: String,_ host: String,_ path: String,_ matchPattern: String) -> Bool {
+func match(_ url: String, _ matchPattern: String) -> Bool {
+    guard
+        let parts = getUrlProps(url),
+        let ptcl = parts["protocol"],
+        let host = parts["host"],
+        var path = parts["pathname"]
+    else {
+        err("invalid url \(url)")
+        return false
+    }
+
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns#path
+    // The value for the path matches against the string which is the URL path plus the URL query string
+    if let search = parts["search"], search.count > 0 {
+        path += search
+    }
+
     // matchPattern is the value from metatdata key @match or @exclude-match
     if (matchPattern == "<all_urls>") {
         return true
@@ -1156,17 +1182,7 @@ func include(_ url: String,_ pattern: String) -> Bool {
 func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlocklist: Bool) -> [String] {
     logText("Getting matched files for \(url)")
     let manifest = optionalManifest ?? getManifest()
-    guard
-        let parts = getUrlProps(url),
-        let ptcl = parts["protocol"],
-        let host = parts["host"],
-        let path = parts["pathname"],
-        let href = parts["href"]
-    else {
-        err("getMatchedFiles failed at (1) for \(url)")
-        return [String]()
-    }
-    
+
     // filenames that should not load for the passed url
     // the manifest values from @exclude and @exclude-match populate this set
     var excludedFilenames: Set<String> = []
@@ -1185,7 +1201,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
     // if url matches a pattern in blocklist, no injection for this url
     if (checkBlocklist) {
         for pattern in manifest.blacklist {
-            if match(ptcl, host, path, pattern) {
+            if match(url, pattern) {
                 // return empty array
                 return Array(matchedFilenames)
             }
@@ -1195,7 +1211,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
     // loop through all the @exclude-match patterns
     // if any match passed url, push all filenames to excludedFilenames set
     for pattern in excludeMatchPatterns {
-        if match(ptcl, host, path, pattern) {
+        if match(url, pattern) {
             guard let filenames = manifest.excludeMatch[pattern] else {
                 err("getMatchedFiles failed at (2) for \(pattern)")
                 continue
@@ -1204,7 +1220,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
         }
     }
     for exp in excludeExpressions {
-        if include(href, exp) {
+        if include(url, exp) {
             guard let filenames = manifest.exclude[exp] else {
                 err("getMatchedFiles failed at (3) for \(exp)")
                 continue
@@ -1213,7 +1229,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
         }
     }
     for pattern in matchPatterns {
-        if match(ptcl, host, path, pattern) {
+        if match(url, pattern) {
             guard let filenames = manifest.match[pattern] else {
                 err("getMatchedFiles failed at (4) for \(pattern)")
                 continue
@@ -1222,7 +1238,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
         }
     }
     for exp in includeExpressions {
-        if include(href, exp) {
+        if include(url, exp) {
             guard let filenames = manifest.include[exp] else {
                 err("getMatchedFiles failed at (5) for \(exp)")
                 continue
@@ -1616,14 +1632,10 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     if showCount == "false" {
         return 0
     }
-    if let parts = getUrlProps(url), let ptcl = parts["protocol"], let host = parts["host"], let path = parts["pathname"] {
-        for pattern in manifest.blacklist {
-            if match(ptcl, host, path, pattern) {
-                return 0
-            }
+    for pattern in manifest.blacklist {
+        if match(url, pattern) {
+            return 0
         }
-    } else {
-        return 0
     }
     if active != "true" {
         return 0
