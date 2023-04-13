@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import Userscripts_Extension
+@testable import Userscripts_Mac_Safari_Extension
 
 class UserscriptsTests: XCTestCase {
 
@@ -144,6 +144,10 @@ class UserscriptsTests: XCTestCase {
             "http://127.0.0.1/*": [
                 "http://127.0.0.1/",
                 "http://127.0.0.1/foo/bar.html"
+            ],
+            "*://*.example.com/*?a=1*": [
+                "http://example.com/?a=1",
+                "https://www.example.com/index?a=1&b=2"
             ]
         ]
         let patternDictFails = [
@@ -163,37 +167,25 @@ class UserscriptsTests: XCTestCase {
             ],
             "https://www.example*/*": [
                 "https://www.example.com/"
+            ],
+            "*://*.example.com/*?a=1*": [
+                "http://example.com/",
+                "https://www.example.com/?a=2"
             ]
         ]
         for (pattern, urls) in patternDict {
             count = count + urls.count
             for url in urls {
-                if
-                    let parts = getUrlProps(url),
-                    let ptcl = parts["protocol"],
-                    let host = parts["host"],
-                    let path = parts["pathname"]
-                {
-                    if match(ptcl, host, path, pattern) {
-                        result.append("1")
-                    }
+                if match(url, pattern) {
+                    result.append("1")
                 }
             }
         }
         for (pattern, urls) in patternDictFails {
             // don't increment count since these tests should fail
             for url in urls {
-                if
-                    let parts = getUrlProps(url),
-                    let ptcl = parts["protocol"],
-                    let host = parts["host"],
-                    let path = parts["pathname"]
-                {
-                    if match(ptcl, host, path, pattern) {
-                        // if these match, results will get an extra element
-                        // and then the test will fail
-                        result.append("1")
-                    }
+                if match(url, pattern) {
+                    result.removeLast()
                 }
             }
         }
