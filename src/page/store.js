@@ -109,6 +109,9 @@ function settingsStore() {
                 }
             });
         }
+        if (key === "active") {
+            browser.runtime.sendNativeMessage({name: "TOGGLE_EXTENSION", active: String(value)});
+        }
     };
     const updateSingleSetting = (key, value) => {
         // update(settings => (settings[key] = value, settings));
