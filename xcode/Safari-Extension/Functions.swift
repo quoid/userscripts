@@ -1622,23 +1622,15 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     }
     let manifest = getManifest()
     guard
-        var matches = getPopupMatches(url, subframeUrls),
-        let active = manifest.settings["active"],
-        let showCount = manifest.settings["showCount"]
+        var matches = getPopupMatches(url, subframeUrls)
     else {
         err("getPopupBadgeCount failed at (1)")
         return nil
-    }
-    if showCount == "false" {
-        return 0
     }
     for pattern in manifest.blacklist {
         if match(url, pattern) {
             return 0
         }
-    }
-    if active != "true" {
-        return 0
     }
     matches = matches.filter{!manifest.disabled.contains($0["filename"] as! String)}
     return matches.count
