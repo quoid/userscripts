@@ -116,7 +116,12 @@ async function setBadgeCount() {
         if (count > 0) {
             browser.browserAction.setBadgeText({text: count.toString()});
         } else {
-            browser.browserAction.setBadgeText({text: ""});
+            const _url = new URL(url);
+            if (_url.pathname.endsWith(".user.js")) {
+                browser.browserAction.setBadgeText({text: "JS"});
+            } else {
+                clearBadge();
+            }
         }
     });
 }
