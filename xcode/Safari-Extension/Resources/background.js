@@ -435,6 +435,10 @@ function handleMessage(request, sender, sendResponse) {
             }
             break;
         }
+        case "REFRESH_BADGE": {
+            setBadgeCount();
+            break;
+        }
         case "REFRESH_SESSION_RULES": {
             setSessionRules();
             break;
