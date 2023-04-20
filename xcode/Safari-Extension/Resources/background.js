@@ -81,9 +81,6 @@ function setClipboard(data, type = "text/plain") {
 }
 
 async function setBadgeCount() {
-    // only set badge on macOS
-    const platform = await getPlatform();
-    if (platform !== "macos") return;
     const clearBadge = () => browser.browserAction.setBadgeText({text: ""});
     // TODO: after the background script is modularized, import and use:
     // settingsStorage.get(["global_active","toolbar_badge_count","global_exclude_match"])

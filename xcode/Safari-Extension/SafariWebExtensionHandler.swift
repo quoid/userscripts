@@ -58,17 +58,15 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
         }
         else if name == "POPUP_BADGE_COUNT" {
-            #if os(macOS)
-                if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-                    if let matches = getPopupBadgeCount(url, frameUrls) {
-                        response.userInfo = [SFExtensionMessageKey: ["count": matches]]
-                    } else {
-                        response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
-                    }
+            if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
+                if let matches = getPopupBadgeCount(url, frameUrls) {
+                    response.userInfo = [SFExtensionMessageKey: ["count": matches]]
                 } else {
-                    inBoundError = true
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
                 }
-            #endif
+            } else {
+                inBoundError = true
+            }
         }
         else if name == "POPUP_INIT" {
             if let initData = popupInit() {
