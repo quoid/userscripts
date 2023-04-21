@@ -203,7 +203,7 @@ const _browser = {
                 response = result;
                 // response.error = "Something went wrong!";
                 // response.info = "No updates found";
-            } else if (name === "POPUP_TOGGLE_EXTENSION") {
+            } else if (name === "TOGGLE_EXTENSION") {
                 // response = {error: "Failed toggle extension"};
                 response = {success: true};
             } else if (name === "POPUP_UPDATE_ALL" || name === "POPUP_UPDATE_SINGLE") {

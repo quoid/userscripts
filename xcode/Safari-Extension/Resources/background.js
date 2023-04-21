@@ -81,23 +81,22 @@ function setClipboard(data, type = "text/plain") {
 }
 
 async function setBadgeCount() {
-    // only set badge on macOS
-    const platform = await getPlatform();
-    if (platform !== "macos") return;
+    const clearBadge = () => browser.browserAction.setBadgeText({text: ""});
+    // TODO: after the background script is modularized, import and use:
+    // settingsStorage.get(["global_active","toolbar_badge_count","global_exclude_match"])
+    const results = await browser.storage.local.get(["US_GLOBAL_ACTIVE", "US_TOOLBAR_BADGE_COUNT"]);
+    if (results?.US_GLOBAL_ACTIVE === false) return clearBadge();
+    if (results?.US_TOOLBAR_BADGE_COUNT === false) return clearBadge();
+
     const currentTab = await browser.tabs.getCurrent();
     // no active tabs exist (user closed all windows)
-    if (!currentTab) return;
+    if (!currentTab) return clearBadge();
     const url = currentTab.url;
     // if url doesn't exist, stop
-    if (!url) {
-        browser.browserAction.setBadgeText({text: ""});
-        return;
-    }
+    if (!url) return clearBadge();
     // only check for http/s pages
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        browser.browserAction.setBadgeText({text: ""});
-        return;
-    }
+    if (!url.startsWith("http://") && !url.startsWith("https://")) return clearBadge();
+    // TODO: if url match in global exclude list, clear badge
     const frameUrls = new Set();
     const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
     for (let i = 0; i < frames.length; i++) {
@@ -117,7 +116,12 @@ async function setBadgeCount() {
         if (count > 0) {
             browser.browserAction.setBadgeText({text: count.toString()});
         } else {
-            browser.browserAction.setBadgeText({text: ""});
+            const _url = new URL(url);
+            if (_url.pathname.endsWith(".user.js")) {
+                browser.browserAction.setBadgeText({text: "JS"});
+            } else {
+                clearBadge();
+            }
         }
     });
 }
