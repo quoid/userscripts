@@ -57,8 +57,6 @@
     async function toggleExtension() {
         await settingsStorage.set({global_active: !active});
         active = await settingsStorage.get("global_active");
-        // refresh badge count
-        browser.runtime.sendMessage({name: "REFRESH_BADGE"});
         // TODO: delete after migrating all related logic on the native
         browser.runtime.sendNativeMessage({name: "TOGGLE_EXTENSION", active: String(active)});
     }
