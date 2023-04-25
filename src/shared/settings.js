@@ -354,6 +354,11 @@ function deepFreeze(object) {
     return Object.freeze(object);
 }
 
+// compatibility polyfill for Safari < 15.4
+if (Object.hasOwn === undefined) {
+    Object.hasOwn = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
 // export and define the operation method of settings storage
 // they are similar to browser.storage but slightly different
 
