@@ -214,7 +214,6 @@ const apis = {
 };
 // remote window's browser object
 delete window.browser;
-delete window.chrome;
 
 // label used to distinguish frames in console
 const label = randomLabel();
