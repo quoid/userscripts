@@ -1,9 +1,9 @@
 #include "Userscripts-Base.xcconfig"
 
 INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2018–2023 Justin Wasack. All rights reserved.
-IOS_APP_BUILD = 44
+IOS_APP_BUILD = 45
 IOS_APP_VERSION = 1.4.1
-MAC_APP_BUILD = 71
+MAC_APP_BUILD = 72
 MAC_APP_VERSION = 4.4.1
 
 // Developer Team ID
