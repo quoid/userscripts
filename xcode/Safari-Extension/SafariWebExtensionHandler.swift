@@ -58,17 +58,15 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
         }
         else if name == "POPUP_BADGE_COUNT" {
-            #if os(macOS)
-                if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-                    if let matches = getPopupBadgeCount(url, frameUrls) {
-                        response.userInfo = [SFExtensionMessageKey: ["count": matches]]
-                    } else {
-                        response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
-                    }
+            if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
+                if let matches = getPopupBadgeCount(url, frameUrls) {
+                    response.userInfo = [SFExtensionMessageKey: ["count": matches]]
                 } else {
-                    inBoundError = true
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
                 }
-            #endif
+            } else {
+                inBoundError = true
+            }
         }
         else if name == "POPUP_INIT" {
             if let initData = popupInit() {
@@ -124,21 +122,17 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 response.userInfo = [SFExtensionMessageKey: ["error": "failed to check for updates"]]
             }
         }
-        else if name == "POPUP_TOGGLE_EXTENSION" {
-            var manifest = getManifest()
-            if let active = manifest.settings["active"] {
-                if active == "true" {
-                    manifest.settings["active"] = "false"
-                } else {
-                    manifest.settings["active"] = "true"
-                }
+        else if name == "TOGGLE_EXTENSION" {
+            if let active = message?["active"] as? String, ["true", "false"].contains(active) {
+                var manifest = getManifest()
+                manifest.settings["active"] = active
                 if updateManifest(with: manifest) {
                     response.userInfo = [SFExtensionMessageKey: ["success": true]]
                 } else {
                     response.userInfo = [SFExtensionMessageKey: ["error": "failed to update injection state"]]
                 }
             } else {
-                response.userInfo = [SFExtensionMessageKey: ["error": "failed to update injection state"]]
+                response.userInfo = [SFExtensionMessageKey: ["error": "missing or wrong message content"]]
             }
         }
         else if name == "TOGGLE_ITEM" {
