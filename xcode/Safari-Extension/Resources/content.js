@@ -178,11 +178,11 @@ const apis = {
                     }
                     // call userscript method
                     details[msg.name](msg.response);
-                    // all messages received
-                    // tell background it's safe to close port
-                    if (msg.name === "onloadend") {
-                        port.postMessage({name: "DISCONNECT"});
-                    }
+                }
+                // all messages received
+                // tell background it's safe to close port
+                if (msg.name === "onloadend") {
+                    port.postMessage({name: "DISCONNECT"});
                 }
             });
 
