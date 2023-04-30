@@ -188,7 +188,7 @@ const apis = {
 
             // handle port disconnect and clean tasks
             port.onDisconnect.addListener(p => {
-                if (p.error) {
+                if (p?.error) {
                     console.error(`port disconnected due to an error: ${p.error.message}`);
                 }
                 browser.runtime.onConnect.removeListener(listener);
