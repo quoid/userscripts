@@ -130,6 +130,8 @@ async function setBadgeCount() {
 }
 
 async function setSessionRules() {
+    // not supported below safari 15.4
+    if (!browser.declarativeNetRequest.updateSessionRules) return;
     await clearAllSessionRules();
     const message = {name: "REQ_REQUESTS"};
     const response = await browser.runtime.sendNativeMessage(message);
