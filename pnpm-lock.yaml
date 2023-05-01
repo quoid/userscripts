@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@sveltejs/vite-plugin-svelte': ^2.0.3
+  '@types/webextension-polyfill': ^0.10.0
   autoprefixer: ^10.4.13
   cm-show-invisibles: ^3.1.0
   codemirror: ^5.65.12
@@ -24,6 +25,7 @@ specifiers:
 
 devDependencies:
   '@sveltejs/vite-plugin-svelte': 2.0.3_svelte@3.55.1+vite@4.1.4
+  '@types/webextension-polyfill': 0.10.0
   autoprefixer: 10.4.13_postcss@8.4.23
   cm-show-invisibles: 3.1.0
   codemirror: 5.65.12
@@ -382,6 +384,10 @@ packages:
 
   /@types/parse-json/4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
+    dev: true
+
+  /@types/webextension-polyfill/0.10.0:
+    resolution: {integrity: sha512-If4EcaHzYTqcbNMp/FdReVdRmLL/Te42ivnJII551bYjhX19bWem5m14FERCqdJA732OloGuxCRvLBvcMGsn4A==}
     dev: true
 
   /acorn-jsx/5.3.2_acorn@8.8.2:

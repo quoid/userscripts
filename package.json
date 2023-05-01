@@ -10,6 +10,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^2.0.3",
+		"@types/webextension-polyfill": "^0.10.0",
 		"autoprefixer": "^10.4.13",
 		"cm-show-invisibles": "^3.1.0",
 		"codemirror": "^5.65.12",
