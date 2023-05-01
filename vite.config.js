@@ -184,5 +184,10 @@ export default defineConfig({
 		processIndexFiles()
 	],
 	publicDir: false,
-	root: root
+	root: root,
+	test: {
+		dir: "tests",
+		environment: "jsdom",
+		root: "./"
+	}
 });

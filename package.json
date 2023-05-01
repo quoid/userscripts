@@ -11,10 +11,12 @@
 		"format": "prettier --write '**/*.{js,ts,css,svelte}'",
 		"lint:css": "stylelint '**/*.{css,svelte}'",
 		"lint:js": "eslint ./ --max-warnings 10",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^2.0.3",
+		"@testing-library/svelte": "^3.2.2",
 		"@types/webextension-polyfill": "^0.10.0",
 		"autoprefixer": "^10.4.13",
 		"cm-show-invisibles": "^3.1.0",
@@ -23,6 +25,7 @@
 		"eslint-config-prettier": "^8.8.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-svelte": "^2.27.2",
+		"jsdom": "^21.1.2",
 		"postcss": "^8.4.23",
 		"postcss-html": "^1.5.0",
 		"prettier": "^2.8.8",
@@ -34,6 +37,7 @@
 		"stylelint-order": "^6.0.3",
 		"stylelint-prettier": "^3.0.0",
 		"svelte": "^3.55.1",
-		"vite": "^4.1.4"
+		"vite": "^4.1.4",
+		"vitest": "^0.30.1"
 	}
 }
