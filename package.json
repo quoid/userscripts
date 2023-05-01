@@ -1,28 +1,33 @@
 {
-    "name": "userscripts",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "lint-js": "eslint ./",
-        "lint-css": "stylelint '**/*.{css,svelte}'"
-    },
-    "devDependencies": {
-        "@sveltejs/vite-plugin-svelte": "^2.0.3",
-        "autoprefixer": "^10.4.13",
-        "cm-show-invisibles": "^3.1.0",
-        "codemirror": "^5.65.12",
-        "eslint": "^8.35.0",
-        "eslint-config-airbnb-base": "^15.0.0",
-        "eslint-plugin-import": "^2.27.5",
-        "eslint-plugin-svelte3": "^4.0.0",
-        "postcss-html": "^1.5.0",
-        "stylelint": "^15.2.0",
-        "stylelint-config-html": "^1.1.0",
-        "stylelint-config-recommended": "^10.0.1",
-        "stylelint-config-standard": "^30.0.1",
-        "svelte": "^3.55.1",
-        "vite": "^4.1.4"
-    }
+	"name": "userscripts",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"lint-js": "eslint ./",
+		"lint-css": "stylelint '**/*.{css,svelte}'"
+	},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^2.0.3",
+		"autoprefixer": "^10.4.13",
+		"cm-show-invisibles": "^3.1.0",
+		"codemirror": "^5.65.12",
+		"eslint": "^8.35.0",
+		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-svelte": "^2.27.2",
+		"postcss": "^8.4.23",
+		"postcss-html": "^1.5.0",
+		"prettier": "^2.8.8",
+		"prettier-plugin-svelte": "^2.10.0",
+		"stylelint": "^14.16.1",
+		"stylelint-config-html": "^1.1.0",
+		"stylelint-config-prettier": "^9.0.5",
+		"stylelint-config-standard": "^29.0.0",
+		"stylelint-order": "^6.0.3",
+		"stylelint-prettier": "^3.0.0",
+		"svelte": "^3.55.1",
+		"vite": "^4.1.4"
+	}
 }
