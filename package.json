@@ -3,10 +3,15 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"build:content": "VITE_ENTRY=content vite build",
+		"build": "vite build && VITE_ENTRY=content vite build",
+		"dev:page": "VITE_ENTRY=page vite",
+		"dev:popup": "VITE_ENTRY=popup vite",
 		"dev": "vite",
-		"build": "vite build",
-		"lint-js": "eslint ./",
-		"lint-css": "stylelint '**/*.{css,svelte}'"
+		"format": "prettier --write '**/*.{js,ts,css,svelte}'",
+		"lint:css": "stylelint '**/*.{css,svelte}'",
+		"lint:js": "eslint ./ --max-warnings 10",
+		"preview": "vite preview"
 	},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^2.0.3",
