@@ -19,9 +19,6 @@
 	"overrides": [
 		{
 			"files": ["*.svelte"],
-			// why use this instead of the svelte3 plugin?
-			// eslint prettier errors are ignored for stylelint, and...
-			// https://github.com/prettier/eslint-plugin-prettier#svelte-support
 			"parser": "svelte-eslint-parser"
 		}
 	],
