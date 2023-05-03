@@ -2,7 +2,9 @@
 	"env": {
 		"browser": true,
 		"es2021": true,
-		"node": true
+		"es2022": true,
+		"node": true,
+		"webextensions": true
 	},
 	"extends": ["prettier"],
 	"globals": {
@@ -11,7 +13,7 @@
 	},
 	"ignorePatterns": ["node_modules", "xcode"],
 	"parserOptions": {
-		"ecmaVersion": 13,
+		"ecmaVersion": "latest",
 		"sourceType": "module"
 	},
 	"overrides": [
