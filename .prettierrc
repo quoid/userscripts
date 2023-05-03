@@ -1,13 +1,6 @@
 {
-	"arrowParens": "always",
 	"bracketSpacing": false,
-	"bracketSameLine": false,
 	"plugins": ["prettier-plugin-svelte"],
-	"printWidth": 80,
-	"quoteProps": "as-needed",
-	"semi": true,
-	"singleAttributePerLine": false,
-	"singleQuote": false,
 	"tabWidth": 4,
 	"trailingComma": "none",
 	"useTabs": true,
