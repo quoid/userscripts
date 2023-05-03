@@ -26,7 +26,6 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-svelte": "^2.27.2",
 		"jsdom": "^21.1.2",
-		"postcss": "^8.4.23",
 		"postcss-html": "^1.5.0",
 		"prettier": "^2.8.8",
 		"prettier-plugin-svelte": "^2.10.0",

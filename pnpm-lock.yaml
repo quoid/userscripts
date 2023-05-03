@@ -12,7 +12,6 @@ specifiers:
   eslint-plugin-prettier: ^4.2.1
   eslint-plugin-svelte: ^2.27.2
   jsdom: ^21.1.2
-  postcss: ^8.4.23
   postcss-html: ^1.5.0
   prettier: ^2.8.8
   prettier-plugin-svelte: ^2.10.0
@@ -31,7 +30,7 @@ devDependencies:
   '@sveltejs/vite-plugin-svelte': 2.0.3_svelte@3.55.1+vite@4.1.4
   '@testing-library/svelte': 3.2.2_svelte@3.55.1
   '@types/webextension-polyfill': 0.10.0
-  autoprefixer: 10.4.13_postcss@8.4.23
+  autoprefixer: 10.4.13
   cm-show-invisibles: 3.1.0
   codemirror: 5.65.12
   eslint: 8.35.0
@@ -39,7 +38,6 @@ devDependencies:
   eslint-plugin-prettier: 4.2.1_hlw7btvvbpomsbv6wtkjlnqoee
   eslint-plugin-svelte: 2.27.2_n4ieifq2d7jq3sqoe474cgqlim
   jsdom: 21.1.2
-  postcss: 8.4.23
   postcss-html: 1.5.0
   prettier: 2.8.8
   prettier-plugin-svelte: 2.10.0_aufncwtidwpazwvtgfg5gzupc4
@@ -646,7 +644,7 @@ packages:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: true
 
-  /autoprefixer/10.4.13_postcss@8.4.23:
+  /autoprefixer/10.4.13:
     resolution: {integrity: sha512-49vKpMqcZYsJjwotvt4+h/BCjJVnhGwcLpDt5xkcaOG3eLrG/HUYLagrihYsQ+qrIBgIzX1Rw7a6L8I/ZA1Atg==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
@@ -658,7 +656,6 @@ packages:
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
-      postcss: 8.4.23
       postcss-value-parser: 4.2.0
     dev: true
 
