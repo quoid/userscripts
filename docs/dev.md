@@ -2,6 +2,8 @@ The `root` directory is a typical multi-page app of Vite with Svelte JavaScript 
 
 The `xcode` directory is the root of the Xcode project where the Safari extension app is built.
 
+For other directory structure instructions, please refer to [structure.md](structure.md).
+
 # Environment
 - [`Node.js`](https://nodejs.dev/en/learn/how-to-install-nodejs/)
 - [`pnpm`](https://pnpm.io/installation) (optional)
