@@ -6,9 +6,11 @@ We hope this guide will helps you understand how to contribute to this project.
 
 For development and build environments please refer to [development guide](dev.md).
 
+**Note: Portions of this guide are outdated. Some processes are still being tweaked and optimized, we will update them in due course.**
+
 # Branches
 
-### `master`: default branch
+### `main`: default branch
 - corresponding to development channel
 - all development work around this branch
 - protected branches not accept commits
