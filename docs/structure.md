@@ -8,12 +8,12 @@ Store documents and project description files, etc.
 Readme references and project history assets
 
 ## `public`
-Project Static Asset
+Project Static Asset  
 https://vitejs.dev/guide/assets.html#the-public-directory
 
 ### `./public/page/jshint.min.js`
-CodeMirror 5 `codemirror/addon/lint/javascript-lint.js` depends on `jshint.js`
-https://codemirror.net/5/doc/manual.html#addon_lint
+CodeMirror 5 `codemirror/addon/lint/javascript-lint.js` depends on `jshint.js`  
+https://codemirror.net/5/doc/manual.html#addon_lint  
 https://github.com/jshint/jshint/blob/main/dist/jshint.js
 
 ## `src`
