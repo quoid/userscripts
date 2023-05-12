@@ -19,8 +19,7 @@
     "browser_action": {
         "default_popup": "dist/entry-popup.html",
         "default_icon": {
-            "16": "images/toolbar-icon-16.png",
-            "32": "images/toolbar-icon-32.png"
+            "36": "images/toolbar-icon.svg"
         }
     },
     "content_scripts": [
