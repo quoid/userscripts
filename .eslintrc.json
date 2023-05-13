@@ -15,7 +15,8 @@
         "/etc",
         "build",
         "dist",
-        "node_modules"
+        "node_modules",
+        "public"
     ],
     "overrides": [
         {

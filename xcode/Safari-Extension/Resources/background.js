@@ -82,7 +82,10 @@ function setClipboard(data, type = "text/plain") {
 
 async function setBadgeCount() {
     const clearBadge = () => browser.browserAction.setBadgeText({text: ""});
-    // TODO: after the background script is modularized, import and use:
+    // @todo until better introduce in ios, only set badge on macOS
+    const platform = await getPlatform();
+    if (platform !== "macos") return clearBadge();
+    // @todo after the background script is modularized, import and use:
     // settingsStorage.get(["global_active","toolbar_badge_count","global_exclude_match"])
     const results = await browser.storage.local.get(["US_GLOBAL_ACTIVE", "US_TOOLBAR_BADGE_COUNT"]);
     if (results?.US_GLOBAL_ACTIVE === false) return clearBadge();
@@ -96,7 +99,7 @@ async function setBadgeCount() {
     if (!url) return clearBadge();
     // only check for http/s pages
     if (!url.startsWith("http://") && !url.startsWith("https://")) return clearBadge();
-    // TODO: if url match in global exclude list, clear badge
+    // @todo if url match in global exclude list, clear badge
     const frameUrls = new Set();
     const frames = await browser.webNavigation.getAllFrames({tabId: currentTab.id});
     for (let i = 0; i < frames.length; i++) {
@@ -127,6 +130,8 @@ async function setBadgeCount() {
 }
 
 async function setSessionRules() {
+    // not supported below safari 15.4
+    if (!browser.declarativeNetRequest.updateSessionRules) return;
     await clearAllSessionRules();
     const message = {name: "REQ_REQUESTS"};
     const response = await browser.runtime.sendNativeMessage(message);
@@ -424,7 +429,7 @@ function handleMessage(request, sender, sendResponse) {
             });
             // handle port disconnect and clean tasks
             port.onDisconnect.addListener(p => {
-                if (p.error) {
+                if (p?.error) {
                     console.error(`port disconnected due to an error: ${p.error.message}`);
                 }
             });

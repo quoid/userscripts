@@ -178,17 +178,17 @@ const apis = {
                     }
                     // call userscript method
                     details[msg.name](msg.response);
-                    // all messages received
-                    // tell background it's safe to close port
-                    if (msg.name === "onloadend") {
-                        port.postMessage({name: "DISCONNECT"});
-                    }
+                }
+                // all messages received
+                // tell background it's safe to close port
+                if (msg.name === "onloadend") {
+                    port.postMessage({name: "DISCONNECT"});
                 }
             });
 
             // handle port disconnect and clean tasks
             port.onDisconnect.addListener(p => {
-                if (p.error) {
+                if (p?.error) {
                     console.error(`port disconnected due to an error: ${p.error.message}`);
                 }
                 browser.runtime.onConnect.removeListener(listener);
