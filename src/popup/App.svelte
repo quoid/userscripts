@@ -1,5 +1,6 @@
 <script>
     import {onMount} from "svelte";
+	import {t, waitLocale} from "svelte-i18n";
     import IconButton from "../shared/Components/IconButton.svelte";
     import Toggle from "../shared/Components/Toggle.svelte";
     import Loader from "../shared/Components/Loader.svelte";
@@ -469,6 +470,7 @@
     }
 
     onMount(async () => {
+		await waitLocale();
         await initialize();
         // run resize again for good measure
         resize();

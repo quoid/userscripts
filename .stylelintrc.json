@@ -1,29 +1,39 @@
 {
-    "extends": [
-        "stylelint-config-recommended",
-        "stylelint-config-standard",
-        "stylelint-config-html/svelte"
-    ],
-    "ignoreFiles": [
-        "**/build/**",
-        "**/dist/**",
-        "**/etc/**",
-        "**/node_modules/**",
-        "**/reset.css"
-    ],
-    "rules": {
-        "alpha-value-notation": "number",
-        "comment-empty-line-before": ["always",{
-            "ignore": ["after-comment", "stylelint-commands"]
-        }],
-        "custom-property-empty-line-before": null,
-        "indentation": 4,
-        "max-empty-lines": 1,
-        "no-descending-specificity": null,
-        "property-no-vendor-prefix": null,
-        "selector-class-pattern": null,
-        "selector-pseudo-class-no-unknown": [true, {
-            "ignorePseudoClasses": ["global"]
-        }]
-    }
+	"extends": [
+		"stylelint-config-standard",
+		"stylelint-prettier/recommended",
+		"stylelint-config-prettier"
+	],
+	"ignoreFiles": [
+		"**/node_modules/**",
+		"**/reset.css",
+		"xcode/**/*"
+	],
+	"plugins": ["stylelint-order"],
+	"rules": {
+		"alpha-value-notation": "number",
+		"custom-property-empty-line-before": "never",
+		"declaration-block-no-duplicate-properties": true,
+		"order/properties-alphabetical-order": true,
+		"property-no-vendor-prefix": true,
+		"selector-class-pattern": [
+			"^[a-z]([-]?[a-z0-9]+)*(__[a-z0-9]([-]?[a-z0-9]+)*)?(--[a-z0-9]([-]?[a-z0-9]+)*)?$",
+			{
+				"resolveNestedSelectors": true,
+				"message": "Expected class selector to match BEM CSS pattern https://en.bem.info/methodology/css. Regex examples: https://regex101.com/r/DhEhbS/1"
+			}
+		],
+		"selector-pseudo-class-no-unknown": [
+			true,
+			{
+				"ignorePseudoClasses": ["global"]
+			}
+		]
+	},
+	"overrides": [
+		{
+			"customSyntax": "postcss-html",
+			"files": ["**/*svelte"]
+		}
+	]
 }

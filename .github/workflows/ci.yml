@@ -1,0 +1,49 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "v*"
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
+      - name: Install dependencies
+        run: npm install
+      - name: Lint CSS
+        run: npm run lint:css
+      - name: Lint JavaScript
+        run: npm run lint:js
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
+      - name: Install dependencies
+        run: npm install
+      - name: Run Tests
+        run: npm run test
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
