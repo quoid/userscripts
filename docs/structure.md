@@ -17,11 +17,11 @@ https://codemirror.net/5/doc/manual.html#addon_lint
 https://github.com/jshint/jshint/blob/main/dist/jshint.js
 
 ## `src`
-Project Web App Source Code
+Project Web App Source Code  
 Build the project from here to extension resources
 
 ## `xcode`
-Project Native App Source Code
+Project Native App Source Code  
 Build the project from here to extension bundle app
 
 # About
