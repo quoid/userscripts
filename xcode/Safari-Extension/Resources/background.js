@@ -347,7 +347,7 @@ function handleMessage(request, sender, sendResponse) {
             break;
         }
         case "API_SET_CLIPBOARD": {
-            const result = setClipboard(request.data, request.type);
+            const result = setClipboard(request.clipboardData, request.type);
             sendResponse(result);
             break;
         }
