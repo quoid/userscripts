@@ -944,7 +944,9 @@ func getRemoteFileContents(_ url: String) -> String? {
     // get remote file contents, synchronously
     let semaphore = DispatchSemaphore(value: 0)
     var task: URLSessionDataTask?
-    task = URLSession.shared.dataTask(with: solidURL) { data, response, error in
+    let request = urlRequestWithBasicUser(url: solidURL)
+    
+    task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let r = response as? HTTPURLResponse, data != nil, error == nil {
             if r.statusCode == 200 {
                 contents = String(data: data!, encoding: .utf8) ?? ""
@@ -965,6 +967,20 @@ func getRemoteFileContents(_ url: String) -> String? {
     }
     logText("getRemoteFileContents for \(url) end")
     return contents
+}
+
+// If the URL contains userinfo, use the user name as basic authentication data.
+func urlRequestWithBasicUser(url: URL) -> URLRequest {
+    var request = URLRequest(url: url)
+
+    if let user = url.user {
+        // only consider the "user" segment, which is all content before the first ":" in the URL's userinfo.
+        // RFC 3986 deprecates the use of password data in the userinfo, see https://www.rfc-editor.org/rfc/rfc3986#section-3.2.1
+        let base64User = Data(user.utf8).base64EncodedString()
+        request.setValue("basic \(base64User)", forHTTPHeaderField: "authorization")
+    }
+    
+    return request
 }
 
 func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
