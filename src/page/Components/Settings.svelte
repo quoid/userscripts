@@ -136,6 +136,13 @@
                 />
             </div>
             <div class="modal__row">
+                <div>Strict Mode</div>
+                <Toggle
+                    checked={$settings.strictMode}
+                    on:click={() => update("strictMode", !$settings.strictMode)}
+                />
+            </div>
+            <div class="modal__row">
                 <div>Show Toolbar Count</div>
                 <Toggle
                     checked={$settings.showCount}
