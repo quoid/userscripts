@@ -1,83 +1,108 @@
 {
-    "env": {
-        "browser": true,
-        "node": true,
-        "es2021": true,
-        "es2022": true,
-        "webextensions": true
-    },
-    "extends": ["eslint:recommended", "airbnb-base"],
-    "globals": {
-        "_browser": "writable",
-        "browser": "readonly"
-    },
-    "ignorePatterns": [
-        "/etc",
-        "build",
-        "dist",
-        "node_modules",
-        "public"
-    ],
-    "overrides": [
-        {
-            "files": ["*.svelte"],
-            "processor": "svelte3/svelte3"
-        }
-    ],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
-    },
-    "plugins": ["svelte3"],
-    "rules": {
-        "array-callback-return": "off",
-        "arrow-body-style": "off",
-        "arrow-parens": ["error", "as-needed"],
-        "comma-dangle": ["error", "never"],
-        "consistent-return": "off",
-        "default-case": "off",
-        "eqeqeq": ["error", "smart"],
-        "global-require": "off",
-        "guard-for-in": "warn",
-        "import/extensions": "off",
-        "import/first": "off",
-        "import/no-mutable-exports": "off",
-        "import/no-extraneous-dependencies": ["error", {
-            "devDependencies": true
-        }],
-        "import/prefer-default-export": "off",
-        "import/no-unresolved": "off",
-        "indent": ["error", 4, {"SwitchCase": 1}],
-        "max-len": "off",
-        "no-alert":"off",
-        "no-await-in-loop":"warn",
-        "no-confusing-arrow": ["warn", {
-            "allowParens": true,
-            "onlyOneSimpleParam": true
-        }],
-        "no-console": ["warn", {"allow": ["info", "warn", "error"]}],
-        "no-continue": "off",
-        "no-else-return": ["error", {"allowElseIf": true}],
-        "no-nested-ternary": "off",
-        "no-param-reassign": ["warn", { "props": false }],
-        "no-plusplus": "off",
-        "no-restricted-syntax": "off",
-        "no-return-assign": "off",
-        "no-underscore-dangle":"off",
-        "no-unused-expressions": "off",
-        "no-use-before-define": ["error", {
-            "functions": false,
-            "classes": true,
-            "variables": true,
-            "allowNamedExports": false
-        }],
-        "object-curly-newline": ["error", {"consistent": true}],
-        "object-curly-spacing": ["error", "never"],
-        "one-var": "off",
-        "one-var-declaration-per-line": "off",
-        "prefer-destructuring": "off",
-        "prefer-object-spread": "warn",
-        "quotes": ["error", "double"],
-        "import/no-namespace": "warn"
-    }
+	"env": {
+		"browser": true,
+		"es2021": true,
+		"es2022": true,
+		"node": true,
+		"webextensions": true
+	},
+	"extends": ["prettier"],
+	"globals": {
+		"browser": "readonly",
+		"webkit": "readonly"
+	},
+	"ignorePatterns": ["node_modules", "xcode"],
+	"parserOptions": {
+		"ecmaVersion": "latest",
+		"sourceType": "module"
+	},
+	"overrides": [
+		{
+			"files": ["*.svelte"],
+			"parser": "svelte-eslint-parser"
+		}
+	],
+	"plugins": ["prettier"],
+	"rules": {
+		"curly": ["error", "multi-line"],
+		"eqeqeq": ["error", "smart"],
+		"max-len": [
+			"error",
+			{
+				"code": 80,
+				"ignoreRegExpLiterals": true,
+				"tabWidth": 4
+			}
+		],
+		"no-bitwise": "error",
+		"no-console": [1, {"allow": ["error", "info", "warn"]}],
+		"no-duplicate-imports": "error",
+		"no-mixed-operators": "error",
+		"no-multi-str": "error",
+		"no-restricted-syntax": [
+			"error",
+			{
+				"selector": "VariableDeclaration[kind='var'][declare!=true]",
+				"message": "Unexpected var, use let or const instead."
+			}
+		],
+		"no-useless-concat": "error",
+		"no-unused-vars": [
+			"error",
+			{
+				"args": "all",
+				"argsIgnorePattern": "^_",
+				"caughtErrors": "all",
+				"caughtErrorsIgnorePattern": "^_",
+				"destructuredArrayIgnorePattern": "^_"
+			}
+		],
+		"no-undef": "error",
+		"no-use-before-define": [
+			"error",
+			{
+				"classes": true,
+				"functions": false,
+				"variables": true
+			}
+		],
+		"no-var": "off",
+		"operator-assignment": ["error", "always"],
+		"padding-line-between-statements": [
+			"error",
+			// {
+			// 	"blankLine": "always",
+			// 	"prev": "*",
+			// 	"next": ["return", "throw"]
+			// },
+			// {
+			// 	"blankLine": "always",
+			// 	"prev": ["const", "let", "var"],
+			// 	"next": "*"
+			// },
+			// {
+			// 	"blankLine": "any",
+			// 	"prev": ["const", "let", "var"],
+			// 	"next": ["const", "let", "var"]
+			// },
+			{
+				"blankLine": "always",
+				"prev": ["directive", "import"],
+				"next": "*"
+			},
+			{
+				"blankLine": "any",
+				"prev": ["directive", "import"],
+				"next": ["directive", "import"]
+			}
+		],
+		"prefer-const": "error",
+		"prefer-template": "error",
+		"quotes": [
+			"error",
+			"double",
+			{"allowTemplateLiterals": false, "avoidEscape": true}
+		],
+		"prettier/prettier": "error"
+	}
 }
