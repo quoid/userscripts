@@ -227,18 +227,16 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 }
             #endif
         }
-        else if name == "PAGE_TRASH" {
-            #if os(macOS)
-                if let item = message?["item"] as? [String: Any] {
-                    if trashFile(item) {
-                        response.userInfo = [SFExtensionMessageKey: ["success": true]]
-                    } else {
-                        response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
-                    }
+        else if name == "PAGE_TRASH" || name == "POPUP_TRASH"  {
+            if let item = message?["item"] as? [String: Any] {
+                if trashFile(item) {
+                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
                 } else {
-                    inBoundError = true
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
                 }
-            #endif
+            } else {
+                inBoundError = true
+            }
         }
         else if name == "PAGE_UPDATE" {
             #if os(macOS)
