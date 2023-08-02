@@ -295,6 +295,7 @@ let defaultSettings = [
     "sortOrder": "lastModifiedDesc",
     "showCount": "true",
     "showInvisibles": "true",
+    "strictMode": "false",
     "tabSize": "4"
 ]
 
@@ -1252,7 +1253,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
 }
 
 // injection
-func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
+func getCode(_ filenames: [String], _ isTop: Bool, _ strictMode: Bool)-> [String: Any]? {
     var cssFiles = [Any]()
     var jsFiles = [Any]()
     var menuFiles = [Any]()
@@ -1265,7 +1266,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
     for filename in filenames {
         guard
             let contents = getFileContentsParsed(saveLocation.appendingPathComponent(filename)),
-            var code = contents["code"] as? String,
+            let code = contents["code"] as? String,
             let type = filename.split(separator: ".").last
         else {
             // if guard fails, log error continue to next file
@@ -1340,6 +1341,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
         let requires = metadata["require"] ?? []
         let version = metadata["version"]?[0] ?? ""
         let noframes = metadata["noframes"] != nil ? true : false
+        let strictValue = metadata["strict"]?[0] == "true" ? true : false
         var scriptObject:[String: Any] = [
             "description": description,
             "excludes": excludes,
@@ -1356,6 +1358,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             "resources": "",
             "require": requires,
             "run-at": runAt,
+            "strict": strictValue,
             "version": version
         ]
         // certain metadata keys use a different key name then the actual key name
@@ -1381,15 +1384,13 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
 
         // attempt to get require resource from disk
         // if required resource is inaccessible, log error and continue
+        var requiredCode = ""
         if let required = metadata["require"] {
-            // reverse required metadata
-            // if required is ["A", "B", "C"], C gets added above B which is above A, etc..
-            // the reverse of that is desired
-            for require in required.reversed() {
+            for require in required {
                 let sanitizedName = sanitize(require)
                 let requiredFileURL = getRequireLocation().appendingPathComponent(filename).appendingPathComponent(sanitizedName)
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
-                    code = "\(requiredContent)\n\(code)"
+                    requiredCode += requiredContent
                 } else {
                     err("getCode failed at (3) for \(requiredFileURL)")
                 }
@@ -1409,6 +1410,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
                 #if os(macOS)
                     menuFiles.append([
                         "code": code,
+                        "requiredCode": requiredCode,
                         "scriptMetaStr": scriptMetaStr,
                         "scriptObject": scriptObject,
                         "type": "js",
@@ -1418,6 +1420,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             } else {
                 jsFiles.append([
                     "code": code,
+                    "requiredCode": requiredCode,
                     "scriptMetaStr": scriptMetaStr,
                     "scriptObject": scriptObject,
                     "type": "js",
@@ -1429,7 +1432,8 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
     let resp = [
         "files": ["css": cssFiles, "js": jsFiles, "menu": menuFiles],
         "scriptHandler": "Userscripts",
-        "scriptHandlerVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
+        "scriptHandlerVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??",
+        "strictMode": strictMode
     ] as [String : Any]
     return resp
 }
@@ -1455,9 +1459,9 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     return parsed
 }
 
-func getInjectionFilenames(_ url: String) -> [String]? {
+func getInjectionFilenames(_ url: String, _ optionalManifest: Manifest?) -> [String]? {
     var filenames = [String]()
-    let manifest = getManifest()
+    let manifest = optionalManifest ?? getManifest()
     let matched = getMatchedFiles(url, manifest, true)
     guard let active = manifest.settings["active"] else {
         err("getInjectionFilenames failed at (1)")
@@ -1508,9 +1512,12 @@ func getRequestScripts() -> [[String: String]]? {
 
 func getContextMenuScripts() -> [String: Any]? {
     var menuFilenames = [String]()
-    // check the manifest to see if injection is enabled
+    // check the manifest to see if injection is enabled and strict mode setting
     let manifest = getManifest()
-    guard let active = manifest.settings["active"] else {
+    guard
+        let active = manifest.settings["active"],
+        let strictMode = manifest.settings["strictMode"]
+    else {
         err("getContextMenuScripts failed at (1)")
         return nil
     }
@@ -1541,7 +1548,8 @@ func getContextMenuScripts() -> [String: Any]? {
         }
     }
     // get and return script objects for all context-menu scripts
-    guard let scripts = getCode(menuFilenames, true) else {
+    let strict = (strictMode == "true")
+    guard let scripts = getCode(menuFilenames, true, strict) else {
         err("getContextMenuScripts failed at (4)")
         return nil
     }

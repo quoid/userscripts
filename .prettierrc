@@ -1,0 +1,9 @@
+{
+	"bracketSpacing": false,
+	"plugins": ["prettier-plugin-svelte"],
+	"tabWidth": 4,
+	"overrides": [
+		{"files": "*.svelte", "options": {"parser": "svelte"}},
+		{"files": "*.yml", "options": {"tabWidth": 2, "useTabs": false}}
+	]
+}

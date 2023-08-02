@@ -98,6 +98,7 @@ After installing Userscripts on macOS, you **do not** need to select a userscrip
 - **Javascript Linter** - toggles basic Javascript linting within the editor
 - **Tab Size** - the number of spaces a tab is equal to while editing, obviously defaults to `4` because using `2` spaces is absolute insanity
 - **Enable Injection** - toggle on/off script injection for the pages you visit (this is the on/off switch)
+- **Strict Mode** - injects [`"use strict";`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode) statement before all code (userscript and `@required` code) - **macOS Only**
 - **Show Toolbar Count** - displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on
 - **Save Location** - where your file are currently located and being saved to (click the blue text to open location)
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location

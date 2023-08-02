@@ -31,9 +31,11 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
         else if name == "REQ_USERSCRIPTS" {
             if let url = message?["url"] as? String, let isTop = message?["isTop"] as? Bool {
+                let manifest = getManifest()
                 if
-                    let matches = getInjectionFilenames(url),
-                    let code = getCode(matches, isTop)
+                    let strictMode = manifest.settings["strictMode"],
+                    let matches = getInjectionFilenames(url, manifest),
+                    let code = getCode(matches, isTop, (strictMode == "true"))
                 {
                     response.userInfo = [SFExtensionMessageKey: code]
                 } else {
@@ -227,18 +229,16 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 }
             #endif
         }
-        else if name == "PAGE_TRASH" {
-            #if os(macOS)
-                if let item = message?["item"] as? [String: Any] {
-                    if trashFile(item) {
-                        response.userInfo = [SFExtensionMessageKey: ["success": true]]
-                    } else {
-                        response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
-                    }
+        else if name == "PAGE_TRASH" || name == "POPUP_TRASH"  {
+            if let item = message?["item"] as? [String: Any] {
+                if trashFile(item) {
+                    response.userInfo = [SFExtensionMessageKey: ["success": true]]
                 } else {
-                    inBoundError = true
+                    response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
                 }
-            #endif
+            } else {
+                inBoundError = true
+            }
         }
         else if name == "PAGE_UPDATE" {
             #if os(macOS)

@@ -1,12 +1,13 @@
 <script>
     import {onMount} from "svelte";
+	import {t, waitLocale} from "svelte-i18n";
     import IconButton from "../shared/Components/IconButton.svelte";
     import Toggle from "../shared/Components/Toggle.svelte";
     import Loader from "../shared/Components/Loader.svelte";
     import PopupItem from "./Components/PopupItem.svelte";
     import View from "./Components/View.svelte";
     import UpdateView from "./Components/Views/UpdateView.svelte";
-    import InstallView from "./Components/Views/InstallView.svelte";
+    import DetailView from "./Components/Views/DetailView.svelte";
     import AllItemsView from "./Components/Views/AllItemsView.svelte";
     import iconOpen from "../shared/img/icon-open.svg?raw";
     import iconUpdate from "../shared/img/icon-update.svg?raw";
@@ -31,13 +32,13 @@
     let header;
     let warn;
     let err;
+    let currentTabItem;
     let scriptChecking;
     let scriptInstalled;
     let showInstallPrompt;
-    let showInstall;
-    let installUserscript; // url, content
-    let installViewUserscript; // metadata
-    let installViewUserscriptError;
+    let showDetailView;
+    let detailViewTitle;
+    let detailViewItem;
     let showAll;
     let allItems = [];
     let resizeTimer;
@@ -123,6 +124,12 @@
             }
             disabled = false;
         });
+    }
+
+    function detailItem(item) {
+        detailViewItem = item;
+        detailViewTitle = "Userscript Detail";
+        showDetailView = true;
     }
 
     function checkForUpdates() {
@@ -405,18 +412,18 @@
         }
         const content = await res.text();
         // caching script data
-        installUserscript = {url: currentTab.url, content};
+        currentTabItem = {url: currentTab.url, content};
         // send native swift a message, parse metadata and check if installed
         const response = await browser.runtime.sendNativeMessage({name: "POPUP_INSTALL_CHECK", content});
         console.info("POPUP_INSTALL_CHECK:", response);
         if (response.error) {
             console.error(`Error checking .user.js url: ${response.error}`);
             // errorNotification = response.error;
-            installViewUserscriptError = response.error;
+            currentTabItem.error = response.error;
         } else {
             scriptInstalled = response.installed;
-            // caching script metadata
-            installViewUserscript = response.metadata;
+            currentTabItem.installed = response.installed;
+            currentTabItem.metadata = response.metadata;
             // the response will contain the string to display
             // ex: {success: "Click to install"}
             showInstallPrompt = response.success;
@@ -424,9 +431,11 @@
         scriptChecking = false;
     }
 
-    async function showInstallView() {
+    async function installItem() {
+        detailViewItem = currentTabItem;
+        detailViewTitle = "Install Userscript";
         // show the install view
-        showInstall = true;
+        showDetailView = true;
     }
 
     async function installConfirm() {
@@ -438,13 +447,13 @@
         // show loading element
         loading = true;
         // go back to main view
-        showInstall = false;
+        showDetailView = false;
         // double check before send install message
-        if (!installUserscript || !installUserscript.content) {
+        if (!currentTabItem) {
             errorNotification = "Install failed: userscript missing";
         }
         const currentTab = await browser.tabs.getCurrent();
-        if (currentTab.url !== installUserscript.url) {
+        if (currentTab.url !== currentTabItem.url) {
             errorNotification = "Install failed: tab changed unexpectedly";
         }
         if (errorNotification) {
@@ -455,7 +464,7 @@
         // send native swift a message, which will start the install process
         const response = await browser.runtime.sendNativeMessage({
             name: "POPUP_INSTALL_SCRIPT",
-            content: installUserscript.content
+            content: currentTabItem.content
         });
         if (response.error) {
             errorNotification = response.error;
@@ -468,7 +477,31 @@
         refreshView();
     }
 
+    async function updateConfirm() {
+        console.log("updateConfirm");
+        // TODO
+        // will be implement after the new async update check is implemented
+    }
+
+    async function trashConfirm() {
+        disabled = true;
+        const message = {name: "POPUP_TRASH", item: detailViewItem};
+        const response = await browser.runtime.sendNativeMessage(message);
+        if (response.error) {
+            errorNotification = response.error;
+        } else {
+            // delete the item in the cache array after success
+            allItems = allItems.filter(obj => obj.filename !== detailViewItem.filename);
+            // refresh main view
+            refreshView();
+        }
+        disabled = false;
+        // exit detail view
+        showDetailView = undefined;
+    }
+
     onMount(async () => {
+		await waitLocale();
         await initialize();
         // run resize again for good measure
         resize();
@@ -522,7 +555,7 @@
             {showInstallPrompt}
         {:else}
             {scriptInstalled ? "Installed" : "Detected"}:
-            <span on:click={showInstallView}>{showInstallPrompt}</span>
+            <span on:click={installItem}>{showInstallPrompt}</span>
         {/if}
     </div>
 {/if}
@@ -564,7 +597,8 @@
                         subframe={item.subframe}
                         type={item.type}
                         request={!!item.request}
-                        on:click={() => toggleItem(item)}
+                        toggleItem={() => toggleItem(item)}
+                        detailItem={() => detailItem(item)}
                     />
                 {/each}
             </div>
@@ -594,18 +628,19 @@
             {updates}
         />
     </View>
-{:else if showInstall}
+{:else if showDetailView}
     <View
-        headerTitle={"Install Userscript"}
+        headerTitle={detailViewTitle}
         loading={disabled}
-        closeClick={() => showInstall = false}
+        closeClick={() => showDetailView = false}
         showLoaderOnDisabled={true}
     >
-        <InstallView
-            userscript={installViewUserscript}
-            installError={installViewUserscriptError}
-            installCancelClick={() => showInstall = false}
+        <DetailView
+            itemdata={detailViewItem}
+            goBackClick={() => showDetailView = false}
             installConfirmClick={installConfirm}
+            updateConfirmClick={updateConfirm}
+            trashConfirmClick={trashConfirm}
         />
     </View>
 {:else if showAll}
@@ -620,7 +655,8 @@
     >
         <AllItemsView
             allItems={allItems}
-            allItemsToggleItem={toggleItem}
+            toggleItem={toggleItem}
+            detailItem={detailItem}
         />
     </View>
 {/if}

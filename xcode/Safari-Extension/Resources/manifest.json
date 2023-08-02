@@ -4,7 +4,7 @@
     "default_locale": "en",
     "name": "__MSG_extension_name__",
     "description": "__MSG_extension_description__",
-    "version": "4.4.3",
+    "version": "5.0.0",
     "icons": {
         "48": "images/icon-48.png",
         "96": "images/icon-96.png",
@@ -17,7 +17,7 @@
         "persistent": false
     },
     "browser_action": {
-        "default_popup": "dist/entry-popup.html",
+        "default_popup": "popup.html",
         "default_icon": {
             "16": "images/toolbar-icon-16.png",
             "32": "images/toolbar-icon-32.png"
@@ -35,7 +35,6 @@
         "<all_urls>",
         "clipboardWrite",
         "contextMenus",
-        "declarativeNetRequest",
         "declarativeNetRequestWithHostAccess",
         "menus",
         "nativeMessaging",
@@ -43,5 +42,10 @@
         "tabs",
         "unlimitedStorage",
         "webNavigation"
-    ]
+    ],
+    "browser_specific_settings": {
+        "safari": {
+            "strict_min_version": "16.4"
+        }
+    }
 }
