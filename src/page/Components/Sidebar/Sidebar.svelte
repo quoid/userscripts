@@ -146,6 +146,10 @@
                     ind.disabled = !ind.disabled;
                     return allItems;
                 });
+                if (item.request) {
+                    // refresh session rules
+                    browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
+                }
             } else {
                 log.add("Failed to toggle item", "error", true);
             }
