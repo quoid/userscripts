@@ -25,6 +25,13 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 #endif
             }
         }
+        else if name == "NATIVE_UPDATE" {
+            if let result = nativeUpdate() {
+                response.userInfo = [SFExtensionMessageKey: result]
+            } else {
+                response.userInfo = [SFExtensionMessageKey: ["error": "NATIVE_UPDATE failed"]]
+            }
+        }
         else if name == "REQ_PLATFORM" {
             let platform = getPlatform()
             response.userInfo = [SFExtensionMessageKey: ["platform": platform]]

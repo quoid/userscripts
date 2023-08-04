@@ -1969,6 +1969,49 @@ func popupInit() -> [String: String]? {
     ]
 }
 
+// background
+func nativeUpdate() -> [String: String]? {
+    logText("nativeUpdate started")
+    // check the default directories
+    guard checkDefaultDirectories() else {
+        err("nativeUpdate: checkDefaultDirectories failed")
+        return ["error": "Native check error (1)"]
+    }
+    // check the settings
+    guard checkSettings() else {
+        err("nativeUpdate: checkSettings failed")
+        return ["error": "Native check error (2)"]
+    }
+    // get all files to pass as arguments to function below
+    guard let allFiles = getAllFiles() else {
+        err("nativeUpdate: getAllFiles failed")
+        return ["error": "Native check error (3)"]
+    }
+    // purge the manifest of old records
+    guard purgeManifest(allFiles) else {
+        err("nativeUpdate: purgeManifest failed")
+        return ["error": "Native check error (4)"]
+    }
+    // update matches in manifest
+    guard updateManifestMatches(allFiles) else {
+        err("nativeUpdate: updateManifestMatches failed")
+        return ["error": "Native check error (5)"]
+    }
+    // update the required resources
+    guard updateManifestRequired(allFiles) else {
+        err("nativeUpdate: updateManifestRequired failed")
+        return ["error": "Native check error (6)"]
+    }
+    // update declarativeNetRequest
+    guard updateManifestDeclarativeNetRequests(allFiles) else {
+        err("nativeUpdate: updateManifestDeclarativeNetRequests failed")
+        return ["error": "Native check error (7)"]
+    }
+    // pass some info in response
+    logText("nativeUpdate complete")
+    return ["success": "Native update complete"]
+}
+
 // userscript install
 func installCheck(_ content: String) -> [String: Any] {
     // this func checks a userscript's metadata to determine if it's already installed

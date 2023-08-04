@@ -273,6 +273,16 @@ function contextClick(info, tab) {
     });
 }
 
+async function nativeUpdate() {
+    const response = await browser.runtime.sendNativeMessage({name: "NATIVE_UPDATE"});
+    // note: use settings.js once background page modularization
+    if (response.error) {
+        browser.storage.local.set({US_ERROR: response.error});
+    } else {
+        browser.storage.local.remove("US_ERROR");
+    }
+}
+
 // handles messages sent with browser.runtime.sendMessage
 function handleMessage(request, sender, sendResponse) {
     switch (request.name) {
@@ -470,7 +480,15 @@ browser.runtime.onStartup.addListener(async () => {
 browser.runtime.onMessage.addListener(handleMessage);
 // set the badge count
 browser.tabs.onActivated.addListener(setBadgeCount);
-browser.windows.onFocusChanged.addListener(setBadgeCount);
+browser.windows.onFocusChanged.addListener(async windowId => {
+    if (windowId < 1) { // lose focus
+        return;
+    }
+    setBadgeCount();
+    setSessionRules();
+    getContextMenuItems();
+    nativeUpdate();
+});
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
 
 // handle native app messages
