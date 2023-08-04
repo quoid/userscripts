@@ -1917,7 +1917,7 @@ func nativeChecks() -> [String: String] {
     #if os(iOS)
         // check the save location is set
         guard (getSaveLocation() != nil) else {
-            err("nativeChecks: checkDefaultDirectories failed")
+            err("nativeChecks: save location unset (iOS)")
             return [
                 "error": "Native checks error (0)",
                 "saveLocation": "unset",
