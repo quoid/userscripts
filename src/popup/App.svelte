@@ -239,30 +239,17 @@
         }
         platform = pltfm.platform;
 
-        // run init checks
-        // const init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"}).catch(error => {});
-        let init;
-        try {
-            init = await browser.runtime.sendNativeMessage({name: "POPUP_INIT"});
-        } catch (error) {
-            console.error(`Error for init promise: ${error}`);
-            initError = true;
-            loading = false;
-            return;
-        }
-        if (init.error) {
-            errorNotification = init.error;
+        // display global error if there is
+        const globalError = await settingsStorage.get("global_error");
+        if (globalError) {
+            errorNotification = globalError;
             loading = false;
             disabled = false;
             return;
         }
 
+        // set toggle state
         active = await settingsStorage.get("global_active");
-
-        // refresh session rules
-        browser.runtime.sendMessage({name: "REFRESH_SESSION_RULES"});
-        // refresh context-menu scripts
-        browser.runtime.sendMessage({name: "REFRESH_CONTEXT_MENU_SCRIPTS"});
 
         // set popup height
         resize();

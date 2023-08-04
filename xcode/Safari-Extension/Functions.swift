@@ -1911,64 +1911,6 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
     return ["content": remoteContent]
 }
 
-func popupInit() -> [String: String]? {
-    // check the default directories
-    let checkDefaultDirectories = checkDefaultDirectories()
-    // check the settings
-    let checkSettings = checkSettings()
-    // get all files to pass as arguments to function below
-    guard let allFiles = getAllFiles() else {
-        err("Failed to getAllFiles in popupInit")
-        return nil
-    }
-    // purge the manifest of old records
-    let purgeManifest = purgeManifest(allFiles)
-    // update matches in manifest
-    let updateManifestMatches = updateManifestMatches(allFiles)
-    // update the required resources
-    let updateManifestRequired = updateManifestRequired(allFiles)
-    // update declarativeNetRequest
-    let updateDeclarativeNetRequest = updateManifestDeclarativeNetRequests(allFiles)
-    // verbose error checking
-    if !checkDefaultDirectories {
-        err("Failed to checkDefaultDirectories in popupInit")
-        return nil
-    }
-    if !checkSettings {
-        err("Failed to checkSettings in popupInit")
-        return nil
-    }
-    if !purgeManifest {
-        err("Failed to purgeManifest in popupInit")
-        return nil
-    }
-    if !updateManifestMatches {
-        err("Failed to updateManifestMatches in popupInit")
-        return nil
-    }
-    if !updateManifestRequired {
-        err("Failed to updateManifestRequired in popupInit")
-        return nil
-    }
-    if !updateDeclarativeNetRequest {
-        err("Failed to updateDeclarativeNetRequest in popupInit")
-        return nil
-    }
-    // pass some info in response
-    guard let saveLocation = getSaveLocation() else {
-        err("Failed at getSaveLocation in popupInit")
-        return nil
-    }
-    let documentsDirectory = getDocumentsDirectory()
-    let requireLocation = getRequireLocation()
-
-    return [
-        "saveLocation": saveLocation.absoluteString,
-        "documentsDirectory": documentsDirectory.absoluteString,
-        "requireLocation": requireLocation.absoluteString
-    ]
-}
-
 // background
 func nativeUpdate() -> [String: String]? {
     logText("nativeUpdate started")

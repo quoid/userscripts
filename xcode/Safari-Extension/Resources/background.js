@@ -277,9 +277,9 @@ async function nativeUpdate() {
     const response = await browser.runtime.sendNativeMessage({name: "NATIVE_UPDATE"});
     // note: use settings.js once background page modularization
     if (response.error) {
-        browser.storage.local.set({US_ERROR: response.error});
+        browser.storage.local.set({US_GLOBAL_ERROR: response.error});
     } else {
-        browser.storage.local.remove("US_ERROR");
+        browser.storage.local.remove("US_GLOBAL_ERROR");
     }
 }
 

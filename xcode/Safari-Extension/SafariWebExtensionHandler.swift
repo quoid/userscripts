@@ -29,7 +29,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             if let result = nativeUpdate() {
                 response.userInfo = [SFExtensionMessageKey: result]
             } else {
-                response.userInfo = [SFExtensionMessageKey: ["error": "NATIVE_UPDATE failed"]]
+                response.userInfo = [SFExtensionMessageKey: ["error": "Native check failed"]]
             }
         }
         else if name == "REQ_PLATFORM" {
@@ -73,13 +73,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 }
             } else {
                 inBoundError = true
-            }
-        }
-        else if name == "POPUP_INIT" {
-            if let initData = popupInit() {
-                response.userInfo = [SFExtensionMessageKey: ["initData": initData]]
-            } else {
-                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
             }
         }
         else if name == "POPUP_MATCHES"{

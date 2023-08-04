@@ -161,6 +161,14 @@ export const settingsDefine = deepFreeze([
         nodeType: "Toggle"
     },
     {
+        name: "global_error",
+        type: "string",
+        local: true,
+        default: "",
+        platforms: ["macos", "ipados", "ios"],
+        group: "Internal"
+    },
+    {
         name: "scripts_update_check_lasttime",
         type: "number",
         default: 0,
@@ -173,8 +181,7 @@ export const settingsDefine = deepFreeze([
             en: "The lasttime for script update check in background",
             zh_hans: "后台脚本更新上次检查时间"
         },
-        group: "Internal",
-        nodeType: "Toggle"
+        group: "Internal"
     },
     {
         name: "scripts_auto_update",
