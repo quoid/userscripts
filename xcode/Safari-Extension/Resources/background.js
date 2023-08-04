@@ -282,8 +282,8 @@ function contextClick(info, tab) {
     });
 }
 
-async function nativeUpdate() {
-    const response = await browser.runtime.sendNativeMessage({name: "NATIVE_UPDATE"});
+async function nativeChecks() {
+    const response = await browser.runtime.sendNativeMessage({name: "NATIVE_CHECKS"});
     // note: use settings.js once background page modularization
     if (response.error) {
         browser.storage.local.set({US_GLOBAL_ERROR: response.error});
@@ -490,7 +490,7 @@ browser.windows.onFocusChanged.addListener(async windowId => {
     setBadgeCount();
     setSessionRules();
     getContextMenuItems();
-    nativeUpdate();
+    nativeChecks();
 });
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
 

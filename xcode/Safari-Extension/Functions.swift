@@ -1912,46 +1912,46 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
 }
 
 // background
-func nativeUpdate() -> [String: String]? {
-    logText("nativeUpdate started")
+func nativeChecks() -> [String: String] {
+    logText("nativeChecks started")
     // check the default directories
     guard checkDefaultDirectories() else {
-        err("nativeUpdate: checkDefaultDirectories failed")
-        return ["error": "Native check error (1)"]
+        err("nativeChecks: checkDefaultDirectories failed")
+        return ["error": "Native checks error (1)"]
     }
     // check the settings
     guard checkSettings() else {
-        err("nativeUpdate: checkSettings failed")
-        return ["error": "Native check error (2)"]
+        err("nativeChecks: checkSettings failed")
+        return ["error": "Native checks error (2)"]
     }
     // get all files to pass as arguments to function below
     guard let allFiles = getAllFiles() else {
-        err("nativeUpdate: getAllFiles failed")
-        return ["error": "Native check error (3)"]
+        err("nativeChecks: getAllFiles failed")
+        return ["error": "Native checks error (3)"]
     }
     // purge the manifest of old records
     guard purgeManifest(allFiles) else {
-        err("nativeUpdate: purgeManifest failed")
-        return ["error": "Native check error (4)"]
+        err("nativeChecks: purgeManifest failed")
+        return ["error": "Native checks error (4)"]
     }
     // update matches in manifest
     guard updateManifestMatches(allFiles) else {
-        err("nativeUpdate: updateManifestMatches failed")
-        return ["error": "Native check error (5)"]
+        err("nativeChecks: updateManifestMatches failed")
+        return ["error": "Native checks error (5)"]
     }
     // update the required resources
     guard updateManifestRequired(allFiles) else {
-        err("nativeUpdate: updateManifestRequired failed")
-        return ["error": "Native check error (6)"]
+        err("nativeChecks: updateManifestRequired failed")
+        return ["error": "Native checks error (6)"]
     }
     // update declarativeNetRequest
     guard updateManifestDeclarativeNetRequests(allFiles) else {
-        err("nativeUpdate: updateManifestDeclarativeNetRequests failed")
-        return ["error": "Native check error (7)"]
+        err("nativeChecks: updateManifestDeclarativeNetRequests failed")
+        return ["error": "Native checks error (7)"]
     }
     // pass some info in response
-    logText("nativeUpdate complete")
-    return ["success": "Native update complete"]
+    logText("nativeChecks complete")
+    return ["success": "Native checks complete"]
 }
 
 // userscript install
