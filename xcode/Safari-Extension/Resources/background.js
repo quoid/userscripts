@@ -129,6 +129,12 @@ async function setBadgeCount() {
     });
 }
 
+// on startup get declarativeNetRequests
+// and set the requests for the session
+// should also check and refresh when:
+// 1. dnr item save event in the page occurs
+// 2. dnr item toggle event in the page occurs
+// 3. external editor changes script file content
 async function setSessionRules() {
     // not supported below safari 15.4
     if (!browser.declarativeNetRequest.updateSessionRules) return;
@@ -187,6 +193,9 @@ function randomNumberSet(max, count) {
     return [...numbers];
 }
 
+// the current update logic is similar to setSessionRules()
+// this feature needs a more detailed redesign in the future
+// https://github.com/quoid/userscripts/issues/453
 async function getContextMenuItems() {
     // macos exclusive feature
     const platform = await getPlatform();
@@ -467,12 +476,6 @@ function handleMessage(request, sender, sendResponse) {
 }
 
 browser.runtime.onStartup.addListener(async () => {
-    // on startup get declarativeNetRequests
-    // and set the requests for the session
-    // should also check and refresh when:
-    // 1. popup opens (done)
-    // 2. a new save event in the page occurs
-    // 3. the refresh button is pushed in the popup
     await setSessionRules();
     await getContextMenuItems();
 });
