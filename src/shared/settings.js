@@ -42,6 +42,14 @@ const settingDefault = deepFreeze({
 
 export const settingsDefine = deepFreeze([
     {
+        name: "error_native",
+        type: "object",
+        local: true,
+        default: {error: undefined},
+        platforms: ["macos", "ipados", "ios"],
+        group: "Internal"
+    },
+    {
         name: "legacy_imported",
         type: "number",
         local: true,
@@ -159,14 +167,6 @@ export const settingsDefine = deepFreeze([
         },
         group: "General",
         nodeType: "Toggle"
-    },
-    {
-        name: "global_error",
-        type: "string",
-        local: true,
-        default: "",
-        platforms: ["macos", "ipados", "ios"],
-        group: "Internal"
     },
     {
         name: "scripts_update_check_lasttime",

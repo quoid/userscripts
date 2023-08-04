@@ -1914,6 +1914,17 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
 // background
 func nativeChecks() -> [String: String] {
     logText("nativeChecks started")
+    #if os(iOS)
+        // check the save location is set
+        guard (getSaveLocation() != nil) else {
+            err("nativeChecks: checkDefaultDirectories failed")
+            return [
+                "error": "Native checks error (0)",
+                "saveLocation": "unset",
+                "scheme": Bundle.main.infoDictionary?["US_URL_SCHEME"] as! String
+            ]
+        }
+    #endif
     // check the default directories
     guard checkDefaultDirectories() else {
         err("nativeChecks: checkDefaultDirectories failed")

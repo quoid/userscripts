@@ -27,6 +27,7 @@
     let inactive = false;
     let platform;
     let initError;
+    let firstGuide;
     let windowHeight = 0;
     let header;
     let warn;
@@ -220,6 +221,13 @@
         loading = false;
     }
 
+    async function openContainingApp() {
+        browser.tabs.executeScript({
+            code: `location="${firstGuide}"`
+        });
+        window.close();
+    }
+
     async function initialize() {
         // get platform first since it applies important styling
         let pltfm;
@@ -239,10 +247,15 @@
         }
         platform = pltfm.platform;
 
-        // display global error if there is
-        const globalError = await settingsStorage.get("global_error");
-        if (globalError) {
-            errorNotification = globalError;
+        // display native error if there is
+        const errorNative = await settingsStorage.get("error_native");
+        if (errorNative.error) {
+            if (errorNative.saveLocation === "unset") {
+                firstGuide = `${errorNative.scheme}://`;
+                loading = false;
+                return;
+            }
+            errorNotification = errorNative.error;
             loading = false;
             disabled = false;
             return;
@@ -529,6 +542,11 @@
     {:else}
         {#if inactive}
             <div class="none">Popup inactive on extension page</div>
+        {:else if firstGuide}
+            <div class="none" on:click={openContainingApp}>
+                Welcome, first please:&nbsp;
+                <span class="link">set directory</span>
+            </div>
         {:else if initError}
             <div class="none">
                 Something went wrong:&nbsp;

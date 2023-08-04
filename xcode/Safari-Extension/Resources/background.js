@@ -286,10 +286,11 @@ async function nativeChecks() {
     const response = await browser.runtime.sendNativeMessage({name: "NATIVE_CHECKS"});
     // note: use settings.js once background page modularization
     if (response.error) {
-        browser.storage.local.set({US_GLOBAL_ERROR: response.error});
-    } else {
-        browser.storage.local.remove("US_GLOBAL_ERROR");
+        browser.storage.local.set({US_ERROR_NATIVE: response});
+        return false;
     }
+    browser.storage.local.remove("US_ERROR_NATIVE");
+    return true;
 }
 
 // handles messages sent with browser.runtime.sendMessage
@@ -474,10 +475,12 @@ function handleMessage(request, sender, sendResponse) {
         }
     }
 }
-
+browser.runtime.onInstalled.addListener(async () => {
+    nativeChecks();
+});
 browser.runtime.onStartup.addListener(async () => {
-    await setSessionRules();
-    await getContextMenuItems();
+    setSessionRules();
+    getContextMenuItems();
 });
 // listens for messages from content script, popup and page
 browser.runtime.onMessage.addListener(handleMessage);
@@ -487,10 +490,10 @@ browser.windows.onFocusChanged.addListener(async windowId => {
     if (windowId < 1) { // lose focus
         return;
     }
+    nativeChecks();
     setBadgeCount();
     setSessionRules();
     getContextMenuItems();
-    nativeChecks();
 });
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
 
