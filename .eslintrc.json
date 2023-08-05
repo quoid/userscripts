@@ -6,7 +6,11 @@
         "es2022": true,
         "webextensions": true
     },
-    "extends": ["eslint:recommended", "airbnb-base"],
+    "extends": [
+        "eslint:recommended",
+        "airbnb-base",
+        "plugin:svelte/recommended"
+    ],
     "globals": {
         "_browser": "writable",
         "browser": "readonly"
@@ -21,14 +25,13 @@
     "overrides": [
         {
             "files": ["*.svelte"],
-            "processor": "svelte3/svelte3"
+            "parser": "svelte-eslint-parser"
         }
     ],
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
-    "plugins": ["svelte3"],
     "rules": {
         "array-callback-return": "off",
         "arrow-body-style": "off",
