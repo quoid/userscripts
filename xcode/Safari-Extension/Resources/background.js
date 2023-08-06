@@ -129,6 +129,12 @@ async function setBadgeCount() {
     });
 }
 
+// on startup get declarativeNetRequests
+// and set the requests for the session
+// should also check and refresh when:
+// 1. dnr item save event in the page occurs
+// 2. dnr item toggle event in the page occurs
+// 3. external editor changes script file content
 async function setSessionRules() {
     // not supported below safari 15.4
     if (!browser.declarativeNetRequest.updateSessionRules) return;
@@ -187,6 +193,9 @@ function randomNumberSet(max, count) {
     return [...numbers];
 }
 
+// the current update logic is similar to setSessionRules()
+// this feature needs a more detailed redesign in the future
+// https://github.com/quoid/userscripts/issues/453
 async function getContextMenuItems() {
     // macos exclusive feature
     const platform = await getPlatform();
@@ -271,6 +280,17 @@ function contextClick(info, tab) {
             code: response.code
         });
     });
+}
+
+async function nativeChecks() {
+    const response = await browser.runtime.sendNativeMessage({name: "NATIVE_CHECKS"});
+    // note: use settings.js once background page modularization
+    if (response.error) {
+        browser.storage.local.set({US_ERROR_NATIVE: response});
+        return false;
+    }
+    browser.storage.local.remove("US_ERROR_NATIVE");
+    return true;
 }
 
 // handles messages sent with browser.runtime.sendMessage
@@ -455,22 +475,26 @@ function handleMessage(request, sender, sendResponse) {
         }
     }
 }
-
+browser.runtime.onInstalled.addListener(async () => {
+    nativeChecks();
+});
 browser.runtime.onStartup.addListener(async () => {
-    // on startup get declarativeNetRequests
-    // and set the requests for the session
-    // should also check and refresh when:
-    // 1. popup opens (done)
-    // 2. a new save event in the page occurs
-    // 3. the refresh button is pushed in the popup
-    await setSessionRules();
-    await getContextMenuItems();
+    setSessionRules();
+    getContextMenuItems();
 });
 // listens for messages from content script, popup and page
 browser.runtime.onMessage.addListener(handleMessage);
 // set the badge count
 browser.tabs.onActivated.addListener(setBadgeCount);
-browser.windows.onFocusChanged.addListener(setBadgeCount);
+browser.windows.onFocusChanged.addListener(async windowId => {
+    if (windowId < 1) { // lose focus
+        return;
+    }
+    nativeChecks();
+    setBadgeCount();
+    setSessionRules();
+    getContextMenuItems();
+});
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
 
 // handle native app messages

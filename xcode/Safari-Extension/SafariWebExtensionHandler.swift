@@ -25,6 +25,10 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 #endif
             }
         }
+        else if name == "NATIVE_CHECKS" {
+            let result = nativeChecks()
+            response.userInfo = [SFExtensionMessageKey: result]
+        }
         else if name == "REQ_PLATFORM" {
             let platform = getPlatform()
             response.userInfo = [SFExtensionMessageKey: ["platform": platform]]
@@ -66,13 +70,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                 }
             } else {
                 inBoundError = true
-            }
-        }
-        else if name == "POPUP_INIT" {
-            if let initData = popupInit() {
-                response.userInfo = [SFExtensionMessageKey: ["initData": initData]]
-            } else {
-                response.userInfo = [SFExtensionMessageKey: ["error": "failed to get init data"]]
             }
         }
         else if name == "POPUP_MATCHES"{
