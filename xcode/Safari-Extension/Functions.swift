@@ -1919,62 +1919,58 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
     return ["content": remoteContent]
 }
 
-func popupInit() -> [String: String]? {
+// background
+func nativeChecks() -> [String: String] {
+    logText("nativeChecks started")
+    #if os(iOS)
+        // check the save location is set
+        guard (getSaveLocation() != nil) else {
+            err("nativeChecks: save location unset (iOS)")
+            return [
+                "error": "Native checks error (0)",
+                "saveLocation": "unset",
+                "scheme": Bundle.main.infoDictionary?["US_URL_SCHEME"] as! String
+            ]
+        }
+    #endif
     // check the default directories
-    let checkDefaultDirectories = checkDefaultDirectories()
+    guard checkDefaultDirectories() else {
+        err("nativeChecks: checkDefaultDirectories failed")
+        return ["error": "Native checks error (1)"]
+    }
     // check the settings
-    let checkSettings = checkSettings()
+    guard checkSettings() else {
+        err("nativeChecks: checkSettings failed")
+        return ["error": "Native checks error (2)"]
+    }
     // get all files to pass as arguments to function below
     guard let allFiles = getAllFiles() else {
-        err("Failed to getAllFiles in popupInit")
-        return nil
+        err("nativeChecks: getAllFiles failed")
+        return ["error": "Native checks error (3)"]
     }
     // purge the manifest of old records
-    let purgeManifest = purgeManifest(allFiles)
+    guard purgeManifest(allFiles) else {
+        err("nativeChecks: purgeManifest failed")
+        return ["error": "Native checks error (4)"]
+    }
     // update matches in manifest
-    let updateManifestMatches = updateManifestMatches(allFiles)
+    guard updateManifestMatches(allFiles) else {
+        err("nativeChecks: updateManifestMatches failed")
+        return ["error": "Native checks error (5)"]
+    }
     // update the required resources
-    let updateManifestRequired = updateManifestRequired(allFiles)
+    guard updateManifestRequired(allFiles) else {
+        err("nativeChecks: updateManifestRequired failed")
+        return ["error": "Native checks error (6)"]
+    }
     // update declarativeNetRequest
-    let updateDeclarativeNetRequest = updateManifestDeclarativeNetRequests(allFiles)
-    // verbose error checking
-    if !checkDefaultDirectories {
-        err("Failed to checkDefaultDirectories in popupInit")
-        return nil
-    }
-    if !checkSettings {
-        err("Failed to checkSettings in popupInit")
-        return nil
-    }
-    if !purgeManifest {
-        err("Failed to purgeManifest in popupInit")
-        return nil
-    }
-    if !updateManifestMatches {
-        err("Failed to updateManifestMatches in popupInit")
-        return nil
-    }
-    if !updateManifestRequired {
-        err("Failed to updateManifestRequired in popupInit")
-        return nil
-    }
-    if !updateDeclarativeNetRequest {
-        err("Failed to updateDeclarativeNetRequest in popupInit")
-        return nil
+    guard updateManifestDeclarativeNetRequests(allFiles) else {
+        err("nativeChecks: updateManifestDeclarativeNetRequests failed")
+        return ["error": "Native checks error (7)"]
     }
     // pass some info in response
-    guard let saveLocation = getSaveLocation() else {
-        err("Failed at getSaveLocation in popupInit")
-        return nil
-    }
-    let documentsDirectory = getDocumentsDirectory()
-    let requireLocation = getRequireLocation()
-
-    return [
-        "saveLocation": saveLocation.absoluteString,
-        "documentsDirectory": documentsDirectory.absoluteString,
-        "requireLocation": requireLocation.absoluteString
-    ]
+    logText("nativeChecks complete")
+    return ["success": "Native checks complete"]
 }
 
 // userscript install
