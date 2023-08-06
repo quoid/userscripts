@@ -1,5 +1,7 @@
 <script>
+    import IconButton from "../../shared/Components/IconButton.svelte";
     import Tag from "../../shared/Components/Tag.svelte";
+    import iconInfo from "../../shared/img/icon-info.svg?raw";
 
     export let background;
     export let enabled = false;
@@ -7,16 +9,26 @@
     export let type;
     export let subframe;
     export let request = false;
+    export let toggleItem;
+    export let detailItem;
 </script>
 
 <div
     class="item {enabled ? "enabled" : "disabled"} {background ?? ""}"
     on:click
 >
-    <span></span>
-    <div class="truncate">{name}</div>
-    {#if subframe}<div class="subframe">SUB</div>{/if}
-    <Tag type={request ? "request" : type}/>
+    <div class="base" on:click={toggleItem}>
+        <Tag type={request ? "request" : type}/>
+        <span></span>
+        <div class="truncate">{name}</div>
+        {#if subframe}<div class="subframe">SUB</div>{/if}
+    </div>
+    <div class="more" on:click={detailItem}>
+        <IconButton
+            icon={iconInfo}
+            title="Show user script details"
+        />
+    </div>
 </div>
 
 <style>
@@ -24,7 +36,6 @@
         align-items: center;
         cursor: pointer;
         display: flex;
-        padding: 0.5rem 1rem;
         position: relative;
         -webkit-user-select: none;
         user-select: none;
@@ -38,10 +49,42 @@
         .item:hover {
             background-color: rgb(255 255 255 / 0.075);
         }
+
+        .item:active {
+            background-color: rgb(255 255 255 / 0.15);
+        }
     }
 
-    .item:active {
-        background-color: rgb(255 255 255 / 0.15);
+    .item .base {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+        padding: .5rem 0 .5rem .75rem;
+        position: relative;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .item .more {
+        padding: .5rem;
+        font-weight: bold;
+    }
+
+    .more :global(button svg) {
+        opacity: 1;
+        transform: scale(0.75);
+    }
+
+    @media (hover: hover) {
+        .more :global(button svg:not(:hover)) {
+            opacity: 0.25;
+        }
+
+        .more:hover :global(button svg) {
+            opacity: 1;
+        }
     }
 
     span {

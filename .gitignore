@@ -35,10 +35,13 @@ ehthumbs.db
 Thumbs.db
 
 # xcode
-xcuserdata/
-*.xcuserstate
 *.dev.xcconfig
+*.xcuserstate
+**/Safari-Extension/Resources/*.html
+**/Safari-Extension/Resources/*.js
+**/Safari-Extension/Resources/assets/**/*
 XCBuildData
 xcode/**/build/
 xcode/**/dist/
+xcuserdata/
 # xcode/Userscripts-iOS/Base.lproj/Main.html

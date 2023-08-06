@@ -4,6 +4,7 @@
     import {
         items, log, notifications, settings, state
     } from "./store.js";
+	import {t, waitLocale} from "svelte-i18n";
     import Sidebar from "./Components/Sidebar/Sidebar.svelte";
     import Editor from "./Components/Editor/Editor.svelte";
     import Settings from "./Components/Settings.svelte";
@@ -43,6 +44,7 @@
     // }
 
     onMount(async () => {
+		await waitLocale();
         log.add("Requesting initialization data", "info", false);
         const initData = await browser.runtime.sendNativeMessage({name: "PAGE_INIT_DATA"});
         if (initData.error) return console.error(initData.error);
