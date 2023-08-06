@@ -28,6 +28,11 @@
             "parser": "svelte-eslint-parser"
         }
     ],
+    "settings": { // https://github.com/sveltejs/svelte-eslint-parser/issues/377#issuecomment-1630941193
+        "import/parsers": {
+            "espree": [".js"]
+        }
+    },
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
