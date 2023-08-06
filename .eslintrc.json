@@ -86,6 +86,7 @@
         "prefer-destructuring": "off",
         "prefer-object-spread": "warn",
         "quotes": ["error", "double"],
-        "import/no-namespace": "warn"
+        "import/no-namespace": "warn",
+        "svelte/no-at-html-tags": "warn"
     }
 }
