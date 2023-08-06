@@ -12,6 +12,9 @@
 <div
     class="item {enabled ? "enabled" : "disabled"} {background ?? ""}"
     on:click
+    on:keypress
+    role=button
+    tabindex=0
 >
     <span></span>
     <div class="truncate">{name}</div>

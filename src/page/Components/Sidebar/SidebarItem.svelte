@@ -32,6 +32,9 @@
     data-last-modified={data.lastModified}
     data-type={data.type}
     on:click
+    on:keypress
+    role=button
+    tabindex=0
 >
     <div class="item__header">
         <Tag type={data.request ? "request" : data.type}/>

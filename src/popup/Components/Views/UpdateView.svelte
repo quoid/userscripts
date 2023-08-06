@@ -15,24 +15,24 @@
             <a href="{item.url}" target="_blank">
                 Source
             </a>
-            <span class="link" on:click={() => updateSingleClick(item)}>
+            <button class="link" on:click={() => updateSingleClick(item)}>
                 Update
-            </span>
+            </button>
         </div>
     {/each}
     <p>Be sure you trust the author before saving remote code to your device.</p>
-    <div class="link" on:click={updateClick}>
+    <button class="link" on:click={updateClick}>
         Update All
-    </div>
+    </button>
 {:else}
     <div class="none">
         {@html iconUpdate}
         <div>
             There are no file updates available
             <br>
-            <div class="link" on:click={checkClick}>
+            <button class="link" on:click={checkClick}>
                 Check Updates
-            </div>
+            </button>
         </div>
     </div>
 {/if}
@@ -51,7 +51,7 @@
     }
 
     .item a,
-    .item span {
+    .item button {
         flex-shrink: 0;
         font: var(--text-small);
         letter-spacing: var(--letter-spacing-small);
@@ -81,7 +81,7 @@
         margin-bottom: 2rem;
     }
 
-    div.link {
+    button.link:not(.item button) {
         font-weight: 600;
         padding-bottom: 1rem;
     }

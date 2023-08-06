@@ -1,5 +1,6 @@
 import {writable} from "svelte/store";
 import {uniqueId} from "../shared/utils.js";
+// eslint-disable-next-line import/no-namespace
 import * as settingsStorage from "../shared/settings.js";
 
 function notificationStore() {
@@ -83,10 +84,10 @@ function settingsStore() {
         // once all new name is used, use settingsStorage.get()
         const settings = await settingsStorage.legacyGet();
         console.info("store.js settingsStore init", initData, settings);
-        set(Object.assign({}, initData, settings));
+        set({...initData, ...settings});
         // sync popup, backgound, etc... settings changes
         settingsStorage.onChanged((s, area) => {
-            console.log(`store.js storage.${area}.onChanged`, s);
+            console.info(`store.js storage.${area}.onChanged`, s);
             update(obj => Object.assign(obj, s));
         });
     };

@@ -40,6 +40,8 @@
     out:fade={{duration: 150}}
     on:mouseover={pause}
     on:mouseout={resume}
+    on:focus={pause}
+    on:blur={resume}
 >
     <progress value={$progress}></progress>
     <div>

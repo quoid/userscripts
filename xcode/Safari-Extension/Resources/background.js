@@ -4,8 +4,8 @@ async function openExtensionPage() {
     const tabs = await browser.tabs.query({});
     for (let i = 0; i < tabs.length; i++) {
         if (tabs[i].url === extensionPageUrl) {
-            await browser.windows.update(tabs[i].windowId, {focused: true});
-            await browser.tabs.update(tabs[i].id, {active: true});
+            browser.windows.update(tabs[i].windowId, {focused: true});
+            browser.tabs.update(tabs[i].id, {active: true});
             return;
         }
     }
@@ -438,8 +438,10 @@ function handleMessage(request, sender, sendResponse) {
             xhr.responseType = details.responseType || "";
             if (details.headers) {
                 for (const key in details.headers) {
-                    const val = details.headers[key];
-                    xhr.setRequestHeader(key, val);
+                    if (!key.startsWith("Proxy-") && !key.startsWith("Sec-")) {
+                        const val = details.headers[key];
+                        xhr.setRequestHeader(key, val);
+                    }
                 }
             }
             // receive messages from content script and process them

@@ -5,6 +5,8 @@
 </script>
 
 <!-- prevent toggle label clicks from triggering parent element on:click -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <label on:click|stopPropagation={() => {}} class:disabled={disabled} title={title}>
     <input type="checkbox" on:click|stopPropagation bind:checked={checked} {disabled}>
     <span></span>

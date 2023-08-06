@@ -11,7 +11,7 @@
     {@html iconLoader}
     {#if abort}
         <div>
-            Fetching resources, <span class="link" on:click={abortClick}>cancel request</span>
+            Fetching resources, <button class="link" on:click={abortClick}>cancel request</button>
         </div>
     {/if}
 </div>

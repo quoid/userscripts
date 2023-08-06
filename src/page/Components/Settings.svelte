@@ -64,10 +64,9 @@
     in:fade={{duration: 150}}
     out:fade={{duration: 150, delay: 75}}
 >
-    <div
-        class="mask"
-        on:click|self={() => state.remove("settings")}
-    ></div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="mask" on:click|self={() => state.remove("settings")}></div>
     <div
         class="modal"
         in:fly={{y: 50, duration: 150, delay: 75}}
@@ -144,10 +143,10 @@
             </div>
             <div class="modal__row saveLocation">
                 <div>Save Location</div>
-                <div
-                    class="truncate"
+                <button
+                    class="link truncate"
                     on:click={openSaveLocation}
-                >{$settings.saveLocation}</div>
+                >{$settings.saveLocation}</button>
                 <IconButton
                     icon={iconEdit}
                     on:click={changeSaveLocation}
@@ -258,15 +257,12 @@
         flex-grow: 0;
     }
 
-    .saveLocation > div:nth-child(2) {
-        color: var(--color-blue);
-        cursor: pointer;
+    .saveLocation > button {
         font-weight: normal;
         margin-left: auto;
         max-width: 65%;
         padding-right: 0.5rem;
         text-align: right;
-        text-decoration: underline;
     }
 
     .blacklist {

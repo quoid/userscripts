@@ -13,6 +13,7 @@
     import iconClear from "../shared/img/icon-clear.svg?raw";
     import iconRefresh from "../shared/img/icon-refresh.svg?raw";
     import {extensionPaths, openExtensionPage} from "../shared/utils.js";
+    // eslint-disable-next-line import/no-namespace
     import * as settingsStorage from "../shared/settings.js";
 
     let errorNotification;
@@ -522,7 +523,7 @@
             {showInstallPrompt}
         {:else}
             {scriptInstalled ? "Installed" : "Detected"}:
-            <span on:click={showInstallView}>{showInstallPrompt}</span>
+            <button on:click={showInstallView}>{showInstallPrompt}</button>
         {/if}
     </div>
 {/if}
@@ -543,19 +544,24 @@
         {#if inactive}
             <div class="none">Popup inactive on extension page</div>
         {:else if firstGuide}
-            <div class="none" on:click={openContainingApp}>
+            <div class="none">
                 Welcome, first please:&nbsp;
-                <span class="link">set directory</span>
+                <button
+                    class="link"
+                    on:click={openContainingApp}
+                >
+                    set directory
+                </button>
             </div>
         {:else if initError}
             <div class="none">
                 Something went wrong:&nbsp;
-                <span
+                <button
                     class="link"
                     on:click={() => window.location.reload()}
                 >
                     click to retry
-                </span>
+                </button>
             </div>
         {:else if items.length < 1}
             <div class="none">No matched userscripts</div>
@@ -578,9 +584,9 @@
 </div>
 {#if !inactive && platform === "macos"}
     <div class="footer">
-        <div class="link" on:click={openExtensionPage}>
+        <button class="link" on:click={openExtensionPage}>
             Open Extension Page
-        </div>
+        </button>
     </div>
 {/if}
 {#if showUpdates}
@@ -688,14 +694,15 @@
         background-color: var(--color-green);
     }
 
-    .warn span {
+    .warn button {
+        background: none;
+        color: inherit;
         border-bottom: 1px dotted var(--color-bg-secondary);
     }
 
-    @media (hover: hover) {
-        .warn span {
-            cursor: pointer;
-        }
+    button {
+        line-height: initial;
+        font-weight: inherit;
     }
 
     .main {

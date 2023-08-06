@@ -73,6 +73,7 @@ button:disabled {
 
 a,
 .link {
+    background: none;
     color: var(--color-blue);
     cursor: pointer;
     text-decoration: underline;

@@ -176,7 +176,7 @@
                     {:else if $state.includes("trashing")}
                         （◞‸◟）
                     {:else if $state.includes("updating")}
-                        Updating code, <span class="link" on:click={abort}>cancel request</span>
+                        Updating code, <button class="link" on:click={abort}>cancel request</button>
                     {:else if remote}
                         Code was <span class="info" title={remote}>remotely fetched</span>, check carefully before saving!
                     {:else if temp}
