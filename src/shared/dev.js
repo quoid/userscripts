@@ -55,6 +55,25 @@ function generateFile(type, updates = false, longName = false, request = false) 
     };
 }
 
+function generateMetadata(type, updates = false, longName = false) {
+    const metadata = {
+        description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
+        grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
+        match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
+        name: "Test Install Userscript",
+        require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
+        source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
+    };
+    if (updates) {
+        metadata.updateURL = ["https://www.k21p.com/example.user.js"];
+        metadata.downloadURL = ["https://www.k21p.com/example.user.js"];
+    }
+    if (longName) {
+        metadata.name = "Test Install Userscript with loooooooooooooooooooooooooooooooooooooooooong name";
+    }
+    return metadata;
+}
+
 const files = [
     generateFile("js", true, true),
     generateFile("css"),
@@ -310,7 +329,7 @@ const _browser = {
                                 filename: "Google Images Restored.js",
                                 disabled: false,
                                 type: "js",
-                                metadata: []
+                                metadata: generateMetadata()
                             },
                             {
                                 name: "Subframe Script Managerial Staffing Company",
@@ -334,14 +353,7 @@ const _browser = {
                     {success: "Click to install", installed: false},
                     {success: "Click to re-install", installed: true}
                 ]);
-                response.metadata = {
-                    description: "This userscript re-implements the \"View Image\" and \"Search by image\" buttons into google images.",
-                    grant: ["GM.getValue", "GM.setValue", "GM.xmlHttpRequest"],
-                    match: ["https://www.example.com/*", "https://www.example.com/somethingReallylong/goesRightHere"],
-                    name: "Test Install Userscript",
-                    require: ["https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-1.7.1.min.js"],
-                    source: "https://greasyforx.org/scripts/00000-something-something-long-name/code/Something%20something%20long20name.user.js"
-                };
+                response.metadata = generateMetadata();
                 // response.error = "something went wrong (dev)";
             }
             if (!responseCallback) {
