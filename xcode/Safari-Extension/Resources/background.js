@@ -2,14 +2,10 @@
 async function openExtensionPage() {
     const url = browser.runtime.getURL("dist/entry-page.html");
     const tabs = await browser.tabs.query({url});
-    for (const tab of tabs) {
-        if (tab.url === url) {
-            browser.tabs.update(tab.id, {active: true});
-            browser.windows.update(tab.windowId, {focused: true});
-            return;
-        }
-    }
-    browser.tabs.create({url});
+    const tab = tabs.find(e => e.url.startsWith(url));
+    if (!tab) return browser.tabs.create({url});
+    browser.tabs.update(tab.id, {active: true});
+    browser.windows.update(tab.windowId, {focused: true});
 }
 
 // functions from "src/shared/settings.js";
