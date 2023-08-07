@@ -25,13 +25,13 @@ body {
     }
 }
 
-@media screen and (min-device-width: 481px) and (orientation: portrait) and (hover: none) {
+@media screen and (width >= 481px) and (orientation: portrait) and (hover: none) {
     body {
         width: 18rem;
     }
 }
 
-@media screen and (min-device-width: 1024px) and (orientation: landscape) and (hover: none) {
+@media screen and (width >= 1024px) and (orientation: landscape) and (hover: none) {
     body {
         width: 18rem;
     }
@@ -73,6 +73,7 @@ button:disabled {
 
 a,
 .link {
+    background: none;
     color: var(--color-blue);
     cursor: pointer;
     text-decoration: underline;

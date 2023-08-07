@@ -184,9 +184,9 @@
             {disabled}
         />
         <Dropdown icon={iconPlus} title={"New item"} {disabled}>
-            <li on:click={() => newItem("css")}>New CSS</li>
-            <li on:click={() => newItem("js")}>New Javascript</li>
-            <li on:click={newRemote}>New Remote</li>
+            <button on:click={() => newItem("js")}>New JS</button><br>
+            <button on:click={() => newItem("css")}>New CSS</button><br>
+            <button on:click={newRemote}>New Remote</button>
         </Dropdown>
     </div>
     <div class="sidebar__body" on:scroll={sidebarScroll}>
@@ -199,6 +199,7 @@
                 data={item}
                 toggleClick={e => toggleItem(e, item)}
                 on:click={() => activate(item)}
+                on:keypress={() => activate(item)}
             />
         {/each}
     </div>

@@ -16,6 +16,9 @@
 <div
     class="item {enabled ? "enabled" : "disabled"} {background ?? ""}"
     on:click
+    on:keypress
+    role=button
+    tabindex=0
 >
     <div class="base" on:click={toggleItem}>
         <Tag type={request ? "request" : type}/>
