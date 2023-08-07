@@ -584,7 +584,7 @@
 </div>
 {#if !inactive && platform === "macos"}
     <div class="footer">
-        <button class="link" on:click={openExtensionPage}>
+        <button class="link" on:click={() => { openExtensionPage(); window.close(); }}>
             Open Extension Page
         </button>
     </div>
