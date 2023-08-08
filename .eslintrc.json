@@ -6,7 +6,11 @@
         "es2022": true,
         "webextensions": true
     },
-    "extends": ["eslint:recommended", "airbnb-base"],
+    "extends": [
+        "eslint:recommended",
+        "airbnb-base",
+        "plugin:svelte/recommended"
+    ],
     "globals": {
         "_browser": "writable",
         "browser": "readonly"
@@ -21,14 +25,18 @@
     "overrides": [
         {
             "files": ["*.svelte"],
-            "processor": "svelte3/svelte3"
+            "parser": "svelte-eslint-parser"
         }
     ],
+    "settings": { // https://github.com/sveltejs/svelte-eslint-parser/issues/377#issuecomment-1630941193
+        "import/parsers": {
+            "espree": [".js"]
+        }
+    },
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
-    "plugins": ["svelte3"],
     "rules": {
         "array-callback-return": "off",
         "arrow-body-style": "off",
@@ -78,6 +86,7 @@
         "prefer-destructuring": "off",
         "prefer-object-spread": "warn",
         "quotes": ["error", "double"],
-        "import/no-namespace": "warn"
+        "import/no-namespace": "warn",
+        "svelte/no-at-html-tags": "warn"
     }
 }

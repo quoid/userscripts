@@ -91,10 +91,25 @@
         pointer-events: none;
     }
 
-    @media (hover: hover) {
-        ul :global(li:hover:not(.separator)) {
-            background-color: var(--color-blue);
-            color: var(--color-black);
-        }
+    ul :global(li:hover:not(.separator)) {
+        background-color: var(--color-blue);
+        color: var(--color-black);
+    }
+
+    ul :global(button) {
+        text-align: left;
+        background: none;
+        width: 100%;
+        border-radius: 2px;
+        padding: 0.5rem 1rem;
+    }
+
+    ul :global(button.selected) {
+        color: var(--text-color-disabled);
+    }
+
+    ul :global(button:hover) {
+        background-color: var(--color-blue);
+        color: var(--color-black);
     }
 </style>

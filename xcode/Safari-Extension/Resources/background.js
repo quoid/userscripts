@@ -1,15 +1,11 @@
 // functions from "src/shared/utils.js";
 async function openExtensionPage() {
-    const extensionPageUrl = browser.runtime.getURL("dist/entry-page.html");
-    const tabs = await browser.tabs.query({});
-    for (let i = 0; i < tabs.length; i++) {
-        if (tabs[i].url === extensionPageUrl) {
-            await browser.windows.update(tabs[i].windowId, {focused: true});
-            await browser.tabs.update(tabs[i].id, {active: true});
-            return;
-        }
-    }
-    await browser.tabs.create({url: extensionPageUrl});
+    const url = browser.runtime.getURL("dist/entry-page.html");
+    const tabs = await browser.tabs.query({url});
+    const tab = tabs.find(e => e.url.startsWith(url));
+    if (!tab) return browser.tabs.create({url});
+    browser.tabs.update(tab.id, {active: true});
+    browser.windows.update(tab.windowId, {focused: true});
 }
 
 // functions from "src/shared/settings.js";
@@ -438,8 +434,10 @@ function handleMessage(request, sender, sendResponse) {
             xhr.responseType = details.responseType || "";
             if (details.headers) {
                 for (const key in details.headers) {
-                    const val = details.headers[key];
-                    xhr.setRequestHeader(key, val);
+                    if (!key.startsWith("Proxy-") && !key.startsWith("Sec-")) {
+                        const val = details.headers[key];
+                        xhr.setRequestHeader(key, val);
+                    }
                 }
             }
             // receive messages from content script and process them

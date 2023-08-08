@@ -9,20 +9,20 @@
         "lint-css": "stylelint '**/*.{css,svelte}'"
     },
     "devDependencies": {
-        "@sveltejs/vite-plugin-svelte": "^2.0.3",
-        "autoprefixer": "^10.4.13",
+        "@sveltejs/vite-plugin-svelte": "^2.4.3",
+        "autoprefixer": "^10.4.14",
         "cm-show-invisibles": "^3.1.0",
-        "codemirror": "^5.65.12",
-        "eslint": "^8.35.0",
+        "codemirror": "^5.65.14",
+        "eslint": "^8.46.0",
         "eslint-config-airbnb-base": "^15.0.0",
-        "eslint-plugin-import": "^2.27.5",
-        "eslint-plugin-svelte3": "^4.0.0",
+        "eslint-plugin-import": "^2.28.0",
+        "eslint-plugin-svelte": "^2.32.4",
         "postcss-html": "^1.5.0",
-        "stylelint": "^15.2.0",
+        "stylelint": "^15.10.2",
         "stylelint-config-html": "^1.1.0",
-        "stylelint-config-recommended": "^10.0.1",
-        "stylelint-config-standard": "^30.0.1",
-        "svelte": "^3.55.1",
-        "vite": "^4.1.4"
+        "stylelint-config-recommended": "^13.0.0",
+        "stylelint-config-standard": "^34.0.0",
+        "svelte": "^4.1.2",
+        "vite": "^4.4.8"
     }
 }

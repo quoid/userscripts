@@ -183,14 +183,10 @@ export const extensionPaths = {
 };
 
 export async function openExtensionPage() {
-    const extensionPageUrl = browser.runtime.getURL(extensionPaths.page);
-    const tabs = await browser.tabs.query({});
-    for (let i = 0; i < tabs.length; i++) {
-        if (tabs[i].url === extensionPageUrl) {
-            await browser.windows.update(tabs[i].windowId, {focused: true});
-            await browser.tabs.update(tabs[i].id, {active: true});
-            return;
-        }
-    }
-    await browser.tabs.create({url: extensionPageUrl});
+    const url = browser.runtime.getURL(extensionPaths.page);
+    const tabs = await browser.tabs.query({url});
+    const tab = tabs.find(e => e.url.startsWith(url));
+    if (!tab) return browser.tabs.create({url});
+    browser.tabs.update(tab.id, {active: true});
+    browser.windows.update(tab.windowId, {focused: true});
 }

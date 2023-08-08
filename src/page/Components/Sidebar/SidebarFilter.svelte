@@ -38,30 +38,33 @@
         {disabled}
     >
     <Dropdown icon={iconSort} {disabled}>
-        <li
+        <button
             class:selected={sortOrder === "lastModifiedAsc"}
             on:click={() => updateSortOrder("lastModifiedAsc")}
         >
             Last Modified: Asc{sortOrder === "lastModifiedAsc" ? " *" : ""}
-        </li>
-        <li
+        </button>
+        <br>
+        <button
             class:selected={sortOrder === "lastModifiedDesc"}
             on:click={() => updateSortOrder("lastModifiedDesc")}
         >
             Last Modified: Desc{sortOrder === "lastModifiedDesc" ? " *" : ""}
-        </li>
-        <li
+        </button>
+        <br>
+        <button
             class:selected={sortOrder === "nameAsc"}
             on:click={() => updateSortOrder("nameAsc")}
         >
             Name: Asc{sortOrder === "nameAsc" ? " *" : ""}
-        </li>
-        <li
+        </button>
+        <br>
+        <button
             class:selected={sortOrder === "nameDesc"}
             on:click={() => updateSortOrder("nameDesc")}
         >
             Name: Desc{sortOrder === "nameDesc" ? " *" : ""}
-        </li>
+        </button>
     </Dropdown>
     {#if query}
         <IconButton icon={iconClear} on:click={() => query = ""} {disabled}/>

@@ -4,7 +4,7 @@
 
 <main>
     <div>
-        <a href="https://github.com/quoid/userscripts" target="_blank" rel="noreferrer"> 
+        <a href="https://github.com/quoid/userscripts" target="_blank" rel="noreferrer">
             <img src={Logo} class="logo" alt="Logo" />
         </a>
     </div>
