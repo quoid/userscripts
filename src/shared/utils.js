@@ -190,3 +190,50 @@ export async function openExtensionPage() {
     browser.tabs.update(tab.id, {active: true});
     browser.windows.update(tab.windowId, {focused: true});
 }
+
+// Safari currently does not honor the download attribute of <a> elements in extension contexts
+// Also not support https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/download
+export async function downloadToFile(filename, content, type = "text/plain") {
+    const url = "https://quoid.github.io/userscripts/serve/download.html";
+    const tab = await browser.tabs.create({url});
+    const exchange = {filename, content, type};
+    const exscript = o => {
+        // make sure executed only once
+        if (window.US_DOWNLOAD === 1) return; window.US_DOWNLOAD = 1;
+        window.stop();
+        document.body.textContent = "Download is starting...";
+        const a = document.createElement("a");
+        a.download = o.filename;
+        a.href = URL.createObjectURL(new Blob([o.content], {type: o.type}));
+        a.click();
+        document.body.innerHTML += "<br>The download should have started.<br>";
+        a.textContent = o.filename;
+        document.body.append(a);
+    };
+    // Safari currently unable to stably executeScript on tab loading status
+    try {
+        await browser.tabs.executeScript(tab.id, {
+            code: `(${exscript})(${JSON.stringify(exchange)});`
+        });
+    } catch {
+        const handleUpdated = async tabId => {
+            if (tabId !== tab.id) return;
+            try {
+                await browser.tabs.executeScript(tabId, {
+                    code: `(${exscript})(${JSON.stringify(exchange)});`
+                });
+                console.info(`[${filename}] Download is starting...`);
+            } catch {
+                console.info(`[${filename}] Start download failed, retrying...`);
+            }
+        };
+        browser.tabs.onUpdated.addListener(handleUpdated);
+        // Remove the listener when tab closing
+        const handleRemoved = tabId => {
+            if (tabId !== tab.id) return;
+            browser.tabs.onUpdated.removeListener(handleUpdated);
+            browser.tabs.onRemoved.removeListener(handleRemoved);
+        };
+        browser.tabs.onRemoved.addListener(handleRemoved);
+    }
+}
