@@ -191,6 +191,11 @@ export async function openExtensionPage() {
     browser.windows.update(tab.windowId, {focused: true});
 }
 
+// Safari currently does not honor the target attribute of <a> elements in extension contexts
+export async function openInBlank(url) {
+    browser.tabs.create({url});
+}
+
 // Safari currently does not honor the download attribute of <a> elements in extension contexts
 // Also not support https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/download
 export async function downloadToFile(filename, content, type = "text/plain") {
