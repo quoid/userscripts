@@ -822,15 +822,18 @@ func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
 
 func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
     let directory = getRequireLocation().appendingPathComponent(filename)
-    // if file requires no resource but directory exists, trash it
-    if resources.isEmpty && FileManager.default.fileExists(atPath: directory.path) {
-        do {
-            try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
-        } catch {
-            // failing to trash item won't break functionality, so log error and move on
-            err("failed to trash directory in getRequiredCode \(error.localizedDescription)")
-            return true
+    // if file requires no resource but directory exists, remove it
+    // this resource is not user-generated and can be downloaded again, so just remove it instead of moves to the trash
+    // also in ios, the volume “Data” has no trash and item can only be removed directly
+    if resources.isEmpty {
+        if FileManager.default.fileExists(atPath: directory.path) {
+            do {
+                try FileManager.default.removeItem(at: directory)
+            } catch {
+                err("failed to remove directory in getRequiredCode \(error.localizedDescription)")
+            }
         }
+        return true
     }
     // loop through resource urls and attempt to fetch it
     for resourceUrlString in resources {
