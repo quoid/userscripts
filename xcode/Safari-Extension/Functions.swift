@@ -822,16 +822,21 @@ func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
 
 func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: String) -> Bool {
     let directory = getRequireLocation().appendingPathComponent(filename)
-    // if file requires no resource but directory exists, trash it
-    if resources.isEmpty && FileManager.default.fileExists(atPath: directory.path) {
-        do {
-            try FileManager.default.trashItem(at: directory, resultingItemURL: nil)
-        } catch {
-            // failing to trash item won't break functionality, so log error and move on
-            err("failed to trash directory in getRequiredCode \(error.localizedDescription)")
-            return true
+    // if file requires no resource but directory exists, remove it
+    // this resource is not user-generated and can be downloaded again, so just remove it instead of moves to the trash
+    // also in ios, the volume “Data” has no trash and item can only be removed directly
+    if resources.isEmpty {
+        if FileManager.default.fileExists(atPath: directory.path) {
+            do {
+                try FileManager.default.removeItem(at: directory)
+            } catch {
+                err("failed to remove directory in getRequiredCode \(error.localizedDescription)")
+            }
         }
+        return true
     }
+    // record URLs for subsequent processing
+    var resourceUrls = Set<URL>()
     // loop through resource urls and attempt to fetch it
     for resourceUrlString in resources {
         // get the path of the url string
@@ -844,6 +849,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         if resourceUrlPath.hasSuffix(fileType) {
             let resourceFilename = sanitize(resourceUrlString)
             let fileURL = directory.appendingPathComponent(resourceFilename)
+            resourceUrls.insert(fileURL)
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
             // get the remote file contents
@@ -861,6 +867,23 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
                 return false
             }
         }
+    }
+    // cleanup downloaded files that are no longer required
+    do {
+        // get all downloaded resources url
+        let downloadedUrls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [])
+        // exclude currently required resources
+        let abandonedUrls = Set(downloadedUrls).subtracting(resourceUrls)
+        // loop through abandoned urls and attempt to remove it
+        for abandonFlieUrl in abandonedUrls {
+            do {
+                try FileManager.default.removeItem(at: abandonFlieUrl)
+            } catch {
+                err("failed to remove abandoned resource in getRequiredCode \(error.localizedDescription)")
+            }
+        }
+    } catch {
+        err("failed to cleanup resources in getRequiredCode \(error.localizedDescription)")
     }
     return true
 }
