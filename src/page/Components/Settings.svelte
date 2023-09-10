@@ -1,6 +1,7 @@
 <script>
     import {fade, fly} from "svelte/transition";
     import {settings, state, log} from "../store.js";
+    import {openInBlank} from "../../shared/utils.js";
     import IconButton from "../../shared/Components/IconButton.svelte";
     import Toggle from "../../shared/Components/Toggle.svelte";
     import iconLoader from "../../shared/img/icon-loader.svg?raw";
@@ -172,7 +173,15 @@
         <div class="modal__section">
             <div class="modal__title">Information</div>
             <p>
-                Userscripts Safari Version {$settings.version} ({$settings.build})<br><br>You can review the documentation, report bugs and get more information about this extension by visiting <a href="https://github.com/quoid/userscripts">the code repository.</a><br><br>If you enjoy using this extension, please consider <a href="https://apps.apple.com/us/app/userscripts/id1463298887">leaving a review</a> on the App Store or <a href="https://github.com/quoid/userscripts#support">supporting the project</a>.
+                Userscripts Safari Version {$settings.version} ({$settings.build})
+                <br><br>
+                You can review the documentation, report bugs and get more information about this extension by visiting
+                <button class="link" on:click={() => openInBlank("https://github.com/quoid/userscripts")}>the code repository.</button>
+                <br><br>
+                If you enjoy using this extension, please consider
+                <button class="link" on:click={() => openInBlank("https://geo.itunes.apple.com/app/id1463298887")}>leaving a review</button>
+                on the App Store or
+                <button class="link" on:click={() => openInBlank("https://github.com/quoid/userscripts#support")}>supporting the project.</button>
             </p>
         </div>
     </div>
