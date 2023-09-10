@@ -835,6 +835,8 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         }
         return true
     }
+    // record URLs for subsequent processing
+    var resourceUrls = Set<URL>()
     // loop through resource urls and attempt to fetch it
     for resourceUrlString in resources {
         // get the path of the url string
@@ -847,6 +849,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         if resourceUrlPath.hasSuffix(fileType) {
             let resourceFilename = sanitize(resourceUrlString)
             let fileURL = directory.appendingPathComponent(resourceFilename)
+            resourceUrls.insert(fileURL)
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
             // get the remote file contents
@@ -864,6 +867,23 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
                 return false
             }
         }
+    }
+    // cleanup downloaded files that are no longer required
+    do {
+        // get all downloaded resources url
+        let downloadedUrls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [])
+        // exclude currently required resources
+        let abandonedUrls = Set(downloadedUrls).subtracting(resourceUrls)
+        // loop through abandoned urls and attempt to remove it
+        for abandonFlieUrl in abandonedUrls {
+            do {
+                try FileManager.default.removeItem(at: abandonFlieUrl)
+            } catch {
+                err("failed to remove abandoned resource in getRequiredCode \(error.localizedDescription)")
+            }
+        }
+    } catch {
+        err("failed to cleanup resources in getRequiredCode \(error.localizedDescription)")
     }
     return true
 }
