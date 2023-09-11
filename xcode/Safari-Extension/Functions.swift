@@ -849,7 +849,8 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         if resourceUrlPath.hasSuffix(fileType) {
             let resourceFilename = sanitize(resourceUrlString)
             let fileURL = directory.appendingPathComponent(resourceFilename)
-            resourceUrls.insert(fileURL)
+            // insert url to resolve symlink into set
+            resourceUrls.insert(fileURL.resolvingSymlinksInPath())
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
             // get the remote file contents
@@ -870,14 +871,18 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
     }
     // cleanup downloaded files that are no longer required
     do {
+        var downloadedUrls = Set<URL>()
         // get all downloaded resources url
-        let downloadedUrls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [])
+        let fileUrls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [])
+        // insert url to resolve symlink into set
+        for url in fileUrls { downloadedUrls.insert(url.resolvingSymlinksInPath()) }
         // exclude currently required resources
         let abandonedUrls = Set(downloadedUrls).subtracting(resourceUrls)
         // loop through abandoned urls and attempt to remove it
-        for abandonFlieUrl in abandonedUrls {
+        for abandonFileUrl in abandonedUrls {
             do {
-                try FileManager.default.removeItem(at: abandonFlieUrl)
+                try FileManager.default.removeItem(at: abandonFileUrl)
+                logText("cleanup abandoned resource: \(unsanitize(abandonFileUrl.lastPathComponent))")
             } catch {
                 err("failed to remove abandoned resource in getRequiredCode \(error.localizedDescription)")
             }
