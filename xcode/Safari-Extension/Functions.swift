@@ -877,7 +877,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         // insert url to resolve symlink into set
         for url in fileUrls { downloadedUrls.insert(url.resolvingSymlinksInPath()) }
         // exclude currently required resources
-        let abandonedUrls = Set(downloadedUrls).subtracting(resourceUrls)
+        let abandonedUrls = downloadedUrls.subtracting(resourceUrls)
         // loop through abandoned urls and attempt to remove it
         for abandonFileUrl in abandonedUrls {
             do {
