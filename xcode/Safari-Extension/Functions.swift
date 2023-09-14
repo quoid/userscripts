@@ -850,7 +850,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
             let resourceFilename = sanitize(resourceUrlString)
             let fileURL = directory.appendingPathComponent(resourceFilename)
             // insert url to resolve symlink into set
-            resourceUrls.insert(fileURL.resolvingSymlinksInPath())
+            resourceUrls.insert(fileURL.standardizedFileURL)
             // only attempt to get resource if it does not yet exist
             if FileManager.default.fileExists(atPath: fileURL.path) {continue}
             // get the remote file contents
@@ -875,9 +875,9 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         // get all downloaded resources url
         let fileUrls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [])
         // insert url to resolve symlink into set
-        for url in fileUrls { downloadedUrls.insert(url.resolvingSymlinksInPath()) }
+        for url in fileUrls { downloadedUrls.insert(url.standardizedFileURL) }
         // exclude currently required resources
-        let abandonedUrls = Set(downloadedUrls).subtracting(resourceUrls)
+        let abandonedUrls = downloadedUrls.subtracting(resourceUrls)
         // loop through abandoned urls and attempt to remove it
         for abandonFileUrl in abandonedUrls {
             do {
