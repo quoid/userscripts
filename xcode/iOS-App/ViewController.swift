@@ -9,6 +9,9 @@
 import UIKit
 import WebKit
 import UniformTypeIdentifiers
+import os
+
+fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
 
 class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, UIDocumentPickerDelegate {
 
@@ -61,11 +64,11 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let name = message.body as? String else {
-            err("Userscripts iOS received a message without a name")
+            logger.error("\(#function, privacy: .public) - Userscripts iOS received a message without a name")
             return
         }
         if name == "SET_READ_LOCATION" {
-            logText("Userscripts iOS has requested to set the readLocation")
+            logger.info("\(#function, privacy: .public) - Userscripts iOS has requested to set the readLocation")
             let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
             documentPicker.delegate = self
             present(documentPicker, animated: true, completion: nil)
@@ -85,7 +88,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
                 throw NSError(domain: "Failed to saved bookmark", code: 0, userInfo: [:])
             }
         } catch let error {
-            err("\(error)")
+            logger.error("\(#function, privacy: .public) - \(error, privacy: .public)")
             return
         }
     }
