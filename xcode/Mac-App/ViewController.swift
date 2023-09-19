@@ -1,5 +1,8 @@
 import Cocoa
 import SafariServices.SFSafariApplication
+import os
+
+fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
 
 class ViewController: NSViewController {
 
@@ -33,9 +36,13 @@ class ViewController: NSViewController {
 
     @objc func setExtensionState() {
         SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionID) { (state, error) in
-            guard let state = state, error == nil else {
+            guard let state = state else {
                 self.enabledText.stringValue = "Safari Extension State Unknown"
-                err(error?.localizedDescription ?? "couldn't get safari extension state in containing app")
+                if let error = error {
+                    logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+                } else {
+                    logger.error("\(#function, privacy: .public) - couldn't get safari extension state in containing app")
+                }
                 return
             }
             DispatchQueue.main.async {

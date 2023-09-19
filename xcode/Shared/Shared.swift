@@ -2,6 +2,8 @@ import Foundation
 import SafariServices
 import os
 
+fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+
 struct SharedDefaults {
     // https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_application-groups
     static let suiteName = Bundle.main.infoDictionary?["US_SHARED_GID"] as? String
@@ -10,18 +12,6 @@ struct SharedDefaults {
     #elseif os(macOS)
         static let keyName = "hostSelectedSaveLocation"
     #endif
-}
-
-func err(_ message: String) {
-    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "general")
-    os_log("%{public}@", log: log, type: .error, "Error: \(message)")
-}
-
-func logText(_ message: String) {
-    // create helper log func to easily disable logging
-    // NSLog(message)
-    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "general")
-    os_log("%{public}@", log: log, type: .default, message)
 }
 
 func getDocumentsDirectory() -> URL {
@@ -76,7 +66,7 @@ func saveBookmark(url: URL, isShared: Bool, keyName: String, isSecure: Bool) -> 
         #endif
         return true
     } catch let error {
-        err("\(error)")
+        logger.error("\(#function, privacy: .public) - \(error, privacy: .public)")
         return false
     }
 }
@@ -105,7 +95,7 @@ func readBookmark(data: Data, isSecure: Bool) -> URL? {
         }
         return url
     } catch let error {
-        err("Error: \(error)")
+        logger.error("\(#function, privacy: .public) - \(error, privacy: .public)")
         return nil
     }
 }
