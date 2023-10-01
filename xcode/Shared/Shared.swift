@@ -2,7 +2,19 @@ import Foundation
 import SafariServices
 import os
 
-fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+private let logger = USLogger(#fileID)
+
+func USLogger(_ category: String) -> Logger? {
+    let subsystem = Bundle.main.bundleIdentifier!
+#if DEBUG // Always enable logger in DEBUG builds
+    return Logger(subsystem: subsystem, category: category)
+#else
+    if Preferences.enableLogger {
+        return Logger(subsystem: subsystem, category: category)
+    }
+    return nil
+#endif
+}
 
 struct SharedDefaults {
     // https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_application-groups
@@ -66,7 +78,7 @@ func saveBookmark(url: URL, isShared: Bool, keyName: String, isSecure: Bool) -> 
         #endif
         return true
     } catch let error {
-        logger.error("\(#function, privacy: .public) - \(error, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
         return false
     }
 }
@@ -95,7 +107,7 @@ func readBookmark(data: Data, isSecure: Bool) -> URL? {
         }
         return url
     } catch let error {
-        logger.error("\(#function, privacy: .public) - \(error, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
         return nil
     }
 }

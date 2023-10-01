@@ -3,15 +3,15 @@ import os
 
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     func beginRequest(with context: NSExtensionContext) {
-        let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+        let logger = USLogger(#fileID)
         let item = context.inputItems[0] as? NSExtensionItem
         let message = item?.userInfo?[SFExtensionMessageKey] as? [String: Any]
         // if message received without name, ignore
         guard let name = message?["name"] as? String else {
-            logger.error("\(#function, privacy: .public) - could not get message name from web extension")
+            logger?.error("\(#function, privacy: .public) - could not get message name from web extension")
             return
         }
-        logger.info("\(#function, privacy: .public) - Got message with name: \(name, privacy: .public)")
+        logger?.info("\(#function, privacy: .public) - Got message with name: \(name, privacy: .public)")
         // got a valid message, construct response based on message received
         let response = NSExtensionItem()
         // send standard error when there's an issue parsing inbound message

@@ -3,7 +3,7 @@ import SafariServices
 import os
 
 let extensionIdentifier = Bundle.main.infoDictionary?["US_EXT_IDENTIFIER"] as! String
-fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+private let logger = USLogger(#fileID)
 
 func getSaveLocationURL() -> URL {
     var url: URL
@@ -43,7 +43,7 @@ func setSaveLocationURL(url: URL) -> Bool {
         return false
     }
     guard saveBookmark(url: url, isShared: true, keyName: SharedDefaults.keyName, isSecure: false) else {
-        logger.error("\(#function, privacy: .public) - couldn't save new location from host app")
+        logger?.error("\(#function, privacy: .public) - couldn't save new location from host app")
         return false
     }
     return true

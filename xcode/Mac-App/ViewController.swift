@@ -2,7 +2,7 @@ import Cocoa
 import SafariServices.SFSafariApplication
 import os
 
-fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+private let logger = USLogger(#fileID)
 
 class ViewController: NSViewController {
 
@@ -39,9 +39,9 @@ class ViewController: NSViewController {
             guard let state = state else {
                 self.enabledText.stringValue = "Safari Extension State Unknown"
                 if let error = error {
-                    logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+                    logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
                 } else {
-                    logger.error("\(#function, privacy: .public) - couldn't get safari extension state in containing app")
+                    logger?.error("\(#function, privacy: .public) - couldn't get safari extension state in containing app")
                 }
                 return
             }

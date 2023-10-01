@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+private let logger = USLogger(#fileID)
 private let suiteName = Bundle.main.infoDictionary!["US_SHARED_GID"] as! String
 private let SDefaults = UserDefaults(suiteName: suiteName) // Shared UserDefaults
 
@@ -86,7 +86,7 @@ private struct SecurityScopedBookmark {
                relativeTo: nil
            )
        } catch {
-           logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+           logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
        }
        return nil
     }
@@ -100,19 +100,19 @@ private struct SecurityScopedBookmark {
                bookmarkDataIsStale: &isStale
            )
        } catch {
-           logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+           logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
        }
        return nil
     }
 
     private func updateBookmark() {
         guard let setterIdentifier = SDefaults?.string(forKey: keySetter) else {
-            logger.debug("\(#function, privacy: .public) - setterId not exist: \(key, privacy: .public)")
+            logger?.debug("\(#function, privacy: .public) - setterId not exist: \(key, privacy: .public)")
             return
         }
         guard bundleIdentifier != setterIdentifier else { return } // update only in non-setter environment
         guard let data = SDefaults?.data(forKey: keyTransfer) else { // no need to update due empty data
-            logger.debug("\(#function, privacy: .public) - no update: \(key, privacy: .public)")
+            logger?.debug("\(#function, privacy: .public) - no update: \(key, privacy: .public)")
             return
         }
         var isStale = false // no need to renew since will remove anyway
@@ -122,14 +122,14 @@ private struct SecurityScopedBookmark {
         }
         defer { url.stopAccessingSecurityScopedResource() } // revoke implicitly starts security-scoped access
         if let data = createBookmark(url, true) { // set URL bookmark with an explicit security scope
-            logger.info("\(#function, privacy: .public) - update bookmark: \(key, privacy: .public) \(url, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - update bookmark: \(key, privacy: .public) \(url, privacy: .public)")
             SDefaults?.removeObject(forKey: keyTransfer)
             SDefaults?.set(data, forKey: keySecurityScoped)
         }
     }
     
     private func removeBookmark() {
-        logger.info("\(#function, privacy: .public) - remove invalid bookmark: \(key, privacy: .public)")
+        logger?.info("\(#function, privacy: .public) - remove invalid bookmark: \(key, privacy: .public)")
         SDefaults?.removeObject(forKey: keyTransfer)
         SDefaults?.removeObject(forKey: keySecurityScoped)
         if let setterIdentifier = SDefaults?.string(forKey: keySetter) {
@@ -142,19 +142,19 @@ private struct SecurityScopedBookmark {
         guard key == "ScriptsDirectoryUrlBookmarkData" else { return }
         guard bundleIdentifier == extIdentifier else { return }
         func legacyCleanup() {
-            logger.debug("\(#function, privacy: .public) - cleanup legacy bookmark data")
+            logger?.debug("\(#function, privacy: .public) - cleanup legacy bookmark data")
             SDefaults?.removeObject(forKey: "hostSelectedSaveLocation") // shared
             UserDefaults.standard.removeObject(forKey: "saveLocation") // ext
             UserDefaults.standard.removeObject(forKey: "userSaveLocation") // ext
         }
         guard let data = UserDefaults.standard.data(forKey: "userSaveLocation") else { // get from old key
-            logger.debug("\(#function, privacy: .public) - legacy bookmark not exist")
+            logger?.debug("\(#function, privacy: .public) - legacy bookmark not exist")
             return
         }
         guard SDefaults?.string(forKey: keySetter) == nil else { // already a new key
             return legacyCleanup()
         }
-        logger.debug("\(#function, privacy: .public) - Import legacy bookmark data")
+        logger?.debug("\(#function, privacy: .public) - Import legacy bookmark data")
         var isStale = false // no need to renew since will remove anyway
         guard let url = resolvBookmark(data, true, &isStale) else { // get URL bookmark with an explicit security scope
             return legacyCleanup()
@@ -176,9 +176,9 @@ private struct SecurityScopedBookmark {
         get {
             legacyBookmarkImporter()
             updateBookmark()
-            logger.info("\(#function, privacy: .public) - try get bookmark: \(key, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - try get bookmark: \(key, privacy: .public)")
             guard let data = SDefaults?.data(forKey: keySecurityScoped) else {
-                logger.debug("\(#function, privacy: .public) - bookmark not exist: \(key, privacy: .public)")
+                logger?.debug("\(#function, privacy: .public) - bookmark not exist: \(key, privacy: .public)")
                 return defaultValue
             }
             var isStale = false
@@ -189,7 +189,7 @@ private struct SecurityScopedBookmark {
             if isStale, url.startAccessingSecurityScopedResource() { // renew URL bookmark
                 defer { url.stopAccessingSecurityScopedResource() }
                 if let data = createBookmark(url, true) { // set URL bookmark with an explicit security scope
-                    logger.info("\(#function, privacy: .public) - renew bookmark: \(key, privacy: .public) \(url, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - renew bookmark: \(key, privacy: .public) \(url, privacy: .public)")
                     SDefaults?.set(data, forKey: keySecurityScoped)
                 }
             }
@@ -197,9 +197,9 @@ private struct SecurityScopedBookmark {
         }
         set(url) {
             let k = key // key cannot be log directly with error: Escaping autoclosure captures mutating 'self' parameter
-            logger.info("\(#function, privacy: .public) - try set bookmark: \(k, privacy: .public) \(url, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - try set bookmark: \(k, privacy: .public) \(url, privacy: .public)")
             guard let tdata = createBookmark(url, false), let sdata = createBookmark(url, true) else {
-                logger.info("\(#function, privacy: .public) - failed create bookmark: \(k, privacy: .public) \(url, privacy: .public)")
+                logger?.info("\(#function, privacy: .public) - failed create bookmark: \(k, privacy: .public) \(url, privacy: .public)")
                 return
             }
             SDefaults?.set(bundleIdentifier, forKey: keySetter)
@@ -228,7 +228,7 @@ private struct SecurityScopedBookmark {
        do {
            return try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
        } catch {
-           logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+           logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
        }
        return nil
     }
@@ -237,7 +237,7 @@ private struct SecurityScopedBookmark {
        do {
            return try URL(resolvingBookmarkData: data, bookmarkDataIsStale: &isStale)
        } catch {
-           logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+           logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
        }
        return nil
     }
@@ -245,10 +245,10 @@ private struct SecurityScopedBookmark {
     // NOTE: This function will be deleted after several public versions of v4.5.0
     private func legacyBookmarkImporter() {
         guard let data = SDefaults?.data(forKey: "iosReadLocation") else { // get from old key
-            logger.debug("\(#function, privacy: .public) - legacy bookmark not exist")
+            logger?.debug("\(#function, privacy: .public) - legacy bookmark not exist")
             return
         }
-        logger.debug("\(#function, privacy: .public) - Import legacy bookmark data")
+        logger?.debug("\(#function, privacy: .public) - Import legacy bookmark data")
         SDefaults?.set(data, forKey: key)
         SDefaults?.removeObject(forKey: "iosReadLocation")
     }
@@ -256,9 +256,9 @@ private struct SecurityScopedBookmark {
     var wrappedValue: URL {
         get {
             legacyBookmarkImporter()
-            logger.info("\(#function, privacy: .public) - try get bookmark: \(key, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - try get bookmark: \(key, privacy: .public)")
             guard let data = SDefaults?.data(forKey: key) else {
-                logger.debug("\(#function, privacy: .public) - bookmark not exist: \(key, privacy: .public)")
+                logger?.debug("\(#function, privacy: .public) - bookmark not exist: \(key, privacy: .public)")
                 return defaultValue
             }
             var isStale = false
@@ -269,7 +269,7 @@ private struct SecurityScopedBookmark {
             if isStale, url.startAccessingSecurityScopedResource() { // renew URL bookmark
                 defer { url.stopAccessingSecurityScopedResource() }
                 if let data = createBookmark(url) { // set security-scoped URL
-                    logger.info("\(#function, privacy: .public) - renew bookmark: \(key, privacy: .public) \(url, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - renew bookmark: \(key, privacy: .public) \(url, privacy: .public)")
                     SDefaults?.set(data, forKey: key)
                 }
             }
@@ -277,13 +277,13 @@ private struct SecurityScopedBookmark {
         }
         set(url) {
             let k = key // key cannot be log directly with error: Escaping autoclosure captures mutating 'self' parameter
-            logger.info("\(#function, privacy: .public) - try set bookmark: \(k, privacy: .public) \(url, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - try set bookmark: \(k, privacy: .public) \(url, privacy: .public)")
             let didStartAccessing = url.startAccessingSecurityScopedResource()
             defer {
                 if didStartAccessing { url.stopAccessingSecurityScopedResource() }
             }
             guard let data = createBookmark(url) else {
-                logger.info("\(#function, privacy: .public) - failed create bookmark: \(k, privacy: .public) \(url, privacy: .public)")
+                logger?.info("\(#function, privacy: .public) - failed create bookmark: \(k, privacy: .public) \(url, privacy: .public)")
                 return
             }
             SDefaults?.set(data, forKey: key) // set security-scoped URL
