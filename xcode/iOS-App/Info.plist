@@ -40,5 +40,7 @@
 	<false/>
 	<key>US_SHARED_GID</key>
 	<string>$(IOS_SHARED_GID)</string>
+	<key>US_EXT_IDENTIFIER</key>
+	<string>$(EXT_IDENTIFIER)</string>
 </dict>
 </plist>

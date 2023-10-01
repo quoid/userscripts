@@ -14,7 +14,6 @@ class ViewController: NSViewController {
 	
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
     let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
-    let extensionID = extensionIdentifier
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,7 +34,7 @@ class ViewController: NSViewController {
     }
 
     @objc func setExtensionState() {
-        SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionID) { (state, error) in
+        SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extIdentifier) { (state, error) in
             guard let state = state else {
                 self.enabledText.stringValue = "Safari Extension State Unknown"
                 if let error = error {
@@ -59,6 +58,8 @@ class ViewController: NSViewController {
         panel.beginSheetModal(for: window, completionHandler: { response in
             // check if clicked open button and there is a valid result
             guard response == .OK, let url: URL = panel.urls.first else { return }
+            // revoke implicitly starts security-scoped access
+            defer { url.stopAccessingSecurityScopedResource() }
             // check if path has indeed changed
             if url.absoluteString == saveLocationURL.absoluteString { return }
             // try set new save location path to bookmark
@@ -78,6 +79,6 @@ class ViewController: NSViewController {
     }
 
     @IBAction func openSafariExtensionPreferences(_ sender: AnyObject?) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionID)
+        SFSafariApplication.showPreferencesForExtension(withIdentifier: extIdentifier)
     }
 }

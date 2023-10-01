@@ -2,37 +2,10 @@ import AppKit
 import SafariServices
 import os
 
-let extensionIdentifier = Bundle.main.infoDictionary?["US_EXT_IDENTIFIER"] as! String
 private let logger = USLogger(#fileID)
 
 func getSaveLocationURL() -> URL {
-    var url: URL
-    // default url
-    if #available(macOS 13.0, *) {
-        url = getDocumentsDirectory().appending(path: "scripts")
-    } else {
-        url = getDocumentsDirectory().appendingPathComponent("scripts")
-    }
-    // if not in safari extension environment, replace with extension path
-    if let bundleIdentifier = Bundle.main.bundleIdentifier, bundleIdentifier != extensionIdentifier {
-        let s = url.absoluteString.replacingOccurrences(of: bundleIdentifier, with: extensionIdentifier)
-        // avoid being encode again, decode first
-        if let decodePath = s.removingPercentEncoding {
-            url = URL(fileURLWithPath: decodePath, isDirectory: true)
-        }
-    }
-    // bookmark url
-    if let data = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName) {
-        if let bookmarkURL = readBookmark(data: data, isSecure: false) {
-            if directoryExists(path: bookmarkURL.path) {
-                url = bookmarkURL
-            } else {
-                UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-                NSLog("removed shared bookmark because it's directory is non-existent, permanently deleted or in trash")
-            }
-        }
-    }
-    return url
+    return Preferences.scriptsDirectoryUrl
 }
 
 func setSaveLocationURL(url: URL) -> Bool {
@@ -42,17 +15,14 @@ func setSaveLocationURL(url: URL) -> Bool {
         alert.runModal()
         return false
     }
-    guard saveBookmark(url: url, isShared: true, keyName: SharedDefaults.keyName, isSecure: false) else {
-        logger?.error("\(#function, privacy: .public) - couldn't save new location from host app")
-        return false
-    }
-    return true
+    Preferences.scriptsDirectoryUrl = url
+    return Preferences.scriptsDirectoryUrl == url
 }
 
 func sendExtensionMessage(name: String, userInfo: [String : Any]? = nil, completion: ((Error?) -> Void)? = nil) {
     SFSafariApplication.dispatchMessage(
         withName: name,
-        toExtensionWithIdentifier: extensionIdentifier,
+        toExtensionWithIdentifier: extIdentifier,
         userInfo: userInfo
     ) { error in // always be called
         if error != nil {
@@ -83,6 +53,8 @@ func schemeChangeSaveLocation() {
     let response = panel.runModal()
     // check if clicked open button and there is a valid result
     guard response == .OK, let url: URL = panel.urls.first else { return }
+    // revoke implicitly starts security-scoped access
+    defer { url.stopAccessingSecurityScopedResource() }
     // check if path has indeed changed
     if url.absoluteString == saveLocationURL.absoluteString { return }
     // try set new save location path to bookmark

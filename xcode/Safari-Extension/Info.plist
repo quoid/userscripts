@@ -33,6 +33,8 @@
 	<string>$(MAC_SHARED_GID)</string>
 	<key>US_SHARED_GID-iphoneos</key>
 	<string>$(IOS_SHARED_GID)</string>
+	<key>US_EXT_IDENTIFIER</key>
+	<string>$(EXT_IDENTIFIER)</string>
 	<key>US_URL_SCHEME</key>
 	<string>$(APP_URL_SCHEME)</string>
 </dict>

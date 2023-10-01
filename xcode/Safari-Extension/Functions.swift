@@ -53,76 +53,12 @@ func normalizeWeight(_ weight: String) -> String {
 }
 
 func getSaveLocation() -> URL? {
-    #if os(iOS)
-        if
-            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-            let bookmarkUrl = readBookmark(data: sharedBookmarkData, isSecure: true)
-        {
-            return bookmarkUrl
-        } else {
-            return nil
-        }
-    #elseif os(macOS)
-        let standardDefaults = UserDefaults.standard
-        let userSaveLocationKey = "userSaveLocation"
-        var defaultSaveLocation:URL
-
-        // get the default save location, if key doesn't exist write it to user defaults
-        if let saveLocationValue = standardDefaults.url(forKey: "saveLocation") {
-            defaultSaveLocation = saveLocationValue
-        } else {
-            logger?.info("\(#function, privacy: .public) - default save location not set, writing to user defaults")
-            let url = getDocumentsDirectory().appendingPathComponent("scripts")
-            UserDefaults.standard.set(url, forKey: "saveLocation")
-            defaultSaveLocation = url
-        }
-
-        // check if shared bookmark data exists
-        // check if can get shared bookmark url
-        // won't be able to if directory trashed
-        guard
-            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-            let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
-            directoryExists(path: sharedBookmark.path)
-        else {
-            // can't get shared bookmark, use default location and remove shared bookmark key from shared user defaults
-            UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-            logger?.info("\(#function, privacy: .public) - removed sharedbookmark because it was either permanently deleted or in trash")
-            return defaultSaveLocation
-        }
-
-        // at this point, it's known sharedbookmark exists
-        // check local bookmark exists, can read url from bookmark and if bookmark url == shared bookmark url
-        // if local bookmark exists, no need to check if directory exists for it
-        // can't think of an instance where shared bookmark directory exists (checked above), yet local bookmark directory does not
-        if
-            let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
-            let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
-            sharedBookmark == userSaveLocation
-        {
-            return userSaveLocation
-        }
-
-        // at this point one of the following conditions met
-        // - local bookmark data doesn't exist
-        // - for some reason can't get url from local bookmark data
-        // - local bookmark url != shared bookmark url (user updated save location)
-        // when any of those conditions are met, create new local bookmark from shared bookmark
-        if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
-            // read the newly saved bookmark and return it
-            guard
-                let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
-                let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
-            else {
-                logger?.error("\(#function, privacy: .public) - failed reading local bookmark")
-                return nil
-            }
-            return localBookmarkUrl
-        } else {
-            logger?.error("\(#function, privacy: .public) - could not save local version of shared bookmark")
-            return nil
-        }
-    #endif
+#if os(iOS)
+    if Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl() { return nil }
+#endif
+    let url = Preferences.scriptsDirectoryUrl
+    logger?.debug("\(#function, privacy: .public) - \(url, privacy: .public)")
+    return url
 }
 
 func openSaveLocation() -> Bool {
@@ -401,7 +337,7 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             return false
         }
     }
-    logger?.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
@@ -509,7 +445,7 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
         }
         logger?.info("\(#function, privacy: .public) - end   \(filename, privacy: .public)")
     }
-    logger?.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
@@ -580,7 +516,7 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
             return false
         }
     }
-    logger?.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
@@ -719,7 +655,7 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         logger?.error("\(#function, privacy: .public) - failed to purge manifest")
         return false
     }
-    logger?.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
@@ -755,6 +691,7 @@ func updateSettings(_ settings: [String: String]) -> Bool {
 
 // files
 func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
+    logger?.info("\(#function, privacy: .public) - started")
     // returns all files of proper type with filenames, metadata & more
     var files = [[String: Any]]()
     let fm = FileManager.default
@@ -994,7 +931,7 @@ func getRemoteFileContents(_ url: String) -> String? {
         logger?.error("\(#function, privacy: .public) - failed at (4), contents empty, \(url, privacy: .public)")
         return nil
     }
-    logger?.info("\(#function, privacy: .public) - complete for \(url, privacy: .public)")
+    logger?.info("\(#function, privacy: .public) - completed for \(url, privacy: .public)")
     return contents
 }
 
@@ -1993,7 +1930,7 @@ func nativeChecks() -> [String: String] {
         return ["error": "Native checks error (7)"]
     }
     // pass some info in response
-    logger?.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return ["success": "Native checks complete"]
 }
 
