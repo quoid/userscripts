@@ -9,7 +9,7 @@ MAC_APP_VERSION = 1.0.0
 // Sign to Run Locally
 CODE_SIGN_IDENTITY = -
 // Organization Identifier
-ORG_IDENTIFIER = debug
+ORG_IDENTIFIER = dev.debug
 // Application Identifier
 APP_IDENTIFIER = $(ORG_IDENTIFIER).userscripts
 // Safari Extension Identifier
