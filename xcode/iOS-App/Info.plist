@@ -38,6 +38,10 @@
 	<string>UIStatusBarStyleLightContent</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
 	<key>US_SHARED_GID</key>
 	<string>$(IOS_SHARED_GID)</string>
 	<key>US_EXT_IDENTIFIER</key>
