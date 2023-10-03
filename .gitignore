@@ -1,3 +1,18 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temp/Dist/Built
+temp
+dist
+dist-ssr
+*.local
+
 # Logs
 logs
 *.log
@@ -7,11 +22,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# npm
 node_modules
-temp
-dist
-dist-ssr
-*.local
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Editor directories and files
 .vscode/*
@@ -24,15 +39,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
 # xcode
 xcuserdata/

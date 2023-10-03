@@ -6,15 +6,15 @@ For other directory structure instructions, please refer to [structure.md](struc
 
 # Environment
 - [`Node.js`](https://nodejs.dev/en/learn/how-to-install-nodejs/)
-- [`pnpm`](https://pnpm.io/installation) (optional)
+- [`bun`](https://bun.sh/docs/installation) (optional)
 - [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
 
 # Dev
-- `pnpm install`
-- `pnpm dev`
+- `bun install` or `npm install`
+- `bun dev` or `npm run dev`
 
 # Build
-- `pnpm build`
+- `bun build:ext` or `npm run build:ext`
 - `cd ./xcode`
 - `xcodebuild` or build with Xcode App
 

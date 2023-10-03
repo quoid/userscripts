@@ -4,30 +4,30 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "pnpm: install",
+            "label": "bun: install",
             "detail": "Install dev dependencies",
             "type": "shell",
-            "command": "pnpm install",
+            "command": "bun install",
             "group": "build",
             "options": {
                 "cwd": "./"
             }
         },
         {
-            "label": "pnpm: dev",
+            "label": "bun: dev",
             "detail": "Run dev server",
             "type": "shell",
-            "command": "pnpm dev",
+            "command": "bun dev",
             "group": "build",
             "options": {
                 "cwd": "./"
             }
         },
         {
-            "label": "pnpm: build",
+            "label": "bun: build",
             "detail": "Build to xcode dist path",
             "type": "shell",
-            "command": "pnpm build",
+            "command": "bun build:ext",
             "group": "build",
             "options": {
                 "cwd": "./"
@@ -45,13 +45,13 @@
         },
         {
             "label": "xcode: rebuild",
-            "detail": "pnpm build + xcodebuild",
+            "detail": "bun build + xcodebuild",
             "presentation": {
                 "reveal": "silent"
             },
             "dependsOrder": "sequence",
             "dependsOn": [
-                "pnpm: build",
+                "bun: build",
                 "xcode: build"
             ],
             "group": {
