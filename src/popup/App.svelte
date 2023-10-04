@@ -545,13 +545,14 @@
             <div class="none">Popup inactive on extension page</div>
         {:else if firstGuide}
             <div class="none">
-                Welcome, first please:&nbsp;
+                <p>Welcome, first use please:&nbsp;</p>
                 <button
                     class="link"
                     on:click={openContainingApp}
                 >
-                    set directory
+                    Open Userscripts App
                 </button>
+                <p>to complete the initialization</p>
             </div>
         {:else if initError}
             <div class="none">
@@ -716,13 +717,11 @@
     }
 
     .none {
-        align-items: center;
-        color: var(--text-color-disabled);
-        display: flex;
         font-weight: 600;
-        justify-content: center;
-        inset: 0;
-        position: absolute;
+        color: var(--text-color-disabled);
+        text-align: center;
+        padding: 3rem 0;
+        line-height: 2.5;
     }
 
     .items.disabled {

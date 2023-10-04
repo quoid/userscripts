@@ -7,6 +7,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var windowForego = false
     private var windowLoaded = false
     
+    @IBOutlet weak var enbaleNativeLogger: NSMenuItem!
+    
     func application(_ application: NSApplication, open urls: [URL]) {
         // if open panel is already open, stop processing the URL scheme
         if NSApplication.shared.keyWindow?.accessibilityIdentifier() == "open-panel" { return }
@@ -26,6 +28,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // Initialize menu items
+        enbaleNativeLogger.state = Preferences.enableLogger ? .on : .off
         if windowForego { return }
         let storyboard = NSStoryboard(name: "View", bundle: Bundle.main)
         let windowController = storyboard.instantiateInitialController() as! NSWindowController
@@ -45,6 +49,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
+    }
+    
+    @IBAction func enableLogger(_ sender: NSMenuItem) {
+        if sender.state == .on {
+            Preferences.enableLogger = false
+            sender.state = .off
+        } else {
+            Preferences.enableLogger = true
+            sender.state = .on
+        }
+    }
+    
+    @IBAction func applicationHelp(_ sender: NSMenuItem) {
+        if let url = URL(string: "https://github.com/quoid/userscripts") {
+            NSWorkspace.shared.open(url)
+        }
     }
     
 }

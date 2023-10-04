@@ -2,7 +2,7 @@ import Foundation
 import SafariServices
 import os
 
-fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+private let logger = USLogger(#fileID)
 
 // helpers
 func getRequireLocation() -> URL {
@@ -53,76 +53,12 @@ func normalizeWeight(_ weight: String) -> String {
 }
 
 func getSaveLocation() -> URL? {
-    #if os(iOS)
-        if
-            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-            let bookmarkUrl = readBookmark(data: sharedBookmarkData, isSecure: true)
-        {
-            return bookmarkUrl
-        } else {
-            return nil
-        }
-    #elseif os(macOS)
-        let standardDefaults = UserDefaults.standard
-        let userSaveLocationKey = "userSaveLocation"
-        var defaultSaveLocation:URL
-
-        // get the default save location, if key doesn't exist write it to user defaults
-        if let saveLocationValue = standardDefaults.url(forKey: "saveLocation") {
-            defaultSaveLocation = saveLocationValue
-        } else {
-            logger.info("\(#function, privacy: .public) - default save location not set, writing to user defaults")
-            let url = getDocumentsDirectory().appendingPathComponent("scripts")
-            UserDefaults.standard.set(url, forKey: "saveLocation")
-            defaultSaveLocation = url
-        }
-
-        // check if shared bookmark data exists
-        // check if can get shared bookmark url
-        // won't be able to if directory trashed
-        guard
-            let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName),
-            let sharedBookmark = readBookmark(data: sharedBookmarkData, isSecure: false),
-            directoryExists(path: sharedBookmark.path)
-        else {
-            // can't get shared bookmark, use default location and remove shared bookmark key from shared user defaults
-            UserDefaults(suiteName: SharedDefaults.suiteName)?.removeObject(forKey: SharedDefaults.keyName)
-            logger.info("\(#function, privacy: .public) - removed sharedbookmark because it was either permanently deleted or in trash")
-            return defaultSaveLocation
-        }
-
-        // at this point, it's known sharedbookmark exists
-        // check local bookmark exists, can read url from bookmark and if bookmark url == shared bookmark url
-        // if local bookmark exists, no need to check if directory exists for it
-        // can't think of an instance where shared bookmark directory exists (checked above), yet local bookmark directory does not
-        if
-            let userSaveLocationData = standardDefaults.data(forKey: userSaveLocationKey),
-            let userSaveLocation = readBookmark(data: userSaveLocationData, isSecure: true),
-            sharedBookmark == userSaveLocation
-        {
-            return userSaveLocation
-        }
-
-        // at this point one of the following conditions met
-        // - local bookmark data doesn't exist
-        // - for some reason can't get url from local bookmark data
-        // - local bookmark url != shared bookmark url (user updated save location)
-        // when any of those conditions are met, create new local bookmark from shared bookmark
-        if saveBookmark(url: sharedBookmark, isShared: false, keyName: userSaveLocationKey, isSecure: true) {
-            // read the newly saved bookmark and return it
-            guard
-                let localBookmarkData = standardDefaults.data(forKey: userSaveLocationKey),
-                let localBookmarkUrl = readBookmark(data: localBookmarkData, isSecure: true)
-            else {
-                logger.error("\(#function, privacy: .public) - failed reading local bookmark")
-                return nil
-            }
-            return localBookmarkUrl
-        } else {
-            logger.error("\(#function, privacy: .public) - could not save local version of shared bookmark")
-            return nil
-        }
-    #endif
+#if os(iOS)
+    if Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl() { return nil }
+#endif
+    let url = Preferences.scriptsDirectoryUrl
+    logger?.debug("\(#function, privacy: .public) - \(url, privacy: .public)")
+    return url
 }
 
 func openSaveLocation() -> Bool {
@@ -146,7 +82,7 @@ func validateUrl(_ urlString: String) -> Bool {
         if let decodedUrl = urlChecked.removingPercentEncoding {
             urlChecked = decodedUrl
         } else {
-            logger.error("\(#function, privacy: .public) - failed at (1), couldn't decode url, \(urlString, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - failed at (1), couldn't decode url, \(urlString, privacy: .public)")
             return false
         }
     }
@@ -154,7 +90,7 @@ func validateUrl(_ urlString: String) -> Bool {
     if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
         urlChecked = encodedUrl
     } else {
-        logger.error("\(#function, privacy: .public) - failed at (2), couldn't percent encode url, \(urlString, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed at (2), couldn't percent encode url, \(urlString, privacy: .public)")
         return false
     }
     guard
@@ -162,7 +98,7 @@ func validateUrl(_ urlString: String) -> Bool {
         let ptcl = parts["protocol"],
         let path = parts["pathname"]
     else {
-        logger.error("\(#function, privacy: .public) - failed at (3) for \(urlString, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed at (3) for \(urlString, privacy: .public)")
         return false
     }
     if
@@ -312,7 +248,7 @@ func updateManifest(with data: Manifest) -> Bool {
         try fileContent.write(to: url, atomically: false, encoding: .utf8)
         return true
     } catch {
-        logger.error("\(#function, privacy: .public) - failed to update manifest: \(error.localizedDescription, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed to update manifest: \(error.localizedDescription, privacy: .public)")
         return false
     }
 }
@@ -345,7 +281,7 @@ func getManifest() -> Manifest {
 }
 
 func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
-    logger.info("\(#function, privacy: .public) - started")
+    logger?.info("\(#function, privacy: .public) - started")
     // only get all files if files were not provided
     var files = [[String: Any]]()
     if optionalFilesArray.isEmpty {
@@ -386,7 +322,7 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             if let index = manifest.declarativeNetRequest.firstIndex(of: filename) {
                 manifest.declarativeNetRequest.remove(at: index)
             } else {
-                logger.error("\(#function, privacy: .public) - failed to remove \(filename, privacy: .public) from dNR array")
+                logger?.error("\(#function, privacy: .public) - failed to remove \(filename, privacy: .public) from dNR array")
             }
         }
 
@@ -397,11 +333,11 @@ func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         manifest.include = updatePatternDict(filename, included, manifest.include)
 
         if !updateManifest(with: manifest) {
-            logger.error("\(#function, privacy: .public) - failed to update manifest matches")
+            logger?.error("\(#function, privacy: .public) - failed to update manifest matches")
             return false
         }
     }
-    logger.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
@@ -416,7 +352,7 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
     for key in keys {
         // key is an array of filenames
         guard let filenames = returnDictionary[key] else {
-            logger.error("\(#function, privacy: .public) - failed to get values for manifest key, \(key, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - failed to get values for manifest key, \(key, privacy: .public)")
             continue
         }
         for name in filenames {
@@ -463,19 +399,19 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
 }
 
 func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
-    logger.info("\(#function, privacy: .public) - started")
+    logger?.info("\(#function, privacy: .public) - started")
     // only get all files if files were not provided
     var files = [[String: Any]]()
     if optionalFilesArray.isEmpty {
         guard let getFiles = getAllFiles() else {
-            logger.info("\(#function, privacy: .public) - count not get files")
+            logger?.info("\(#function, privacy: .public) - count not get files")
             return false
         }
         files = getFiles
     } else {
         files = optionalFilesArray
     }
-    logger.info("\(#function, privacy: .public) - will loop through \(files.count, privacy: .public)")
+    logger?.info("\(#function, privacy: .public) - will loop through \(files.count, privacy: .public)")
     var manifest = getManifest()
     for file in files {
         // can be force unwrapped because getAllFiles didn't return nil
@@ -483,10 +419,10 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
         let metadata = file["metadata"] as! [String: [String]]
         let type = file["type"] as! String
         let required = metadata["require"] ?? []
-        logger.info("\(#function, privacy: .public) - begin \(filename, privacy: .public)")
+        logger?.info("\(#function, privacy: .public) - begin \(filename, privacy: .public)")
         // get required resources for file, if fail, skip updating manifest
         if !getRequiredCode(filename, required, type) {
-            logger.error("\(#function, privacy: .public) - couldn't fetch remote content for \(filename, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - couldn't fetch remote content for \(filename, privacy: .public)")
             continue
         }
 
@@ -504,21 +440,21 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
         if !r.isEmpty && r != manifest.require[filename] {
             manifest.require[filename] = r
             if !updateManifest(with: manifest) {
-                logger.error("\(#function, privacy: .public) - couldn't update manifest when getting required resources")
+                logger?.error("\(#function, privacy: .public) - couldn't update manifest when getting required resources")
             }
         }
-        logger.info("\(#function, privacy: .public) - end   \(filename, privacy: .public)")
+        logger?.info("\(#function, privacy: .public) - end   \(filename, privacy: .public)")
     }
-    logger.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
 func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
-    logger.info("\(#function, privacy: .public) - started")
+    logger?.info("\(#function, privacy: .public) - started")
     var files = [[String: Any]]()
     if optionalFilesArray.isEmpty {
         guard let getFiles = getAllFiles() else {
-            logger.error("\(#function, privacy: .public) - failed at (1)")
+            logger?.error("\(#function, privacy: .public) - failed at (1)")
             return false
         }
         files = getFiles
@@ -576,16 +512,16 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
             }
         }
         if update, !updateManifest(with: manifest) {
-            logger.error("\(#function, privacy: .public) - failed at (2)")
+            logger?.error("\(#function, privacy: .public) - failed at (2)")
             return false
         }
     }
-    logger.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
 func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
-    logger.info("\(#function, privacy: .public) - started")
+    logger?.info("\(#function, privacy: .public) - started")
     // purge all manifest keys of any stale entries
     var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
     // only get all files if files were not provided
@@ -611,14 +547,14 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
                 if let index = manifest.match[pattern]?.firstIndex(of: filename) {
                     manifest.match[pattern]?.remove(at: index)
                     update = true
-                    logger.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from match pattern - \(pattern, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from match pattern - \(pattern, privacy: .public)")
                 }
             }
         }
         if let length = manifest.match[pattern]?.count {
             if length < 1, let ind = manifest.match.index(forKey: pattern) {
                 manifest.match.remove(at: ind)
-                logger.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) match pattern, removed from manifest")
+                logger?.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) match pattern, removed from manifest")
             }
         }
     }
@@ -628,14 +564,14 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
                 if let index = manifest.excludeMatch[pattern]?.firstIndex(of: filename) {
                     manifest.excludeMatch[pattern]?.remove(at: index)
                     update = true
-                    logger.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from exclude-match pattern - \(pattern, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from exclude-match pattern - \(pattern, privacy: .public)")
                 }
             }
         }
         if let length = manifest.excludeMatch[pattern]?.count {
             if length < 1, let ind = manifest.excludeMatch.index(forKey: pattern) {
                 manifest.excludeMatch.remove(at: ind)
-                logger.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) exclude-match pattern, removed from manifest")
+                logger?.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) exclude-match pattern, removed from manifest")
             }
         }
     }
@@ -645,14 +581,14 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
                 if let index = manifest.exclude[pattern]?.firstIndex(of: filename) {
                     manifest.exclude[pattern]?.remove(at: index)
                     update = true
-                    logger.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from exclude pattern - \(pattern, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from exclude pattern - \(pattern, privacy: .public)")
                 }
             }
         }
         if let length = manifest.exclude[pattern]?.count {
             if length < 1, let ind = manifest.exclude.index(forKey: pattern) {
                 manifest.exclude.remove(at: ind)
-                logger.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) exclude pattern, removed from manifest")
+                logger?.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) exclude pattern, removed from manifest")
             }
         }
     }
@@ -662,14 +598,14 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
                 if let index = manifest.include[pattern]?.firstIndex(of: filename) {
                     manifest.include[pattern]?.remove(at: index)
                     update = true
-                    logger.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from exclude pattern - \(pattern, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from exclude pattern - \(pattern, privacy: .public)")
                 }
             }
         }
         if let length = manifest.include[pattern]?.count {
             if length < 1, let ind = manifest.include.index(forKey: pattern) {
                 manifest.include.remove(at: ind)
-                logger.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) exclude pattern, removed from manifest")
+                logger?.info("\(#function, privacy: .public) - No more files for \(pattern, privacy: .public) exclude pattern, removed from manifest")
             }
         }
     }
@@ -680,10 +616,10 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
                 manifest.require.remove(at: index)
                 // remove associated resources
                 if !getRequiredCode(filename, [], (filename as NSString).pathExtension) {
-                    logger.error("\(#function, privacy: .public) - failed to remove required resources when purging \(filename, privacy: .public) from manifest required records")
+                    logger?.error("\(#function, privacy: .public) - failed to remove required resources when purging \(filename, privacy: .public) from manifest required records")
                 }
                 update = true
-                logger.info("\(#function, privacy: .public) - No more required resources for \(filename, privacy: .public), removed from manifest along with resource folder")
+                logger?.info("\(#function, privacy: .public) - No more required resources for \(filename, privacy: .public), removed from manifest along with resource folder")
             }
         }
     }
@@ -693,7 +629,7 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             if let index = manifest.disabled.firstIndex(of: filename) {
                 manifest.disabled.remove(at: index)
                 update = true
-                logger.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from disabled")
+                logger?.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from disabled")
             }
         }
     }
@@ -703,7 +639,7 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             if let index = manifest.declarativeNetRequest.firstIndex(of: filename) {
                 manifest.declarativeNetRequest.remove(at: index)
                 update = true
-                logger.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from dNR")
+                logger?.info("\(#function, privacy: .public) - Could not find \(filename, privacy: .public) in save location, removed from dNR")
             }
         }
     }
@@ -712,14 +648,14 @@ func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         if !defaultSettings.keys.contains(setting.key) {
             manifest.settings.removeValue(forKey: setting.key)
             update = true
-            logger.info("\(#function, privacy: .public) - Removed obsolete setting - \(setting.key, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - Removed obsolete setting - \(setting.key, privacy: .public)")
         }
     }
     if update, !updateManifest(with: manifest) {
-        logger.error("\(#function, privacy: .public) - failed to purge manifest")
+        logger?.error("\(#function, privacy: .public) - failed to purge manifest")
         return false
     }
-    logger.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return true
 }
 
@@ -737,7 +673,7 @@ func checkSettings() -> Bool {
         }
     }
     if update, !updateManifest(with: manifest) {
-        logger.error("\(#function, privacy: .public) - failed to update manifest settings")
+        logger?.error("\(#function, privacy: .public) - failed to update manifest settings")
         return false
     }
     return true
@@ -747,7 +683,7 @@ func updateSettings(_ settings: [String: String]) -> Bool {
     var manifest = getManifest()
     manifest.settings = settings
     if updateManifest(with: manifest) != true {
-        logger.error("\(#function, privacy: .public) - failed to update settings")
+        logger?.error("\(#function, privacy: .public) - failed to update settings")
         return false
     }
     return true
@@ -755,12 +691,13 @@ func updateSettings(_ settings: [String: String]) -> Bool {
 
 // files
 func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
+    logger?.info("\(#function, privacy: .public) - started")
     // returns all files of proper type with filenames, metadata & more
     var files = [[String: Any]]()
     let fm = FileManager.default
     let manifest = getManifest()
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // security scope
@@ -770,7 +707,7 @@ func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
     }
     // get all file urls within save location
     guard let urls = try? fm.contentsOfDirectory(at: saveLocation, includingPropertiesForKeys: [])  else {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return nil
     }
     for url in urls {
@@ -788,7 +725,7 @@ func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
             let metadata = parsed["metadata"] as? [String: [String]],
             let type = filename.split(separator: ".").last
         else {
-            logger.info("\(#function, privacy: .public) - ignoring \(filename, privacy: .public), file missing or metadata missing from file contents")
+            logger?.info("\(#function, privacy: .public) - ignoring \(filename, privacy: .public), file missing or metadata missing from file contents")
             continue
         }
         fileData["canUpdate"] = false
@@ -819,7 +756,7 @@ func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
         }
         files.append(fileData)
     }
-    logger.info("\(#function, privacy: .public) - completed")
+    logger?.info("\(#function, privacy: .public) - completed")
     return files
 }
 
@@ -833,7 +770,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
             do {
                 try FileManager.default.removeItem(at: directory)
             } catch {
-                logger.error("\(#function, privacy: .public) - failed to remove directory: \(error.localizedDescription, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed to remove directory: \(error.localizedDescription, privacy: .public)")
             }
         }
         return true
@@ -845,7 +782,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         // get the path of the url string
         guard let resourceUrlPath = URLComponents(string: resourceUrlString)?.path else {
             // if path can not be obtained, skip and log
-            logger.info("\(#function, privacy: .public) - failed to get path on \(filename, privacy: .public) for \(resourceUrlString, privacy: .public)")
+            logger?.info("\(#function, privacy: .public) - failed to get path on \(filename, privacy: .public) for \(resourceUrlString, privacy: .public)")
             continue
         }
         // skip urls pointing to files of different types
@@ -861,13 +798,13 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
             // check if file specific folder exists at requires directory
             if !FileManager.default.fileExists(atPath: directory.path) {
                 guard ((try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)) != nil) else {
-                    logger.info("\(#function, privacy: .public) - failed to create required code directory for \(filename, privacy: .public)")
+                    logger?.info("\(#function, privacy: .public) - failed to create required code directory for \(filename, privacy: .public)")
                     return false
                 }
             }
             // finally write file to directory
             guard ((try? contents.write(to: fileURL, atomically: false, encoding: .utf8)) != nil) else {
-                logger.info("\(#function, privacy: .public) - failed to write content to file for \(filename, privacy: .public) from \(resourceUrlString, privacy: .public)")
+                logger?.info("\(#function, privacy: .public) - failed to write content to file for \(filename, privacy: .public) from \(resourceUrlString, privacy: .public)")
                 return false
             }
         }
@@ -885,13 +822,13 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
         for abandonFileUrl in abandonedUrls {
             do {
                 try FileManager.default.removeItem(at: abandonFileUrl)
-                logger.info("\(#function, privacy: .public) - cleanup abandoned resource: \(unsanitize(abandonFileUrl.lastPathComponent), privacy: .public)")
+                logger?.info("\(#function, privacy: .public) - cleanup abandoned resource: \(unsanitize(abandonFileUrl.lastPathComponent), privacy: .public)")
             } catch {
-                logger.error("\(#function, privacy: .public) - failed to remove abandoned resource: \(error.localizedDescription, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed to remove abandoned resource: \(error.localizedDescription, privacy: .public)")
             }
         }
     } catch {
-        logger.error("\(#function, privacy: .public) - failed to cleanup resources: \(error.localizedDescription, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed to cleanup resources: \(error.localizedDescription, privacy: .public)")
     }
     return true
 }
@@ -901,7 +838,7 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
     var files = [[String: Any]]()
     if optionalFilesArray.isEmpty {
         guard let getFiles = getAllFiles() else {
-            logger.error("\(#function, privacy: .public) - failed at (1)")
+            logger?.error("\(#function, privacy: .public) - failed at (1)")
             return nil
         }
         files = getFiles
@@ -917,7 +854,7 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
         let metadata = file["metadata"] as! [String: [String]]
         let type = file["type"] as! String
         let name = metadata["name"]![0]
-        logger.info("\(#function, privacy: .public) - Checking for remote updates for \(filename, privacy: .public)")
+        logger?.info("\(#function, privacy: .public) - Checking for remote updates for \(filename, privacy: .public)")
         if canUpdate {
             let currentVersion = metadata["version"]![0]
             let updateUrl = metadata["updateURL"]![0]
@@ -929,7 +866,7 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
                 let remoteMetadata = remoteFileContentsParsed["metadata"] as? [String: [String]],
                 let remoteVersion = remoteMetadata["version"]?[0]
             else {
-                logger.error("\(#function, privacy: .public) - failed to parse remote file contents")
+                logger?.error("\(#function, privacy: .public) - failed to parse remote file contents")
                 return nil
             }
             let remoteVersionNewer = isVersionNewer(currentVersion, remoteVersion)
@@ -938,24 +875,24 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
             }
         }
     }
-    logger.info("\(#function, privacy: .public) - Finished checking for remote updates for \(files.count, privacy: .public) files")
+    logger?.info("\(#function, privacy: .public) - Finished checking for remote updates for \(files.count, privacy: .public) files")
     return hasUpdates
 }
 
 func getRemoteFileContents(_ url: String) -> String? {
-    logger.info("\(#function, privacy: .public) - started for \(url, privacy: .public)")
+    logger?.info("\(#function, privacy: .public) - started for \(url, privacy: .public)")
     // if url is http change to https
     var urlChecked = url
     if urlChecked.hasPrefix("http:") {
         urlChecked = urlChecked.replacingOccurrences(of: "http:", with: "https:")
-        logger.info("\(#function, privacy: .public) - \(url, privacy: .public) is using insecure http, attempt to fetch remote content with https")
+        logger?.info("\(#function, privacy: .public) - \(url, privacy: .public) is using insecure http, attempt to fetch remote content with https")
     }
     // if the url is already encoded, decode it
     if isEncoded(urlChecked) {
         if let decodedUrl = urlChecked.removingPercentEncoding {
             urlChecked = decodedUrl
         } else {
-            logger.error("\(#function, privacy: .public) - failed at (1), couldn't decode url, \(url, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - failed at (1), couldn't decode url, \(url, privacy: .public)")
             return nil
         }
     }
@@ -963,12 +900,12 @@ func getRemoteFileContents(_ url: String) -> String? {
     if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
         urlChecked = encodedUrl
     } else {
-        logger.error("\(#function, privacy: .public) - failed at (2), couldn't percent encode url, \(url, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed at (2), couldn't percent encode url, \(url, privacy: .public)")
         return nil
     }
     // convert url string to url
     guard let solidURL = URL(string: urlChecked) else {
-        logger.error("\(#function, privacy: .public) - failed at (3), couldn't convert string to url, \(url, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed at (3), couldn't convert string to url, \(url, privacy: .public)")
         return nil
     }
     var contents = ""
@@ -991,10 +928,10 @@ func getRemoteFileContents(_ url: String) -> String? {
 
     // if made it to this point and contents still an empty string, something went wrong with the request
     if contents.isEmpty {
-        logger.error("\(#function, privacy: .public) - failed at (4), contents empty, \(url, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed at (4), contents empty, \(url, privacy: .public)")
         return nil
     }
-    logger.info("\(#function, privacy: .public) - complete for \(url, privacy: .public)")
+    logger?.info("\(#function, privacy: .public) - completed for \(url, privacy: .public)")
     return contents
 }
 
@@ -1004,7 +941,7 @@ func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
         let filesWithUpdates = checkForRemoteUpdates(optionalFilesArray),
         let saveLocation = getSaveLocation()
     else {
-        logger.error("\(#function, privacy: .public) - failed to update files (1)")
+        logger?.error("\(#function, privacy: .public) - failed to update files (1)")
         return false
     }
     // security scope
@@ -1022,7 +959,7 @@ func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             let metadata = parsed["metadata"] as? [String: [String]],
             let updateUrl = metadata["updateURL"]?[0]
         else {
-            logger.error("\(#function, privacy: .public) - failed to update files (2)")
+            logger?.error("\(#function, privacy: .public) - failed to update files (2)")
             continue
         }
         let downloadUrl = metadata["downloadURL"] != nil ? metadata["downloadURL"]![0] : updateUrl
@@ -1030,10 +967,10 @@ func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
             let remoteFileContents = getRemoteFileContents(downloadUrl),
             ((try? remoteFileContents.write(to: fileUrl, atomically: false, encoding: .utf8)) != nil)
         else {
-            logger.error("\(#function, privacy: .public) - failed to update files (3)")
+            logger?.error("\(#function, privacy: .public) - failed to update files (3)")
             continue
         }
-        logger.info("\(#function, privacy: .public) - updated \(filename, privacy: .public) with contents fetched from \(downloadUrl, privacy: .public)")
+        logger?.info("\(#function, privacy: .public) - updated \(filename, privacy: .public) with contents fetched from \(downloadUrl, privacy: .public)")
     }
     return true
 }
@@ -1041,7 +978,7 @@ func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
 func toggleFile(_ filename: String,_ action: String) -> Bool {
     // if file doesn't exist return false
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return false
     }
     let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
@@ -1050,7 +987,7 @@ func toggleFile(_ filename: String,_ action: String) -> Bool {
     }
     let path = saveLocation.appendingPathComponent(filename).path
     if !FileManager.default.fileExists(atPath: path) {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return false
     }
     var manifest = getManifest()
@@ -1063,13 +1000,13 @@ func toggleFile(_ filename: String,_ action: String) -> Bool {
     // remove filename from disabled array if enabling
     if (action == "enable") {
         guard let index = manifest.disabled.firstIndex(of: filename) else {
-            logger.error("\(#function, privacy: .public) - failed at (3)")
+            logger?.error("\(#function, privacy: .public) - failed at (3)")
             return false
         }
         manifest.disabled.remove(at: index)
     }
     if !updateManifest(with: manifest) {
-        logger.error("\(#function, privacy: .public) - failed at (4)")
+        logger?.error("\(#function, privacy: .public) - failed at (4)")
         return false
     }
     return true
@@ -1085,7 +1022,7 @@ func checkDefaultDirectories() -> Bool {
                 try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
             } catch {
                 // could not create the save location directory, show error
-                logger.error("\(#function, privacy: .public) - failed at (1) - \(url, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed at (1) - \(url, privacy: .public) - \(error.localizedDescription, privacy: .public)")
                 return false
             }
         }
@@ -1100,7 +1037,7 @@ func getUrlProps(_ url: String) -> [String: String]? {
         let ptcl = parts.scheme,
         let host = parts.host
     else {
-        logger.error("\(#function, privacy: .public) - failed to parse url")
+        logger?.error("\(#function, privacy: .public) - failed to parse url")
         return nil
     }
     var search = ""
@@ -1133,7 +1070,7 @@ func match(_ url: String, _ matchPattern: String) -> Bool {
         let host = parts["host"],
         var path = parts["pathname"]
     else {
-        logger.error("\(#function, privacy: .public) - invalid url \(url, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - invalid url \(url, privacy: .public)")
         return false
     }
 
@@ -1155,7 +1092,7 @@ func match(_ url: String, _ matchPattern: String) -> Bool {
     let partsPatternReg = try! NSRegularExpression(pattern: partsPattern, options: .caseInsensitive)
     let range = NSMakeRange(0, matchPattern.utf16.count)
     guard let parts = partsPatternReg.firstMatch(in: matchPattern, options: [], range: range) else {
-        logger.error("\(#function, privacy: .public) - malformed regex match pattern")
+        logger?.error("\(#function, privacy: .public) - malformed regex match pattern")
         return false
     }
     // ensure url protocol matches pattern protocol
@@ -1169,13 +1106,13 @@ func match(_ url: String, _ matchPattern: String) -> Bool {
     hostPattern = hostPattern.replacingOccurrences(of: "^*$", with: ".*")
     hostPattern = hostPattern.replacingOccurrences(of: "*\\.", with: "(.*\\.)?")
     guard let hostRegEx = try? NSRegularExpression(pattern: hostPattern, options: .caseInsensitive) else {
-        logger.error("\(#function, privacy: .public) - invalid host regex")
+        logger?.error("\(#function, privacy: .public) - invalid host regex")
         return false
     }
     // construct path regex from matchPattern
     let matchPatternPath = matchPattern[Range(parts.range(at: 3), in: matchPattern)!]
     guard let pathRegEx = stringToRegex(String(matchPatternPath)) else {
-        logger.error("\(#function, privacy: .public) - invalid path regex")
+        logger?.error("\(#function, privacy: .public) - invalid path regex")
         return false
     }
     guard
@@ -1193,13 +1130,13 @@ func include(_ url: String,_ pattern: String) -> Bool {
     if pattern.hasPrefix("/") && pattern.hasSuffix("/") {
         let p = String(pattern.dropFirst().dropLast())
         guard let exp = try? NSRegularExpression(pattern: p, options: .caseInsensitive) else {
-            logger.error("\(#function, privacy: .public) - invalid regex")
+            logger?.error("\(#function, privacy: .public) - invalid regex")
             return false
         }
         regex = exp
     } else {
         guard let exp = stringToRegex(pattern) else {
-            logger.error("\(#function, privacy: .public) - coudn't convert string to regex")
+            logger?.error("\(#function, privacy: .public) - coudn't convert string to regex")
             return false
         }
         regex = exp
@@ -1211,8 +1148,8 @@ func include(_ url: String,_ pattern: String) -> Bool {
 }
 
 func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlocklist: Bool) -> [String] {
-    logger.info("\(#function, privacy: .public) - Getting matched files for \(url, privacy: .private(mask: .hash))")
-    // logger.debug("\(#function, privacy: .public) - Getting matched files for \(url, privacy: .public)")
+    logger?.info("\(#function, privacy: .public) - Getting matched files for \(url, privacy: .private(mask: .hash))")
+    // logger?.debug("\(#function, privacy: .public) - Getting matched files for \(url, privacy: .public)")
     let manifest = optionalManifest ?? getManifest()
 
     // filenames that should not load for the passed url
@@ -1245,7 +1182,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
     for pattern in excludeMatchPatterns {
         if match(url, pattern) {
             guard let filenames = manifest.excludeMatch[pattern] else {
-                logger.error("\(#function, privacy: .public) - failed at (2) for \(pattern, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed at (2) for \(pattern, privacy: .public)")
                 continue
             }
             excludedFilenames = excludedFilenames.union(filenames)
@@ -1254,7 +1191,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
     for exp in excludeExpressions {
         if include(url, exp) {
             guard let filenames = manifest.exclude[exp] else {
-                logger.error("\(#function, privacy: .public) - failed at (3) for \(exp, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed at (3) for \(exp, privacy: .public)")
                 continue
             }
             excludedFilenames = excludedFilenames.union(filenames)
@@ -1263,7 +1200,7 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
     for pattern in matchPatterns {
         if match(url, pattern) {
             guard let filenames = manifest.match[pattern] else {
-                logger.error("\(#function, privacy: .public) - failed at (4) for \(pattern, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed at (4) for \(pattern, privacy: .public)")
                 continue
             }
             matchedFilenames = matchedFilenames.union(filenames)
@@ -1272,15 +1209,15 @@ func getMatchedFiles(_ url: String, _ optionalManifest: Manifest?, _ checkBlockl
     for exp in includeExpressions {
         if include(url, exp) {
             guard let filenames = manifest.include[exp] else {
-                logger.error("\(#function, privacy: .public) - failed at (5) for \(exp, privacy: .public)")
+                logger?.error("\(#function, privacy: .public) - failed at (5) for \(exp, privacy: .public)")
                 continue
             }
             matchedFilenames = matchedFilenames.union(filenames)
         }
     }
     matchedFilenames = matchedFilenames.subtracting(excludedFilenames)
-    logger.info("\(#function, privacy: .public) - Got \(matchedFilenames.count) matched files for \(url, privacy: .private(mask: .hash))")
-    // logger.debug("\(#function, privacy: .public) - Got \(matchedFilenames.count) matched files for \(url, privacy: .public)")
+    logger?.info("\(#function, privacy: .public) - Got \(matchedFilenames.count) matched files for \(url, privacy: .private(mask: .hash))")
+    // logger?.debug("\(#function, privacy: .public) - Got \(matchedFilenames.count) matched files for \(url, privacy: .public)")
     return Array(matchedFilenames)
 }
 
@@ -1291,7 +1228,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
     var menuFiles = [Any]()
     
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     
@@ -1302,7 +1239,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
             let type = filename.split(separator: ".").last
         else {
             // if guard fails, log error continue to next file
-            logger.error("\(#function, privacy: .public) - failed at (2) for \(filename, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - failed at (2) for \(filename, privacy: .public)")
             continue
         }
         // can force unwrap b/c getFileContentsParsed ensures metadata exists
@@ -1424,7 +1361,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
                 if let requiredContent = try? String(contentsOf: requiredFileURL, encoding: .utf8) {
                     code = "\(requiredContent)\n\(code)"
                 } else {
-                    logger.error("\(#function, privacy: .public) - failed at (3) for \(require, privacy: .public)")
+                    logger?.error("\(#function, privacy: .public) - failed at (3) for \(require, privacy: .public)")
                 }
             }
         }
@@ -1469,7 +1406,7 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
 
 func getFileContentsParsed(_ url: URL) -> [String: Any]? {
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // security scope
@@ -1493,7 +1430,7 @@ func getInjectionFilenames(_ url: String) -> [String]? {
     let manifest = getManifest()
     let matched = getMatchedFiles(url, manifest, true)
     guard let active = manifest.settings["active"] else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // if injection is disabled return empty array
@@ -1510,7 +1447,7 @@ func getRequestScripts() -> [[String: String]]? {
     // check the manifest to see if injection is enabled
     let manifest = getManifest()
     guard let active = manifest.settings["active"] else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // if not enabled, do not apply any net requests, ie. return empty array
@@ -1518,7 +1455,7 @@ func getRequestScripts() -> [[String: String]]? {
         return requestScripts
     }
     guard let files = getAllFiles(includeCode: true) else {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return nil
     }
     for file in files {
@@ -1544,7 +1481,7 @@ func getContextMenuScripts() -> [String: Any]? {
     // check the manifest to see if injection is enabled
     let manifest = getManifest()
     guard let active = manifest.settings["active"] else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // if not enabled return empty array
@@ -1553,17 +1490,17 @@ func getContextMenuScripts() -> [String: Any]? {
     }
     // get all files at save location
     guard let files = getAllFiles() else {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return nil
     }
     // loop through files and find @run-at context-menu script filenames
     for file in files {
         guard let filename = file["filename"] as? String else {
-            logger.error("\(#function, privacy: .public) - failed at (3), couldn't get filename")
+            logger?.error("\(#function, privacy: .public) - failed at (3), couldn't get filename")
             continue
         }
         guard let fileMetadata = file["metadata"] as? [String: [String]] else {
-            logger.error("\(#function, privacy: .public) - failed at (4), couldn't get metadata for \(filename, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - failed at (4), couldn't get metadata for \(filename, privacy: .public)")
             continue
         }
         let runAt = fileMetadata["run-at"]?[0] ?? "document-end"
@@ -1574,7 +1511,7 @@ func getContextMenuScripts() -> [String: Any]? {
     }
     // get and return script objects for all context-menu scripts
     guard let scripts = getCode(menuFilenames, true) else {
-        logger.error("\(#function, privacy: .public) - failed at (5)")
+        logger?.error("\(#function, privacy: .public) - failed at (5)")
         return nil
     }
     return scripts
@@ -1593,7 +1530,7 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]
     guard
         let files = getAllFiles()
     else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // filter out the files that are present in both files and matched
@@ -1656,7 +1593,7 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
     guard
         var matches = getPopupMatches(url, subframeUrls)
     else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     for pattern in manifest.blacklist {
@@ -1670,7 +1607,7 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
 
 func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     // security scope
@@ -1685,7 +1622,7 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
         let metadata = parsed["metadata"] as? [String: [String]],
         let updateUrl = metadata["updateURL"]?[0]
     else {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return nil
     }
     let downloadUrl = metadata["downloadURL"] != nil ? metadata["downloadURL"]![0] : updateUrl
@@ -1693,7 +1630,7 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
         let remoteFileContents = getRemoteFileContents(downloadUrl),
         ((try? remoteFileContents.write(to: fileUrl, atomically: false, encoding: .utf8)) != nil)
     else {
-        logger.error("\(#function, privacy: .public) - failed at (3)")
+        logger?.error("\(#function, privacy: .public) - failed at (3)")
         return nil
     }
     guard
@@ -1703,7 +1640,7 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
         purgeManifest(files),
         let matches = getPopupMatches(url, subframeUrls)
     else {
-        logger.error("\(#function, privacy: .public) - failed at (4)")
+        logger?.error("\(#function, privacy: .public) - failed at (4)")
         return nil
     }
     return matches
@@ -1712,7 +1649,7 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
 // page
 func getInitData() -> [String: Any]? {
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return nil
     }
     return [
@@ -1733,7 +1670,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     var response = [String: Any]()
     let newContent = content
     guard let saveLocation = getSaveLocation() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return ["error": "failed to get save location when attempting to save"]
     }
     guard
@@ -1798,7 +1735,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     do {
         try newContent.write(to: newFileUrl, atomically: false, encoding: .utf8)
     } catch {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return ["error": "failed to write file to disk"]
     }
 
@@ -1808,7 +1745,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
     guard
         let dateMod = try? FileManager.default.attributesOfItem(atPath: newFileUrl.path)[.modificationDate] as? Date
     else {
-        logger.error("\(#function, privacy: .public) - failed at (3)")
+        logger?.error("\(#function, privacy: .public) - failed at (3)")
         return ["error": "failed to read modified date in save function"]
     }
 
@@ -1831,7 +1768,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
         updateManifestDeclarativeNetRequests(allFiles),
         purgeManifest(allFiles)
     else {
-        logger.error("\(#function, privacy: .public) - failed at (4)")
+        logger?.error("\(#function, privacy: .public) - failed at (4)")
         return ["error": "file save but manifest couldn't be updated"]
     }
 
@@ -1864,7 +1801,7 @@ func trashFile(_ item: [String: Any]) -> Bool {
         let saveLocation = getSaveLocation(),
         let filename = item["filename"] as? String
     else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return false
     }
     // security scope
@@ -1878,13 +1815,13 @@ func trashFile(_ item: [String: Any]) -> Bool {
         do {
             try FileManager.default.trashItem(at: url, resultingItemURL: nil)
         } catch {
-            logger.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+            logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
     // update manifest
     guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
-        logger.error("\(#function, privacy: .public) - failed at (2)")
+        logger?.error("\(#function, privacy: .public) - failed at (2)")
         return false
     }
     return true;
@@ -1945,11 +1882,11 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
 
 // background
 func nativeChecks() -> [String: String] {
-    logger.info("\(#function, privacy: .public) - started")
+    logger?.info("\(#function, privacy: .public) - started")
     #if os(iOS)
         // check the save location is set
         guard (getSaveLocation() != nil) else {
-            logger.error("\(#function, privacy: .public) - save location unset (iOS)")
+            logger?.error("\(#function, privacy: .public) - save location unset (iOS)")
             return [
                 "error": "Native checks error (0)",
                 "saveLocation": "unset",
@@ -1959,41 +1896,41 @@ func nativeChecks() -> [String: String] {
     #endif
     // check the default directories
     guard checkDefaultDirectories() else {
-        logger.error("\(#function, privacy: .public) - checkDefaultDirectories failed")
+        logger?.error("\(#function, privacy: .public) - checkDefaultDirectories failed")
         return ["error": "Native checks error (1)"]
     }
     // check the settings
     guard checkSettings() else {
-        logger.error("\(#function, privacy: .public) - checkSettings failed")
+        logger?.error("\(#function, privacy: .public) - checkSettings failed")
         return ["error": "Native checks error (2)"]
     }
     // get all files to pass as arguments to function below
     guard let allFiles = getAllFiles() else {
-        logger.error("\(#function, privacy: .public) - getAllFiles failed")
+        logger?.error("\(#function, privacy: .public) - getAllFiles failed")
         return ["error": "Native checks error (3)"]
     }
     // purge the manifest of old records
     guard purgeManifest(allFiles) else {
-        logger.error("\(#function, privacy: .public) - purgeManifest failed")
+        logger?.error("\(#function, privacy: .public) - purgeManifest failed")
         return ["error": "Native checks error (4)"]
     }
     // update matches in manifest
     guard updateManifestMatches(allFiles) else {
-        logger.error("\(#function, privacy: .public) - updateManifestMatches failed")
+        logger?.error("\(#function, privacy: .public) - updateManifestMatches failed")
         return ["error": "Native checks error (5)"]
     }
     // update the required resources
     guard updateManifestRequired(allFiles) else {
-        logger.error("\(#function, privacy: .public) - updateManifestRequired failed")
+        logger?.error("\(#function, privacy: .public) - updateManifestRequired failed")
         return ["error": "Native checks error (6)"]
     }
     // update declarativeNetRequest
     guard updateManifestDeclarativeNetRequests(allFiles) else {
-        logger.error("\(#function, privacy: .public) - updateManifestDeclarativeNetRequests failed")
+        logger?.error("\(#function, privacy: .public) - updateManifestDeclarativeNetRequests failed")
         return ["error": "Native checks error (7)"]
     }
     // pass some info in response
-    logger.info("\(#function, privacy: .public) - complete")
+    logger?.info("\(#function, privacy: .public) - completed")
     return ["success": "Native checks complete"]
 }
 
@@ -2002,7 +1939,7 @@ func installCheck(_ content: String) -> [String: Any] {
     // this func checks a userscript's metadata to determine if it's already installed
 
     guard let files = getAllFiles() else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return ["error": "installCheck failed at (1)"]
     }
 
@@ -2054,7 +1991,7 @@ func installUserscript(_ content: String) -> [String: Any] {
         let metadata = parsed["metadata"] as? [String: [String]],
         let n = metadata["name"]?[0]
     else {
-        logger.error("\(#function, privacy: .public) - failed at (1)")
+        logger?.error("\(#function, privacy: .public) - failed at (1)")
         return ["error": "installUserscript failed at (1)"]
     }
     let name = sanitize(n)

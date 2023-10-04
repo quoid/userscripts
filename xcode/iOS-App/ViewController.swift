@@ -11,7 +11,7 @@ import WebKit
 import UniformTypeIdentifiers
 import os
 
-fileprivate let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: #fileID)
+private let logger = USLogger(#fileID)
 
 class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, UIDocumentPickerDelegate {
 
@@ -33,17 +33,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
         let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
-        var readLocation:String
-        if let sharedBookmarkData = UserDefaults(suiteName: SharedDefaults.suiteName)?.data(forKey: SharedDefaults.keyName) {
-            if let bookmarkUrl = readBookmark(data: sharedBookmarkData, isSecure: true) {
-                readLocation = bookmarkUrl.absoluteString
-            } else {
-                readLocation = "Failed to get read directory"
-            }
-        } else {
-            readLocation = "Select a directory to load userscripts"
-        }
-        webView.evaluateJavaScript("printDirectory('\(readLocation)')")
+        webView.evaluateJavaScript("printDirectory('\(Preferences.scriptsDirectoryUrl.absoluteString)')")
         webView.evaluateJavaScript("printVersion('v\(appVersion)', '(\(buildNumber))')")
     }
 
@@ -64,32 +54,21 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let name = message.body as? String else {
-            logger.error("\(#function, privacy: .public) - Userscripts iOS received a message without a name")
+            logger?.error("\(#function, privacy: .public) - Userscripts iOS received a message without a name")
             return
         }
         if name == "SET_READ_LOCATION" {
-            logger.info("\(#function, privacy: .public) - Userscripts iOS has requested to set the readLocation")
+            // https://developer.apple.com/documentation/uikit/view_controllers/providing_access_to_directories
+            logger?.info("\(#function, privacy: .public) - Userscripts iOS has requested to set the readLocation")
             let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
             documentPicker.delegate = self
+            documentPicker.directoryURL = Preferences.scriptsDirectoryUrl
             present(documentPicker, animated: true, completion: nil)
         }
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
-        // https://developer.apple.com/videos/play/wwdc2018/216
-        do {
-            let shouldStopAccessing = url.startAccessingSecurityScopedResource()
-            defer {
-                if shouldStopAccessing {url.stopAccessingSecurityScopedResource()}
-            }
-            if saveBookmark(url: url, isShared: true, keyName: SharedDefaults.keyName, isSecure: false) {
-                webView.evaluateJavaScript("printDirectory('\(url.absoluteString)')")
-            } else {
-                throw NSError(domain: "Failed to saved bookmark", code: 0, userInfo: [:])
-            }
-        } catch let error {
-            logger.error("\(#function, privacy: .public) - \(error, privacy: .public)")
-            return
-        }
+        Preferences.scriptsDirectoryUrl = url
+        webView.evaluateJavaScript("printDirectory('\(Preferences.scriptsDirectoryUrl.absoluteString)')")
     }
 }
