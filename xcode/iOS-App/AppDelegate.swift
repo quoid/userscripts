@@ -16,12 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        let logger = USLogger(#fileID)
-        // set the scripts directory to the app document on first use
-        if Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl() {
-            logger?.info("\(#function, privacy: .public) - Initialize default directory")
-            Preferences.scriptsDirectoryUrl = getDocumentsDirectory()
-        }
+        initializeFirstStart()
         return true
     }
 

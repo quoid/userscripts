@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		030C64F62AC62CC900548FBD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 030C64F52AC62CC900548FBD /* Settings.bundle */; };
+		030C64FC2AD0B24C00548FBD /* Initialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030C64FB2AD0B24C00548FBD /* Initialization.swift */; };
 		0336619F294DF7C900CFE179 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0336619E294DF7C900CFE179 /* Functions.swift */; };
 		033661A529510B7900CFE179 /* View.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 033661A329510B7900CFE179 /* View.storyboard */; };
 		0376905B29808EEA00F3474D /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 0376905A29808EEA00F3474D /* background.js */; };
@@ -106,6 +107,7 @@
 
 /* Begin PBXFileReference section */
 		030C64F52AC62CC900548FBD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		030C64FB2AD0B24C00548FBD /* Initialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Initialization.swift; sourceTree = "<group>"; };
 		0336619E294DF7C900CFE179 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		033661A429510B7900CFE179 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/View.storyboard; sourceTree = "<group>"; };
 		0376905A29808EEA00F3474D /* background.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
@@ -210,6 +212,7 @@
 				4A4CF6DD270A38BD00111584 /* AppDelegate.swift */,
 				4A4CF6E7270A38BD00111584 /* SceneDelegate.swift */,
 				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
+				030C64FB2AD0B24C00548FBD /* Initialization.swift */,
 				4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */,
 				4A4CF6EE270A38BD00111584 /* Main.storyboard */,
 			);
@@ -566,6 +569,7 @@
 				4A4CF6EA270A38BD00111584 /* ViewController.swift in Sources */,
 				4A4CF6DE270A38BD00111584 /* AppDelegate.swift in Sources */,
 				03C24F992ABD2CBB00F130F9 /* Preferences.swift in Sources */,
+				030C64FC2AD0B24C00548FBD /* Initialization.swift in Sources */,
 				78B25585299D4C27000B2E9B /* Shared.swift in Sources */,
 				4A4CF6E8270A38BD00111584 /* SceneDelegate.swift in Sources */,
 			);

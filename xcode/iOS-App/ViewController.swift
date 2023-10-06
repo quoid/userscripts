@@ -62,7 +62,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
             logger?.info("\(#function, privacy: .public) - Userscripts iOS has requested to set the readLocation")
             let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
             documentPicker.delegate = self
-            documentPicker.directoryURL = Preferences.scriptsDirectoryUrl
+            documentPicker.directoryURL = getDocumentsDirectory()
             present(documentPicker, animated: true, completion: nil)
         }
     }
