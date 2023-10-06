@@ -6,7 +6,7 @@ private func createDemoScript() {
     let demoScript = """
 // ==UserScript==
 // @name         Demo user script
-// @description  I am a demo user script that you can safely delete (add any files in this directory and I will no longer automatically generate)
+// @description  I am a demo user script that you can safely delete (add any files to this folder and I will no longer automatically generate)
 // @author       Userscripts
 // @version      0.0.1
 // @match        *://*/*
