@@ -6,18 +6,20 @@ For other directory structure instructions, please refer to [structure.md](struc
 
 <details><summary>With `Node.js` please click here</summary>
 
-# Environment
+---
+### Environment
 - [`Node.js`](https://nodejs.org/)
 - [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
 
-# Dev
+### Dev
 - `npm install`
 - `npm run dev`
 
-# Build
+### Build
 - `npm run build:ext`
 - `cd ./xcode`
 - `xcodebuild` or build with Xcode App
+---
 </details>
 
 `Bun` has faster speeds as an alternative to `Node.js`.
