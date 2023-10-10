@@ -39,7 +39,7 @@ For other directory structure instructions, please refer to [structure.md](struc
 
 [^1]: These commands can also be executed directly through the VSCode Run Task. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
 [^2]: If `/usr/bin/env node` does not exist, the two commands behaves identically. Please refer to: https://bun.sh/docs/cli/run#bun
-[^3]: Local setup may be required. Please refer to [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
+[^3]: Local setup may be required. Please refer to: [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 # Xcode
 
