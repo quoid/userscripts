@@ -17,7 +17,7 @@
             "label": "bun: dev",
             "detail": "Run dev server",
             "type": "shell",
-            "command": "bun dev",
+            "command": "bun --bun run dev",
             "group": "build",
             "options": {
                 "cwd": "./"
@@ -27,7 +27,7 @@
             "label": "bun: build",
             "detail": "Build to xcode dist path",
             "type": "shell",
-            "command": "bun build:ext",
+            "command": "bun --bun run build",
             "group": "build",
             "options": {
                 "cwd": "./"

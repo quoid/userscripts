@@ -4,7 +4,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build:ext": "vite build",
+        "build": "vite build",
         "lint-js": "eslint ./",
         "lint-css": "stylelint '**/*.{css,svelte}'"
     },

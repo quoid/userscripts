@@ -30,12 +30,14 @@ For other directory structure instructions, please refer to [structure.md](struc
 
 # Dev
 - `bun install`
-- `bun dev`
+- `bun --bun run dev` or `bun dev`[^1]
 
 # Build
-- `bun build:ext`
+- `bun --bun run build` or `bun run build`[^1]
 - `cd ./xcode`
 - `xcodebuild` or build with Xcode App
+
+[^1]: If `/usr/bin/env node` does not exist, the two commands behaves identically. Please refer to: https://bun.sh/docs/cli/run#bun
 
 # Xcode
 
