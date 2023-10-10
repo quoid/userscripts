@@ -18,7 +18,7 @@ For other directory structure instructions, please refer to [structure.md](struc
 ### Build (with `Node.js`)
 - `npm run build`
 - `cd ./xcode`
-- `xcodebuild` or build with Xcode App
+- `xcodebuild` or build with `Xcode` App
 ---
 </details>
 
@@ -29,15 +29,17 @@ For other directory structure instructions, please refer to [structure.md](struc
 - [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
 
 # Dev
-- `bun install`
-- `bun --bun run dev` or `bun dev`[^1]
+- `bun install`[^1]
+- `bun --bun run dev` or `bun dev`[^1][^2]
 
 # Build
-- `bun --bun run build` or `bun run build`[^1]
+- `bun --bun run build` or `bun run build`[^1][^2]
 - `cd ./xcode`
-- `xcodebuild` or build with Xcode App
+- `xcodebuild`[^1][^3] or build with `Xcode` App
 
-[^1]: If `/usr/bin/env node` does not exist, the two commands behaves identically. Please refer to: https://bun.sh/docs/cli/run#bun
+[^1]: These commands can also be executed directly through the VSCode Run Task. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
+[^2]: If `/usr/bin/env node` does not exist, the two commands behaves identically. Please refer to: https://bun.sh/docs/cli/run#bun
+[^3]: Local setup may be required, please refer to [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html).
 
 # Xcode
 
