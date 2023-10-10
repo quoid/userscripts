@@ -22,8 +22,6 @@ For other directory structure instructions, please refer to [structure.md](struc
 
 `Bun` has faster speeds as an alternative to `Node.js`.
 
-The following description uses `Bun` by default.
-
 # Environment
 - [`Bun`](https://bun.sh/docs/installation)
 - [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
