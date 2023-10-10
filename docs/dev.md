@@ -7,15 +7,15 @@ For other directory structure instructions, please refer to [structure.md](struc
 <details><summary>With `Node.js` please click here</summary>
 
 ---
-### Environment
+### Environment (with `Node.js`)
 - [`Node.js`](https://nodejs.org/)
 - [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
 
-### Dev
+### Dev (with `Node.js`)
 - `npm install`
 - `npm run dev`
 
-### Build
+### Build (with `Node.js`)
 - `npm run build:ext`
 - `cd ./xcode`
 - `xcodebuild` or build with Xcode App
