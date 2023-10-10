@@ -16,7 +16,7 @@ For other directory structure instructions, please refer to [structure.md](struc
 - `npm run dev`
 
 ### Build (with `Node.js`)
-- `npm run build:ext`
+- `npm run build`
 - `cd ./xcode`
 - `xcodebuild` or build with Xcode App
 ---
