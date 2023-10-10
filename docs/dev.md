@@ -4,17 +4,36 @@ The `xcode` directory is the root of the Xcode project where the Safari extensio
 
 For other directory structure instructions, please refer to [structure.md](structure.md).
 
+<details><summary>With `Node.js` please click here</summary>
+
 # Environment
 - [`Node.js`](https://nodejs.dev/en/learn/how-to-install-nodejs/)
-- [`bun`](https://bun.sh/docs/installation) (optional)
 - [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
 
 # Dev
-- `bun install` or `npm install`
-- `bun dev` or `npm run dev`
+- `npm install`
+- `npm run dev`
 
 # Build
-- `bun build:ext` or `npm run build:ext`
+- `npm run build:ext`
+- `cd ./xcode`
+- `xcodebuild` or build with Xcode App
+</details>
+
+`Bun` has faster speeds as an alternative to `Node.js`.
+
+The following description uses `Bun` by default.
+
+# Environment
+- [`Bun`](https://bun.sh/docs/installation)
+- [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
+
+# Dev
+- `bun install`
+- `bun dev`
+
+# Build
+- `bun build:ext`
 - `cd ./xcode`
 - `xcodebuild` or build with Xcode App
 
