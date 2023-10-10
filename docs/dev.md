@@ -7,7 +7,7 @@ For other directory structure instructions, please refer to [structure.md](struc
 <details><summary>With `Node.js` please click here</summary>
 
 # Environment
-- [`Node.js`](https://nodejs.dev/en/learn/how-to-install-nodejs/)
+- [`Node.js`](https://nodejs.org/)
 - [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
 
 # Dev
@@ -24,7 +24,7 @@ For other directory structure instructions, please refer to [structure.md](struc
 
 # Environment
 - [`Bun`](https://bun.sh/docs/installation)
-- [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
+- [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
 
 # Dev
 - `bun install`
