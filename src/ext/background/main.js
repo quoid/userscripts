@@ -1,14 +1,6 @@
-// functions from "src/shared/utils.js";
-async function openExtensionPage() {
-    const url = browser.runtime.getURL("dist/entry-ext-extension-page.html");
-    const tabs = await browser.tabs.query({url});
-    const tab = tabs.find(e => e.url.startsWith(url));
-    if (!tab) return browser.tabs.create({url});
-    browser.tabs.update(tab.id, {active: true});
-    browser.windows.update(tab.windowId, {focused: true});
-}
-
-// functions from "src/shared/settings.js";
+import {openExtensionPage} from "../shared/utils.js";
+// eslint-disable-next-line import/no-namespace
+import * as settingsStorage from "../shared/settings.js";
 
 // first sorts files by run-at value, then by weight value
 function userscriptSort(a, b) {
@@ -81,11 +73,10 @@ async function setBadgeCount() {
     // @todo until better introduce in ios, only set badge on macOS
     const platform = await getPlatform();
     if (platform !== "macos") return clearBadge();
-    // @todo after the background script is modularized, import and use:
-    // settingsStorage.get(["global_active","toolbar_badge_count","global_exclude_match"])
-    const results = await browser.storage.local.get(["US_GLOBAL_ACTIVE", "US_TOOLBAR_BADGE_COUNT"]);
-    if (results?.US_GLOBAL_ACTIVE === false) return clearBadge();
-    if (results?.US_TOOLBAR_BADGE_COUNT === false) return clearBadge();
+    // @todo settingsStorage.get("global_exclude_match")
+    const settings = await settingsStorage.get(["global_active", "toolbar_badge_count"]);
+    if (settings.global_active === false) return clearBadge();
+    if (settings.toolbar_badge_count === false) return clearBadge();
 
     const currentTab = await browser.tabs.getCurrent();
     // no active tabs exist (user closed all windows)
@@ -280,12 +271,11 @@ function contextClick(info, tab) {
 
 async function nativeChecks() {
     const response = await browser.runtime.sendNativeMessage({name: "NATIVE_CHECKS"});
-    // note: use settings.js once background page modularization
     if (response.error) {
-        browser.storage.local.set({US_ERROR_NATIVE: response});
+        settingsStorage.set({error_native: response});
         return false;
     }
-    browser.storage.local.remove("US_ERROR_NATIVE");
+    settingsStorage.reset("error_native");
     return true;
 }
 
