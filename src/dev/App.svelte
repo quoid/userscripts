@@ -11,8 +11,8 @@
     <h1>Userscripts dev</h1>
 
     <p>
-        <a href="/entry-page.html" target="_blank" rel="noreferrer">page</a>,
-        <a href="/entry-popup.html" target="_blank" rel="noreferrer">popup</a>
+        <a href="/entry-ext-action-popup.html" target="_blank" rel="noreferrer">action-popup</a>,
+        <a href="/entry-ext-extension-page.html" target="_blank" rel="noreferrer">extension-page</a>
     </p>
 
     <p class="read-the-docs">
