@@ -11,6 +11,7 @@
     <h1>Userscripts dev</h1>
 
     <p>
+        <a href="/entry-app-webview.html" target="_blank" rel="noreferrer">native-app</a>,
         <a href="/entry-ext-action-popup.html" target="_blank" rel="noreferrer">action-popup</a>,
         <a href="/entry-ext-extension-page.html" target="_blank" rel="noreferrer">extension-page</a>
     </p>
