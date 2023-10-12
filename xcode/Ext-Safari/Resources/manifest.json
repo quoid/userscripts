@@ -13,11 +13,11 @@
         "512": "images/icon-512.png"
     },
     "background": {
-        "scripts": ["background.js"],
+        "scripts": ["dist/background.js"],
         "persistent": false
     },
     "browser_action": {
-        "default_popup": "dist/entry-popup.html",
+        "default_popup": "dist/entry-ext-action-popup.html",
         "default_icon": {
             "16": "images/toolbar-icon-16.png",
             "32": "images/toolbar-icon-32.png"
@@ -25,7 +25,7 @@
     },
     "content_scripts": [
         {
-            "js": ["content.js"],
+            "js": ["dist/content.js"],
             "matches": ["<all_urls>"],
             "run_at": "document_start",
             "all_frames": true
