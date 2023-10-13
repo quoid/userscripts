@@ -190,8 +190,19 @@
 		0316A9992AD7709600AAEC8A /* App-Shared */ = {
 			isa = PBXGroup;
 			children = (
+				039F59512AD95485002E9977 /* Resources */,
+				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
 			);
 			path = "App-Shared";
+			sourceTree = "<group>";
+		};
+		039F59512AD95485002E9977 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4A4CF6E3270A38BD00111584 /* Icon.png */,
+				4A4CF6E0270A38BD00111584 /* Main.html */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		4A143AAA279DE6FF0029BFD0 /* Tests-Mac */ = {
@@ -208,25 +219,14 @@
 				4A4CF6F2270A38BF00111584 /* Info.plist */,
 				4A4CF718270A38C700111584 /* App.entitlements */,
 				030C64F52AC62CC900548FBD /* Settings.bundle */,
-				4A4CF6DF270A38BD00111584 /* Resources */,
 				4A4CF6F1270A38BF00111584 /* Assets.xcassets */,
 				4A4CF6DD270A38BD00111584 /* AppDelegate.swift */,
 				4A4CF6E7270A38BD00111584 /* SceneDelegate.swift */,
-				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
 				030C64FB2AD0B24C00548FBD /* Initialization.swift */,
 				4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */,
 				4A4CF6EE270A38BD00111584 /* Main.storyboard */,
 			);
 			path = "App-iOS";
-			sourceTree = "<group>";
-		};
-		4A4CF6DF270A38BD00111584 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				4A4CF6E3270A38BD00111584 /* Icon.png */,
-				4A4CF6E0270A38BD00111584 /* Main.html */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		4A57B9E3227235CD008A9763 = {
