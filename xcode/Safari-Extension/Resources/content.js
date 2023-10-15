@@ -160,21 +160,24 @@ const apis = {
                 ) {
                     // process xhr response
                     const r = msg.response;
-                    if (r.responseType === "arraybuffer") {
-                        // arraybuffer responses had their data converted in background
-                        // convert it back to arraybuffer
-                        try {
-                            const buffer = new Uint8Array(r.response).buffer;
-                            r.response = buffer;
-                        } catch (err) {
-                            console.error("error parsing xhr arraybuffer", err);
+                    // only process when xhr is complete and data exist
+                    if (r.readyState === 4 && r.response !== null) {
+                        if (r.responseType === "arraybuffer") {
+                            // arraybuffer responses had their data converted in background
+                            // convert it back to arraybuffer
+                            try {
+                                const buffer = new Uint8Array(r.response).buffer;
+                                r.response = buffer;
+                            } catch (err) {
+                                console.error("error parsing xhr arraybuffer", err);
+                            }
+                        } else if (r.responseType === "blob" && r.response.data) {
+                            // blob responses had their data converted in background
+                            // convert it back to blob
+                            const resp = await fetch(r.response.data);
+                            const b = await resp.blob();
+                            r.response = b;
                         }
-                    } else if (r.responseType === "blob" && r.response.data) {
-                        // blob responses had their data converted in background
-                        // convert it back to blob
-                        const resp = await fetch(r.response.data);
-                        const b = await resp.blob();
-                        r.response = b;
                     }
                     // call userscript method
                     details[msg.name](msg.response);
