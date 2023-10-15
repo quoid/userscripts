@@ -38,10 +38,12 @@ private func createDemoScript() {
 
 func initializeFirstStart() {
     // set the scripts directory to the app document on first use
-    if Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl() {
+    if isCurrentDefaultScriptsDirectory() {
         logger?.info("\(#function, privacy: .public) - Initialize default directory")
         Preferences.scriptsDirectoryUrl = getDocumentsDirectory()
     }
     // put a visible file to display the documents directory in files app
-    createDemoScript()
+    if isCurrentInitialScriptsDirectory() {
+        createDemoScript()
+    }
 }

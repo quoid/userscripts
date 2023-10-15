@@ -54,7 +54,10 @@ func normalizeWeight(_ weight: String) -> String {
 
 func getSaveLocation() -> URL? {
 #if os(iOS)
-    if Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl() { return nil }
+    if isCurrentDefaultScriptsDirectory() {
+        logger?.info("\(#function, privacy: .public) - Uninitialized save location")
+        return nil
+    }
 #endif
     let url = Preferences.scriptsDirectoryUrl
     logger?.debug("\(#function, privacy: .public) - \(url, privacy: .public)")

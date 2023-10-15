@@ -29,6 +29,27 @@ func getDefaultScriptsDirectoryUrl() -> URL {
     return url
 }
 
+func isCurrentDefaultScriptsDirectory() -> Bool {
+    return Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl()
+}
+
+func isCurrentInitialScriptsDirectory() -> Bool {
+    let url = Preferences.scriptsDirectoryUrl.standardizedFileURL
+    return url == getDocumentsDirectory().standardizedFileURL
+}
+
+func getCurrentScriptsDirectoryString() -> String {
+    let url = Preferences.scriptsDirectoryUrl.standardizedFileURL
+    if url == getDocumentsDirectory().standardizedFileURL {
+        return "Userscripts App Documents"
+    }
+    if #available(macOS 13.0, iOS 16.0, *) {
+        return url.path(percentEncoded: false)
+    } else {
+        return url.path.removingPercentEncoding ?? url.path
+    }
+}
+
 // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties#Property-Wrappers
 // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/generics/
 @propertyWrapper
