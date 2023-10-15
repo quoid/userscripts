@@ -404,18 +404,21 @@ function handleMessage(request, sender, sendResponse) {
                     if (["", "text"].indexOf(xhr.responseType) !== -1) {
                         x.responseText = xhr.responseText;
                     }
-                    // need to convert arraybuffer data to postMessage
-                    if (xhr.responseType === "arraybuffer") {
-                        const arr = Array.from(new Uint8Array(xhr.response));
-                        x.response = arr;
-                    }
-                    // need to blob arraybuffer data to postMessage
-                    if (xhr.responseType === "blob") {
-                        const base64data = await readAsDataURL(xhr.response);
-                        x.response = {
-                            data: base64data,
-                            type: xhr.responseType
-                        };
+                    // only process when xhr is complete and data exist
+                    if (xhr.readyState === 4 && xhr.response !== null) {
+                        // need to convert arraybuffer data to postMessage
+                        if (xhr.responseType === "arraybuffer") {
+                            const arr = Array.from(new Uint8Array(xhr.response));
+                            x.response = arr;
+                        }
+                        // need to convert blob data to postMessage
+                        if (xhr.responseType === "blob") {
+                            const base64data = await readAsDataURL(xhr.response);
+                            x.response = {
+                                data: base64data,
+                                type: xhr.responseType
+                            };
+                        }
                     }
                     port.postMessage({name: e, event, response: x});
                 };
