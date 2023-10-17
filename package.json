@@ -4,9 +4,11 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
-        "lint-js": "eslint ./",
-        "lint-css": "stylelint '**/*.{css,svelte}'"
+        "build": "pnpm build:app && pnpm build:ext",
+        "build:app": "node scripts/build-app.js",
+        "build:ext": "node scripts/build-ext-v4.js",
+        "lint:js": "eslint ./",
+        "lint:css": "stylelint '**/*.{css,svelte}'"
     },
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^2.4.3",
