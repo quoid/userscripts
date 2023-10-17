@@ -1,20 +1,43 @@
 <script>
     import icon from "./img/icon.png";
     import logo from "./img/logo.svg?raw";
+
+    let version = "v0.0.0";
+    let build = "(0)";
+    let directory = "init";
+
+    window.APP = {
+        printVersion: (v, b) => {
+            version = v;
+            build = b;
+        },
+        printDirectory: d => {
+            directory = d;
+        }
+    };
+
+    function changeDirectory() {
+        window.webkit?.messageHandlers.controller.postMessage("CHANGE_DIRECTORY");
+    }
 </script>
 
 <main>
-    <img class="icon" inline src={icon} alt="Userscripts App Icon">
+    <img class="icon" src={icon} alt="Userscripts App Icon" draggable="false">
     <div class="logo">
         {@html logo}
-        <span><span id="version">v0.1</span>&nbsp;<span id="build">(0)</span></span>
+    <span>
+        <span>{version}</span>
+        <span>{build}</span>
+    </span>
     </div>
     <p>You can turn on the Userscripts iOS Safari extension in Settings.
         <a href="https://github.com/quoid/userscripts#userscripts-safari">Read the docs.</a>
     </p>
-    <button id="set_directory">Change Userscripts Directory</button>
+    <button id="set_directory" on:click={changeDirectory}>
+        Change Userscripts Directory
+    </button>
     <div class="current">CURRENT DIRECTORY:</div>
-    <div id="directory">init</div>
+    <div id="directory">{directory}</div>
 </main>
 
 <style>
@@ -26,6 +49,8 @@
         justify-content: center;
         padding: 0 1rem;
         text-align: center;
+        -webkit-touch-callout: none;
+        user-select: none;
     }
 
     a {
@@ -48,6 +73,8 @@
     }
 
     .logo > span {
+        text-align: left;
+        min-width: 3.5rem;
         margin-left: 0.5rem;
     }
 
@@ -81,5 +108,7 @@
         font-size: 0.875rem;
         font-weight: 400;
         word-break: break-all;
+        min-height: 7rem;
+        max-height: 10rem;
     }
 </style>
