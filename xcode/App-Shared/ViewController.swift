@@ -48,17 +48,34 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if navigationAction.navigationType == .linkActivated  {
-            guard
-                let url =  navigationAction.request.url,
-                UIApplication.shared.canOpenURL(url)
-            else {
+            guard let url = navigationAction.request.url else {
+                decisionHandler(.allow)
                 return
             }
-            UIApplication.shared.open(url)
-            decisionHandler(.cancel)
-        } else {
+            // allow registration scheme
+            if url.scheme == AppWebViewUrlScheme {
+                decisionHandler(.allow)
+                return
+            }
+            // allow specified url prefixes
+//            let allowPrefixes = [
+//                "https://github.com/quoid/userscripts"
+//            ]
+//            for prefix in allowPrefixes {
+//                if url.absoluteString.lowercased().hasPrefix(prefix) {
+//                    decisionHandler(.allow)
+//                    return
+//                }
+//            }
+            // open from external app like safari
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+                decisionHandler(.cancel)
+                return
+            }
             decisionHandler(.allow)
         }
+        decisionHandler(.allow)
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {

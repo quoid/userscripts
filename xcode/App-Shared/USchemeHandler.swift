@@ -10,17 +10,26 @@ let AppWebViewEntryPage = "entry-app-webview.html"
 class USchemeHandler: NSObject, WKURLSchemeHandler {
     
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
+        // wrapper of didFailWithError
+        func failHandler(_ errmsg: String) {
+            logger?.error("\(#function) - \(errmsg, privacy: .public)")
+            // redirect to a customized error page
+//            DispatchQueue.main.async {
+//                webView.load(URLRequest(url: URL(string: "\(AppWebViewUrlScheme):///")!))
+//            }
+            urlSchemeTask.didFailWithError(NSError(domain: "USchemeHandler", code: 0, userInfo: nil))
+        }
+
         // https://developer.apple.com/documentation/dispatch/dispatchqueue
         DispatchQueue.global(qos: .userInteractive).async {
             guard let url = urlSchemeTask.request.url else {
-                logger?.error("\(#function, privacy: .public) - failed to get request url")
+                failHandler("failed to get request url")
                 return
             }
             guard url.scheme == AppWebViewUrlScheme else {
-                logger?.error("\(#function, privacy: .public) - unexpected url scheme: \(url, privacy: .public)")
+                failHandler("unexpected url scheme: \(url)")
                 return
             }
-            print(url)
             var name: String
             if #available(macOS 13.0, iOS 16.0, *) {
                 name = url.path(percentEncoded: false)
@@ -31,11 +40,11 @@ class USchemeHandler: NSObject, WKURLSchemeHandler {
                 name = AppWebViewEntryPage
             }
             guard let file = Bundle.main.url(forResource: name, withExtension: nil, subdirectory: "dist") else {
-                logger?.error("\(#function, privacy: .public) - file not found: \(url, privacy: .public)")
+                failHandler("file not found: \(url)")
                 return
             }
             guard let data = try? Data(contentsOf: file) else {
-                logger?.error("\(#function, privacy: .public) - faild to get data from: \(url, privacy: .public)")
+                failHandler("faild to get data from: \(url)")
                 return
             }
 
