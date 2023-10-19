@@ -91,6 +91,15 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
             documentPicker.directoryURL = getDocumentsDirectory()
             present(documentPicker, animated: true, completion: nil)
         }
+        if name == "OPEN_DIRECTORY" {
+            guard var components = URLComponents(url: Preferences.scriptsDirectoryUrl, resolvingAgainstBaseURL: true) else {
+                return
+            }
+            components.scheme = "shareddocuments"
+            if let url = components.url, UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            }
+        }
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {

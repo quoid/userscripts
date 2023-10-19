@@ -35,3 +35,17 @@ body {
 #app {
     height: 100%;
 }
+
+button {
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    user-select: none;
+}
+
+.link {
+    background: none;
+    color: var(--color-blue);
+    cursor: pointer;
+    text-decoration: underline;
+}

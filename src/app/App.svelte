@@ -19,6 +19,10 @@
     function changeDirectory() {
         window.webkit?.messageHandlers.controller.postMessage("CHANGE_DIRECTORY");
     }
+
+    function openDirectory() {
+        window.webkit?.messageHandlers.controller.postMessage("OPEN_DIRECTORY");
+    }
 </script>
 
 <main>
@@ -33,11 +37,13 @@
     <p>You can turn on the Userscripts iOS Safari extension in Settings.
         <a href="https://github.com/quoid/userscripts#userscripts-safari">Read the docs.</a>
     </p>
-    <button id="set_directory" on:click={changeDirectory}>
+    <button id="change-directory" on:click={changeDirectory}>
         Change Userscripts Directory
     </button>
     <div class="current">CURRENT DIRECTORY:</div>
-    <div id="directory">{directory}</div>
+    <div id="directory">
+        <button class="link" on:click={openDirectory}>{directory}</button>
+    </div>
 </main>
 
 <style>
@@ -86,7 +92,7 @@
         letter-spacing: var(--letter-spacing-small);
     }
 
-    button {
+    button#change-directory {
         background-color: var(--color-blue);
         border: none;
         border-radius: var(--border-radius);
@@ -98,7 +104,7 @@
         padding: 0.5rem 1rem;
     }
 
-    button:active {
+    button#change-directory:active {
         background-color: #6296c7;
     }
 
@@ -110,5 +116,10 @@
         word-break: break-all;
         min-height: 7rem;
         max-height: 10rem;
+    }
+
+    #directory button {
+        color: inherit;
+        text-decoration: none;
     }
 </style>
