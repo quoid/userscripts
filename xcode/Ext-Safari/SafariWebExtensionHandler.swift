@@ -1,5 +1,4 @@
 import SafariServices
-import os
 
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     func beginRequest(with context: NSExtensionContext) {

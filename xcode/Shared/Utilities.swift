@@ -1,6 +1,5 @@
-import Foundation
-import SafariServices
-import os
+import SwiftUI
+import os.log
 
 func USLogger(_ category: String) -> Logger? {
     let subsystem = Bundle.main.bundleIdentifier!

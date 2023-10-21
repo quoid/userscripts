@@ -1,6 +1,6 @@
-import "./app.css";
 import "../shared/reset.css";
 import "../shared/variables.css";
+import "./app.css";
 import App from "./App.svelte";
 
 if (import.meta.env.DEV) { // vite feat that only import in dev mode

@@ -1,5 +1,4 @@
 import Foundation
-import os
 
 private let logger = USLogger(#fileID)
 private let suiteName = Bundle.main.infoDictionary!["US_SHARED_GID"] as! String

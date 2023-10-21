@@ -27,6 +27,7 @@
 <script>
     import {createEventDispatcher} from "svelte";
     import CodeMirror from "../../codemirror.js";
+    import "../../codemirror.css";
     import {settings, state} from "../../store.js";
     import EditorSearch from "./EditorSearch.svelte";
     import {parseMetadata, validGrants, validMetaKeys} from "../../../shared/utils.js";

@@ -1,6 +1,5 @@
 import AppKit
 import SafariServices
-import os
 
 private let logger = USLogger(#fileID)
 

@@ -1,6 +1,4 @@
-import Foundation
 import SafariServices
-import os
 
 private let logger = USLogger(#fileID)
 

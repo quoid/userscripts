@@ -1,6 +1,4 @@
-import Cocoa
 import SafariServices.SFSafariApplication
-import os
 
 private let logger = USLogger(#fileID)
 
