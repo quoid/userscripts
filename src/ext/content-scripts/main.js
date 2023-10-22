@@ -1,232 +1,21 @@
+import apis from "./api.js";
+
 // code received from background page will be stored in this variable
 // code referenced again when strict CSPs block initial injection attempt
 let data;
 // determines whether strict csp injection has already run (JS only)
 let cspFallbackAttempted = false;
-// save reference to window's browser object
-const browser = window.browser;
-// GM APIs
-const apis = {
-    closeTab(tabId) {
-        return new Promise(resolve => {
-            const message = {
-                name: "API_CLOSE_TAB",
-                tabId
-            };
-            browser.runtime.sendMessage(message, response => resolve(response));
-        });
-    },
-    openInTab(url, openInBackground = false) {
-        if (!url) return console.error("openInTab missing url arg");
-        return new Promise(resolve => {
-            const message = {
-                name: "API_OPEN_TAB",
-                url,
-                active: !openInBackground
-            };
-            browser.runtime.sendMessage(message, response => resolve(response));
-        });
-    },
-    setValue(key, value) {
-        if (typeof key !== "string" || !key.length) {
-            return console.error("setValue invalid key arg");
-        }
-        if (value == null) {
-            return console.error("setValue invalid value arg");
-        }
-        return new Promise(resolve => {
-            const item = {};
-            item[`${this.US_filename}---${key}`] = value;
-            browser.storage.local.set(item, () => resolve({success: 1}));
-        });
-    },
-    getValue(key, defaultValue) {
-        if (typeof key !== "string" || !key.length) {
-            return console.error("getValue invalid key arg");
-        }
-        const prefixedKey = `${this.US_filename}---${key}`;
-        return new Promise(resolve => {
-            browser.storage.local.get(prefixedKey, item => {
-                if (Object.keys(item).length === 0) {
-                    if (defaultValue != null) {
-                        resolve(defaultValue);
-                    } else {
-                        resolve(undefined);
-                    }
-                } else {
-                    resolve(Object.values(item)[0]);
-                }
-            });
-        });
-    },
-    deleteValue(key) {
-        if (typeof key !== "string" || !key.length) {
-            return console.error("deleteValue missing key arg");
-        }
-        return new Promise(resolve => {
-            const prefixedKey = `${this.US_filename}---${key}`;
-            browser.storage.local.remove(prefixedKey, () => {
-                resolve({success: 1});
-            });
-        });
-    },
-    listValues() {
-        return new Promise(resolve => {
-            const prefix = `${this.US_filename}---`;
-            const keys = [];
-            browser.storage.local.get().then(items => {
-                for (const key in items) {
-                    if (key.startsWith(prefix)) {
-                        const k = key.replace(prefix, "");
-                        keys.push(k);
-                    }
-                }
-                resolve(keys);
-            });
-        });
-    },
-    addStyle(css) {
-        if (typeof css !== "string") {
-            return console.error("addStyle invalid css arg");
-        }
-        return new Promise(resolve => {
-            const message = {
-                name: "API_ADD_STYLE",
-                css
-            };
-            browser.runtime.sendMessage(message, response => resolve(response));
-        });
-    },
-    getTab() {
-        return new Promise(resolve => {
-            const message = {name: "API_GET_TAB"};
-            browser.runtime.sendMessage(message, response => {
-                resolve(response);
-            });
-        });
-    },
-    saveTab(tab) {
-        if (tab == null) return console.error("saveTab invalid arg");
-        return new Promise(resolve => {
-            const message = {
-                name: "API_SAVE_TAB",
-                tab
-            };
-            browser.runtime.sendMessage(message, response => {
-                resolve(response);
-            });
-        });
-    },
-    setClipboard(clipboardData, type) {
-        return new Promise(resolve => {
-            const message = {
-                name: "API_SET_CLIPBOARD",
-                clipboardData,
-                type
-            };
-            browser.runtime.sendMessage(message, response => {
-                resolve(response);
-            });
-        });
-    },
-    xhr(details) {
-        if (details == null) return console.error("xhr invalid details arg");
-        if (!details.url) return console.error("xhr details missing url key");
-        // generate random port name for single xhr
-        const xhrPortName = Math.random().toString(36).substring(1, 9);
-        // strip out functions from details
-        const detailsParsed = JSON.parse(JSON.stringify(details));
-        // get all the "on" events from XMLHttpRequest object
-        const events = [];
-        for (const k in XMLHttpRequest.prototype) {
-            if (k.slice(0, 2) === "on") events.push(k);
-        }
-        // check which functions are included in the original details object
-        // add a bool to indicate if event listeners should be attached
-        for (const e of events) {
-            if (typeof details[e] === "function") detailsParsed[e] = true;
-        }
-        // define return method, will be populated after port is established
-        const response = {
-            abort: () => console.error("xhr has not yet been initialized")
-        };
-        // port listener, most of the messaging logic goes here
-        const listener = port => {
-            if (port.name !== xhrPortName) return;
-            port.onMessage.addListener(async msg => {
-                if (
-                    events.includes(msg.name)
-                    && typeof details[msg.name] === "function"
-                ) {
-                    // process xhr response
-                    const r = msg.response;
-                    // only process when xhr is complete and data exist
-                    if (r.readyState === 4 && r.response !== null) {
-                        if (r.responseType === "arraybuffer") {
-                            // arraybuffer responses had their data converted in background
-                            // convert it back to arraybuffer
-                            try {
-                                const buffer = new Uint8Array(r.response).buffer;
-                                r.response = buffer;
-                            } catch (err) {
-                                console.error("error parsing xhr arraybuffer", err);
-                            }
-                        } else if (r.responseType === "blob" && r.response.data) {
-                            // blob responses had their data converted in background
-                            // convert it back to blob
-                            const resp = await fetch(r.response.data);
-                            const b = await resp.blob();
-                            r.response = b;
-                        }
-                    }
-                    // call userscript method
-                    details[msg.name](msg.response);
-                }
-                // all messages received
-                // tell background it's safe to close port
-                if (msg.name === "onloadend") {
-                    port.postMessage({name: "DISCONNECT"});
-                }
-            });
-
-            // handle port disconnect and clean tasks
-            port.onDisconnect.addListener(p => {
-                if (p?.error) {
-                    console.error(`port disconnected due to an error: ${p.error.message}`);
-                }
-                browser.runtime.onConnect.removeListener(listener);
-            });
-            // fill the method returned to the user script
-            response.abort = () => port.postMessage({name: "ABORT"});
-        };
-        // wait for the background to establish a port connection
-        browser.runtime.onConnect.addListener(listener);
-        // pass the basic information to the background through a common message
-        const message = {
-            name: "API_XHR",
-            details: detailsParsed,
-            xhrPortName,
-            events
-        };
-        browser.runtime.sendMessage(message);
-        return response;
-    },
-    // include method names so they don't get skipped when adding to userscript
-    xmlHttpRequest: true,
-    GM_xmlhttpRequest: true
-};
-// remote window's browser object
-delete window.browser;
 
 // label used to distinguish frames in console
 const label = randomLabel();
+const usTag = window.self === window.top ? "" : `(${label})`;
 
 function randomLabel() {
     const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", r = Math.random();
     return a[Math.floor(r * a.length)] + r.toString().slice(5, 6);
 }
 
-function processJS(userscript) {
+function triageJS(userscript) {
     const runAt = userscript.scriptObject["run-at"];
     if (runAt === "document-start") {
         injectJS(userscript);
@@ -251,27 +40,10 @@ function processJS(userscript) {
     }
 }
 
-function wrapCode(preCode, code, filename) {
-    const tag = window.self === window.top ? "" : `(${label})`;
-    return `
-        (function() {
-            ${preCode}
-            (function() {
-                const US_filename = "${filename}";
-                const apis = undefined;
-                const browser = undefined;
-                // userscript code below
-                ${code}
-                //# sourceURL=${filename.replace(/\s/g, "-") + tag}
-            })();
-        })();
-    `;
-}
-
 function injectJS(userscript) {
     const filename = userscript.scriptObject.filename;
-    const code = wrapCode(userscript.preCode, userscript.code, filename);
     const name = userscript.scriptObject.name;
+    const code = `${userscript.code} //# sourceURL=${filename.replace(/\s/g, "-") + usTag}`;
     let injectInto = userscript.scriptObject["inject-into"];
     // change scope to content since strict CSP event detected
     if (injectInto === "auto" && (userscript.fallback || cspFallbackAttempted)) {
@@ -283,15 +55,19 @@ function injectJS(userscript) {
         console.info(`Injecting ${name} %c(js)%c - %cframe(${label})(${window.location})`, "color: #fff600", "color: inherit", "color: #006fff");
     }
     if (injectInto !== "content") {
+        const div = document.createElement("div");
+        div.style.display = "none";
+        const shadowRoot = div.attachShadow({mode: "closed"});
+        document.body.append(div);
         const tag = document.createElement("script");
         tag.textContent = code;
-        document.head.appendChild(tag);
+        shadowRoot.append(tag);
     } else {
         try {
             // eslint-disable-next-line no-new-func
-            return Function(code)();
+            return Function(`{${Object.keys(userscript.apis).join(",")}}`, code)(userscript.apis);
         } catch (error) {
-            console.error(`${filename} error`, error);
+            console.error(`"${filename}" error:`, error);
         }
     }
 }
@@ -336,7 +112,7 @@ function cspFallback(e) {
             const userscript = data.files.js[i];
             if (userscript.scriptObject["inject-into"] !== "auto") continue;
             userscript.fallback = 1;
-            processJS(userscript);
+            triageJS(userscript);
         }
     }
 }
@@ -355,21 +131,19 @@ function injection() {
         // loop through each userscript and prepare for processing
         for (let i = 0; i < scripts.length; i++) {
             const userscript = scripts[i];
-            userscript.preCode = "";
-            // pass references to the api methods as needed
-            const gmMethods = [];
             const filename = userscript.scriptObject.filename;
             const grants = userscript.scriptObject.grant;
             const injectInto = userscript.scriptObject["inject-into"];
-            // create GM.info object
-            const scriptData = {
+            // create GM.info object, all userscripts get access to GM.info
+            userscript.apis = {GM: {}};
+            userscript.apis.GM.info = {
                 script: userscript.scriptObject,
                 scriptHandler: data.scriptHandler,
                 scriptHandlerVersion: data.scriptHandlerVersion,
                 scriptMetaStr: userscript.scriptMetaStr
             };
-            // all userscripts get access to GM.info
-            gmMethods.push("info: GM_info");
+            // add GM_info
+            userscript.apis.GM_info = userscript.apis.GM.info;
             // if @grant explicitly set to none, empty grants array
             if (grants.includes("none")) grants.length = 0;
             // @grant values exist for page scoped userscript
@@ -392,35 +166,28 @@ function injection() {
                 const method = grant.split(".")[1] || grant.split(".")[0];
                 // ensure API method exists in apis object
                 if (!Object.keys(apis).includes(method)) continue;
-                // create the method string to be pushed to methods array
-                let methodStr = `${method}: apis.${method}`;
-                // add require variables to specific methods
+                // add granted methods
                 switch (method) {
+                    case "info":
+                    case "GM_info":
+                        continue;
                     case "getValue":
                     case "setValue":
                     case "deleteValue":
                     case "listValues":
-                        methodStr += `.bind({"US_filename": "${filename}"})`;
+                        userscript.apis.GM[method] = apis[method].bind({US_filename: filename});
                         break;
-                    case "info":
-                    case "GM_info":
-                        continue;
-                    case "xmlHttpRequest":
-                        gmMethods.push("xmlHttpRequest: apis.xhr");
-                        continue;
                     case "GM_xmlhttpRequest":
-                        userscript.preCode += "const GM_xmlhttpRequest = apis.xhr;";
-                        continue;
+                        userscript.apis[method] = apis[method];
+                        break;
+                    default:
+                        userscript.apis.GM[method] = apis[method];
                 }
-                gmMethods.push(methodStr);
             }
-            // add GM.info
-            userscript.preCode += `const GM_info = ${JSON.stringify(scriptData)};`;
-            // add other included GM API methods
-            userscript.preCode += `const GM = {${gmMethods.join(",")}};`;
-            // process file for injection
-            processJS(userscript);
+            // triage userjs item for injection
+            triageJS(userscript);
         }
+        // loop through each usercss and inject
         for (let i = 0; i < data.files.css.length; i++) {
             const userstyle = data.files.css[i];
             injectCSS(userstyle.name, userstyle.code);
@@ -430,7 +197,7 @@ function injection() {
 
 function listeners() {
     // listens for messages from background, popup, etc...
-    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    browser.runtime.onMessage.addListener(request => {
         const name = request.name;
         if (name === "CONTEXT_RUN") {
             // from bg script when context-menu item is clicked
@@ -444,13 +211,7 @@ function listeners() {
                 const item = data.files.menu[i];
                 if (item.scriptObject.filename === filename) {
                     console.info(`Injecting ${filename} %c(js)`, "color: #fff600");
-                    sendResponse({
-                        code: wrapCode(
-                            item.preCode,
-                            item.code,
-                            filename
-                        )
-                    });
+                    injectJS(item);
                     return;
                 }
             }
