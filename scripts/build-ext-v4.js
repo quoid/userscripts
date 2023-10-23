@@ -1,6 +1,6 @@
 /**
  * @file Build Safari extension resources using the Vite JavaScript API
- * @see {@link https://vitejs.dev/guide/api-javascript.html|JavaScript API}
+ * @see {@link https://vitejs.dev/guide/api-javascript.html JavaScript API}
  *
  * Safari supports for modules in background since 16.4
  * @see {@link https://developer.apple.com/documentation/safari-release-notes/safari-16_4-release-notes#Safari-Extensions}
@@ -20,8 +20,8 @@ import {svelte} from "@sveltejs/vite-plugin-svelte";
 /**
  * Define default vite config options
  * Disable auto resolving {@link vite.config.js}
- * @see {@link https://vitejs.dev/config/|Config}
- * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig|configFile}
+ * @see {@link https://vitejs.dev/config/ Config}
+ * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
  */
 const defineConfig = {
     base: "./",

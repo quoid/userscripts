@@ -1,6 +1,6 @@
 /**
  * @file Preview App WebView resources using the Vite JavaScript API
- * @see {@link https://vitejs.dev/guide/api-javascript.html|JavaScript API}
+ * @see {@link https://vitejs.dev/guide/api-javascript.html JavaScript API}
  */
 
 import {preview} from "vite";
@@ -8,8 +8,8 @@ import {preview} from "vite";
 /**
  * Define default vite config options
  * Disable auto resolving {@link vite.config.js}
- * @see {@link https://vitejs.dev/config/|Config}
- * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig|configFile}
+ * @see {@link https://vitejs.dev/config/ Config}
+ * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
  */
 const defineConfig = {
     base: "./",
