@@ -9,6 +9,6 @@ jobs:
     - name: Install modules
       run: npm install
     - name: Run ESLint
-      run: npm run lint-js
+      run: npm run lint:js
     - name: Run Stylelint
-      run: npm run lint-css
+      run: npm run lint:css

@@ -1,8 +1,9 @@
-CODE_SIGN_ENTITLEMENTS = Safari-Extension/Mac.entitlements
+SRC_DIR = Ext-Safari
+CODE_SIGN_ENTITLEMENTS = $(SRC_DIR)/Mac.entitlements
 CURRENT_PROJECT_VERSION = $(MAC_APP_BUILD)
 ENABLE_HARDENED_RUNTIME = YES
 GENERATE_INFOPLIST_FILE = YES
-INFOPLIST_FILE = Safari-Extension/Info.plist
+INFOPLIST_FILE = $(SRC_DIR)/Info.plist
 INFOPLIST_KEY_CFBundleDisplayName = $(PRODUCT_NAME)
 INFOPLIST_KEY_CFBundleDisplayName[config=Debug] = $(PRODUCT_NAME)-Debug
 LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks
@@ -10,6 +11,9 @@ MARKETING_VERSION = $(MAC_APP_VERSION)
 PRODUCT_BUNDLE_IDENTIFIER = $(EXT_IDENTIFIER)
 PRODUCT_NAME = $(PROJECT_NAME)-$(TARGET_NAME)
 SKIP_INSTALL = YES
+MANIFEST_FILE = $(SRC_DIR)/Resources/ext-v4-manifest.json
+MANIFEST_NAME = $(PROJECT_NAME)
+MANIFEST_NAME[config=Debug] = $(PROJECT_NAME)-Debug
 
 // Override this file
 #include? "Mac-Safari-Extension.dev.xcconfig"

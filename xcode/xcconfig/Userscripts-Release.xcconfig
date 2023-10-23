@@ -1,22 +1,23 @@
 #include "Userscripts-Base.xcconfig"
 
 INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2018–2023 Justin Wasack. All rights reserved.
-IOS_APP_BUILD = 53
-IOS_APP_VERSION = 1.4.4
-MAC_APP_BUILD = 80
-MAC_APP_VERSION = 4.4.4
+IOS_APP_BUILD = 55
+IOS_APP_VERSION = 1.5.0
+MAC_APP_BUILD = 81
+MAC_APP_VERSION = 4.5.0
 
 // Developer Team ID
 DEVELOPMENT_TEAM = J74Q8V8V8N
 // Organization Identifier
 ORG_IDENTIFIER = com.userscripts
 // Application Identifier
-APP_IDENTIFIER = com.userscripts.macos
+APP_IDENTIFIER = $(ORG_IDENTIFIER).macos
 // Safari Extension Identifier
 EXT_IDENTIFIER = $(APP_IDENTIFIER).Userscripts-Extension
 // App Groups and Group Containers
-IOS_SHARED_GID = group.com.userscripts.ios
-MAC_SHARED_GID = $(DEVELOPMENT_TEAM).com.userscripts.macos
+// https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_application-groups
+IOS_SHARED_GID = group.$(ORG_IDENTIFIER).ios
+MAC_SHARED_GID = $(DEVELOPMENT_TEAM).$(ORG_IDENTIFIER).macos
 // App URL Scheme
 APP_URL_SCHEME = userscriptsurlscheme
 
