@@ -4,7 +4,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "pnpm build:app && pnpm build:ext",
+        "build": "npm run build:app && npm run build:ext",
         "build:app": "node scripts/build-app.js",
         "build:ext": "node scripts/build-ext-v4.js",
         "lint:js": "eslint ./",

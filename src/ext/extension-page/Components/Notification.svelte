@@ -98,7 +98,7 @@
     }
 
     li > div {
-        align-items: start;
+        align-items: flex-start;
         display: flex;
         padding: 0.5rem 1rem;
     }
