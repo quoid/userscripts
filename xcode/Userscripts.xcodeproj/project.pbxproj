@@ -11,7 +11,8 @@
 		030C64FC2AD0B24C00548FBD /* Initialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030C64FB2AD0B24C00548FBD /* Initialization.swift */; };
 		0336619F294DF7C900CFE179 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0336619E294DF7C900CFE179 /* Functions.swift */; };
 		033661A529510B7900CFE179 /* View.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 033661A329510B7900CFE179 /* View.storyboard */; };
-		0376905B29808EEA00F3474D /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 0376905A29808EEA00F3474D /* background.js */; };
+		039F59532AD9591C002E9977 /* dist in Resources */ = {isa = PBXBuildFile; fileRef = 039F59522AD9591C002E9977 /* dist */; };
+		039F59562ADA2FE2002E9977 /* USchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039F59552ADA2FE2002E9977 /* USchemeHandler.swift */; };
 		03C24F972ABD2CBB00F130F9 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C24F962ABD2CBB00F130F9 /* Preferences.swift */; };
 		03C24F982ABD2CBB00F130F9 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C24F962ABD2CBB00F130F9 /* Preferences.swift */; };
 		03C24F992ABD2CBB00F130F9 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C24F962ABD2CBB00F130F9 /* Preferences.swift */; };
@@ -24,14 +25,10 @@
 		4A301B2A270A474400C7E9E1 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
 		4A301B2B270A474F00C7E9E1 /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A617268266B30018536B /* _locales */; };
 		4A301B2C270A475200C7E9E1 /* images in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A616268266B30018536B /* images */; };
-		4A301B2E270A475D00C7E9E1 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
-		4A301B2F270A476000C7E9E1 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
 		4A301B32270A49F200C7E9E1 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
 		4A36A61A268266B30018536B /* images in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A616268266B30018536B /* images */; };
 		4A36A61B268266B30018536B /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = 4A36A617268266B30018536B /* _locales */; };
 		4A4CF6DE270A38BD00111584 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CF6DD270A38BD00111584 /* AppDelegate.swift */; };
-		4A4CF6E2270A38BD00111584 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E0270A38BD00111584 /* Main.html */; };
-		4A4CF6E4270A38BD00111584 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E3270A38BD00111584 /* Icon.png */; };
 		4A4CF6E8270A38BD00111584 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E7270A38BD00111584 /* SceneDelegate.swift */; };
 		4A4CF6EA270A38BD00111584 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CF6E9270A38BD00111584 /* ViewController.swift */; };
 		4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */; };
@@ -44,16 +41,13 @@
 		4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A57B9F8227235CE008A9763 /* Assets.xcassets */; };
 		4A57BA00227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4A57B9FF227235CE008A9763 /* Userscripts-Mac-Safari-Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
-		4AB22358268B9B9200D551C6 /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 4AB22357268B9B9200D551C6 /* content.js */; };
-		4AD66D2326826D8100B004E8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4AD66D2026826D8100B004E8 /* manifest.json */; };
 		4AED6492268CDB58001794BF /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AED6491268CDB58001794BF /* Functions.swift */; };
 		7878ED24299BA27B00E36A24 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */; };
-		7878ED2B299BA36800E36A24 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 0376905A29808EEA00F3474D /* background.js */; };
-		78B25583299D4C27000B2E9B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Shared.swift */; };
-		78B25584299D4C27000B2E9B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Shared.swift */; };
-		78B25585299D4C27000B2E9B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Shared.swift */; };
-		78B25586299D4C27000B2E9B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Shared.swift */; };
-		78B25587299D4C27000B2E9B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Shared.swift */; };
+		78B25583299D4C27000B2E9B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Utilities.swift */; };
+		78B25584299D4C27000B2E9B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Utilities.swift */; };
+		78B25585299D4C27000B2E9B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Utilities.swift */; };
+		78B25586299D4C27000B2E9B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Utilities.swift */; };
+		78B25587299D4C27000B2E9B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B25582299D4C27000B2E9B /* Utilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,7 +104,9 @@
 		030C64FB2AD0B24C00548FBD /* Initialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Initialization.swift; sourceTree = "<group>"; };
 		0336619E294DF7C900CFE179 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		033661A429510B7900CFE179 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/View.storyboard; sourceTree = "<group>"; };
-		0376905A29808EEA00F3474D /* background.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
+		039F59522AD9591C002E9977 /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
+		039F59552ADA2FE2002E9977 /* USchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USchemeHandler.swift; sourceTree = "<group>"; };
+		039F595A2ADFB312002E9977 /* ext-v5-manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "ext-v5-manifest.json"; sourceTree = "<group>"; };
 		03C24F962ABD2CBB00F130F9 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		03E20D05291E170000B4F692 /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
 		4A143AA9279DE6FF0029BFD0 /* Mac-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Mac-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -119,8 +115,6 @@
 		4A36A617268266B30018536B /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; path = _locales; sourceTree = "<group>"; };
 		4A4CF6DB270A38BD00111584 /* Userscripts-iOS-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Userscripts-iOS-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4CF6DD270A38BD00111584 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4A4CF6E1270A38BD00111584 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
-		4A4CF6E3270A38BD00111584 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		4A4CF6E7270A38BD00111584 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		4A4CF6E9270A38BD00111584 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		4A4CF6EC270A38BD00111584 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -140,8 +134,7 @@
 		4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		4A57BA0E227235CE008A9763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A57BA1D227235E6008A9763 /* Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mac.entitlements; sourceTree = "<group>"; };
-		4AB22357268B9B9200D551C6 /* content.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
-		4AD66D2026826D8100B004E8 /* manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
+		4AD66D2026826D8100B004E8 /* ext-v4-manifest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "ext-v4-manifest.json"; sourceTree = "<group>"; };
 		4AED6491268CDB58001794BF /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		78391D4629A4CB3C00979E34 /* Userscripts-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Userscripts-Debug.xcconfig"; sourceTree = "<group>"; };
 		78391D4729A4CB3C00979E34 /* Userscripts-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Userscripts-Release.xcconfig"; sourceTree = "<group>"; };
@@ -151,7 +144,7 @@
 		7878ED32299BBEBF00E36A24 /* Mac-Safari-Extension.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-Safari-Extension.xcconfig"; sourceTree = "<group>"; };
 		7878ED34299BBEBF00E36A24 /* iOS-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-App.xcconfig"; sourceTree = "<group>"; };
 		7878ED38299BBEBF00E36A24 /* Mac-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mac-App.xcconfig"; sourceTree = "<group>"; };
-		78B25582299D4C27000B2E9B /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		78B25582299D4C27000B2E9B /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,39 +186,46 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4A143AAA279DE6FF0029BFD0 /* Mac-Tests */ = {
+		0316A9992AD7709600AAEC8A /* App-Shared */ = {
+			isa = PBXGroup;
+			children = (
+				039F59512AD95485002E9977 /* Resources */,
+				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
+				039F59552ADA2FE2002E9977 /* USchemeHandler.swift */,
+			);
+			path = "App-Shared";
+			sourceTree = "<group>";
+		};
+		039F59512AD95485002E9977 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				039F59522AD9591C002E9977 /* dist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4A143AAA279DE6FF0029BFD0 /* Tests-Mac */ = {
 			isa = PBXGroup;
 			children = (
 				4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */,
 			);
-			path = "Mac-Tests";
+			path = "Tests-Mac";
 			sourceTree = "<group>";
 		};
-		4A4CF6DC270A38BD00111584 /* iOS-App */ = {
+		4A4CF6DC270A38BD00111584 /* App-iOS */ = {
 			isa = PBXGroup;
 			children = (
 				4A4CF6F2270A38BF00111584 /* Info.plist */,
 				4A4CF718270A38C700111584 /* App.entitlements */,
 				030C64F52AC62CC900548FBD /* Settings.bundle */,
-				4A4CF6DF270A38BD00111584 /* Resources */,
 				4A4CF6F1270A38BF00111584 /* Assets.xcassets */,
 				4A4CF6DD270A38BD00111584 /* AppDelegate.swift */,
 				4A4CF6E7270A38BD00111584 /* SceneDelegate.swift */,
-				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
 				030C64FB2AD0B24C00548FBD /* Initialization.swift */,
 				4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */,
 				4A4CF6EE270A38BD00111584 /* Main.storyboard */,
 			);
-			path = "iOS-App";
-			sourceTree = "<group>";
-		};
-		4A4CF6DF270A38BD00111584 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				4A4CF6E3270A38BD00111584 /* Icon.png */,
-				4A4CF6E0270A38BD00111584 /* Main.html */,
-			);
-			path = Resources;
+			path = "App-iOS";
 			sourceTree = "<group>";
 		};
 		4A57B9E3227235CD008A9763 = {
@@ -233,10 +233,11 @@
 			children = (
 				7878ED2E299BBEBF00E36A24 /* xcconfig */,
 				78B25581299D4C27000B2E9B /* Shared */,
-				4A57BA06227235CE008A9763 /* Safari-Extension */,
-				4A57B9EE227235CD008A9763 /* Mac-App */,
-				4A4CF6DC270A38BD00111584 /* iOS-App */,
-				4A143AAA279DE6FF0029BFD0 /* Mac-Tests */,
+				4A57BA06227235CE008A9763 /* Ext-Safari */,
+				0316A9992AD7709600AAEC8A /* App-Shared */,
+				4A57B9EE227235CD008A9763 /* App-Mac */,
+				4A4CF6DC270A38BD00111584 /* App-iOS */,
+				4A143AAA279DE6FF0029BFD0 /* Tests-Mac */,
 				4A57B9ED227235CD008A9763 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -253,7 +254,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4A57B9EE227235CD008A9763 /* Mac-App */ = {
+		4A57B9EE227235CD008A9763 /* App-Mac */ = {
 			isa = PBXGroup;
 			children = (
 				4A57B9FA227235CE008A9763 /* Info.plist */,
@@ -265,10 +266,10 @@
 				4A57B9F3227235CD008A9763 /* Main.storyboard */,
 				033661A329510B7900CFE179 /* View.storyboard */,
 			);
-			path = "Mac-App";
+			path = "App-Mac";
 			sourceTree = "<group>";
 		};
-		4A57BA06227235CE008A9763 /* Safari-Extension */ = {
+		4A57BA06227235CE008A9763 /* Ext-Safari */ = {
 			isa = PBXGroup;
 			children = (
 				4A57BA0E227235CE008A9763 /* Info.plist */,
@@ -278,7 +279,7 @@
 				4A57BA07227235CE008A9763 /* SafariWebExtensionHandler.swift */,
 				4AED6491268CDB58001794BF /* Functions.swift */,
 			);
-			path = "Safari-Extension";
+			path = "Ext-Safari";
 			sourceTree = "<group>";
 		};
 		4AF1DD0D268265DB00086E88 /* Resources */ = {
@@ -287,9 +288,8 @@
 				4A36A617268266B30018536B /* _locales */,
 				4A36A616268266B30018536B /* images */,
 				03E20D05291E170000B4F692 /* dist */,
-				4AD66D2026826D8100B004E8 /* manifest.json */,
-				0376905A29808EEA00F3474D /* background.js */,
-				4AB22357268B9B9200D551C6 /* content.js */,
+				4AD66D2026826D8100B004E8 /* ext-v4-manifest.json */,
+				039F595A2ADFB312002E9977 /* ext-v5-manifest.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -311,7 +311,7 @@
 		78B25581299D4C27000B2E9B /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				78B25582299D4C27000B2E9B /* Shared.swift */,
+				78B25582299D4C27000B2E9B /* Utilities.swift */,
 				03C24F962ABD2CBB00F130F9 /* Preferences.swift */,
 			);
 			path = Shared;
@@ -346,7 +346,7 @@
 				4A4CF6D8270A38BD00111584 /* Frameworks */,
 				4A4CF6D9270A38BD00111584 /* Resources */,
 				4A4CF713270A38BF00111584 /* Embed Foundation Extensions */,
-				030C64F72AC713A600548FBD /* Update Settings.bundle */,
+				030C64F72AC713A600548FBD /* UScript: Introduce values to app Settings.bundle */,
 			);
 			buildRules = (
 			);
@@ -365,6 +365,7 @@
 				4A4CF6F3270A38BF00111584 /* Sources */,
 				4A4CF6F4270A38BF00111584 /* Frameworks */,
 				4A4CF6F5270A38BF00111584 /* Resources */,
+				039F59592ADFA415002E9977 /* UScript: Produce ext manifest.json */,
 			);
 			buildRules = (
 			);
@@ -401,6 +402,7 @@
 				4A57B9FB227235CE008A9763 /* Sources */,
 				4A57B9FC227235CE008A9763 /* Frameworks */,
 				4A57B9FD227235CE008A9763 /* Resources */,
+				039F59572ADF9558002E9977 /* UScript: Produce ext manifest.json */,
 			);
 			buildRules = (
 			);
@@ -478,12 +480,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A4CF6E4270A38BD00111584 /* Icon.png in Resources */,
 				4A4CF6F0270A38BD00111584 /* Main.storyboard in Resources */,
 				4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */,
-				4A4CF6E2270A38BD00111584 /* Main.html in Resources */,
 				030C64F62AC62CC900548FBD /* Settings.bundle in Resources */,
 				4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */,
+				039F59532AD9591C002E9977 /* dist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,11 +492,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A301B2E270A475D00C7E9E1 /* content.js in Resources */,
 				4A301B2C270A475200C7E9E1 /* images in Resources */,
-				7878ED2B299BA36800E36A24 /* background.js in Resources */,
 				03E20D07291E170000B4F692 /* dist in Resources */,
-				4A301B2F270A476000C7E9E1 /* manifest.json in Resources */,
 				4A301B2B270A474F00C7E9E1 /* _locales in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -514,11 +512,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AD66D2326826D8100B004E8 /* manifest.json in Resources */,
-				4AB22358268B9B9200D551C6 /* content.js in Resources */,
 				03E20D06291E170000B4F692 /* dist in Resources */,
 				4A36A61A268266B30018536B /* images in Resources */,
-				0376905B29808EEA00F3474D /* background.js in Resources */,
 				4A36A61B268266B30018536B /* _locales in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -526,7 +521,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		030C64F72AC713A600548FBD /* Update Settings.bundle */ = {
+		030C64F72AC713A600548FBD /* UScript: Introduce values to app Settings.bundle */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -534,10 +529,10 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/$(TARGET_NAME)/Settings.bundle/Root.plist",
+				"$(SRCROOT)/$(SRC_DIR)/Settings.bundle/Root.plist",
 				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
-			name = "Update Settings.bundle";
+			name = "UScript: Introduce values to app Settings.bundle";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -546,6 +541,50 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Dynamically introduce US_SHARED_GID in xcconfig for Settings.bundle\nUS_SHARED_GID=$(/usr/libexec/PlistBuddy -c \"Print US_SHARED_GID\" \"$TARGET_BUILD_DIR/$INFOPLIST_PATH\")\nSETTINGS_BUNDLE=$TARGET_BUILD_DIR/$EXECUTABLE_FOLDER_PATH/Settings.bundle/Root.plist\n/usr/libexec/PlistBuddy -c \"Set ApplicationGroupContainerIdentifier $US_SHARED_GID\" \"$SETTINGS_BUNDLE\"\n";
+		};
+		039F59572ADF9558002E9977 /* UScript: Produce ext manifest.json */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/$(MANIFEST_FILE)",
+				"$(SRCROOT)/$(SRC_DIR)/Resources/_locales/en/messages.json",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "UScript: Produce ext manifest.json";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sed \"s/_VERSION_/$MAC_APP_VERSION/\" $SRCROOT/$MANIFEST_FILE > $TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/manifest.json\nsed -i \"\" \"s/_NAME_/$MANIFEST_NAME/\" $TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/_locales/en/messages.json\n";
+		};
+		039F59592ADFA415002E9977 /* UScript: Produce ext manifest.json */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/$(MANIFEST_FILE)",
+				"$(SRCROOT)/$(SRC_DIR)/Resources/_locales/en/messages.json",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "UScript: Produce ext manifest.json";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "sed \"s/_VERSION_/$IOS_APP_VERSION/\" $SRCROOT/$MANIFEST_FILE > $TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/manifest.json\nsed -i \"\" \"s/_NAME_/$MANIFEST_NAME/\" $TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/_locales/en/messages.json\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -557,7 +596,7 @@
 				7878ED24299BA27B00E36A24 /* SafariWebExtensionHandler.swift in Sources */,
 				4A143AB2279DEA170029BFD0 /* Functions.swift in Sources */,
 				03C24F9B2ABD2CBB00F130F9 /* Preferences.swift in Sources */,
-				78B25587299D4C27000B2E9B /* Shared.swift in Sources */,
+				78B25587299D4C27000B2E9B /* Utilities.swift in Sources */,
 				4A143AAC279DE6FF0029BFD0 /* UserscriptsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -570,8 +609,9 @@
 				4A4CF6DE270A38BD00111584 /* AppDelegate.swift in Sources */,
 				03C24F992ABD2CBB00F130F9 /* Preferences.swift in Sources */,
 				030C64FC2AD0B24C00548FBD /* Initialization.swift in Sources */,
-				78B25585299D4C27000B2E9B /* Shared.swift in Sources */,
+				78B25585299D4C27000B2E9B /* Utilities.swift in Sources */,
 				4A4CF6E8270A38BD00111584 /* SceneDelegate.swift in Sources */,
+				039F59562ADA2FE2002E9977 /* USchemeHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -579,7 +619,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				78B25586299D4C27000B2E9B /* Shared.swift in Sources */,
+				78B25586299D4C27000B2E9B /* Utilities.swift in Sources */,
 				4A301B2A270A474400C7E9E1 /* SafariWebExtensionHandler.swift in Sources */,
 				03C24F9A2ABD2CBB00F130F9 /* Preferences.swift in Sources */,
 				4A301B32270A49F200C7E9E1 /* Functions.swift in Sources */,
@@ -593,7 +633,7 @@
 				4A57B9F7227235CD008A9763 /* ViewController.swift in Sources */,
 				4A57B9F2227235CD008A9763 /* AppDelegate.swift in Sources */,
 				03C24F972ABD2CBB00F130F9 /* Preferences.swift in Sources */,
-				78B25583299D4C27000B2E9B /* Shared.swift in Sources */,
+				78B25583299D4C27000B2E9B /* Utilities.swift in Sources */,
 				0336619F294DF7C900CFE179 /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -602,7 +642,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				78B25584299D4C27000B2E9B /* Shared.swift in Sources */,
+				78B25584299D4C27000B2E9B /* Utilities.swift in Sources */,
 				4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */,
 				03C24F982ABD2CBB00F130F9 /* Preferences.swift in Sources */,
 				4AED6492268CDB58001794BF /* Functions.swift in Sources */,
@@ -636,14 +676,6 @@
 				033661A429510B7900CFE179 /* Base */,
 			);
 			name = View.storyboard;
-			sourceTree = "<group>";
-		};
-		4A4CF6E0270A38BD00111584 /* Main.html */ = {
-			isa = PBXVariantGroup;
-			children = (
-				4A4CF6E1270A38BD00111584 /* Base */,
-			);
-			name = Main.html;
 			sourceTree = "<group>";
 		};
 		4A4CF6EB270A38BD00111584 /* LaunchScreen.storyboard */ = {

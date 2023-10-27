@@ -5,18 +5,20 @@ The `xcode` directory is the root of the Xcode project where the Safari extensio
 For other directory structure instructions, please refer to [structure.md](structure.md).
 
 # Environment
-- [`Node.js`](https://nodejs.dev/en/learn/how-to-install-nodejs/)
-- [`pnpm`](https://pnpm.io/installation) (optional)
-- [`Xcode`](https://geo.itunes.apple.com/app/xcode/id497799835)
+- [`Node.js`](https://nodejs.org/)
+- [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
 
 # Dev
-- `pnpm install`
-- `pnpm dev`
+- `npm install`[^1]
+- `npm run dev`[^1]
 
 # Build
-- `pnpm build`
+- `npm run build`[^1]
 - `cd ./xcode`
-- `xcodebuild` or build with Xcode App
+- `xcodebuild`[^1][^2] or build with `Xcode` App
+
+[^1]: These commands can also be executed directly through the VSCode Run Task. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
+[^2]: Local setup may be required. Please refer to: [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 # Xcode
 
@@ -28,9 +30,9 @@ The Xcode project contains two configurations, which have independent `xcconfig`
 - `Release`: A developer account is required, which means it can be used for distribution as well as running on real iOS/iPadOS devices. You will need to override your developer account information in `xcconfig` to complete the build.
 
 ### xcconfig
-All `xcconfig` files are in the `./xcode/xcconfig/` directory. Each `.xcconfig` file can be overridden by `.dev.xcconfig` in the same path, they will be ignored by `git`, so you can override any build settings locally.
+All `xcconfig` files are in the [`/xcode/xcconfig/`](../xcode/xcconfig) directory. Each `.xcconfig` file can be overridden by `.dev.xcconfig` in the same path, they will be ignored by `git`, so you can override any build settings locally.
 
-For example, you can create an `Userscripts-Release.dev.xcconfig` file to override `Userscripts-Release.xcconfig` and fill in your own developer account information there:
+For example, you can create an `Userscripts-Release.dev.xcconfig` file to override [`Userscripts-Release.xcconfig`](../xcode/xcconfig/Userscripts-Release.xcconfig) and fill in your own developer account information there:
 
 `Userscripts-Release.dev.xcconfig`
 ```
