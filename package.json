@@ -7,8 +7,9 @@
         "build": "npm run build:app && npm run build:ext",
         "build:app": "node scripts/build-app.js",
         "build:ext": "node scripts/build-ext-v4.js",
-        "lint:js": "eslint ./",
-        "lint:css": "stylelint '**/*.{css,svelte}'"
+        "lint:js": "eslint . && prettier --check . --plugin prettier-plugin-svelte",
+        "lint:css": "stylelint '**/*.{css,svelte}'",
+        "prettier": "prettier --write . --plugin prettier-plugin-svelte"
     },
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^2.4.5",
@@ -16,10 +17,11 @@
         "cm-show-invisibles": "^3.1.0",
         "codemirror": "^5.65.15",
         "eslint": "^8.52.0",
-        "eslint-config-airbnb-base": "^15.0.0",
-        "eslint-plugin-import": "^2.29.0",
-        "eslint-plugin-svelte": "^2.32.4",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-plugin-svelte": "^2.34.0",
         "postcss-html": "^1.5.0",
+        "prettier": "3.0.3",
+        "prettier-plugin-svelte": "3.0.3",
         "stylelint": "^15.11.0",
         "stylelint-config-html": "^1.1.0",
         "stylelint-config-recommended": "^13.0.0",
