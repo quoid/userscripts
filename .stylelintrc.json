@@ -1,15 +1,16 @@
 {
     "extends": [
-        "stylelint-config-recommended",
         "stylelint-config-standard",
-        "stylelint-config-html/svelte"
+        "stylelint-config-html"
     ],
     "ignoreFiles": [
         "**/build/**",
         "**/dist/**",
         "**/etc/**",
         "**/node_modules/**",
-        "**/reset.css"
+        "**/reset.css",
+        "public/**",
+        "xcode/**"
     ],
     "rules": {
         "alpha-value-notation": "number",
@@ -17,8 +18,6 @@
             "ignore": ["after-comment", "stylelint-commands"]
         }],
         "custom-property-empty-line-before": null,
-        "indentation": 4,
-        "max-empty-lines": 1,
         "no-descending-specificity": null,
         "property-no-vendor-prefix": null,
         "selector-class-pattern": null,
