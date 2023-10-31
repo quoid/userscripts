@@ -1,10 +1,24 @@
+# Environment
+
 The `root` directory is a typical multi-page app of Vite with Svelte JavaScript project.
 
 The `xcode` directory is the root of the Xcode project where the Safari extension app is built.
 
 For other directory structure instructions, please refer to [structure.md](structure.md).
 
-# Environment
+### Recommended code editor
+
+[Visual Studio Code](https://github.com/Microsoft/vscode) with extensions: [/.vscode/extensions.json](../.vscode/extensions.json)
+
+# Template
+
+The project is currently based on [`template-svelte`](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-svelte) from [`create-vite`](https://github.com/vitejs/vite/tree/main/packages/create-vite).
+
+Additional reference templates are from [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+
+Reviewing the template will help you understand the composition of the project.
+
+# Requirement
 
 - [`Node.js`](https://nodejs.org/)
 - [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
@@ -20,7 +34,7 @@ For other directory structure instructions, please refer to [structure.md](struc
 - `cd ./xcode`
 - `xcodebuild`[^1][^2] or build with `Xcode` App
 
-[^1]: These commands can also be executed directly through the VSCode Run Task. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
+[^1]: These commands can also be executed directly through the vscode tasks. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
 [^2]: Local setup may be required. Please refer to: [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 # Xcode

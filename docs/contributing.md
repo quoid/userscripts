@@ -6,7 +6,11 @@ We hope this guide will helps you understand how to contribute to this project.
 
 For development and build environments please refer to [development guide](dev.md).
 
-**Note: Portions of this guide are outdated. Some processes are still being tweaked and optimized, we will update them in due course.**
+> [!NOTE]
+> Portions of this guide are outdated. Some processes are still being tweaked and optimized, we will update them in due course.
+
+> [!IMPORTANT]
+> Any pull requests must first go through code formatting and linters, otherwise you will fail the CI check. Refer to the `scripts` in [`package.json`](../package.json)
 
 # Branches
 
