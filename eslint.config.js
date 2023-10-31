@@ -33,7 +33,6 @@ export default [
 		rules: {
 			...sveltePlugin.configs.base.overrides[0].rules,
 			...sveltePlugin.configs.recommended.rules,
-			"svelte/no-at-html-tags": "warn", // use for inline svg raw
 		},
 	},
 

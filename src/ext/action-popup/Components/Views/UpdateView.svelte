@@ -22,6 +22,7 @@
 	<button class="link" on:click={updateClick}> Update All </button>
 {:else}
 	<div class="none">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html iconUpdate}
 		<div>
 			There are no file updates available

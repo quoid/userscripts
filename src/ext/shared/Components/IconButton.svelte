@@ -13,6 +13,7 @@
 	style="--svg-fill: {color};"
 	{title}
 >
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html icon}
 </button>
 

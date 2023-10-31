@@ -50,6 +50,7 @@
 >
 	<progress value={$progress}></progress>
 	<div>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<div class="icon">{@html icon}</div>
 		<span>{item.message}</span>
 		<IconButton icon={iconClose} on:click />

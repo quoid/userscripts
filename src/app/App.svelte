@@ -28,6 +28,7 @@
 <main>
 	<img class="icon" src={icon} alt="Userscripts App Icon" draggable="false" />
 	<div class="logo">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html logo}
 		<span>
 			<span>{version}</span>

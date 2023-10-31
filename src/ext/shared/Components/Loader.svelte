@@ -12,6 +12,7 @@
 	style="background-color: {backgroundColor};"
 	out:fade={{ duration: 125 }}
 >
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html iconLoader}
 	{#if abort}
 		<div>

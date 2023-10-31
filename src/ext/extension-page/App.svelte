@@ -73,6 +73,7 @@
 
 {#if $state.includes("init")}
 	<div class="initializer" out:blur={{ duration: 350 }}>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html logo}
 		{#if $state.includes("init-error")}
 			<span>Failed to initialize app, check the browser console</span>

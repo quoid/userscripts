@@ -11,6 +11,7 @@
 <div class="view--install">
 	{#if installError}
 		<div class="install__error">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html iconError}
 			<div>Couldn't install userscript</div>
 			<p>{installError}</p>
@@ -55,6 +56,7 @@
 			{/if}
 		</ul>
 		<div class="badge">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			<div class="badge--icon">{@html iconWarn}</div>
 			<div class="badge--text">
 				Be sure you trust the author before installing. Nefarious code can

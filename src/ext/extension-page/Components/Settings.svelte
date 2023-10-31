@@ -171,6 +171,7 @@
 			<div class="modal__row modal__row--wrap">
 				<div class="blacklist" class:red={blacklistError}>
 					<span>Global exclude match patterns</span>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{#if blacklistSaving}{@html iconLoader}{/if}
 				</div>
 				<textarea
