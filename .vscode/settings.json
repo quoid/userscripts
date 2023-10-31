@@ -1,10 +1,10 @@
 // https://code.visualstudio.com/docs/getstarted/settings#_workspace-settings
 {
-    "editor.formatOnSave": false,
+	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
-    // https://github.com/microsoft/vscode-eslint#settings-options
-    "eslint.validate": ["javascript", "svelte"],
-    "eslint.experimental.useFlatConfig": true,
-    // https://github.com/stylelint/vscode-stylelint#stylelintvalidate
-	"stylelint.validate": ["css", "postcss", "svelte"],
+	// https://github.com/microsoft/vscode-eslint#settings-options
+	"eslint.validate": ["javascript", "svelte"],
+	"eslint.experimental.useFlatConfig": true,
+	// https://github.com/stylelint/vscode-stylelint#stylelintvalidate
+	"stylelint.validate": ["css", "postcss", "svelte"]
 }

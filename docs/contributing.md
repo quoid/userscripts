@@ -11,6 +11,7 @@ For development and build environments please refer to [development guide](dev.m
 # Branches
 
 ### `main`: default branch
+
 - corresponding to development channel
 - all development work around this branch
 - protected branches not accept commits
@@ -18,6 +19,7 @@ For development and build environments please refer to [development guide](dev.m
 - all sub-branches will be merged via PRs
 
 ### `beta`: latest test version
+
 - generated from the master branch
 - corresponding to TestFlight channel
 - only accept version number commits
@@ -25,6 +27,7 @@ For development and build environments please refer to [development guide](dev.m
 - never merge back into master branch
 
 ### `release`: latest public version
+
 - generated from the beta branch
 - generate GitHub Releases and Tags
 - corresponding to App Store channel
@@ -32,6 +35,7 @@ For development and build environments please refer to [development guide](dev.m
 - always merge back into master branch
 
 # Commits
+
 ### Please use semantic commit messages
 
 Format: `<type>(<scope>): <subject>`
@@ -72,6 +76,7 @@ We will improve the guidelines for creating PRs in the future, like create [`pul
 If you are not a member of the project, first you need to fork the master branch of the repository.
 
 ### General development
+
 - create a new branch from the master branch
 - suggested branch naming format like:
   - `issue/333`
@@ -95,4 +100,5 @@ If you are not a member of the project, first you need to fork the master branch
 - Despite various tests, we may still find bugs through user feedback in the public version, and we will fix those minor bugs through hotfixes.
 
 # About
+
 [Userscripts](https://github.com/quoid/userscripts) @ 2018-2023

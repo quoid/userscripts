@@ -1,86 +1,86 @@
 html {
-    font-size: 100%;
-    overflow: hidden;
+	font-size: 100%;
+	overflow: hidden;
 }
 
 body {
-    background-color: var(--color-bg-secondary);
-    color: var(--text-color-primary);
-    font: var(--text-medium);
-    letter-spacing: var(--letter-spacing-medium);
-    position: relative;
-    text-rendering: optimizelegibility;
-    width: 18rem;
-    -webkit-font-smoothing: antialiased;
+	background-color: var(--color-bg-secondary);
+	color: var(--text-color-primary);
+	font: var(--text-medium);
+	letter-spacing: var(--letter-spacing-medium);
+	position: relative;
+	text-rendering: optimizelegibility;
+	width: 18rem;
+	-webkit-font-smoothing: antialiased;
 }
 
 /* attempts to detect iOS */
 @media (hover: none) {
-    html {
-        font-size: 125%;
-    }
+	html {
+		font-size: 125%;
+	}
 
-    body {
-        width: 100vw;
-    }
+	body {
+		width: 100vw;
+	}
 }
 
 @media screen and (width >= 481px) and (orientation: portrait) and (hover: none) {
-    body {
-        width: 18rem;
-    }
+	body {
+		width: 18rem;
+	}
 }
 
 @media screen and (width >= 1024px) and (orientation: landscape) and (hover: none) {
-    body {
-        width: 18rem;
-    }
+	body {
+		width: 18rem;
+	}
 }
 
 body.ipados {
-    width: 18rem;
-    height: 100vh;
+	width: 18rem;
+	height: 100vh;
 }
 
 body.ipados #app {
-    height: 100%;
+	height: 100%;
 }
 
 body.ios {
-    height: 100vh;
-    width: 100vw;
+	height: 100vh;
+	width: 100vw;
 }
 
 body.ios #app {
-    height: 100%;
+	height: 100%;
 }
 
 noscript {
-    display: block;
+	display: block;
 }
 
 button {
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    user-select: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	user-select: none;
 }
 
 button:disabled {
-    opacity: var(--opacity-disabled);
-    pointer-events: none;
+	opacity: var(--opacity-disabled);
+	pointer-events: none;
 }
 
 a,
 .link {
-    background: none;
-    color: var(--color-blue);
-    cursor: pointer;
-    text-decoration: underline;
+	background: none;
+	color: var(--color-blue);
+	cursor: pointer;
+	text-decoration: underline;
 }
 
 .truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }

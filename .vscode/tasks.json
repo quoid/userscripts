@@ -1,63 +1,59 @@
+// https://code.visualstudio.com/docs/editor/tasks
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "npm: install",
-            "detail": "Install dev dependencies",
-            "type": "shell",
-            "command": "npm install",
-            "group": "build",
-            "options": {
-                "cwd": "./"
-            }
-        },
-        {
-            "label": "npm: dev",
-            "detail": "Run dev server",
-            "type": "shell",
-            "command": "npm run dev",
-            "group": "build",
-            "options": {
-                "cwd": "./"
-            }
-        },
-        {
-            "label": "npm: build",
-            "detail": "Build to xcode dist path",
-            "type": "shell",
-            "command": "npm run build",
-            "group": "build",
-            "options": {
-                "cwd": "./"
-            }
-        },
-        {
-            "label": "xcode: build",
-            "detail": "xcodebuild",
-            "type": "shell",
-            "command": "xcodebuild -scheme Userscripts build",
-            "group": "build",
-            "options": {
-                "cwd": "./xcode/"
-            }
-        },
-        {
-            "label": "build all",
-            "detail": "npm build + xcodebuild",
-            "presentation": {
-                "reveal": "silent"
-            },
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "npm: build",
-                "xcode: build"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm: install",
+			"detail": "Install dev dependencies",
+			"type": "shell",
+			"command": "npm install",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: dev",
+			"detail": "Run dev server",
+			"type": "shell",
+			"command": "npm run dev",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: build",
+			"detail": "Build to xcode dist path",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "xcode: build",
+			"detail": "xcodebuild",
+			"type": "shell",
+			"command": "xcodebuild -scheme Userscripts build",
+			"group": "build",
+			"options": {
+				"cwd": "./xcode/"
+			}
+		},
+		{
+			"label": "build all",
+			"detail": "npm build + xcodebuild",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"dependsOrder": "sequence",
+			"dependsOn": ["npm: build", "xcode: build"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
 }

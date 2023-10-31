@@ -1,9 +1,9 @@
 // https://code.visualstudio.com/docs/editor/extension-gallery#_workspace-recommended-extensions
 {
-    "recommendations": [
-        "svelte.svelte-vscode",
+	"recommendations": [
+		"svelte.svelte-vscode",
 		"esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "stylelint.vscode-stylelint"
-    ]
+		"dbaeumer.vscode-eslint",
+		"stylelint.vscode-stylelint"
+	]
 }

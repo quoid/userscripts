@@ -1,28 +1,31 @@
 {
-    "extends": [
-        "stylelint-config-standard",
-        "stylelint-config-html"
-    ],
-    "ignoreFiles": [
-        "**/build/**",
-        "**/dist/**",
-        "**/etc/**",
-        "**/node_modules/**",
-        "**/reset.css",
-        "public/**",
-        "xcode/**"
-    ],
-    "rules": {
-        "alpha-value-notation": "number",
-        "comment-empty-line-before": ["always",{
-            "ignore": ["after-comment", "stylelint-commands"]
-        }],
-        "custom-property-empty-line-before": null,
-        "no-descending-specificity": null,
-        "property-no-vendor-prefix": null,
-        "selector-class-pattern": null,
-        "selector-pseudo-class-no-unknown": [true, {
-            "ignorePseudoClasses": ["global"]
-        }]
-    }
+	"extends": ["stylelint-config-standard", "stylelint-config-html"],
+	"ignoreFiles": [
+		"**/etc/**",
+		"**/dist/**",
+		"**/build/**",
+		"**/node_modules/**",
+		"**/reset.css",
+		"public/**",
+		"xcode/**"
+	],
+	"rules": {
+		"alpha-value-notation": "number",
+		"comment-empty-line-before": [
+			"always",
+			{
+				"ignore": ["after-comment", "stylelint-commands"]
+			}
+		],
+		"custom-property-empty-line-before": null,
+		"no-descending-specificity": null,
+		"property-no-vendor-prefix": null,
+		"selector-class-pattern": null,
+		"selector-pseudo-class-no-unknown": [
+			true,
+			{
+				"ignorePseudoClasses": ["global"]
+			}
+		]
+	}
 }
