@@ -54,6 +54,36 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "lint: js",
+			"detail": "lint js with eslint",
+			"type": "shell",
+			"command": "npm run lint:js",
+			"group": "test",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "lint: css",
+			"detail": "lint css with stylelint",
+			"type": "shell",
+			"command": "npm run lint:css",
+			"group": "test",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "prettier",
+			"detail": "applying prettier formatting for all supported files",
+			"type": "shell",
+			"command": "npm run prettier",
+			"options": {
+				"cwd": "./"
+			},
+			"problemMatcher": []
 		}
 	]
 }
