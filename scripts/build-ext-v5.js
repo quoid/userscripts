@@ -13,8 +13,8 @@
  * The assets name is irrelevant, just need to determine the entry path
  */
 
-import {build} from "vite";
-import {svelte} from "@sveltejs/vite-plugin-svelte";
+import { build } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 /**
  * Define default vite config options
@@ -23,8 +23,8 @@ import {svelte} from "@sveltejs/vite-plugin-svelte";
  * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
  */
 const defineConfig = {
-    base: "./",
-    configFile: false
+	base: "./",
+	configFile: false,
 };
 
 /**
@@ -33,42 +33,40 @@ const defineConfig = {
  * Using a subdirectory avoid emptying other built files
  */
 build({
-    ...defineConfig,
-    plugins: [svelte()],
-    build: {
-        outDir: "xcode/Ext-Safari/Resources/dist/s/",
-        rollupOptions: {
-            input: {
-                background: "src/ext/background/main.js",
-                "action-popup": "entry-ext-action-popup.html",
-                "extension-page": "entry-ext-extension-page.html"
-            },
-            output: {
-                entryFileNames: "[name].js"
-            }
-        }
-    }
+	...defineConfig,
+	plugins: [svelte()],
+	build: {
+		outDir: "xcode/Ext-Safari/Resources/dist/s/",
+		rollupOptions: {
+			input: {
+				background: "src/ext/background/main.js",
+				"action-popup": "entry-ext-action-popup.html",
+				"extension-page": "entry-ext-extension-page.html",
+			},
+			output: {
+				entryFileNames: "[name].js",
+			},
+		},
+	},
 });
 
 /**
  * Build independent scripts for safari
  * Each entry in the array will generate a separate script
  */
-[
-    {content: "src/ext/content-scripts/main.js"}
-].forEach(input => {
-    build({
-        ...defineConfig,
-        build: {
-            outDir: "xcode/Ext-Safari/Resources/dist/",
-            emptyOutDir: false,
-            copyPublicDir: false,
-            rollupOptions: {
-                input,
-                output: {
-                    entryFileNames: "[name].js"
-                }
-            }
-        }
-    });
+[{ content: "src/ext/content-scripts/main.js" }].forEach((input) => {
+	build({
+		...defineConfig,
+		build: {
+			outDir: "xcode/Ext-Safari/Resources/dist/",
+			emptyOutDir: false,
+			copyPublicDir: false,
+			rollupOptions: {
+				input,
+				output: {
+					entryFileNames: "[name].js",
+				},
+			},
+		},
+	});
 });

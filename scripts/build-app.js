@@ -6,8 +6,8 @@
  * The assets name is irrelevant, just need to determine the entry path
  */
 
-import {build} from "vite";
-import {svelte} from "@sveltejs/vite-plugin-svelte";
+import { build } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 /**
  * Define default vite config options
@@ -16,21 +16,21 @@ import {svelte} from "@sveltejs/vite-plugin-svelte";
  * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
  */
 const defineConfig = {
-    base: "./",
-    configFile: false
+	base: "./",
+	configFile: false,
 };
 
 /**
  * Build App-Shared WebView resources to xcode dist
  */
 build({
-    ...defineConfig,
-    plugins: [svelte()],
-    build: {
-        outDir: "xcode/App-Shared/Resources/dist/",
-        copyPublicDir: false,
-        rollupOptions: {
-            input: "entry-app-webview.html"
-        }
-    }
+	...defineConfig,
+	plugins: [svelte()],
+	build: {
+		outDir: "xcode/App-Shared/Resources/dist/",
+		copyPublicDir: false,
+		rollupOptions: {
+			input: "entry-app-webview.html",
+		},
+	},
 });

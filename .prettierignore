@@ -1,0 +1,26 @@
+# env
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# root
+/package
+/public
+/etc
+
+# dir
+node_modules
+xcode
+build
+built
+dist
+temp
+
+# files
+*.svg
+
+# Ignore files for PNPM, NPM and YARN
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

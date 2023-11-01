@@ -1,9 +1,9 @@
+// https://code.visualstudio.com/docs/editor/extension-gallery#_workspace-recommended-extensions
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=827846
-    // for the documentation about the extensions.json format
-    "recommendations": [
-        "svelte.svelte-vscode",
-        "dbaeumer.vscode-eslint",
-        "stylelint.vscode-stylelint"
-    ]
+	"recommendations": [
+		"svelte.svelte-vscode",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint",
+		"stylelint.vscode-stylelint"
+	]
 }

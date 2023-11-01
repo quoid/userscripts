@@ -1,24 +1,10 @@
+// https://code.visualstudio.com/docs/getstarted/settings#_workspace-settings
 {
-    "editor.formatOnSave": false,
-    "files.associations": {
-        ".htmlhintrc": "json"
-    },
-    "eslint.validate": [
-        "svelte"
-    ],
-    "stylelint.validate": [
-        "css",
-        "postcss",
-        "svelte"
-    ],
-    "svelte.plugin.svelte.compilerWarnings": {
-        "a11y-missing-attribute": "error"
-    },
-    "svelte.plugin.svelte.rename.enable": false,
-    "[svelte]": {
-        "editor.defaultFormatter": "svelte.svelte-vscode"
-    },
-    "[css]": {
-        "editor.defaultFormatter": "stylelint.vscode-stylelint"
-    }
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	// https://github.com/microsoft/vscode-eslint#settings-options
+	"eslint.validate": ["javascript", "svelte"],
+	"eslint.experimental.useFlatConfig": true,
+	// https://github.com/stylelint/vscode-stylelint#stylelintvalidate
+	"stylelint.validate": ["css", "postcss", "svelte"]
 }

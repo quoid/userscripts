@@ -11,6 +11,6 @@
 
 /* eslint-disable */
 (function () {
-    'use strict';
-    alert("DEBUG.Alert-URL:\n\n" + location);
+	"use strict";
+	alert("DEBUG.Alert-URL:\n\n" + location);
 })();
