@@ -22,5 +22,5 @@
 		"skipLibCheck": true,
 		"sourceMap": true
 	},
-	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"]
+	"include": ["**/*.d.ts", "**/*.js", "**/*.svelte"]
 }
