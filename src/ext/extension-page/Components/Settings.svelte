@@ -2,6 +2,7 @@
 	import { fade, fly } from "svelte/transition";
 	import { settings, state, log } from "../store.js";
 	import { openInBlank } from "../../shared/utils.js";
+	import { sendNativeMessage } from "../../shared/native.js";
 	import IconButton from "../../shared/Components/IconButton.svelte";
 	import Toggle from "../../shared/Components/Toggle.svelte";
 	import iconLoader from "../../shared/img/icon-loader.svg?raw";
@@ -62,12 +63,12 @@
 
 	// called when the user clicks the link to the save location
 	function openSaveLocation() {
-		browser.runtime.sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
+		sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
 	}
 
 	// called when the user clicks the icon next to the save location link
 	async function changeSaveLocation() {
-		browser.runtime.sendNativeMessage({ name: "CHANGE_SAVE_LOCATION" });
+		sendNativeMessage({ name: "CHANGE_SAVE_LOCATION" });
 	}
 </script>
 

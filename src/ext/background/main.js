@@ -1,5 +1,6 @@
 import { openExtensionPage } from "../shared/utils.js";
 import * as settingsStorage from "../shared/settings.js";
+import { connectNative, sendNativeMessage } from "../shared/native.js";
 
 // first sorts files by run-at value, then by weight value
 function userscriptSort(a, b) {
@@ -29,7 +30,7 @@ async function getPlatform() {
 	let platform = localStorage.getItem("platform");
 	if (!platform) {
 		const message = { name: "REQ_PLATFORM" };
-		const response = await browser.runtime.sendNativeMessage(message);
+		const response = await sendNativeMessage(message);
 		if (!response.platform) {
 			console.error("Failed to get platform");
 			return "";
@@ -105,20 +106,18 @@ async function setBadgeCount() {
 		url,
 		frameUrls: Array.from(frameUrls),
 	};
-	browser.runtime.sendNativeMessage(message, (response) => {
-		if (response.error) return console.error(response.error);
-		const count = response.count;
-		if (count > 0) {
-			browser.browserAction.setBadgeText({ text: count.toString() });
+	const response = await sendNativeMessage(message);
+	if (response?.error) return console.error(response.error);
+	if (response?.count > 0) {
+		browser.browserAction.setBadgeText({ text: response.count.toString() });
+	} else {
+		const _url = new URL(url);
+		if (_url.pathname.endsWith(".user.js")) {
+			browser.browserAction.setBadgeText({ text: "JS" });
 		} else {
-			const _url = new URL(url);
-			if (_url.pathname.endsWith(".user.js")) {
-				browser.browserAction.setBadgeText({ text: "JS" });
-			} else {
-				clearBadge();
-			}
+			clearBadge();
 		}
-	});
+	}
 }
 
 // on startup get declarativeNetRequests
@@ -132,7 +131,7 @@ async function setSessionRules() {
 	if (!browser.declarativeNetRequest.updateSessionRules) return;
 	await clearAllSessionRules();
 	const message = { name: "REQ_REQUESTS" };
-	const response = await browser.runtime.sendNativeMessage(message);
+	const response = await sendNativeMessage(message);
 	if (response.error) {
 		console.error(response.error);
 		return;
@@ -198,7 +197,7 @@ async function getContextMenuItems() {
 	await browser.menus.removeAll();
 	// get the context-menu scripts
 	const message = { name: "REQ_CONTEXT_MENU_SCRIPTS" };
-	const response = await browser.runtime.sendNativeMessage(message);
+	const response = await sendNativeMessage(message);
 	if (response.error) {
 		console.error(response.error);
 		return;
@@ -263,22 +262,19 @@ async function addContextMenuItem(userscript) {
 	);
 }
 
-function contextClick(info, tab) {
+async function contextClick(info, tab) {
 	// when any created context-menu item is clicked, send message to tab
 	// the content script for that tag will have the context-menu code
 	// which will get send back in the response if/when found
 	const message = { name: "CONTEXT_RUN", menuItemId: info.menuItemId };
-	browser.tabs.sendMessage(tab.id, message, (response) => {
-		// if code is returned, execute on that tab
-		if (!response.code) return;
-		browser.tabs.executeScript(tab.id, {
-			code: response.code,
-		});
-	});
+	const response = await browser.tabs.sendMessage(tab.id, message);
+	// if code is returned, execute on that tab
+	if (!response.code) return;
+	browser.tabs.executeScript(tab.id, { code: response.code });
 }
 
 async function nativeChecks() {
-	const response = await browser.runtime.sendNativeMessage({
+	const response = await sendNativeMessage({
 		name: "NATIVE_CHECKS",
 	});
 	if (response.error) {
@@ -290,7 +286,7 @@ async function nativeChecks() {
 }
 
 // handles messages sent with browser.runtime.sendMessage
-function handleMessage(request, sender, sendResponse) {
+async function handleMessage(request, sender, sendResponse) {
 	switch (request.name) {
 		case "REQ_USERSCRIPTS": {
 			// get the page url from the content script that sent request
@@ -300,23 +296,20 @@ function handleMessage(request, sender, sendResponse) {
 			const isTop = sender.frameId === 0;
 			// send request to swift layer to provide code for page url
 			const message = { name: "REQ_USERSCRIPTS", url, isTop };
-			browser.runtime.sendNativeMessage(message, (response) => {
-				// if request failed, send error to content script for logging
-				if (response.error) return sendResponse(response);
-				// sort files
-				response.files.js.sort(userscriptSort);
-				response.files.css.sort((a, b) => {
-					return Number(a.weight) < Number(b.weight);
-				});
-				// return sorted files for injection
-				sendResponse(response);
+			const response = await sendNativeMessage(message);
+			// if request failed, send error to content script for logging
+			if (response.error) return sendResponse(response);
+			// sort files
+			response.files.js.sort(userscriptSort);
+			response.files.css.sort((a, b) => {
+				return Number(a.weight) < Number(b.weight);
 			});
-			return true;
+			// return sorted files for injection
+			return response;
 		}
 		case "API_CLOSE_TAB": {
 			const tabId = request.tabId || sender.tab.id;
-			browser.tabs.remove(tabId, () => sendResponse({ success: 1 }));
-			return true;
+			return browser.tabs.remove(tabId);
 		}
 		case "API_OPEN_TAB": {
 			const props = {
@@ -324,16 +317,13 @@ function handleMessage(request, sender, sendResponse) {
 				index: sender.tab.index + 1,
 				url: request.url,
 			};
-			browser.tabs.create(props, (response) => sendResponse(response));
-			return true;
+			return browser.tabs.create(props);
 		}
 		case "API_ADD_STYLE": {
 			const tabId = sender.tab.id;
+			/** @type {{code: string, cssOrigin: "user"|"author"}} */
 			const details = { code: request.css, cssOrigin: "user" };
-			browser.tabs.insertCSS(tabId, details, () => {
-				sendResponse(request.css);
-			});
-			return true;
+			return browser.tabs.insertCSS(tabId, details);
 		}
 		case "API_GET_TAB": {
 			let tab = null;
@@ -502,16 +492,16 @@ browser.windows.onFocusChanged.addListener(async (windowId) => {
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
 
 // handle native app messages
-const port = browser.runtime.connectNative();
+const port = connectNative();
 port.onMessage.addListener((message) => {
 	// console.info(message); // DEBUG
 	if (message.name === "SAVE_LOCATION_CHANGED") {
 		openExtensionPage();
 		if (message?.userInfo?.returnApp === true) {
-			browser.runtime.sendNativeMessage({ name: "OPEN_APP" });
+			sendNativeMessage({ name: "OPEN_APP" });
 		}
 	}
 	// if (message.name === "OPEN_EXTENSION_PAGE") {
-	//     openExtensionPage();
+	// 	openExtensionPage();
 	// }
 });

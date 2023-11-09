@@ -64,7 +64,7 @@ export function newScriptDefault(description, name, type) {
 
 /**
  * @param {string} str
- * @returns {?{code: string, content: str, metablock: string, metadata: {string: string[]}}}
+ * @returns {?{code: string, content: str, metablock: string, metadata: object}}
  */
 export function parse(str) {
 	if (typeof str != "string") return null;
@@ -118,7 +118,7 @@ export function parseMetadata(text) {
 	// could be missing opening/closing tags, malformed
 	// or missing metadata between opening/closing tags (group 2 in regex exp)
 	if (!groups) {
-		return { match: false };
+		return { match: false, meta: false };
 	}
 
 	// userscript code matches but content between opening/closing tag missing
@@ -212,7 +212,9 @@ export async function downloadToFile(filename, content, type = "text/plain") {
 	const exchange = { filename, content, type };
 	const exscript = (o) => {
 		// make sure executed only once
+		// @ts-ignore
 		if (window.US_DOWNLOAD === 1) return;
+		// @ts-ignore
 		window.US_DOWNLOAD = 1;
 		window.stop();
 		document.body.textContent = "Download is starting...";

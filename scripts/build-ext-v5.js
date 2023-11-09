@@ -25,6 +25,10 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 const defineConfig = {
 	base: "./",
 	configFile: false,
+	define: {
+		"import.meta.env.BROWSER": JSON.stringify("safari"),
+		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+	},
 };
 
 /**

@@ -7,6 +7,7 @@
 	let directory = "init";
 
 	window.APP = {
+		show: () => {},
 		printVersion: (v, b) => {
 			version = v;
 			build = b;

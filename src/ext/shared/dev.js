@@ -17,7 +17,9 @@ function generateFile(
 	const uid = uniqueId();
 	let name = request ? `${uid}-request-${type}` : `${uid}-example-${type}`;
 	if (longName) name = `${uid}${uid}${uid}-example-${type}`;
-	const randomDate = +(new Date() - Math.floor(Math.random() * 10000000000));
+	const randomDate = +(
+		Number(new Date()) - Math.floor(Math.random() * 10000000000)
+	);
 	let content =
 		"// ==UserScript==" +
 		`\n// @name         ${name}` +
@@ -64,6 +66,7 @@ function generateFile(
 	};
 }
 
+/** @type {Array} */
 const files = [
 	generateFile("js", true, true),
 	generateFile("css"),
@@ -92,9 +95,10 @@ const _browser = {
 			}
 			setTimeout(() => responseCallback(response), _browser.delay);
 		},
-		async sendNativeMessage(message, responseCallback) {
+		async sendNativeMessage(application, message, responseCallback) {
 			const name = message.name;
 			console.info(`Got message: ${name}`);
+			/** @type {any} */
 			let response = {};
 			if (name === "PAGE_INIT_DATA") {
 				response = {
@@ -386,13 +390,14 @@ const _browser = {
 			const response = random([
 				{ url: "https://www.filmgarb.com/foo.user.js", id: 101 },
 				{
-					url: `${window.location.origin}/src/shared/dev/DEMO.Alert-URL.user.js`,
+					url: `${window.location.origin}/src/ext/shared/dev/DEMO.Alert-URL.user.js`,
 					id: 102,
 				},
+				// increase probability
 				{
-					url: `${window.location.origin}/src/shared/dev/DEMO.Alert-URL.user.js`,
+					url: `${window.location.origin}/src/ext/shared/dev/DEMO.Alert-URL.user.js`,
 					id: 103,
-				}, // increase probability
+				},
 				{ url: window.location.href, id: 10 },
 			]);
 			console.info("browser.tabs.getCurrent", response);

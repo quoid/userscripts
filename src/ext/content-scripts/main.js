@@ -122,7 +122,7 @@ function cspFallback(e) {
 		// make sure data var is not undefined before attempting fallback
 		if (!data || cspFallbackAttempted) return;
 		// update global that tracks security policy violations
-		cspFallbackAttempted = 1;
+		cspFallbackAttempted = true;
 		// for all userscripts with @inject-into: auto, attempt re-injection
 		for (let i = 0; i < data.files.js.length; i++) {
 			const userscript = data.files.js[i];
@@ -133,88 +133,89 @@ function cspFallback(e) {
 	}
 }
 
-function injection() {
-	browser.runtime.sendMessage({ name: "REQ_USERSCRIPTS" }, (response) => {
-		// cancel injection if errors detected
-		if (!response || response.error) {
-			console.error(response?.error || "REQ_USERSCRIPTS returned undefined");
-			return;
-		}
-		// save response locally in case CSP events occur
-		data = response;
-		// combine regular and context-menu scripts
-		const scripts = [...data.files.js, ...data.files.menu];
-		// loop through each userscript and prepare for processing
-		for (let i = 0; i < scripts.length; i++) {
-			const userscript = scripts[i];
-			const filename = userscript.scriptObject.filename;
-			const grants = userscript.scriptObject.grant;
-			const injectInto = userscript.scriptObject["inject-into"];
-			// create GM.info object, all userscripts get access to GM.info
-			userscript.apis = { GM: {} };
-			userscript.apis.GM.info = {
-				script: userscript.scriptObject,
-				scriptHandler: data.scriptHandler,
-				scriptHandlerVersion: data.scriptHandlerVersion,
-				scriptMetaStr: userscript.scriptMetaStr,
-			};
-			// add GM_info
-			userscript.apis.GM_info = userscript.apis.GM.info;
-			// if @grant explicitly set to none, empty grants array
-			if (grants.includes("none")) grants.length = 0;
-			// @grant values exist for page scoped userscript
-			if (grants.length && injectInto === "page") {
-				// remove grants
-				grants.length = 0;
-				// log warning
-				console.warn(
-					`${filename} @grant values removed due to @inject-into value: ${injectInto} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`,
-				);
-			}
-			// @grant exist for auto scoped userscript
-			if (grants.length && injectInto === "auto") {
-				// change scope
-				userscript.scriptObject["inject-into"] = "content";
-				// log warning
-				console.warn(
-					`${filename} @inject-into value set to 'content' due to @grant values: ${grants} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`,
-				);
-			}
-			// loop through each userscript @grant value, add methods as needed
-			for (let j = 0; j < grants.length; j++) {
-				const grant = grants[j];
-				const method = grant.split(".")[1] || grant.split(".")[0];
-				// ensure API method exists in apis object
-				if (!Object.keys(apis).includes(method)) continue;
-				// add granted methods
-				switch (method) {
-					case "info":
-					case "GM_info":
-						continue;
-					case "getValue":
-					case "setValue":
-					case "deleteValue":
-					case "listValues":
-						userscript.apis.GM[method] = apis[method].bind({
-							US_filename: filename,
-						});
-						break;
-					case "GM_xmlhttpRequest":
-						userscript.apis[method] = apis[method];
-						break;
-					default:
-						userscript.apis.GM[method] = apis[method];
-				}
-			}
-			// triage userjs item for injection
-			triageJS(userscript);
-		}
-		// loop through each usercss and inject
-		for (let i = 0; i < data.files.css.length; i++) {
-			const userstyle = data.files.css[i];
-			injectCSS(userstyle.name, userstyle.code);
-		}
+async function injection() {
+	const response = await browser.runtime.sendMessage({
+		name: "REQ_USERSCRIPTS",
 	});
+	// cancel injection if errors detected
+	if (!response || response.error) {
+		console.error(response?.error || "REQ_USERSCRIPTS returned undefined");
+		return;
+	}
+	// save response locally in case CSP events occur
+	data = response;
+	// combine regular and context-menu scripts
+	const scripts = [...data.files.js, ...data.files.menu];
+	// loop through each userscript and prepare for processing
+	for (let i = 0; i < scripts.length; i++) {
+		const userscript = scripts[i];
+		const filename = userscript.scriptObject.filename;
+		const grants = userscript.scriptObject.grant;
+		const injectInto = userscript.scriptObject["inject-into"];
+		// create GM.info object, all userscripts get access to GM.info
+		userscript.apis = { GM: {} };
+		userscript.apis.GM.info = {
+			script: userscript.scriptObject,
+			scriptHandler: data.scriptHandler,
+			scriptHandlerVersion: data.scriptHandlerVersion,
+			scriptMetaStr: userscript.scriptMetaStr,
+		};
+		// add GM_info
+		userscript.apis.GM_info = userscript.apis.GM.info;
+		// if @grant explicitly set to none, empty grants array
+		if (grants.includes("none")) grants.length = 0;
+		// @grant values exist for page scoped userscript
+		if (grants.length && injectInto === "page") {
+			// remove grants
+			grants.length = 0;
+			// log warning
+			console.warn(
+				`${filename} @grant values removed due to @inject-into value: ${injectInto} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`,
+			);
+		}
+		// @grant exist for auto scoped userscript
+		if (grants.length && injectInto === "auto") {
+			// change scope
+			userscript.scriptObject["inject-into"] = "content";
+			// log warning
+			console.warn(
+				`${filename} @inject-into value set to 'content' due to @grant values: ${grants} - https://github.com/quoid/userscripts/issues/265#issuecomment-1213462394`,
+			);
+		}
+		// loop through each userscript @grant value, add methods as needed
+		for (let j = 0; j < grants.length; j++) {
+			const grant = grants[j];
+			const method = grant.split(".")[1] || grant.split(".")[0];
+			// ensure API method exists in apis object
+			if (!Object.keys(apis).includes(method)) continue;
+			// add granted methods
+			switch (method) {
+				case "info":
+				case "GM_info":
+					continue;
+				case "getValue":
+				case "setValue":
+				case "deleteValue":
+				case "listValues":
+					userscript.apis.GM[method] = apis[method].bind({
+						US_filename: filename,
+					});
+					break;
+				case "GM_xmlhttpRequest":
+					userscript.apis[method] = apis[method];
+					break;
+				default:
+					userscript.apis.GM[method] = apis[method];
+			}
+		}
+		// triage userjs item for injection
+		triageJS(userscript);
+	}
+	// loop through each usercss and inject
+	for (let i = 0; i < data.files.css.length; i++) {
+		const userstyle = data.files.css[i];
+		injectCSS(userstyle.name, userstyle.code);
+	}
 }
 
 function listeners() {

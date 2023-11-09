@@ -1,26 +1,47 @@
-// wrap a relatively independent settings storage with its own functions
+/**
+ * @file wrap a relatively independent settings storage with its own functions
+ */
 
+/** @type {string} */
 const storagePrefix = "US_";
-const storageKey = (key) => storagePrefix + key.toUpperCase();
-// const storageRef = async area => { // dynamic storage reference
-//     browser.storage.sync.area = "sync";
-//     browser.storage.local.area = "local";
-//     if (area === "sync") return browser.storage.sync;
-//     if (area === "local") return browser.storage.local;
-//     const key = storageKey("settings_sync");
-//     const result = await browser.storage.local.get(key);
-//     if (result?.[key] === true) {
-//         return browser.storage.sync;
-//     } else {
-//         return browser.storage.local;
-//     }
-// };
 
-// https://developer.apple.com/documentation/safariservices/safari_web_extensions/assessing_your_safari_web_extension_s_browser_compatibility#3584139
-// since storage sync is not implemented in Safari, currently only returns using local storage
-const storageRef = async () => {
-	browser.storage.local.area = "local";
-	return browser.storage.local;
+/**
+ * Convert name to storage key
+ * @param {string} name
+ * @returns {string} prefixed storage key
+ */
+const storageKey = (name) => storagePrefix + name.toUpperCase();
+
+/**
+ * Dynamic storage reference
+ * @param {"sync"|"local"|undefined} area
+ * @returns {Promise}
+ */
+const storageRef = async (area) => {
+	const storages = {
+		sync: {
+			area: "sync",
+			ref: browser.storage.sync,
+		},
+		local: {
+			area: "local",
+			ref: browser.storage.local,
+		},
+	};
+	// https://developer.apple.com/documentation/safariservices/safari_web_extensions/assessing_your_safari_web_extension_s_browser_compatibility#3584139
+	// since storage sync is not implemented in Safari, currently only returns using local storage
+	if (import.meta.env.BROWSER === "safari") {
+		return storages.local;
+	}
+	if (area in storages) {
+		return storages[area];
+	} else if (area === undefined) {
+		const key = storageKey("settings_sync");
+		const result = await browser.storage.local.get(key);
+		return result?.[key] ? storages.sync : storages.local;
+	} else {
+		return Promise.reject(new Error(`invalid area ${area}`));
+	}
 };
 
 const settingDefault = deepFreeze({
@@ -345,16 +366,25 @@ export const settingsDefine = deepFreeze(
 	].reduce(settingsDefineReduceCallback, {}),
 );
 
-// populate the settingsDefine with settingDefault
-// and convert settingsDefine to storageKey object
+/**
+ * populate the settingsDefine with settingDefault
+ * and convert settingsDefine to storageKey object
+ * @param {object} settings new settings object
+ * @param {object} setting each setting define
+ * @returns {object} {US_GLOBAL_ACTIVE: {key: US_GLOBAL_ACTIVE, name: global_active, ... }, ...}
+ */
 function settingsDefineReduceCallback(settings, setting) {
 	setting.key = storageKey(setting.name);
 	settings[setting.key] = { ...settingDefault, ...setting };
 	return settings;
 }
 
-// prevent settings define from being modified in any case
-// otherwise user settings may be lost in the worst case
+/**
+ * prevent settings define from being modified in any case
+ * otherwise user settings may be lost in the worst case
+ * @param {object} object any object
+ * @returns {object} deep frozen object
+ */
 function deepFreeze(object) {
 	for (const p in object) {
 		if (typeof object[p] == "object") {
@@ -364,8 +394,12 @@ function deepFreeze(object) {
 	return Object.freeze(object);
 }
 
-// @todo remove this polyfill when browser limitation is set above 15.4
-// compatibility polyfill for Safari < 15.4
+/**
+ * compatibility polyfill for Safari < 15.4
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn#browser_compatibility}
+ * @todo remove this polyfill when set safari strict_min_version 15.4
+ * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings#safari_properties}
+ */
 if (Object.hasOwn === undefined) {
 	Object.hasOwn = (obj, prop) =>
 		Object.prototype.hasOwnProperty.call(obj, prop);
@@ -374,7 +408,13 @@ if (Object.hasOwn === undefined) {
 // export and define the operation method of settings storage
 // they are similar to browser.storage but slightly different
 
-export async function get(keys, area) {
+/**
+ * settings.get
+ * @param {string|Array<string>} keys key | array of keys | undefined for all
+ * @param {"local"|"sync"} area
+ * @returns {Promise} settings object
+ */
+export async function get(keys = undefined, area = undefined) {
 	if (![undefined, "local", "sync"].includes(area)) {
 		return console.error("Unexpected storage area:", area);
 	}
@@ -413,7 +453,7 @@ export async function get(keys, area) {
 		// eslint-disable-next-line no-param-reassign -- change the area is expected
 		settingsDefine[key].local === true && (area = "local");
 		const storage = await storageRef(area);
-		const result = await storage.get(key);
+		const result = await storage.ref.get(key);
 		if (Object.hasOwn(result, key)) return valueFix(key, result[key]);
 		return settingsDefine[key].default;
 	}
@@ -423,14 +463,13 @@ export async function get(keys, area) {
 			sync = {};
 		if (storage.area === "sync") {
 			if (areaKeys.sync.length) {
-				sync = await storage.get(areaKeys.sync);
+				sync = await storage.ref.get(areaKeys.sync);
 			}
 			if (areaKeys.local.length) {
-				const storageLocal = await storageRef("local");
-				local = await storageLocal.get(areaKeys.local);
+				local = await browser.storage.local.get(areaKeys.local);
 			}
 		} else {
-			local = await storage.get(areaKeys.all);
+			local = await storage.ref.get(areaKeys.all);
 		}
 		const result = Object.assign(settingsDefault, local, sync);
 		// revert settings object property name
@@ -480,7 +519,13 @@ export async function get(keys, area) {
 	return console.error("Unexpected keys type:", keys);
 }
 
-export async function set(keys, area) {
+/**
+ * settings.set
+ * @param {object} keys settings object
+ * @param {"local"|"sync"} area
+ * @returns {Promise}
+ */
+export async function set(keys, area = undefined) {
 	if (![undefined, "local", "sync"].includes(area)) {
 		return console.error("unexpected storage area:", area);
 	}
@@ -529,14 +574,13 @@ export async function set(keys, area) {
 	try {
 		if (storage.area === "sync") {
 			if (Object.keys(areaKeys.sync).length) {
-				await storage.set(areaKeys.sync);
+				await storage.ref.set(areaKeys.sync);
 			}
 			if (Object.keys(areaKeys.local).length) {
-				const storageLocal = await storageRef("local");
-				await storageLocal.set(areaKeys.local);
+				await browser.storage.local.set(areaKeys.local);
 			}
 		} else {
-			await storage.set(areaKeys.all);
+			await storage.ref.set(areaKeys.all);
 		}
 		return true;
 	} catch (error) {
@@ -544,8 +588,14 @@ export async function set(keys, area) {
 	}
 }
 
-// reset to default
-export async function reset(keys, area) {
+/**
+ * settings.reset
+ * reset to default
+ * @param {string|Array<string>} keys key | array of keys | undefined for all
+ * @param {"local"|"sync"} area
+ * @returns {Promise}
+ */
+export async function reset(keys = undefined, area = undefined) {
 	if (![undefined, "local", "sync"].includes(area)) {
 		return console.error("unexpected storage area:", area);
 	}
@@ -563,21 +613,20 @@ export async function reset(keys, area) {
 		// eslint-disable-next-line no-param-reassign -- change the area is expected
 		settingsDefine[key].local === true && (area = "local");
 		const storage = await storageRef(area);
-		return storage.remove(key);
+		return storage.ref.remove(key);
 	}
 	const complexRemove = async (areaKeys) => {
 		const storage = await storageRef(area);
 		try {
 			if (storage.area === "sync") {
 				if (areaKeys.sync.length) {
-					await storage.remove(areaKeys.sync);
+					await storage.ref.remove(areaKeys.sync);
 				}
 				if (areaKeys.local.length) {
-					const storageLocal = await storageRef("local");
-					await storageLocal.remove(areaKeys.local);
+					await browser.storage.local.remove(areaKeys.local);
 				}
 			} else {
-				await storage.remove(areaKeys.all);
+				await storage.ref.remove(areaKeys.all);
 			}
 			return true;
 		} catch (error) {
@@ -627,35 +676,47 @@ export async function reset(keys, area) {
 	return console.error("Unexpected keys type:", keys);
 }
 
-// this function is convenient for the svelte store to update the state
-// complex onChanged
-export function onChanged(callback) {
+/**
+ * complex onChanged
+ * this function is convenient for the svelte store to update the state
+ * @param {Function} callback
+ * @returns {void}
+ */
+export function onChangedSettings(callback) {
 	if (typeof callback != "function") {
 		return console.error("Unexpected callback:", callback);
 	}
 	console.info("storage onChanged addListener");
-	const handle = (changes, area) => {
-		// console.log(`storage.${area}.onChanged`, changes);
+	/**
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#listener}
+	 * @param {object} changes
+	 * @param {"sync"|"local"} area
+	 */
+	const listener = (changes, area) => {
+		// console.log(`storage.${area}.onChanged`, changes); // DEBUG
+		const settings = {};
+		for (const key in changes) {
+			if (!Object.hasOwn(settingsDefine, key)) continue;
+			settings[settingsDefine[key].name] = changes[key].newValue;
+		}
 		try {
-			const settings = {};
-			for (const key in changes) {
-				if (!Object.hasOwn(settingsDefine, key)) continue;
-				settings[settingsDefine[key].name] = changes[key].newValue;
-			}
 			callback(settings, area);
 		} catch (error) {
 			console.error("onChanged callback:", error);
 		}
 	};
-	// comment for now same reason as `storageRef` function
-	// browser.storage.sync.onChanged.addListener(c => handle(c, "sync"));
-	browser.storage.local.onChanged.addListener((c) => handle(c, "local"));
+	browser.storage.onChanged.addListener(listener);
 }
 
 // the following functions are used only for compatibility transition periods
 // these functions will be removed in the future, perhaps in version 5.0
 
-export async function legacyGet(keys) {
+/**
+ * settings.legacyGet
+ * @param {string|Array.<string>} keys
+ * @returns {Promise} settings object with legacy keys
+ */
+export async function legacyGet(keys = undefined) {
 	const result = await get(keys);
 	// console.log("legacy_get", keys, result);
 	for (const key of Object.keys(result)) {
@@ -665,6 +726,11 @@ export async function legacyGet(keys) {
 	return result;
 }
 
+/**
+ * settings.legacySet
+ * @param {object} keys legacy keys
+ * @returns {Promise}
+ */
 export async function legacySet(keys) {
 	if (typeof keys != "object") {
 		return console.error("Unexpected arg type:", keys);
@@ -689,7 +755,7 @@ export async function legacyImport() {
 	const imported = await get("legacy_imported");
 	if (imported) return console.info("Legacy settings has already imported");
 	// start the one-time import process
-	const result = await browser.runtime.sendNativeMessage({
+	const result = await browser.runtime.sendNativeMessage("app", {
 		name: "PAGE_LEGACY_IMPORT",
 	});
 	if (result.error) return console.error(result.error);

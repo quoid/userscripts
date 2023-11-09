@@ -177,35 +177,37 @@ Userscripts currently supports the following api methods. All methods are asynch
 
 - `GM.addStyle(css)`
   - `css: String`
-  - on success returns a promise resolved with the css string argument provided
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved if succeeds, rejected with error message if fails
 - `GM.setValue(key, value)`
-  - `key: String`, `value: Any`
-  - on success returns a promise resolved with an object indicating success
+  - `key: String`
+  - `value: Any` - any can be JSON-serialized
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved if succeeds, rejected with error message if fails
 - `GM.getValue(key, defaultValue)`
-  - `key: String`, `defaultValue: Any`
-  - on success returns a promise resolved with the value that was set or default value provided
+  - `key: String`
+  - `defaultValue: Any` - optional
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved with the `value` that was set or `defaultValue` provided or `undefined` if succeeds, rejected with error message if fails
 - `GM.deleteValue(key)`
   - `key: String`
-  - on success returns a promise resolved with an object indicating success
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved if succeeds, rejected with error message if fails
 - `GM.listValues()`
-  - on success returns a promise resolved with an array of the key names of **presently set** values
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved with an array of the key names of **presently set** values if succeeds, rejected with error message if fails
 - `GM.getTab()`
-  - on success returns a promise resolved with `Any` data that is persistent as long as this tab is open
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved with `Any` data that is persistent as long as this tab is open if succeeds, rejected with error message if fails
 - `GM.saveTab(tabObj)`
-  - `tabObj: Any`
-  - on success returns a promise resolved with an object indicating success
+  - `tabObj: Any` - any can be JSON-serialized
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved if succeeds, rejected with error message if fails
 - `GM.openInTab(url, openInBackground)`
-  - `url: String`, `openInBackground: Bool`
-  - on success returns a promise resolved with the [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened
+  - `url: String`
+  - `openInBackground: Bool` - optional, `false` by default
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved with [tab data](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab) for the tab just opened if succeeds, rejected with error message if fails
 - `GM.closeTab(tabId)`
-  - `tabId: Int`
-  - `tabId` is **optional** and if omitted the tab that called `US.closeTab` will be closed
-  - on success returns a promise resolved with an object indicating success
+  - `tabId: Int` - optional, the `caller tab` by default
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved if succeeds, rejected with error message if fails
 - `GM.setClipboard(data, type)`
-  - `data: String` - **required**
-  - `type: String` - **optional** and defaults to `text/plain`
+  - `data: String`
+  - `type: String` - optional, `text/plain` by default
   - [read more here](https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData)
-  - on success returns a promise resolved with a `Bool` indicating success
+  - returns a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), resolved with a `Bool` value indicating succeeds or fails, rejected with error message if fails
 - `GM.info` && `GM_info`
   - is available without needing to add it to `@grant`
   - an object containing information about the running userscript
@@ -230,26 +232,26 @@ Userscripts currently supports the following api methods. All methods are asynch
 - `GM.xmlHttpRequest(details)`
   - `details: Object`
   - the `details` object accepts the following properties
-    - `url` - `String` - **required**
-    - `method` - `String` - defaults to `GET`
-    - `user` - `String`
-    - `password` - `String`
-    - `headers` - `Object`
-    - `overrideMimeType`
-    - `timeout` - `Int`
-    - `binary` - `Bool`
-    - `data` - `String`
-    - `responseType` - `String`
-    - read more about [XMLHttpRequests here](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
+    - `url: String` - required
+    - `method: String` - optional, `GET` by default
+    - `user: String` - optional
+    - `password: String` - optional
+    - `headers: Object` - optional
+    - `overrideMimeTyp: String` - optional
+    - `timeout: Int` - optional
+    - `binary: Bool` - optional
+    - `data: String` - optional
+    - `responseType: String` - optional
+    - refer to [`XMLHttpRequests`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
   - event handlers:
-    - `onabort` - `function`
-    - `onerror` - `function`
-    - `onload` - `function`
-    - `onloadend` - `function`
-    - `onloadstart` - `function`
-    - `onprogress` - `function`
-    - `onreadystatechange` - `function`
-    - `ontimeout` - `function`
+    - `onabort: Function` - optional
+    - `onerror: Function` - optional
+    - `onload: Function` - optional
+    - `onloadend: Function` - optional
+    - `onloadstart: Function` - optional
+    - `onprogress: Function` - optional
+    - `onreadystatechange: Function` - optional
+    - `ontimeout: Function` - optional
     - the response object passed to the event handlers has the following properties:
       - `readyState`
       - `response`
@@ -261,8 +263,8 @@ Userscripts currently supports the following api methods. All methods are asynch
       - `timeout`
       - `withCredentials`
       - `responseText` (when `responseType` is `text`)
-  - returns an object with a single property, `abort`, which is a `function`
-    - usage: `const foo = GM.xmlHttpRequest({...});` ... `foo.abort()` to abort the request
+  - returns an object with a single property, `abort`, which is a `Function`
+    - usage: `const foo = GM.xmlHttpRequest({...});` ... `foo.abort();` to abort the request
 - `GM_xmlhttpRequest(details)`
   - an alias for `GM.xmlHttpRequest`, works exactly the same
 

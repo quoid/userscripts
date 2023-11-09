@@ -4,6 +4,7 @@
 	import IconButton from "../../../shared/Components/IconButton.svelte";
 	import Tag from "../../../shared/Components/Tag.svelte";
 	import { formatDate, downloadToFile } from "../../../shared/utils.js";
+	import { sendNativeMessage } from "../../../shared/native.js";
 	import CodeMirror, {
 		cmChanged,
 		cmGetInstance,
@@ -64,7 +65,7 @@
 			item: activeItem,
 			content: codemirror.getValue(),
 		};
-		const response = await browser.runtime.sendNativeMessage(message);
+		const response = await sendNativeMessage(message);
 		if (response.error) {
 			log.add(response.error, "error", true);
 		} else {
@@ -102,7 +103,7 @@
 		state.add("updating");
 		// get the editor's current contents
 		const message = { name: "PAGE_UPDATE", content: codemirror.getValue() };
-		const response = await browser.runtime.sendNativeMessage(message);
+		const response = await sendNativeMessage(message);
 		if (response.error) {
 			log.add(response.error, "error", true);
 		} else if (response.info) {
@@ -116,9 +117,7 @@
 	}
 
 	async function abort() {
-		const response = await browser.runtime.sendNativeMessage({
-			name: "CANCEL_REQUESTS",
-		});
+		const response = await sendNativeMessage({ name: "CANCEL_REQUESTS" });
 		if (response) state.remove("updating");
 	}
 
@@ -133,7 +132,7 @@
 			items.update((i) => i.filter((a) => !a.active));
 		} else {
 			const message = { name: "PAGE_TRASH", item: activeItem };
-			const response = await browser.runtime.sendNativeMessage(message);
+			const response = await sendNativeMessage(message);
 			if (response.error) {
 				log.add(response.error, "error", true);
 			} else {

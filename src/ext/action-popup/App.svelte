@@ -13,6 +13,7 @@
 	import iconClear from "../shared/img/icon-clear.svg?raw";
 	import iconRefresh from "../shared/img/icon-refresh.svg?raw";
 	import { extensionPaths, openExtensionPage } from "../shared/utils.js";
+	import { connectNative, sendNativeMessage } from "../shared/native.js";
 	import * as settingsStorage from "../shared/settings.js";
 
 	let errorNotification;
@@ -59,29 +60,22 @@
 		await settingsStorage.set({ global_active: !active });
 		active = await settingsStorage.get("global_active");
 		// TODO: delete after migrating all related logic on the native
-		browser.runtime.sendNativeMessage({
-			name: "TOGGLE_EXTENSION",
-			active: String(active),
-		});
+		sendNativeMessage({ name: "TOGGLE_EXTENSION", active: String(active) });
 	}
 
-	function updateAll() {
+	async function updateAll() {
 		showUpdates = false;
 		disabled = true;
 		loading = true;
-		browser.runtime.sendNativeMessage(
-			{ name: "POPUP_UPDATE_ALL" },
-			(response) => {
-				if (response.error) {
-					errorNotification = response.error;
-				} else {
-					if (response.items) items = response.items;
-					updates = response.updates;
-				}
-				disabled = false;
-				loading = false;
-			},
-		);
+		const response = await sendNativeMessage({ name: "POPUP_UPDATE_ALL" });
+		if (response.error) {
+			errorNotification = response.error;
+		} else {
+			if (response.items) items = response.items;
+			updates = response.updates;
+		}
+		disabled = false;
+		loading = false;
 	}
 
 	async function updateItem(item) {
@@ -101,7 +95,7 @@
 			url,
 			frameUrls,
 		};
-		const response = await browser.runtime.sendNativeMessage(message);
+		const response = await sendNativeMessage(message);
 		if (response.error) {
 			errorNotification = response.error;
 			showUpdates = false;
@@ -112,46 +106,33 @@
 		disabled = false;
 	}
 
-	function toggleItem(item) {
+	async function toggleItem(item) {
 		if (disabled) return;
 		disabled = true;
-		browser.runtime.sendNativeMessage(
-			{
-				name: "TOGGLE_ITEM",
-				item,
-			},
-			(response) => {
-				if (response.error) {
-					errorNotification = response.error;
-				} else {
-					const i = items.findIndex((el) => el === item);
-					const j = allItems.findIndex((el) => el === item);
-					item.disabled = !item.disabled;
-					items[i] = item;
-					if (j >= 0) allItems[j] = item;
-				}
-				disabled = false;
-			},
-		);
+		const response = await sendNativeMessage({ name: "TOGGLE_ITEM", item });
+		if (response.error) {
+			errorNotification = response.error;
+		} else {
+			const i = items.findIndex((el) => el === item);
+			const j = allItems.findIndex((el) => el === item);
+			item.disabled = !item.disabled;
+			items[i] = item;
+			if (j >= 0) allItems[j] = item;
+		}
+		disabled = false;
 	}
 
-	function checkForUpdates() {
+	async function checkForUpdates() {
 		disabled = true;
 		initError = false;
-		browser.runtime.sendNativeMessage(
-			{
-				name: "POPUP_CHECK_UPDATES",
-			},
-			(response) => {
-				if (response.error) {
-					errorNotification = response.error;
-					showUpdates = false;
-				} else {
-					updates = response.updates;
-				}
-				disabled = false;
-			},
-		);
+		const response = await sendNativeMessage({ name: "POPUP_CHECK_UPDATES" });
+		if (response.error) {
+			errorNotification = response.error;
+			showUpdates = false;
+		} else {
+			updates = response.updates;
+		}
+		disabled = false;
 	}
 
 	function refreshView() {
@@ -221,9 +202,7 @@
 	async function openSaveLocation() {
 		disabled = true;
 		loading = true;
-		const response = await browser.runtime.sendNativeMessage({
-			name: "OPEN_SAVE_LOCATION",
-		});
+		const response = await sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
 		if (response.success) {
 			window.close();
 		} else if (response.items) {
@@ -248,7 +227,7 @@
 		// get platform first since it applies important styling
 		let pltfm;
 		try {
-			pltfm = await browser.runtime.sendNativeMessage({ name: "REQ_PLATFORM" });
+			pltfm = await sendNativeMessage({ name: "REQ_PLATFORM" });
 		} catch (error) {
 			console.error(`Error for pltfm promise: ${error}`);
 			initError = true;
@@ -309,15 +288,13 @@
 				frameUrls.add(frameUrl);
 			}
 		}
-		const message = {
-			name: "POPUP_MATCHES",
-			url,
-			frameUrls: Array.from(frameUrls),
-		};
 		let matches;
 		try {
-			matches = await browser.runtime.sendNativeMessage(message);
-			// response = await browser.runtime.sendMessage(message);
+			matches = await sendNativeMessage({
+				name: "POPUP_MATCHES",
+				url,
+				frameUrls: Array.from(frameUrls),
+			});
 		} catch (error) {
 			console.error(`Error for matches promise: ${error}`);
 			initError = true;
@@ -341,9 +318,7 @@
 				const timestampMs = Date.now();
 				await browser.storage.local.set({ lastUpdateCheck: timestampMs });
 				abort = true;
-				updatesResponse = await browser.runtime.sendNativeMessage({
-					name: "POPUP_UPDATES",
-				});
+				updatesResponse = await sendNativeMessage({ name: "POPUP_UPDATES" });
 			} catch (error) {
 				console.error(`Error for updates promise: ${error}`);
 				initError = true;
@@ -378,7 +353,7 @@
 
 	async function abortUpdates() {
 		// sends message to swift side canceling all URLSession tasks
-		browser.runtime.sendNativeMessage({ name: "CANCEL_REQUESTS" });
+		sendNativeMessage({ name: "CANCEL_REQUESTS" });
 		// timestamp for checking updates happens right before update fetching
 		// that means when this function runs the timestamp has already been saved
 		// reloading the window will essentially skip the update check
@@ -431,7 +406,7 @@
 		// caching script data
 		installUserscript = { url: currentTab.url, content };
 		// send native swift a message, parse metadata and check if installed
-		const response = await browser.runtime.sendNativeMessage({
+		const response = await sendNativeMessage({
 			name: "POPUP_INSTALL_CHECK",
 			content,
 		});
@@ -480,7 +455,7 @@
 			return;
 		}
 		// send native swift a message, which will start the install process
-		const response = await browser.runtime.sendNativeMessage({
+		const response = await sendNativeMessage({
 			name: "POPUP_INSTALL_SCRIPT",
 			content: installUserscript.content,
 		});
@@ -502,7 +477,7 @@
 	});
 
 	// handle native app messages
-	const port = browser.runtime.connectNative();
+	const port = connectNative();
 	port.onMessage.addListener((message) => {
 		// console.info(message); // DEBUG
 		if (message.name === "SAVE_LOCATION_CHANGED") {
@@ -521,7 +496,7 @@
 	/>
 	<IconButton
 		icon={iconUpdate}
-		notification={updates.length}
+		notification={!!updates.length}
 		on:click={() => (showUpdates = true)}
 		title={"Show updates"}
 		{disabled}
