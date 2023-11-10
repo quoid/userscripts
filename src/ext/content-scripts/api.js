@@ -17,7 +17,7 @@ async function getValue(key, defaultValue) {
 	}
 	const sid = this.US_filename;
 	if (typeof sid !== "string" || !sid.length) {
-		return Promise.reject(new Error("setValue invalid call"));
+		return Promise.reject(new Error("getValue invalid call"));
 	}
 	const prefixedKey = `${sid}---${key}`;
 	const results = await browser.storage.local.get(prefixedKey);
@@ -32,7 +32,7 @@ async function deleteValue(key) {
 	}
 	const sid = this.US_filename;
 	if (typeof sid !== "string" || !sid.length) {
-		return Promise.reject(new Error("setValue invalid call"));
+		return Promise.reject(new Error("deleteValue invalid call"));
 	}
 	const prefixedKey = `${sid}---${key}`;
 	return browser.storage.local.remove(prefixedKey);
