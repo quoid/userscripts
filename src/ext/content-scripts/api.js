@@ -21,7 +21,9 @@ async function getValue(key, defaultValue) {
 	}
 	const prefixedKey = `${sid}---${key}`;
 	const results = await browser.storage.local.get(prefixedKey);
-	return results[prefixedKey] ?? defaultValue ?? undefined;
+	if (prefixedKey in results) return results[prefixedKey];
+	if (defaultValue !== undefined) return defaultValue;
+	return undefined;
 }
 
 async function deleteValue(key) {
