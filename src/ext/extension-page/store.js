@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import { uniqueId } from "../shared/utils.js";
 import * as settingsStorage from "../shared/settings.js";
+import { sendNativeMessage } from "../shared/native.js";
 
 function notificationStore() {
 	const { subscribe, update } = writable([]);
@@ -50,8 +51,10 @@ function stateStore() {
 				"updating", // when the file in the editor is being updating
 			];
 			// disallow adding undefined states
-			if (!states.includes(stateModifier))
-				return console.error("invalid state");
+			if (!states.includes(stateModifier)) {
+				console.error("invalid state");
+				return state;
+			}
 			// save pre-changed state to oldState var
 			oldState = [...state];
 			// if current state modifier not present, add it to state array
@@ -97,9 +100,9 @@ function settingsStore() {
 		console.info("store.js settingsStore init", initData, settings);
 		set({ ...initData, ...settings });
 		// sync popup, backgound, etc... settings changes
-		settingsStorage.onChanged((s, area) => {
-			console.info(`store.js storage.${area}.onChanged`, s);
-			update((obj) => Object.assign(obj, s));
+		settingsStorage.onChangedSettings((sets, area) => {
+			console.info(`store.js storage.${area}.onChanged`, sets);
+			update((obj) => Object.assign(obj, sets));
 		});
 	};
 	const reset = async (keys) => {
@@ -115,17 +118,12 @@ function settingsStore() {
 		if (key === "blacklist") {
 			// update blacklist on swift side
 			const message = { name: "PAGE_UPDATE_BLACKLIST", blacklist: value };
-			browser.runtime.sendNativeMessage(message, (response) => {
-				if (response.error) {
-					log.add("Failed to save blacklist to disk", "error", true);
-				}
+			sendNativeMessage(message).then((response) => {
+				response.error && log.add(response.error, "error", true);
 			});
 		}
 		if (key === "active") {
-			browser.runtime.sendNativeMessage({
-				name: "TOGGLE_EXTENSION",
-				active: String(value),
-			});
+			sendNativeMessage({ name: "TOGGLE_EXTENSION", active: String(value) });
 		}
 	};
 	const updateSingleSetting = (key, value) => {

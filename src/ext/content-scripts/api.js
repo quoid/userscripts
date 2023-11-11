@@ -1,132 +1,97 @@
-function setValue(key, value) {
+async function setValue(key, value) {
 	if (typeof key !== "string" || !key.length) {
-		return console.error("setValue invalid key arg");
+		return Promise.reject(new Error("setValue invalid key arg"));
 	}
-	if (value == null) {
-		return console.error("setValue invalid value arg");
+	const sid = this.US_filename;
+	if (typeof sid !== "string" || !sid.length) {
+		return Promise.reject(new Error("setValue invalid call"));
 	}
-	return new Promise((resolve) => {
-		const item = {};
-		item[`${this.US_filename}---${key}`] = value;
-		browser.storage.local.set(item, () => resolve({ success: 1 }));
-	});
+	const item = {};
+	item[`${sid}---${key}`] = value;
+	return browser.storage.local.set(item);
 }
 
-function getValue(key, defaultValue) {
+async function getValue(key, defaultValue) {
 	if (typeof key !== "string" || !key.length) {
-		return console.error("getValue invalid key arg");
+		return Promise.reject(new Error("getValue invalid key arg"));
 	}
-	const prefixedKey = `${this.US_filename}---${key}`;
-	return new Promise((resolve) => {
-		browser.storage.local.get(prefixedKey, (item) => {
-			if (Object.keys(item).length === 0) {
-				if (defaultValue != null) {
-					resolve(defaultValue);
-				} else {
-					resolve(undefined);
-				}
-			} else {
-				resolve(Object.values(item)[0]);
-			}
-		});
-	});
+	const sid = this.US_filename;
+	if (typeof sid !== "string" || !sid.length) {
+		return Promise.reject(new Error("getValue invalid call"));
+	}
+	const prefixedKey = `${sid}---${key}`;
+	const results = await browser.storage.local.get(prefixedKey);
+	if (prefixedKey in results) return results[prefixedKey];
+	if (defaultValue !== undefined) return defaultValue;
+	return undefined;
 }
 
-function deleteValue(key) {
+async function deleteValue(key) {
 	if (typeof key !== "string" || !key.length) {
-		return console.error("deleteValue missing key arg");
+		return Promise.reject(new Error("deleteValue missing key arg"));
 	}
-	return new Promise((resolve) => {
-		const prefixedKey = `${this.US_filename}---${key}`;
-		browser.storage.local.remove(prefixedKey, () => {
-			resolve({ success: 1 });
-		});
-	});
-}
-
-function listValues() {
-	return new Promise((resolve) => {
-		const prefix = `${this.US_filename}---`;
-		const keys = [];
-		browser.storage.local.get().then((items) => {
-			for (const key in items) {
-				if (key.startsWith(prefix)) {
-					const k = key.replace(prefix, "");
-					keys.push(k);
-				}
-			}
-			resolve(keys);
-		});
-	});
-}
-
-function openInTab(url, openInBackground = false) {
-	if (!url) return console.error("openInTab missing url arg");
-	return new Promise((resolve) => {
-		const message = {
-			name: "API_OPEN_TAB",
-			url,
-			active: !openInBackground,
-		};
-		browser.runtime.sendMessage(message, (response) => resolve(response));
-	});
-}
-
-function getTab() {
-	return new Promise((resolve) => {
-		const message = { name: "API_GET_TAB" };
-		browser.runtime.sendMessage(message, (response) => {
-			resolve(response);
-		});
-	});
-}
-
-function saveTab(tab) {
-	if (tab == null) return console.error("saveTab invalid arg");
-	return new Promise((resolve) => {
-		const message = {
-			name: "API_SAVE_TAB",
-			tab,
-		};
-		browser.runtime.sendMessage(message, (response) => {
-			resolve(response);
-		});
-	});
-}
-
-function closeTab(tabId) {
-	return new Promise((resolve) => {
-		const message = {
-			name: "API_CLOSE_TAB",
-			tabId,
-		};
-		browser.runtime.sendMessage(message, (response) => resolve(response));
-	});
-}
-
-function addStyle(css) {
-	if (typeof css !== "string") {
-		return console.error("addStyle invalid css arg");
+	const sid = this.US_filename;
+	if (typeof sid !== "string" || !sid.length) {
+		return Promise.reject(new Error("deleteValue invalid call"));
 	}
-	return new Promise((resolve) => {
-		const message = {
-			name: "API_ADD_STYLE",
-			css,
-		};
-		browser.runtime.sendMessage(message, (response) => resolve(response));
+	const prefixedKey = `${sid}---${key}`;
+	return browser.storage.local.remove(prefixedKey);
+}
+
+async function listValues() {
+	const sid = this.US_filename;
+	if (typeof sid !== "string" || !sid.length) {
+		return Promise.reject(new Error("listValues invalid call"));
+	}
+	const prefix = `${sid}---`;
+	const results = await browser.storage.local.get();
+	const keys = [];
+	for (const key in results) {
+		key.startsWith(prefix) && keys.push(key.slice(prefix.length));
+	}
+	return keys;
+}
+
+async function openInTab(url, openInBackground = false) {
+	try {
+		new URL(url);
+	} catch (error) {
+		return Promise.reject(error);
+	}
+	return browser.runtime.sendMessage({
+		name: "API_OPEN_TAB",
+		url,
+		active: !openInBackground,
 	});
 }
 
-function setClipboard(clipboardData, type) {
-	return new Promise((resolve) => {
-		const message = {
-			name: "API_SET_CLIPBOARD",
-			clipboardData,
-			type,
-		};
-		browser.runtime.sendMessage(message, (response) => {
-			resolve(response);
-		});
+async function getTab() {
+	return browser.runtime.sendMessage({ name: "API_GET_TAB" });
+}
+
+async function saveTab(tab) {
+	if (tab == null) {
+		return Promise.reject(new Error("saveTab invalid arg"));
+	}
+	return browser.runtime.sendMessage({ name: "API_SAVE_TAB", tab });
+}
+
+async function closeTab(tabId) {
+	return browser.runtime.sendMessage({ name: "API_CLOSE_TAB", tabId });
+}
+
+async function addStyle(css) {
+	if (typeof css !== "string" || !css.length) {
+		return Promise.reject(new Error("addStyle invalid css arg"));
+	}
+	return browser.runtime.sendMessage({ name: "API_ADD_STYLE", css });
+}
+
+async function setClipboard(clipboardData, type) {
+	return browser.runtime.sendMessage({
+		name: "API_SET_CLIPBOARD",
+		clipboardData,
+		type,
 	});
 }
 

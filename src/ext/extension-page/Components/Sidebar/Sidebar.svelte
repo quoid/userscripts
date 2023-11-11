@@ -3,6 +3,7 @@
 	import { fade } from "svelte/transition";
 	import { items, log, settings, state } from "../../store.js";
 	import { newScriptDefault, sortBy, uniqueId } from "../../../shared/utils.js";
+	import { sendNativeMessage } from "../../../shared/native.js";
 	import SidebarFilter from "./SidebarFilter.svelte";
 	import IconButton from "../../../shared/Components/IconButton.svelte";
 	import Dropdown from "../../../shared/Components/Dropdown.svelte";
@@ -115,7 +116,7 @@
 		if (!url) return;
 		state.add("fetching");
 		const message = { name: "PAGE_NEW_REMOTE", url };
-		const response = await browser.runtime.sendNativeMessage(message);
+		const response = await sendNativeMessage(message);
 		if (response.error) {
 			log.add(response.error, "error", true);
 		} else {
@@ -139,25 +140,22 @@
 		// disable the checkbox to prevent multiple toggle messages from being sent
 		const input = e.target;
 		input.disabled = true;
-		browser.runtime.sendNativeMessage(
-			{ name: "TOGGLE_ITEM", item },
-			(response) => {
-				if (!response.error) {
-					items.update((allItems) => {
-						const ind = allItems.find((i) => i.filename === item.filename);
-						ind.disabled = !ind.disabled;
-						return allItems;
-					});
-					if (item.request) {
-						// refresh session rules
-						browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
-					}
-				} else {
-					log.add("Failed to toggle item", "error", true);
+		sendNativeMessage({ name: "TOGGLE_ITEM", item }).then((response) => {
+			if (!response.error) {
+				items.update((allItems) => {
+					const ind = allItems.find((i) => i.filename === item.filename);
+					ind.disabled = !ind.disabled;
+					return allItems;
+				});
+				if (item.request) {
+					// refresh session rules
+					browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
 				}
-				input.disabled = false;
-			},
-		);
+			} else {
+				log.add("Failed to toggle item", "error", true);
+			}
+			input.disabled = false;
+		});
 	}
 
 	function warn() {

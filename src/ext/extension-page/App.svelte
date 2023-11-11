@@ -7,6 +7,7 @@
 	import Settings from "./Components/Settings.svelte";
 	import Notification from "./Components/Notification.svelte";
 	import logo from "../shared/img/logo.svg?raw";
+	import { connectNative, sendNativeMessage } from "../shared/native.js";
 
 	const logger = [];
 
@@ -42,25 +43,21 @@
 
 	onMount(async () => {
 		log.add("Requesting initialization data", "info", false);
-		const initData = await browser.runtime.sendNativeMessage({
-			name: "PAGE_INIT_DATA",
-		});
+		const initData = await sendNativeMessage({ name: "PAGE_INIT_DATA" });
 		if (initData.error) return console.error(initData.error);
 		await settings.init(initData);
 		state.add("items-loading");
 		state.remove("init");
 
 		log.add("Requesting all files in save location", "info", false);
-		const files = await browser.runtime.sendNativeMessage({
-			name: "PAGE_ALL_FILES",
-		});
+		const files = await sendNativeMessage({ name: "PAGE_ALL_FILES" });
 		if (files.error) return console.error(files.error);
 		items.set(files);
 		state.remove("items-loading");
 	});
 
 	// handle native app messages
-	const port = browser.runtime.connectNative();
+	const port = connectNative();
 	port.onMessage.addListener((message) => {
 		// console.info(message); // DEBUG
 		if (message.name === "SAVE_LOCATION_CHANGED") {
