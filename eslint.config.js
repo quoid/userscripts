@@ -49,7 +49,23 @@ export default [
 
 	// https://eslint.org/docs/latest/use/configure/migration-guide#configuring-language-options
 	{
-		files: ["src/**/*.{js,svelte}"],
+		files: ["scripts/**/*.js"],
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
+		},
+	},
+	{
+		files: ["src/{app,dev}/**/*.{js,svelte}"],
+		languageOptions: {
+			globals: {
+				...globals.browser,
+			},
+		},
+	},
+	{
+		files: ["src/ext/**/*.{js,svelte}"],
 		languageOptions: {
 			globals: {
 				...globals.browser,
