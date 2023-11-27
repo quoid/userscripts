@@ -8,8 +8,10 @@ if (import.meta.env.MODE === "development") {
 	const modules = import.meta.glob("../shared/dev.js", { eager: true });
 	const browser = modules["../shared/dev.js"]["browser"];
 	console.debug("DEV-ENV", import.meta.env, modules, browser);
-	// assign to window simulation WebExtension APIs
-	window.browser = browser;
+	if (!window?.browser?.extension) {
+		// assign to window simulation WebExtension APIs
+		window.browser = browser;
+	}
 }
 
 const app = new App({

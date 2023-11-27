@@ -470,9 +470,9 @@ const _browser = {
 				new Promise((resolve) => {
 					setTimeout(() => resolve(), _browser.delay);
 				}),
-			onChanged: {
-				addListener: () => undefined,
-			},
+		},
+		onChanged: {
+			addListener: () => undefined,
 		},
 	},
 };
