@@ -13,7 +13,6 @@ dist
 dist-ssr
 build
 built
-*.local
 
 # Logs
 logs
@@ -47,5 +46,9 @@ xcuserdata/
 *.xcuserstate
 *.dev.xcconfig
 XCBuildData
-xcode/**/build/
-xcode/**/dist/
+xcode/Ext-Safari/Resources/
+
+# directories and files
+local
+*.local
+/scripts/*.local.js

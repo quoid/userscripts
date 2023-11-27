@@ -1,0 +1,48 @@
+{
+	"manifest_version": 2,
+	"default_locale": "en",
+	"name": "__MSG_extension_name__",
+	"description": "__MSG_extension_description__",
+	"version": "_VERSION_",
+	"icons": {
+		"48": "images/128.svg",
+		"96": "images/128.svg",
+		"128": "images/128.svg",
+		"256": "images/128.svg",
+		"512": "images/128.svg"
+	},
+	"background": {
+		"scripts": ["dist/background.js"],
+		"persistent": false
+	},
+	"browser_action": {
+		"default_popup": "dist/entry-ext-action-popup.html",
+		"default_icon": "images/action.svg"
+	},
+	"content_scripts": [
+		{
+			"js": ["dist/content-scripts/userscripts.js"],
+			"matches": ["<all_urls>"],
+			"run_at": "document_start",
+			"all_frames": true
+		}
+	],
+	"permissions": [
+		"<all_urls>",
+		"clipboardWrite",
+		"contextMenus",
+		"declarativeNetRequestWithHostAccess",
+		"menus",
+		"nativeMessaging",
+		"scripting",
+		"storage",
+		"tabs",
+		"unlimitedStorage",
+		"webNavigation"
+	],
+	"browser_specific_settings": {
+		"safari": {
+			"strict_min_version": "16.4"
+		}
+	}
+}

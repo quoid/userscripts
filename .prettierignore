@@ -6,7 +6,7 @@
 
 # root
 /package
-/public
+/public/**/vendor
 /etc
 
 # dir

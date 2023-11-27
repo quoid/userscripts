@@ -186,8 +186,8 @@ export const validMetaKeys = new Set([
 ]);
 
 export const extensionPaths = {
-	popup: "/dist/s/entry-ext-action-popup.html",
-	page: "/dist/s/entry-ext-extension-page.html",
+	popup: "/dist/entry-ext-action-popup.html",
+	page: "/dist/entry-ext-extension-page.html",
 };
 
 export async function openExtensionPage() {
