@@ -2,6 +2,7 @@
 	"name": "userscripts",
 	"private": true,
 	"type": "module",
+	"sideEffects": false,
 	"scripts": {
 		"dev": "vite",
 		"dev:ext-safari-mac": "SAFARI_PLATFORM=mac node scripts/dev-ext-safari.js",
