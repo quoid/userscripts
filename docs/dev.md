@@ -35,7 +35,7 @@ Reviewing the template will help you understand the composition of the project.
 - `xcodebuild -scheme Mac` [^1][^2][^3] or build with `Xcode` App
 
 [^1]: These commands can also be executed directly through the vscode tasks. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
-[^2]: Select the corresponding target and platform to build. Please refer to: [/package.json](../package.json) and [xcode-schemes](/xcode/Userscripts.xcodeproj/xcshareddata/xcschemes/)
+[^2]: Select the corresponding target and platform to build. Please refer to: [/package.json](../package.json) and [xcode-schemes](../xcode/Userscripts.xcodeproj/xcshareddata/xcschemes/)
 [^3]: Local setup may be required. Please refer to: [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 # Xcode

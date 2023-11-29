@@ -5,6 +5,9 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
  * About `inline-svg`
  * use `?raw` suffix import svg assets as inline
  * @see {@link https://vitejs.dev/guide/assets.html#importing-asset-as-string}
+ * Ignore lint errors `{@html}`, since these are deterministic local svg resources,
+ * there is no risk of Cross-Site Scripting (XSS) attacks and can be safely disabled.
+ * @see {@link https://sveltejs.github.io/eslint-plugin-svelte/rules/no-at-html-tags/}
  */
 
 /**
