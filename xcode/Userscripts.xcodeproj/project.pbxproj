@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		030C64F62AC62CC900548FBD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 030C64F52AC62CC900548FBD /* Settings.bundle */; };
 		030C64FC2AD0B24C00548FBD /* Initialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030C64FB2AD0B24C00548FBD /* Initialization.swift */; };
+		030FCAD42B182008004D13CD /* UrlCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030FCAD32B182008004D13CD /* UrlCodecTests.swift */; };
+		030FCADC2B189AAB004D13CD /* UrlPolyfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030FCAD52B1851F8004D13CD /* UrlPolyfill.swift */; };
+		030FCADD2B18BF70004D13CD /* UrlPolyfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030FCAD52B1851F8004D13CD /* UrlPolyfill.swift */; };
+		030FCADF2B18BF72004D13CD /* UrlPolyfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030FCAD52B1851F8004D13CD /* UrlPolyfill.swift */; };
 		0336619F294DF7C900CFE179 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0336619E294DF7C900CFE179 /* Functions.swift */; };
 		033661A529510B7900CFE179 /* View.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 033661A329510B7900CFE179 /* View.storyboard */; };
 		039F59532AD9591C002E9977 /* dist in Resources */ = {isa = PBXBuildFile; fileRef = 039F59522AD9591C002E9977 /* dist */; };
@@ -102,6 +106,8 @@
 /* Begin PBXFileReference section */
 		030C64F52AC62CC900548FBD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		030C64FB2AD0B24C00548FBD /* Initialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Initialization.swift; sourceTree = "<group>"; };
+		030FCAD32B182008004D13CD /* UrlCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlCodecTests.swift; sourceTree = "<group>"; };
+		030FCAD52B1851F8004D13CD /* UrlPolyfill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlPolyfill.swift; sourceTree = "<group>"; };
 		0336619E294DF7C900CFE179 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		033661A429510B7900CFE179 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/View.storyboard; sourceTree = "<group>"; };
 		039F59522AD9591C002E9977 /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
@@ -208,6 +214,7 @@
 			isa = PBXGroup;
 			children = (
 				4A143AAB279DE6FF0029BFD0 /* UserscriptsTests.swift */,
+				030FCAD32B182008004D13CD /* UrlCodecTests.swift */,
 			);
 			path = "Tests-Mac";
 			sourceTree = "<group>";
@@ -313,6 +320,7 @@
 			children = (
 				78B25582299D4C27000B2E9B /* Utilities.swift */,
 				03C24F962ABD2CBB00F130F9 /* Preferences.swift */,
+				030FCAD52B1851F8004D13CD /* UrlPolyfill.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -595,6 +603,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				7878ED24299BA27B00E36A24 /* SafariWebExtensionHandler.swift in Sources */,
+				030FCADC2B189AAB004D13CD /* UrlPolyfill.swift in Sources */,
+				030FCAD42B182008004D13CD /* UrlCodecTests.swift in Sources */,
 				4A143AB2279DEA170029BFD0 /* Functions.swift in Sources */,
 				03C24F9B2ABD2CBB00F130F9 /* Preferences.swift in Sources */,
 				78B25587299D4C27000B2E9B /* Utilities.swift in Sources */,
@@ -622,6 +632,7 @@
 			files = (
 				78B25586299D4C27000B2E9B /* Utilities.swift in Sources */,
 				4A301B2A270A474400C7E9E1 /* SafariWebExtensionHandler.swift in Sources */,
+				030FCADD2B18BF70004D13CD /* UrlPolyfill.swift in Sources */,
 				03C24F9A2ABD2CBB00F130F9 /* Preferences.swift in Sources */,
 				4A301B32270A49F200C7E9E1 /* Functions.swift in Sources */,
 			);
@@ -645,6 +656,7 @@
 			files = (
 				78B25584299D4C27000B2E9B /* Utilities.swift in Sources */,
 				4A57BA08227235CE008A9763 /* SafariWebExtensionHandler.swift in Sources */,
+				030FCADF2B18BF72004D13CD /* UrlPolyfill.swift in Sources */,
 				03C24F982ABD2CBB00F130F9 /* Preferences.swift in Sources */,
 				4AED6492268CDB58001794BF /* Functions.swift in Sources */,
 			);
