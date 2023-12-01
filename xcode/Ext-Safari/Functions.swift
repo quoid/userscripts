@@ -887,7 +887,12 @@ func getRemoteFileContents(_ url: String) -> String? {
         if let r = response as? HTTPURLResponse, data != nil, error == nil {
             if r.statusCode == 200 {
                 contents = String(data: data!, encoding: .utf8) ?? ""
+            } else {
+                logger?.error("\(#function, privacy: .public) - http statusCode (\(r.statusCode, privacy: .public)): \(url, privacy: .public)")
             }
+        }
+        if let error = error {
+            logger?.error("\(#function, privacy: .public) - task error: \(error.localizedDescription, privacy: .public) (\(url, privacy: .public))")
         }
         semaphore.signal()
     }
@@ -895,6 +900,7 @@ func getRemoteFileContents(_ url: String) -> String? {
     // wait 30 seconds before timing out
     if semaphore.wait(timeout: .now() + 30) == .timedOut {
         task?.cancel()
+        logger?.error("\(#function, privacy: .public) - 30 seconds timeout: \(url, privacy: .public)")
     }
 
     // if made it to this point and contents still an empty string, something went wrong with the request

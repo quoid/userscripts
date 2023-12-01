@@ -74,15 +74,19 @@ class UserscriptsTests: XCTestCase {
     }
     
     func testGetRemoteFileContents() throws {
-        let urls = [
+        var urls:[String] = [
             "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect%20外链跳转.user.js",
             "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js",
             "https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=",
             "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js",
             "https://cdn.frankerfacez.com/static/ffz_injector.user.js",
-            "https://☁️.com/", // punycode domian
             "http://www.k21p.com/example.user.js" // add http protocol
         ]
+        if #available(macOS 14.0, iOS 17.0, *) {
+            urls += [
+                "https://☁️.com/", // IDN / Non-Punycode-encoded domain name
+            ]
+        }
         for url in urls {
             if getRemoteFileContents(url) == nil {
                 print(#function, url)
