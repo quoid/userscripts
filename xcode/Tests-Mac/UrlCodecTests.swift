@@ -83,7 +83,7 @@ final class UrlCodecTests: XCTestCase {
             "hash": "#id",
             "host": "host",
             "hostname": "host",
-//            "href": "http://user:password@host/path?q=1#id",
+            // "href": "http://user:password@host/path?q=1#id",
             "origin": "http://host",
             "password": "password",
             "pathname": "/path",
@@ -97,7 +97,7 @@ final class UrlCodecTests: XCTestCase {
             "hash": "#id",
             "host": "host.test:8080",
             "hostname": "host.test",
-//            "href": "http://host.test:8080/path?#id",
+            // "href": "http://host.test:8080/path?#id",
             "origin": "http://host.test:8080",
             "password": "",
             "pathname": "/path",
@@ -111,7 +111,7 @@ final class UrlCodecTests: XCTestCase {
             "hash": "",
             "host": "host.test:8080",
             "hostname": "host.test",
-//            "href": "http://host.test:8080/path?",
+            // "href": "http://host.test:8080/path?",
             "origin": "http://host.test:8080",
             "password": "",
             "pathname": "/path",
@@ -125,7 +125,7 @@ final class UrlCodecTests: XCTestCase {
             "hash": "#id",
             "host": "host.test",
             "hostname": "host.test",
-//            "href": "http://host.test/path#id",
+            // "href": "http://host.test/path#id",
             "origin": "http://host.test",
             "password": "",
             "pathname": "/path",
@@ -139,7 +139,7 @@ final class UrlCodecTests: XCTestCase {
             "hash": "",
             "host": "host.test",
             "hostname": "host.test",
-//            "href": "http://host.test/path",
+            // "href": "http://host.test/path",
             "origin": "http://host.test",
             "password": "",
             "pathname": "/path",
@@ -153,7 +153,7 @@ final class UrlCodecTests: XCTestCase {
             "hash": "",
             "host": "host.test",
             "hostname": "host.test",
-//            "href": "http://host.test/",
+            // "href": "http://host.test/",
             "origin": "http://host.test",
             "password": "",
             "pathname": "/",
@@ -163,12 +163,12 @@ final class UrlCodecTests: XCTestCase {
             "username": ""
         ]))
         
-        XCTAssert(check("https://用户名:密码@中.文:80/path/中%E6%96%87/?a=中&b=%E6%96%87&c#中文", [
+        XCTAssert(check("https://用户名:密码@host.test:80/path/中%E6%96%87/?a=中&b=%E6%96%87&c#中文", [
             "hash": "#%E4%B8%AD%E6%96%87",
-            "host": "xn--fiq.xn--7dv:80",
-            "hostname": "xn--fiq.xn--7dv",
-//            "href": "https://%E7%94%A8%E6%88%B7%E5%90%8D:%E5%AF%86%E7%A0%81@xn--fiq.xn--7dv:80/path/%E4%B8%AD%E6%96%87/?a=%E4%B8%AD&b=%E6%96%87&c#%E4%B8%AD%E6%96%87",
-            "origin": "https://xn--fiq.xn--7dv:80",
+            "host": "host.test:80",
+            "hostname": "host.test",
+            // "href": "https://%E7%94%A8%E6%88%B7%E5%90%8D:%E5%AF%86%E7%A0%81@host.test:80/path/%E4%B8%AD%E6%96%87/?a=%E4%B8%AD&b=%E6%96%87&c#%E4%B8%AD%E6%96%87",
+            "origin": "https://host.test:80",
             "password": "%E5%AF%86%E7%A0%81",
             "pathname": "/path/%E4%B8%AD%E6%96%87/",
             "port": "80",
@@ -176,7 +176,23 @@ final class UrlCodecTests: XCTestCase {
             "search": "?a=%E4%B8%AD&b=%E6%96%87&c",
             "username": "%E7%94%A8%E6%88%B7%E5%90%8D"
         ]))
+        
+        if #available(macOS 14.0, iOS 17.0, *) {
+            XCTAssert(check("https://用户名:密码@中.文:80/path/中%E6%96%87/?a=中&b=%E6%96%87&c#中文", [
+                "hash": "#%E4%B8%AD%E6%96%87",
+                "host": "xn--fiq.xn--7dv:80",
+                "hostname": "xn--fiq.xn--7dv",
+                // "href": "https://%E7%94%A8%E6%88%B7%E5%90%8D:%E5%AF%86%E7%A0%81@xn--fiq.xn--7dv:80/path/%E4%B8%AD%E6%96%87/?a=%E4%B8%AD&b=%E6%96%87&c#%E4%B8%AD%E6%96%87",
+                "origin": "https://xn--fiq.xn--7dv:80",
+                "password": "%E5%AF%86%E7%A0%81",
+                "pathname": "/path/%E4%B8%AD%E6%96%87/",
+                "port": "80",
+                "protocol": "https:",
+                "search": "?a=%E4%B8%AD&b=%E6%96%87&c",
+                "username": "%E7%94%A8%E6%88%B7%E5%90%8D"
+            ]))
+        }
 
-    }
+    } // testJsLikeURL() -> END
 
 }

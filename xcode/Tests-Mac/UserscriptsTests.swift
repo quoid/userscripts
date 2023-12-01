@@ -80,6 +80,7 @@ class UserscriptsTests: XCTestCase {
             "https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=",
             "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js",
             "https://cdn.frankerfacez.com/static/ffz_injector.user.js",
+            "https://☁️.com/", // punycode domian
             "http://www.k21p.com/example.user.js" // add http protocol
         ]
         for url in urls {
@@ -123,7 +124,8 @@ class UserscriptsTests: XCTestCase {
             "*://*/*": [
                 "https://www.bing.com/",
                 "https://example.org/foo/bar.html",
-                "https://a.org/some/path/"
+                "https://a.org/some/path/",
+                "https://☁️.com/"
             ],
             "*://*.mozilla.org/*": [
                 "http://mozilla.org/",
