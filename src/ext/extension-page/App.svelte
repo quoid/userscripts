@@ -1,5 +1,5 @@
 <script>
-	import { onMount, tick } from "svelte";
+	import { onMount } from "svelte";
 	import { blur } from "svelte/transition";
 	import { items, log, notifications, settings, state } from "./store.js";
 	import Sidebar from "./Components/Sidebar/Sidebar.svelte";
@@ -25,20 +25,13 @@
 			return e.preventDefault();
 		}
 	}
-	// app proportions can get messed up when opening/closing new tabs
-	async function windowResize() {
-		document.documentElement.style.height = "100vh";
-		// if tick is omitted, the style change won't apply
-		await tick();
-		document.documentElement.removeAttribute("style");
-	}
 
 	// currently inactive, but could be used to globally prevent auto text replacement in app
 	// function preventAutoTextReplacements(e) {
-	//     if (e.inputType === "insertReplacementText" && e.data === ". ") {
-	//         e.preventDefault();
-	//         e.target.value += " ";
-	//     }
+	// 	if (e.inputType === "insertReplacementText" && e.data === ". ") {
+	// 		e.preventDefault();
+	// 		e.target.value += " ";
+	// 	}
 	// }
 
 	onMount(async () => {
@@ -66,7 +59,7 @@
 	});
 </script>
 
-<svelte:window on:keydown={preventKeyCommands} on:resize={windowResize} />
+<svelte:window on:keydown={preventKeyCommands} />
 
 {#if $state.includes("init")}
 	<div class="initializer" out:blur={{ duration: 350 }}>
