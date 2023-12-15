@@ -406,10 +406,10 @@
 
 <textarea bind:this={textarea}></textarea>
 <!--
-    dynamically add search component, since it requires instance to function
-    if instance is passed to component before instance is set (init is called in Editor component)
-    instance will remain undefined, which would require importing cmGetInstance in search component
-    and creating circular dependency
+	dynamically add search component, since it requires instance to function
+	if instance is passed to component before instance is set (init is called in Editor component)
+	instance will remain undefined, which would require importing cmGetInstance in search component
+	and creating circular dependency
 -->
 {#if instance}
 	<svelte:component
@@ -420,3 +420,9 @@
 		{instance}
 	/>
 {/if}
+
+<style>
+	:global(.CodeMirror-scroll) {
+		overscroll-behavior: none;
+	}
+</style>
