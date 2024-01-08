@@ -1,0 +1,207 @@
+{
+	"extension_description": {
+		"message": "用户脚本和样式管理器",
+		"description": "Description of what the extension does."
+	},
+	"settings": {
+		"message": "设置"
+	},
+	"settings_section_editor": {
+		"message": "编辑器设置"
+	},
+	"settings_section_general": {
+		"message": "通用设置"
+	},
+	"settings_section_native": {
+		"message": "本地设置"
+	},
+	"settings_section_about": {
+		"message": "关于"
+	},
+	"settings_editor_auto_hint": {
+		"message": "自动提示（Hint）"
+	},
+	"settings_editor_auto_hint_desc": {
+		"message": "编辑时自动显示完成提示"
+	},
+	"settings_editor_close_brackets": {
+		"message": "自动关闭括号"
+	},
+	"settings_editor_close_brackets_desc": {
+		"message": "在编辑器中启用自动关闭括号，这会影响以下字符：() [] {} \"\" ''"
+	},
+	"settings_editor_javascript_lint": {
+		"message": "Javascript Linter"
+	},
+	"settings_editor_javascript_lint_desc": {
+		"message": "在编辑器中启用基本的 Javascript linting 检查"
+	},
+	"settings_editor_list_descriptions": {
+		"message": "显示列表项目描述"
+	},
+	"settings_editor_list_descriptions_desc": {
+		"message": "显示或隐藏侧边栏中的用户脚本项目描述"
+	},
+	"settings_editor_list_sort": {
+		"message": "项目排序顺序"
+	},
+	"settings_editor_list_sort_desc": {
+		"message": "侧栏中项目的显示顺序"
+	},
+	"settings_editor_list_sort_nameAsc": {
+		"message": "项目名称: 升序"
+	},
+	"settings_editor_list_sort_nameDesc": {
+		"message": "项目名称: 降序"
+	},
+	"settings_editor_list_sort_lastModifiedAsc": {
+		"message": "最后修改: 升序"
+	},
+	"settings_editor_list_sort_lastModifiedDesc": {
+		"message": "最后修改: 降序"
+	},
+	"settings_editor_show_whitespace": {
+		"message": "显示空白字符"
+	},
+	"settings_editor_show_whitespace_desc": {
+		"message": "切换编辑器中不可见字符的显示"
+	},
+	"settings_editor_tab_size": {
+		"message": "制表符大小"
+	},
+	"settings_editor_tab_size_desc": {
+		"message": "选择渲染代码时制表符等于的空格数"
+	},
+	"settings_global_active": {
+		"message": "启用注入"
+	},
+	"settings_global_active_desc": {
+		"message": "全局脚本注入的开启或关闭"
+	},
+	"settings_global_exclude_match": {
+		"message": "全局排除匹配模式列表"
+	},
+	"settings_global_exclude_match_desc": {
+		"message": "此输入接受以空白符（空格、换行等）分隔的 @match 模式列表，与此列表中的模式匹配的页面 URL 将在脚本注入时被忽略"
+	},
+	"settings_global_exclude_match_saving": {
+		"message": "保存中..."
+	},
+	"settings_global_exclude_match_placeholder": {
+		"message": "@match 模式列表，例如：\n*://*/*foo.bar\n*://*/*foo.bar?*\n*://*.example.net/*\nhttps://example.net/*/foo/*/\nhttps://*.example.net/a/b/c/?foo=/"
+	},
+	"settings_global_exclude_match_refer": {
+		"message": "匹配模式结构请参考："
+	},
+	"settings_global_scripts_update_check": {
+		"message": "全局脚本更新检查"
+	},
+	"settings_global_scripts_update_check_desc": {
+		"message": "是否开启全局定期脚本更新检查"
+	},
+	"settings_scripts_settings": {
+		"message": "脚本更新检查激活"
+	},
+	"settings_scripts_settings_desc": {
+		"message": "是否开启单个脚本更新检查"
+	},
+	"settings_scripts_update_automation": {
+		"message": "自动更新脚本"
+	},
+	"settings_scripts_update_automation_desc": {
+		"message": "脚本在后台静默自动更新，这是危险的，可能引入未经确认的恶意代码"
+	},
+	"settings_scripts_update_check_interval": {
+		"message": "脚本更新检查间隔"
+	},
+	"settings_scripts_update_check_interval_desc": {
+		"message": "脚本在后台检查更新的间隔时间（天）"
+	},
+	"settings_scripts_update_check_interval_0": {
+		"message": "从不"
+	},
+	"settings_scripts_update_check_lasttime": {
+		"message": "脚本更新上次检查时间"
+	},
+	"settings_scripts_update_check_lasttime_desc": {
+		"message": "后台脚本更新上次检查时间"
+	},
+	"settings_settings_sync": {
+		"message": "同步设置"
+	},
+	"settings_settings_sync_desc": {
+		"message": "跨设备同步设置"
+	},
+	"settings_toolbar_badge_count": {
+		"message": "工具栏图标显示计数徽章"
+	},
+	"settings_toolbar_badge_count_desc": {
+		"message": "在工具栏图标上显示一个徽章，其中的数字代表有多少个已启用的脚本与您所在页面的 URL 匹配"
+	},
+	"settings_scripts_directory": {
+		"message": "保存位置"
+	},
+	"settings_scripts_directory_desc": {
+		"message": "存储用户脚本的文件夹路径"
+	},
+	"settings_set_scripts_directory": {
+		"message": "更改保存位置"
+	},
+	"settings_about_text1": {
+		"message": "获取有关此扩展的更多信息，请访问本开源项目："
+	},
+	"settings_about_text2": {
+		"message": "如果您喜欢使用此扩展，请考虑在 App Store 上留下您的评论或注册 Beta 测试新版本："
+	},
+	"settings_about_button_repo": {
+		"message": "代码库"
+	},
+	"settings_about_button_docs": {
+		"message": "文档"
+	},
+	"settings_about_button_issues": {
+		"message": "报告错误"
+	},
+	"settings_about_button_store": {
+		"message": "在 App Store 中打开"
+	},
+	"settings_about_button_beta": {
+		"message": "注册 Beta 测试版"
+	},
+	"utils_check_match_patterns_1": {
+		"message": "这 scheme 部分应当为 *、https、http 之一"
+	},
+	"utils_check_match_patterns_2": {
+		"message": "这 scheme 和 host 部分应当用 `://` 分隔"
+	},
+	"utils_check_match_patterns_3": {
+		"message": "匹配模式缺少 path 部分（至少应当有`/`)"
+	},
+	"utils_check_match_patterns_4": {
+		"message": "这 `*.` 后面应当跟随主机名的一部分"
+	},
+	"utils_check_match_patterns_5": {
+		"message": "这 host 部分长度应当为 1-255"
+	},
+	"utils_check_match_patterns_6": {
+		"message": "这 `*` 应该是独立的或者为 `*.` 在开头"
+	},
+	"utils_check_match_patterns_7": {
+		"message": "这 host 部分包含一个或多个空标签"
+	},
+	"utils_check_match_patterns_8": {
+		"message": "主机名标签不能以 `-` 字符开头或结尾"
+	},
+	"utils_check_match_patterns_9": {
+		"message": "主机名标签最大长度不能超过 63"
+	},
+	"utils_check_match_patterns_10": {
+		"message": "这 host 部分包含无效字符：$1"
+	},
+	"utils_check_match_patterns_11": {
+		"message": "这 path 部分包含无效字符：$1"
+	},
+	"msg_invalid_match_pattern": {
+		"message": "无效的匹配模式"
+	}
+}

@@ -147,6 +147,184 @@ export function parseMetadata(text) {
 	return metadata;
 }
 
+/**
+ * @param {string} input a match pattern
+ * @typedef {string} value - the match pattern
+ * @typedef {Object} parsedItem - parsed result
+ * @property {string} start - leading whitespace
+ * @property {string} separ - separator whitespace
+ * @property {value} value - the match pattern
+ * @property {boolean} error - the match pattern valid or not
+ * @property {string} point - invalid point or error message
+ * @returns {{error: boolean, items: parsedItem[], values: value[]}}
+ */
+export function parseMatchPatterns(input) {
+	if (typeof input !== "string") return;
+	const result = {
+		error: false,
+		items: [],
+		values: [],
+	};
+	// match the separated values from input string
+	const matches = input.matchAll(
+		/(?<start>^\s*|)(?<value>\S+?)(?<separ>\s+|$)/g,
+	);
+	for (const match of matches) {
+		const item = checkMatchPatterns(match.groups.value);
+		// setting the global error indicator
+		if (item.error === true) {
+			result.error = true;
+		}
+		result.items.push({ ...match.groups, ...item });
+		result.values.push(item.value.toLowerCase());
+	}
+	return result;
+}
+
+/**
+ * @param {string} input whitespace separated list of match patterns
+ * @typedef {Object} checkedItem - checked result
+ * @property {string} value - the match pattern with fixes
+ * @property {boolean} error - the match pattern valid or not
+ * @property {string} point - invalid point or error message
+ * @returns {checkedItem}
+ */
+export function checkMatchPatterns(input) {
+	if (typeof input !== "string") return;
+	const result = {
+		value: input,
+		error: true,
+		point: "",
+	};
+	if (input === "<all_urls>") {
+		result.error = false;
+		result.value = "*://*/*";
+		return result;
+	}
+	let scheme, host, path;
+	/** check scheme component */
+	if (input.slice(0, 5).toLowerCase() === "https") {
+		scheme = input.slice(0, 5);
+	} else if (input.slice(0, 4).toLowerCase() === "http") {
+		scheme = input.slice(0, 4);
+	} else if (input.startsWith("*")) {
+		scheme = "*";
+	} else {
+		// The scheme component should one of *, https, http
+		result.point = gl("utils_check_match_patterns_1");
+		return result;
+	}
+	/** check :// separator */
+	if (input.slice(scheme.length, scheme.length + 3) !== "://") {
+		// The scheme and host should separated by `://`
+		result.point = gl("utils_check_match_patterns_2");
+		return result;
+	}
+	// separate host and path
+	const array = input.slice(scheme.length + 3).split("/");
+	if (array.length < 2) {
+		// The match pattern has no path component
+		result.point = gl("utils_check_match_patterns_3");
+		return result;
+	}
+	host = array[0];
+	path = "/" + array.slice(1).join("/");
+	/** check host component */
+	if (host === "*.") {
+		// The `*.` should followed by part of the hostname
+		result.point = gl("utils_check_match_patterns_4");
+		return result;
+	}
+	// allow fully qualified domain name (FQDN)
+	if (host.at(-1) === ".") host = host.slice(0, -1);
+	if (host.length < 1 || 255 - 1 < host.length) {
+		// The host component length should be 1-255
+		result.point = gl("utils_check_match_patterns_5");
+		return result;
+	}
+	let labels = []; // domain labels
+	let hostPart = ""; // rest part that exclude wildcard
+	if (host.startsWith("*.")) {
+		hostPart = host.slice(2);
+		labels = hostPart.split(".");
+	} else if (host !== "*") {
+		hostPart = host;
+		labels = host.split(".");
+	}
+	if (hostPart.includes("*")) {
+		// The `*` should be independent or `*.` at the start
+		result.point = gl("utils_check_match_patterns_6");
+		return result;
+	}
+	for (const label of labels) {
+		if (label.length === 0) {
+			// The host component contains empty label(s)
+			result.point = gl("utils_check_match_patterns_7");
+			return result;
+		}
+		if (label.startsWith("-") || label.endsWith("-")) {
+			// The label cannot start or end with `-` character
+			result.point = gl("utils_check_match_patterns_8");
+			return result;
+		}
+		if (label.length > 63) {
+			// The maximum length of the label cannot exceed 63
+			result.point = gl("utils_check_match_patterns_9");
+			return result;
+		}
+	}
+	// allowed character set of host component
+	const hostInvalidMatches = hostPart.match(/[^A-Za-z0-9.-]/g);
+	if (hostInvalidMatches) {
+		const characters = hostInvalidMatches.join("");
+		// The host component contains invalid character(s): ${c}
+		result.point = gl("utils_check_match_patterns_10", characters);
+		return result;
+	}
+	/** check path component */
+	// allowed character set of path component
+	const pathInvalidMatches = path.match(
+		/[^\w\]\\!$%&'()*+,./:;=?@[^`{|}~-]/g, // toolsGetValidPathCharacters
+	);
+	if (pathInvalidMatches) {
+		const characters = pathInvalidMatches.join("");
+		// The path component contains invalid character(s): ${c}
+		result.point = gl("utils_check_match_patterns_11", characters);
+		return result;
+	}
+	result.error = false;
+	return result;
+}
+
+/** Generate valid path characters in browser js runtime */
+export function toolsGetValidPathCharacters() {
+	const set = new Set();
+	for (let i = 32; i < 128; i++) set.add(String.fromCharCode(i));
+	set.delete("?");
+	set.delete("#");
+	const p = [...set].join("");
+	set.delete("=");
+	set.delete("&");
+	const s = [...set].join("");
+	const url = new URL(`https://host/${p}?1=${s}&${s}=2`);
+	const possibles = [...url.pathname, ...url.search];
+	const characters = [...new Set(possibles)].sort().join("");
+	const symbols = characters.match(/[^\w]/g).join("");
+	return {
+		characters,
+		symbols,
+		restr: `/\\w${symbols.replace(/[\^[\]-]/g, "\\$&")}]/`,
+	};
+}
+
+/**
+ * get lang
+ * @param {string} n messageName
+ * @param {string | string[]} s substitutions
+ * const gl = browser.i18n.getMessage; // issue: safari return `undefined`
+ */
+export const gl = (n, s = undefined) => browser.i18n.getMessage(n, s);
+
 export const validGrants = new Set([
 	"GM.info",
 	"GM_info",
