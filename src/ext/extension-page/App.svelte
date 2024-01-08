@@ -5,6 +5,7 @@
 	import Sidebar from "./Components/Sidebar/Sidebar.svelte";
 	import Editor from "./Components/Editor/Editor.svelte";
 	import Settings from "./Components/Settings.svelte";
+	import ModalWrapper from "./Components/ModalWrapper.svelte";
 	import Notification from "./Components/Notification.svelte";
 	import logo from "../shared/img/logo.svg?raw";
 	import { connectNative, sendNativeMessage } from "../shared/native.js";
@@ -47,16 +48,19 @@
 		if (files.error) return console.error(files.error);
 		items.set(files);
 		state.remove("items-loading");
+		state.loadUrlState();
 	});
 
 	// handle native app messages
-	const port = connectNative();
-	port.onMessage.addListener((message) => {
+	const nativePort = connectNative();
+	nativePort.onMessage.addListener((message) => {
 		// console.info(message); // DEBUG
 		if (message.name === "SAVE_LOCATION_CHANGED") {
 			window.location.reload();
 		}
 	});
+
+	const settingsProps = { nativePort, platform: "macos" };
 </script>
 
 <svelte:window on:keydown={preventKeyCommands} />
@@ -81,7 +85,13 @@
 		<Notification on:click={() => notifications.remove(item.id)} {item} />
 	{/each}
 </ul>
-{#if $state.includes("settings")}<Settings />{/if}
+{#if $state.includes("settings")}
+	<ModalWrapper
+		component={Settings}
+		componentProps={settingsProps}
+		closeHandler={() => state.remove("settings")}
+	/>
+{/if}
 
 <style>
 	.initializer {
