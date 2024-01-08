@@ -11,6 +11,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	@IBOutlet weak var enbaleNativeLogger: NSMenuItem!
 
 	@objc func handleGetURL(event: NSAppleEventDescriptor, replyEvent: NSAppleEventDescriptor) {
+		// issue: https://developer.apple.com/forums/thread/697217
+//		sendExtensionMessage(name: "URL_SCHEME_STARTED")
 		// if open panel is already open, stop processing the URL scheme
 		if NSApplication.shared.keyWindow?.accessibilityIdentifier() == "open-panel" { return }
 		// handle URL scheme

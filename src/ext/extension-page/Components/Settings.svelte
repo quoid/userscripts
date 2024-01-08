@@ -1,341 +1,477 @@
 <script>
-	import { fade, fly } from "svelte/transition";
-	import { settings, state, log } from "../store.js";
-	import { openInBlank } from "../../shared/utils.js";
+	import { settingsDictionary } from "../../shared/settings.js";
+	import { settings, log } from "../store.js";
+	import { parseMatchPatterns, openInBlank, gl } from "../../shared/utils.js";
 	import { sendNativeMessage } from "../../shared/native.js";
-	import IconButton from "../../shared/Components/IconButton.svelte";
 	import Toggle from "../../shared/Components/Toggle.svelte";
-	import iconLoader from "../../shared/img/icon-loader.svg?raw";
-	import iconClose from "../../shared/img/icon-close.svg?raw";
+	import IconButton from "../../shared/Components/IconButton.svelte";
 	import iconEdit from "../../shared/img/icon-edit.svg?raw";
+	import iconLoader from "../../shared/img/icon-loader.svg?raw";
 
-	// bound to blacklist textarea element, to easily get value when saving
-	let blacklist;
-	// indicates that a blacklist save has initiated
-	let blacklistSaving = false;
-	// indicates that a blacklist value has error
-	let blacklistError = false;
+	/** @type {"macos"|"ios"} - native message port */
+	export let platform;
+	/** @type {import("webextension-polyfill").Runtime.Port} - native message port */
+	export let nativePort = undefined;
 
-	// the saved blacklisted domain patterns
-	$: blacklisted = $settings.blacklist.join(", ");
+	const items = Object.values(settingsDictionary);
 
-	function saveBlacklist() {
-		// get the comma separated values from blacklist input
-		const val = [
-			...new Set(
-				blacklist.value
-					.split(",")
-					.map((item) => item.trim())
-					.filter((n) => n),
-			),
-		];
-
-		// check if val matches `match patterns`, if not, return a warning
-		const re =
-			/^(http:|https:|\*:)\/\/((?:\*\.)?(?:[a-z0-9-]+\.)+(?:[a-z0-9]+)|\*\.[a-z]+|\*|[a-z0-9]+)(\/[^\s]*)$/;
-		blacklistError = false;
-		for (const v of val) {
-			if (re.exec(v) === null) {
-				blacklistError = true;
-				log.add(`Invalid match pattern: ${v}`, "error", true);
-			}
-		}
-		if (blacklistError)
-			return console.warn("Global exclude includes invalid match patterns");
-
-		// compare blacklist input to saved blacklist
-		if (
-			[...val].sort().toString() !== [...$settings.blacklist].sort().toString()
-		) {
-			settings.updateSingleSetting("blacklist", val);
-			// when blacklistSaving, visual indication of saving occurs on element
-			// the visual save indication is mostly ux only indicates a setting save was attempted
-			// remove visual indication arbitrarily
-			blacklistSaving = true;
-			setTimeout(() => (blacklistSaving = false), 1000);
-		}
+	/** @type {("general"|"editor")[]} settings group names */
+	let groups = ["general", "editor"];
+	if (platform === "ios") {
+		groups = ["general"];
 	}
 
-	// updates the individual setting in the settings store
-	function update(name, value) {
-		settings.updateSingleSetting(name, value);
+	/**
+	 * @param {typeof groups[number]} groupName settings group name
+	 * @returns setting items for the specified group
+	 */
+	const groupItems = (groupName) => {
+		// show disabled setting items only in development mode
+		if (import.meta.env.MODE === "development") {
+			return items.filter(
+				(i) => i.group === groupName && platform in i.platforms,
+			);
+		} else {
+			return items.filter(
+				(i) => i.group === groupName && platform in i.platforms && !i.disable,
+			);
+		}
+	};
+
+	const indicators = {
+		warn: {},
+		error: {},
+		saving: {},
+		loading: {},
+	};
+
+	// indicates that a global exclude match save has initiated
+	indicators.saving["global_exclude_match"] = false;
+	// indicates that a global exclude match value has error
+	indicators.error["global_exclude_match"] = false;
+
+	// global exclude match (gem)
+	let gemRender;
+	let gemTextarea;
+	let gemStyleHeight;
+	let gemStyleOpacity;
+	let gemValue = $settings["global_exclude_match"].join("\n");
+	$: gemParsed = parseMatchPatterns(gemValue);
+
+	function saveGlobalExcludeMatch() {
+		const result = gemParsed;
+		// update indicator
+		indicators.error["global_exclude_match"] = result.error;
+		// check if input matches `match patterns`, if not, return a warning
+		for (const item of result.items) {
+			if (item.error) {
+				log.add(
+					`${gl("msg_invalid_match_pattern")}: ${item.value}\n${item.point}`,
+					"error",
+					true,
+				);
+			}
+		}
+		if (indicators.error["global_exclude_match"]) {
+			return console.warn("Global exclude includes invalid match patterns");
+		}
+
+		// when global exclude match saving, visual indication of saving occurs on element
+		// the visual save indication is mostly ux only indicates a setting save was attempted
+		// remove visual indication arbitrarily
+		indicators.saving["global_exclude_match"] = true;
+		setTimeout(() => (indicators.saving["global_exclude_match"] = false), 100);
+
+		// compare global exclude match input to saved value
+		/** @param {Array} a @param {Array} b */
+		const isEqual = (a, b) =>
+			a.every((i) => b.includes(i)) && b.every((i) => a.includes(i));
+		if (!isEqual(result.values, $settings["global_exclude_match"])) {
+			settings.updateSingleSetting("global_exclude_match", result.values);
+		}
+		gemValue = result.values.join("\n");
+	}
+
+	/** @type {import('svelte/action').Action<HTMLElement, (c: ResizeObserverEntry) => number>} */
+	function actionResize(node, callback) {
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				if (typeof callback === "function") {
+					callback(entry);
+				}
+			}
+		});
+		resizeObserver.observe(node);
+		return {
+			destroy() {
+				resizeObserver.disconnect();
+			},
+		};
 	}
 
 	// called when the user clicks the link to the save location
 	function openSaveLocation() {
-		sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
+		if (import.meta.env.SAFARI_PLATFORM === "mac") {
+			sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
+		} else {
+			// ios
+		}
 	}
 
 	// called when the user clicks the icon next to the save location link
-	async function changeSaveLocation() {
-		sendNativeMessage({ name: "CHANGE_SAVE_LOCATION" });
+	function changeSaveLocation() {
+		if (indicators.loading.changeSaveLocation) return;
+		if (import.meta.env.SAFARI_PLATFORM === "mac") {
+			// eslint-disable-next-line no-constant-condition -- issue: https://developer.apple.com/forums/thread/697217
+			if (nativePort && false) {
+				const listener = (message) => {
+					if (message.name === "URL_SCHEME_STARTED") {
+						indicators.loading.changeSaveLocation = false;
+						nativePort.onMessage.removeListener(listener);
+					}
+				};
+				nativePort.onMessage.addListener(listener);
+			} else {
+				setTimeout(() => (indicators.loading.changeSaveLocation = false), 1000);
+			}
+			indicators.loading.changeSaveLocation = true;
+			sendNativeMessage({ name: "CHANGE_SAVE_LOCATION" });
+		} else {
+			// ios
+		}
 	}
 </script>
 
-<div
-	class="settings"
-	in:fade={{ duration: 150 }}
-	out:fade={{ duration: 150, delay: 75 }}
->
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div class="mask" on:click|self={() => state.remove("settings")}></div>
-	<div
-		class="modal"
-		in:fly={{ y: 50, duration: 150, delay: 75 }}
-		out:fly={{ y: 50, duration: 150, delay: 0 }}
-	>
-		<div class="modal__section">
-			<div class="modal__title">
-				<div>Editor Settings</div>
-				<IconButton
-					icon={iconClose}
-					on:click={() => state.remove("settings")}
-				/>
+<div class="settings">
+	{#each groups as group}
+		<div class="section">
+			<div class="section__title">
+				<div>{gl(`settings_section_${group}`)}</div>
 			</div>
-			<div class="modal__row">
-				<div>Auto Close Brackets</div>
-				<Toggle
-					checked={$settings.autoCloseBrackets}
-					on:click={() =>
-						update("autoCloseBrackets", !$settings.autoCloseBrackets)}
-				/>
-			</div>
-			<div class="modal__row">
-				<div>Auto Hint</div>
-				<Toggle
-					checked={$settings.autoHint}
-					on:click={() => update("autoHint", !$settings.autoHint)}
-				/>
-			</div>
-			<div class="modal__row">
-				<div>Hide Descriptions</div>
-				<Toggle
-					checked={!$settings.descriptions}
-					on:click={() => update("descriptions", !$settings.descriptions)}
-				/>
-			</div>
-			<div class="modal__row">
-				<div>Javascript Linter</div>
-				<Toggle
-					checked={$settings.lint}
-					on:click={() => update("lint", !$settings.lint)}
-				/>
-			</div>
-			<div class="modal__row">
-				<div>Show Invisibles</div>
-				<Toggle
-					checked={$settings.showInvisibles}
-					on:click={() => update("showInvisibles", !$settings.showInvisibles)}
-				/>
-			</div>
-			<div class="modal__row">
-				<div>Tab Size</div>
-				<select
-					bind:value={$settings.tabSize}
-					on:blur={() => update("tabSize", $settings.tabSize)}
-				>
-					<option value={2}>2</option>
-					<option value={4}>4</option>
-				</select>
-			</div>
-		</div>
-		<div class="modal__section">
-			<div class="modal__title">
-				<div>General Settings</div>
-			</div>
-			<div class="modal__row">
-				<div class:red={!$settings.active}>Enable Injection</div>
-				<Toggle
-					checked={$settings.active}
-					on:click={() => update("active", !$settings.active)}
-				/>
-			</div>
-			<div class="modal__row">
-				<div>Show Toolbar Count</div>
-				<Toggle
-					checked={$settings.showCount}
-					on:click={() => update("showCount", !$settings.showCount)}
-				/>
-			</div>
-			<div class="modal__row saveLocation">
-				<div>Save Location</div>
-				<button class="link truncate" on:click={openSaveLocation}>
-					{$settings.saveLocation}
-				</button>
-				<IconButton
-					icon={iconEdit}
-					on:click={changeSaveLocation}
-					title={"Change save location"}
-				/>
-			</div>
-			<div class="modal__row modal__row--wrap">
-				<div class="blacklist" class:red={blacklistError}>
-					<span>Global exclude match patterns</span>
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{#if blacklistSaving}{@html iconLoader}{/if}
+			{#each groupItems(group) as item}
+				<div class="section__row {item.name}" class:disable={item.disable}>
+					<div
+						id={`${item.name}_label`}
+						class="name"
+						class:warn={item.nodeClass.warn === $settings[item.name] ||
+							indicators.warn[item.name]}
+						class:error={item.nodeClass.error === $settings[item.name] ||
+							indicators.error[item.name]}
+					>
+						{gl(`settings_${item.name}`)}
+					</div>
+					<label
+						aria-labelledby={`${item.name}_label`}
+						aria-describedby={`${item.name}_desc`}
+					>
+						{#if item.nodeType === "Toggle"}
+							<Toggle
+								checked={$settings[item.name]}
+								on:click={() =>
+									settings.updateSingleSetting(
+										item.name,
+										!$settings[item.name],
+									)}
+							/>
+						{/if}
+						{#if item.nodeType === "select"}
+							<select
+								bind:value={$settings[item.legacy]}
+								on:blur={() =>
+									settings.updateSingleSetting(
+										item.name,
+										!$settings[item.name],
+									)}
+							>
+								{#each item.values as value}
+									<option {value}>
+										{gl(`settings_${item.name}_${value}`) || value}
+									</option>
+								{/each}
+							</select>
+						{/if}
+					</label>
+					{#if item.nodeType === "textarea" && item.name === "global_exclude_match"}
+						{#if indicators.saving[item.name]}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							<span class="icon__loader">{@html iconLoader}</span>
+							{gl(`settings_${item.name}_saving`)}
+						{/if}
+						<div class="textarea_box">
+							<textarea
+								aria-labelledby={`${item.name}_label`}
+								aria-describedby={`${item.name}_desc`}
+								class:error={gemParsed.error || indicators.error[item.name]}
+								disabled={indicators.saving[item.name]}
+								placeholder={gl(`settings_${item.name}_placeholder`)}
+								spellcheck="false"
+								bind:this={gemTextarea}
+								bind:value={gemValue}
+								on:focus={() => (gemStyleOpacity = 1)}
+								on:blur={() => {
+									gemStyleOpacity = "revert-layer";
+									saveGlobalExcludeMatch();
+								}}
+								on:scroll={(e) => (gemRender.scrollTop = e.target.scrollTop)}
+								use:actionResize={(c) =>
+									(gemStyleHeight = c.borderBoxSize[0].blockSize)}
+							></textarea>
+							<div
+								class="textarea"
+								style="height: {gemStyleHeight}px; opacity: {gemStyleOpacity};"
+								bind:this={gemRender}
+							>
+								{#each gemParsed.items as p}
+									<!-- should not contain any newlines or indents -->
+									{p.start}{#if p.error}<mark>{p.value}</mark
+										>{:else}{p.value}{/if}{p.separ}
+								{/each}
+							</div>
+						</div>
+						<div class="global_exclude_match_refer">
+							{gl(`settings_${item.name}_refer`)}
+							<button
+								class="link"
+								on:click={() =>
+									openInBlank(
+										"https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns#match_pattern_structure",
+									)}
+							>
+								Match pattern structure
+							</button>
+						</div>
+					{/if}
+					<div class="desc" id={`${item.name}_desc`}>
+						{gl(`settings_${item.name}_desc`)}
+					</div>
 				</div>
-				<textarea
-					class:error={blacklistError}
-					placeholder="Comma separated list of @match patterns"
-					spellcheck="false"
-					bind:this={blacklist}
-					value={blacklisted}
-					on:blur={saveBlacklist}
-					disabled={$state.includes("blacklist-saving") || blacklistSaving}
-				></textarea>
-			</div>
+			{/each}
 		</div>
-		<div class="modal__section">
-			<div class="modal__title">Information</div>
-			<p>
-				Userscripts Safari Version {$settings.version} ({$settings.build})
-				<br /><br />
-				You can review the documentation, report bugs and get more information about
-				this extension by visiting
-				<button
-					class="link"
-					on:click={() => openInBlank("https://github.com/quoid/userscripts")}
-				>
-					the code repository.
-				</button>
-				<br /><br />
-				If you enjoy using this extension, please consider
-				<button
-					class="link"
-					on:click={() =>
-						openInBlank("https://geo.itunes.apple.com/app/id1463298887")}
-				>
-					leaving a review
-				</button>
-				on the App Store or
-				<button
-					class="link"
-					on:click={() =>
-						openInBlank("https://github.com/quoid/userscripts#support")}
-				>
-					supporting the project.
-				</button>
-			</p>
+	{/each}
+	<div class="section">
+		<div class="section__title">
+			<div>{gl(`settings_section_native`)}</div>
 		</div>
+		<div class="section__row saveLocation">
+			<div class="name">{gl("settings_scripts_directory")}</div>
+			{#if indicators.loading.changeSaveLocation}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				<span class="icon__loader">{@html iconLoader}</span>
+			{/if}
+			<IconButton
+				icon={iconEdit}
+				on:click={changeSaveLocation}
+				title={gl("settings_set_scripts_directory")}
+			/>
+			<button
+				class="link"
+				title={$settings["saveLocation"]}
+				on:click={openSaveLocation}
+			>
+				{$settings["saveLocation"]}
+			</button>
+			<div class="desc">{gl("settings_scripts_directory_desc")}</div>
+		</div>
+	</div>
+	<div class="section">
+		<div class="section__title">{gl(`settings_section_about`)}</div>
+		<p>
+			Userscripts {import.meta.env.BROWSER ?? ""}
+			v{$settings["version"]}
+			({$settings["build"]})
+			<br /><br />
+			{gl("settings_about_text1")}
+			<button
+				class="link"
+				on:click={() => openInBlank("https://github.com/quoid/userscripts")}
+			>
+				{gl("settings_about_button_repo")}
+			</button>
+			<button
+				class="link"
+				on:click={() =>
+					openInBlank(
+						`https://github.com/quoid/userscripts/blob/v${$settings["version"]}/README.md`,
+					)}
+			>
+				{gl("settings_about_button_docs")}
+			</button>
+			<button
+				class="link"
+				on:click={() =>
+					openInBlank("https://github.com/quoid/userscripts/issues")}
+			>
+				{gl("settings_about_button_issues")}
+			</button>
+			<br /><br />
+			{gl("settings_about_text2")}
+			<button
+				class="link"
+				on:click={() =>
+					openInBlank("https://geo.itunes.apple.com/app/id1463298887")}
+			>
+				{gl("settings_about_button_store")}
+			</button>
+			<button
+				class="link"
+				on:click={() =>
+					openInBlank("https://github.com/quoid/userscripts#support")}
+			>
+				{gl("settings_about_button_beta")}
+			</button>
+		</p>
 	</div>
 </div>
 
 <style>
 	.settings {
-		align-items: center;
-		backdrop-filter: blur(3px);
-		-webkit-backdrop-filter: blur(3px);
-		background-color: rgba(0 0 0 / 0.45);
 		color: var(--text-color-secondary);
-		display: flex;
-		font: var(--text-medium);
-		height: 100%;
 		letter-spacing: var(--letter-spacing-medium);
-		justify-content: center;
-		left: 0;
-		position: absolute;
-		top: 0;
-		width: 100%;
-		z-index: 90;
 	}
 
-	.mask {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-	}
-
-	.modal {
-		background-color: var(--color-bg-secondary);
-		border-radius: var(--border-radius);
-		box-shadow: var(--box-shadow);
-		max-height: 90%;
-		overflow-y: auto;
-		width: 32rem;
-		z-index: 99;
-	}
-
-	.modal__title {
+	.section__title {
 		align-items: center;
+		border-top: 1px solid var(--color-black);
 		border-bottom: 1px solid var(--color-black);
 		color: var(--text-color-primary);
 		display: flex;
 		font: var(--text-default);
 		font-weight: 500;
 		letter-spacing: var(--letter-spacing-default);
-		padding: 1rem 1rem calc(1rem - 1px) 1rem;
+		padding: calc(1rem - 2px) 1rem 1rem 1rem;
 	}
 
-	.modal__title div {
+	.section__title div {
 		flex-grow: 1;
 	}
 
-	.modal__row {
+	.section__row {
 		align-items: center;
 		border-bottom: 1px solid var(--color-black);
 		display: flex;
-		padding: 1rem 1rem 1rem 0;
-		margin-left: 1rem;
-	}
-
-	.modal__row:last-child {
-		padding: 1rem;
-		margin-left: 0;
-	}
-
-	.modal__row--wrap {
 		flex-wrap: wrap;
+		padding: 1rem 0;
+		margin: 0 2rem;
 	}
 
-	.modal__row div {
+	.section__row:last-child {
+		border-bottom: none;
+	}
+
+	.section__row div {
 		flex-grow: 1;
 	}
 
-	.modal__row div.red {
+	.section__row div.warn {
+		color: var(--color-yellow);
+	}
+
+	.section__row div.error {
 		color: var(--color-red);
 	}
 
-	.saveLocation > div:nth-child(1) {
-		flex-grow: 0;
+	.section__row.disable {
+		background: repeating-linear-gradient(
+			50deg,
+			transparent 0 20px,
+			rgb(0 0 0 / 0.1) 20px 25px
+		);
+	}
+
+	.section__row .name {
+		color: var(--text-color-primary);
+	}
+
+	.section__row .desc {
+		width: 100%;
+		padding: 0.25rem 0 0;
+		color: var(--text-color-secondary);
+		font: var(--text-small);
 	}
 
 	.saveLocation > button {
-		font-weight: normal;
-		margin-left: auto;
-		max-width: 65%;
-		padding-right: 0.5rem;
-		text-align: right;
+		width: 100%;
+		text-align: left;
+		overflow-wrap: anywhere;
 	}
 
-	.blacklist {
-		align-items: center;
+	.icon__loader {
 		display: flex;
+		align-items: center;
+		margin-right: 0.25rem;
 	}
 
-	.blacklist:disabled {
-		opacity: var(--opacity-disabled);
-	}
-
-	.blacklist :global(svg) {
+	.icon__loader :global(svg) {
 		height: 0.75rem;
-		margin-left: 0.5rem;
 		width: 0.75rem;
 	}
 
+	.global_exclude_match_refer {
+		padding: 0.25rem 0 0;
+		font: var(--text-small);
+	}
+
+	.textarea_box {
+		position: relative;
+		width: 100%;
+		margin-top: 0.5rem;
+	}
+
+	.textarea mark {
+		color: transparent;
+		color: var(--text-color-primary);
+		background-color: red;
+		border-radius: var(--border-radius);
+		opacity: 1;
+	}
+
+	.textarea,
 	textarea {
 		background-color: var(--color-black);
-		border: none;
 		border-radius: var(--border-radius);
+		border: 1px solid transparent;
 		color: inherit;
-		font: var(--text-small);
 		font-family: var(--editor-font);
-		margin-top: 0.5rem;
-		min-height: 4rem;
+		letter-spacing: initial;
+		max-height: 50rem;
+		max-width: 100%;
+		min-height: 10rem;
+		min-width: 100%;
 		opacity: 0.75;
+		overscroll-behavior: none;
 		padding: 0.5rem;
 		width: 100%;
-		min-width: 100%;
+		word-break: break-all;
+	}
+
+	.textarea {
+		color: transparent;
+		overflow: scroll;
+		user-select: none;
+		-webkit-user-select: none;
+		white-space: pre-wrap;
+	}
+
+	.textarea::-webkit-scrollbar {
+		display: none;
+	}
+
+	textarea {
+		background-color: transparent;
+		position: absolute;
+		top: 0;
+		z-index: 10;
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		textarea {
+			min-height: 20rem;
+		}
+	}
+
+	textarea:focus::placeholder {
+		color: transparent;
 	}
 
 	textarea.error {
@@ -344,9 +480,14 @@
 
 	textarea:focus {
 		opacity: 1;
+		color: var(--text-color-primary);
 	}
 
 	p {
-		padding: 1rem;
+		padding: 1rem 2rem 2rem;
+	}
+
+	p button {
+		margin-right: 0.25rem;
 	}
 </style>

@@ -1,7 +1,7 @@
 <script>
 	export let checked = false;
 	export let disabled = false;
-	export let title;
+	export let title = "";
 </script>
 
 <!-- prevent toggle label clicks from triggering parent element on:click -->
@@ -18,12 +18,19 @@
 
 		cursor: pointer;
 		display: block;
-		font-size: 1rem;
+		font-size: 1.1rem;
 		height: 1em;
 		min-width: 1.75em;
 		position: relative;
 		user-select: none;
 		width: 1.75em;
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		label {
+			font-size: 1.8rem;
+		}
 	}
 
 	label.disabled {
