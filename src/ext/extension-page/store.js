@@ -37,7 +37,7 @@ function stateStore() {
 	// store oldState to see how state transitioned
 	// ex. if (newState === foo && oldState === bar) baz();
 	let oldState = [];
-	const add = (stateModifier) =>
+	const add = (stateModifier) => {
 		update((state) => {
 			// list of acceptable states, mostly for state definition tracking
 			const states = [
@@ -68,7 +68,14 @@ function stateStore() {
 			);
 			return state;
 		});
-	const remove = (stateModifier) =>
+		// URL hash handle
+		const params = new URLSearchParams(location.hash.slice(1));
+		if (["settings"].includes(stateModifier)) {
+			params.set("state", stateModifier);
+			location.hash = params.toString();
+		}
+	};
+	const remove = (stateModifier) => {
 		update((state) => {
 			// save pre-changed state to oldState var
 			oldState = [...state];
@@ -84,20 +91,38 @@ function stateStore() {
 			);
 			return state;
 		});
+		// URL hash handle
+		const params = new URLSearchParams(location.hash.slice(1));
+		const state = params.get("state");
+		if (state === stateModifier) {
+			params.delete("state");
+			location.hash = params.toString();
+		}
+	};
 	const getOldState = () => oldState;
-	return { subscribe, add, getOldState, remove };
+	// URL hash handle
+	const loadUrlState = () => {
+		const params = new URLSearchParams(location.hash.slice(1));
+		const state = params.get("state");
+		state && add(state);
+	};
+	return { subscribe, add, getOldState, remove, loadUrlState };
 }
 export const state = stateStore();
 
 function settingsStore() {
 	const { subscribe, update, set } = writable({});
 	const init = async (initData) => {
-		// import legacy settings data just one-time
-		await settingsStorage.legacyImport();
+		if (import.meta.env.SAFARI_PLATFORM === "mac") {
+			// import legacy settings data just one-time
+			await settingsStorage.legacyImport();
+		}
 		// for compatibility with legacy getting names only
 		// once all new name is used, use settingsStorage.get()
 		const settings = await settingsStorage.legacyGet();
-		console.info("store.js settingsStore init", initData, settings);
+		if (import.meta.env.MODE === "development") {
+			console.info("store.js settingsStore init", initData, settings);
+		}
 		set({ ...initData, ...settings });
 		// sync popup, backgound, etc... settings changes
 		settingsStorage.onChangedSettings((sets, area) => {
@@ -135,6 +160,7 @@ function settingsStore() {
 		// for compatibility with legacy setting names only
 		// once all new name is used, use settingsStorage.set()
 		settingsStorage.legacySet({ [key]: value }); // Durable Storage
+		settingsStorage.set({ [key]: value }); // Durable Storage
 		// temporarily keep the old storage method until it is confirmed that all dependencies are removed
 		updateSingleSettingOld(key, value);
 	};
