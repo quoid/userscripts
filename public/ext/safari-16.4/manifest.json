@@ -19,6 +19,9 @@
 		"default_popup": "dist/entry-ext-action-popup.html",
 		"default_icon": "images/action.svg"
 	},
+	"options_ui": {
+		"page": "dist/entry-ext-extension-page.html#state=settings"
+	},
 	"content_scripts": [
 		{
 			"js": ["dist/content-scripts/userscripts.js"],

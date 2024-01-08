@@ -20,7 +20,7 @@
 		"default_icon": "images/action.svg"
 	},
 	"options_ui": {
-		"page": "dist/entry-ext-extension-page.html#settings"
+		"page": "dist/entry-ext-extension-page.html#state=settings"
 	},
 	"content_scripts": [
 		{

@@ -22,6 +22,9 @@
 			"32": "images/toolbar-icon-32.png"
 		}
 	},
+	"options_ui": {
+		"page": "dist/entry-ext-extension-page.html#state=settings"
+	},
 	"content_scripts": [
 		{
 			"js": ["dist/content-scripts/userscripts.js"],
