@@ -117,9 +117,8 @@ function settingsStore() {
 			// import legacy settings data just one-time
 			await settingsStorage.legacyImport();
 		}
-		// for compatibility with legacy getting names only
-		// once all new name is used, use settingsStorage.get()
-		const settings = await settingsStorage.legacyGet();
+		// read settings from persistence storage
+		const settings = await settingsStorage.get();
 		if (import.meta.env.MODE === "development") {
 			console.info("store.js settingsStore init", initData, settings);
 		}
@@ -132,35 +131,28 @@ function settingsStore() {
 	};
 	const reset = async (keys) => {
 		await settingsStorage.reset(keys);
-		// once all new name is used, use settingsStorage.get()
-		const settings = await settingsStorage.legacyGet();
+		const settings = await settingsStorage.get();
 		console.info("store.js settingsStore reset", settings);
 		update((obj) => Object.assign(obj, settings));
 	};
 
 	const updateSingleSettingOld = (key, value) => {
-		// blacklist not stored in normal setting object in manifest, so handle differently
-		if (key === "blacklist") {
-			// update blacklist on swift side
+		// following settings logics is still handled in the native swift layer
+		if (key === "global_exclude_match") {
 			const message = { name: "PAGE_UPDATE_BLACKLIST", blacklist: value };
 			sendNativeMessage(message).then((response) => {
 				response.error && log.add(response.error, "error", true);
 			});
 		}
-		if (key === "active") {
+		if (key === "global_active") {
 			sendNativeMessage({ name: "TOGGLE_EXTENSION", active: String(value) });
 		}
 	};
+	/** @param {string} key @param {any} value */
 	const updateSingleSetting = (key, value) => {
-		// update(settings => (settings[key] = value, settings));
-		update((settings) => {
-			settings[key] = value;
-			return settings;
-		});
-		// for compatibility with legacy setting names only
-		// once all new name is used, use settingsStorage.set()
-		settingsStorage.legacySet({ [key]: value }); // Durable Storage
-		settingsStorage.set({ [key]: value }); // Durable Storage
+		update((settings) => ((settings[key] = value), settings));
+		// save settings to persistence storage
+		settingsStorage.set({ [key]: value });
 		// temporarily keep the old storage method until it is confirmed that all dependencies are removed
 		updateSingleSettingOld(key, value);
 	};

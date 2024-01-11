@@ -606,44 +606,6 @@ export function onChangedSettings(callback) {
 // the following functions are used only for compatibility transition periods
 // these functions will be removed in the future, perhaps in version 5.0
 
-/**
- * settings.legacyGet
- * @param {string|string[]} keys
- * @returns settings object with legacy keys
- */
-export async function legacyGet(keys = undefined) {
-	const result = await get(keys);
-	// console.log("legacy_get", keys, result);
-	for (const key of Object.keys(result)) {
-		const legacy = settingsDictionary[storageKey(key)]?.legacy;
-		if (legacy) result[legacy] = result[key];
-	}
-	return result;
-}
-
-/**
- * settings.legacySet
- * @param {object} keys legacy keys
- */
-export async function legacySet(keys) {
-	if (typeof keys != "object") {
-		return console.error("Unexpected arg type:", keys);
-	}
-	if (!Object.keys(keys).length) {
-		return console.error("Settings object empty:", keys);
-	}
-	const settings = {};
-	for (const key of Object.keys(settingsDictionary)) {
-		const setting = settingsDictionary[key];
-		if (!setting.legacy) continue;
-		if (setting.legacy in keys) {
-			settings[setting.name] = keys[setting.legacy];
-		}
-	}
-	// console.log("legacy_set", keys, settings);
-	return set(settings);
-}
-
 export async function legacyImport() {
 	// if legacy data has already been imported, skip this process
 	const imported = await get("legacy_imported");

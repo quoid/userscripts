@@ -65,10 +65,13 @@
 
 	// update settings when changed
 	$: if (instance) {
-		instance.setOption("autoCloseBrackets", $settings.autoCloseBrackets);
-		instance.setOption("showInvisibles", $settings.showInvisibles);
-		instance.setOption("tabSize", parseInt($settings.tabSize, 10));
-		instance.setOption("indentUnit", parseInt($settings.tabSize, 10));
+		instance.setOption("autoCloseBrackets", $settings["editor_close_brackets"]);
+		instance.setOption("showInvisibles", $settings["editor_show_whitespace"]);
+		instance.setOption("tabSize", parseInt($settings["editor_tab_size"], 10));
+		instance.setOption(
+			"indentUnit",
+			parseInt($settings["editor_tab_size"], 10),
+		);
 	}
 
 	// store cursor position and disable on save
@@ -100,20 +103,20 @@
 	}
 
 	// track lint settings and update accordingly
-	$: if (instance && $settings.lint) {
+	$: if (instance && $settings["editor_javascript_lint"]) {
 		toggleLint("enable");
-	} else if (instance && !$settings.lint) {
+	} else if (instance && !$settings["editor_javascript_lint"]) {
 		toggleLint("disable");
 	}
 
 	export function init() {
 		// do lint settings check
-		const lint = $settings.lint ? lintOptions : false;
+		const lint = $settings["editor_javascript_lint"] ? lintOptions : false;
 
 		// create codemirror instance
 		instance = CodeMirror.fromTextArea(textarea, {
 			mode: "javascript",
-			autoCloseBrackets: $settings.autoCloseBrackets,
+			autoCloseBrackets: $settings["editor_close_brackets"],
 			continueComments: true,
 			foldGutter: true,
 			lineNumbers: true,
@@ -121,9 +124,9 @@
 			matchBrackets: true,
 			smartIndent: true,
 			styleActiveLine: true,
-			indentUnit: parseInt($settings.tabSize, 10),
-			showInvisibles: $settings.showInvisibles,
-			tabSize: parseInt($settings.tabSize, 10),
+			indentUnit: parseInt($settings["editor_tab_size"], 10),
+			showInvisibles: $settings["editor_show_whitespace"],
+			tabSize: parseInt($settings["editor_tab_size"], 10),
 			highlightSelectionMatches: false,
 			lint,
 			hintOptions: {
@@ -192,7 +195,7 @@
 		});
 		if (
 			// check if setting is enabled
-			$settings.autoHint &&
+			$settings["editor_auto_hint"] &&
 			// ensure hinting not active already
 			!cm.state.completionActive &&
 			// not first position on the line

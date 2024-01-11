@@ -7,7 +7,7 @@
 
 	$: disabled = !$state.includes("ready");
 
-	$: sortOrder = $settings.sortOrder;
+	$: sortOrder = $settings["editor_list_sort"];
 
 	let query = "";
 

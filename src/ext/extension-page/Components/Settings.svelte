@@ -176,12 +176,9 @@
 						{/if}
 						{#if item.nodeType === "select"}
 							<select
-								bind:value={$settings[item.legacy]}
+								bind:value={$settings[item.name]}
 								on:blur={() =>
-									settings.updateSingleSetting(
-										item.name,
-										!$settings[item.name],
-									)}
+									settings.updateSingleSetting(item.name, $settings[item.name])}
 							>
 								{#each item.values as value}
 									<option {value}>

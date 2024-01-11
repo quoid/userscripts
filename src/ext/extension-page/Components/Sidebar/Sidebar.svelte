@@ -21,7 +21,7 @@
 	// disable buttons accordingly
 	$: disabled = !$state.includes("ready");
 
-	$: list = sortBy($items, $settings.sortOrder).filter(
+	$: list = sortBy($items, $settings["editor_list_sort"]).filter(
 		(a) => a.visible !== false,
 	);
 
@@ -175,11 +175,15 @@
 	}
 </script>
 
-<div class="sidebar {!$settings.descriptions ? 'sidebar--compact' : ''}">
+<div
+	class="sidebar {!$settings['editor_list_descriptions']
+		? 'sidebar--compact'
+		: ''}"
+>
 	<div class="sidebar__header">
 		<div class="sidebar__filter"><SidebarFilter /></div>
 		<IconButton
-			notification={!$settings.active}
+			notification={!$settings["global_active"]}
 			icon={iconSettings}
 			on:click={() => state.add("settings")}
 			title={"Open settings"}
