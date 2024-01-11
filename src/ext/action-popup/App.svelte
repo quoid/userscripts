@@ -496,7 +496,7 @@
 	/>
 	<IconButton
 		icon={iconUpdate}
-		notification={!!updates.length}
+		infoDot={!!updates.length}
 		on:click={() => (showUpdates = true)}
 		title={"Show updates"}
 		{disabled}

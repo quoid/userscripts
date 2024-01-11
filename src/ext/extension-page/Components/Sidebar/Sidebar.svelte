@@ -183,7 +183,7 @@
 	<div class="sidebar__header">
 		<div class="sidebar__filter"><SidebarFilter /></div>
 		<IconButton
-			notification={!$settings["global_active"]}
+			warnDot={!$settings["global_active"]}
 			icon={iconSettings}
 			on:click={() => state.add("settings")}
 			title={"Open settings"}
