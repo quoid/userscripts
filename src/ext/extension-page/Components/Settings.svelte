@@ -49,6 +49,8 @@
 	indicators.saving["global_exclude_match"] = false;
 	// indicates that a global exclude match value has error
 	indicators.error["global_exclude_match"] = false;
+	// indicates that a global exclude match value has warn
+	indicators.warn["global_exclude_match"] = false;
 
 	// global exclude match (gem)
 	let gemRender;
@@ -56,24 +58,29 @@
 	let gemStyleHeight;
 	let gemStyleOpacity;
 	let gemValue = $settings["global_exclude_match"].join("\n");
-	$: gemParsed = parseMatchPatterns(gemValue);
+	let gemParsed;
+	$: {
+		gemParsed = parseMatchPatterns(gemValue);
+		indicators.warn["global_exclude_match"] = gemParsed.warn;
+		indicators.error["global_exclude_match"] = gemParsed.error;
+	}
 
 	function saveGlobalExcludeMatch() {
 		const result = gemParsed;
-		// update indicator
-		indicators.error["global_exclude_match"] = result.error;
-		// check if input matches `match patterns`, if not, return a warning
 		for (const item of result.items) {
 			if (item.error) {
 				log.add(
-					`${gl("msg_invalid_match_pattern")}: ${item.value}\n${item.point}`,
+					`${gl("msg_invalid_match_pattern")}: ${item.value} - ${item.point}`,
 					"error",
 					true,
 				);
 			}
+			if (item.warn) {
+				log.add(`${item.value} - ${item.point}`, "warn", true);
+			}
 		}
-		if (indicators.error["global_exclude_match"]) {
-			return console.warn("Global exclude includes invalid match patterns");
+		if (result.error) {
+			return console.error("Global exclude includes invalid match patterns");
 		}
 
 		// when global exclude match saving, visual indication of saving occurs on element
@@ -82,14 +89,17 @@
 		indicators.saving["global_exclude_match"] = true;
 		setTimeout(() => (indicators.saving["global_exclude_match"] = false), 100);
 
+		// filter duplicate values
+		const values = [...new Set(result.values)];
 		// compare global exclude match input to saved value
 		/** @param {Array} a @param {Array} b */
 		const isEqual = (a, b) =>
 			a.every((i) => b.includes(i)) && b.every((i) => a.includes(i));
-		if (!isEqual(result.values, $settings["global_exclude_match"])) {
-			settings.updateSingleSetting("global_exclude_match", result.values);
+		if (!isEqual(values, $settings["global_exclude_match"])) {
+			settings.updateSingleSetting("global_exclude_match", values);
 		}
-		gemValue = result.values.join("\n");
+		// update textarea value
+		gemValue = values.join("\n");
 	}
 
 	/** @type {import('svelte/action').Action<HTMLElement, (c: ResizeObserverEntry) => number>} */
@@ -198,6 +208,7 @@
 							<textarea
 								aria-labelledby={`${item.name}_label`}
 								aria-describedby={`${item.name}_desc`}
+								class:warn={gemParsed.warn || indicators.warn[item.name]}
 								class:error={gemParsed.error || indicators.error[item.name]}
 								disabled={indicators.saving[item.name]}
 								placeholder={gl(`settings_${item.name}_placeholder`)}
@@ -220,7 +231,9 @@
 							>
 								{#each gemParsed.items as p}
 									<!-- should not contain any newlines or indents -->
-									{p.start}{#if p.error}<mark>{p.value}</mark
+									{p.start}{#if p.warn || p.error}<mark
+											class:warn={p.warn}
+											class:error={p.error}>{p.value}</mark
 										>{:else}{p.value}{/if}{p.separ}
 								{/each}
 							</div>
@@ -422,6 +435,11 @@
 		opacity: 1;
 	}
 
+	.textarea mark.warn {
+		background-color: var(--color-yellow);
+		background-color: #808000;
+	}
+
 	.textarea,
 	textarea {
 		background-color: var(--color-black);
@@ -469,6 +487,10 @@
 
 	textarea:focus::placeholder {
 		color: transparent;
+	}
+
+	textarea.warn {
+		border: 1px solid var(--color-yellow);
 	}
 
 	textarea.error {

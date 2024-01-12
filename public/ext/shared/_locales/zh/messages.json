@@ -168,6 +168,9 @@
 	"settings_about_button_beta": {
 		"message": "注册 Beta 测试版"
 	},
+	"utils_check_match_patterns_0": {
+		"message": "此匹配模式将匹配所有 URL"
+	},
 	"utils_check_match_patterns_1": {
 		"message": "这 scheme 部分应当为 *、https、http 之一"
 	},

@@ -150,21 +150,21 @@ export function parseMetadata(text) {
 /**
  * @param {string} input a match pattern
  * @typedef {string} value - the match pattern
- * @typedef {Object} parsedItem - parsed result
+ * @typedef {Object} MatchGroups - regexp match groups
  * @property {string} start - leading whitespace
  * @property {string} separ - separator whitespace
  * @property {value} value - the match pattern
- * @property {boolean} error - the match pattern valid or not
- * @property {string} point - invalid point or error message
- * @returns {{error: boolean, items: parsedItem[], values: value[]}}
+ * @typedef {MatchGroups & CheckedItem} ParsedItem - parsed result
+ * @returns {{warn: boolean, error: boolean, items: ParsedItem[], values: value[]}}
  */
 export function parseMatchPatterns(input) {
-	if (typeof input !== "string") return;
 	const result = {
-		error: false,
+		warn: false, // global warn
+		error: false, // global error
 		items: [],
 		values: [],
 	};
+	if (typeof input !== "string") return result;
 	// match the separated values from input string
 	const matches = input.matchAll(
 		/(?<start>^\s*|)(?<value>\S+?)(?<separ>\s+|$)/g,
@@ -172,33 +172,33 @@ export function parseMatchPatterns(input) {
 	for (const match of matches) {
 		const item = checkMatchPatterns(match.groups.value);
 		// setting the global error indicator
-		if (item.error === true) {
-			result.error = true;
-		}
+		if (item.warn === true) result.warn = true;
+		if (item.error === true) result.error = true;
 		result.items.push({ ...match.groups, ...item });
-		result.values.push(item.value.toLowerCase());
+		result.values.push(match.groups.value.toLowerCase());
 	}
 	return result;
 }
 
 /**
  * @param {string} input whitespace separated list of match patterns
- * @typedef {Object} checkedItem - checked result
- * @property {string} value - the match pattern with fixes
+ * @typedef {Object} CheckedItem - checked result
+ * @property {boolean} warn - the match pattern has warning
  * @property {boolean} error - the match pattern valid or not
  * @property {string} point - invalid point or error message
- * @returns {checkedItem}
+ * @returns {CheckedItem}
  */
 export function checkMatchPatterns(input) {
 	if (typeof input !== "string") return;
 	const result = {
-		value: input,
+		warn: false,
 		error: true,
 		point: "",
 	};
-	if (input === "<all_urls>") {
+	if (["<all_urls>", "*://*/*"].includes(input)) {
+		result.warn = true;
 		result.error = false;
-		result.value = "*://*/*";
+		result.point = gl("utils_check_match_patterns_0");
 		return result;
 	}
 	let scheme, host, path;
