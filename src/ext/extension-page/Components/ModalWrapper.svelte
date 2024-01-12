@@ -5,6 +5,30 @@
 	import { fade, fly } from "svelte/transition";
 	import IconButton from "../../shared/Components/IconButton.svelte";
 	import iconClose from "../../shared/img/icon-close.svg?raw";
+
+	let nav = false;
+	const navAnchors = new Map();
+
+	/** @type {import('svelte/action').Action<HTMLElement, string>} */
+	function navRegister(node, lang) {
+		navAnchors.set(node, lang);
+		nav = !!navAnchors.size;
+		return {
+			destroy() {
+				navAnchors.delete(node);
+				nav = !!navAnchors.size;
+			},
+		};
+	}
+
+	/** @param {HTMLElement} node */
+	function navClick(node) {
+		node.scrollIntoView({ behavior: "smooth" });
+		if (!node.classList.contains("target_hint")) {
+			node.classList.add("target_hint");
+			setTimeout(() => node.classList.remove("target_hint"), 1000);
+		}
+	}
 </script>
 
 <div
@@ -20,6 +44,19 @@
 		in:fly={{ y: 50, duration: 150, delay: 75 }}
 		out:fly={{ y: 50, duration: 150, delay: 0 }}
 	>
+		{#if nav}
+			<nav>
+				<ul>
+					{#each navAnchors as [node, lang]}
+						<li>
+							<button on:click={() => navClick(node)}>
+								{lang}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+		{/if}
 		<div class="close">
 			<IconButton
 				icon={iconClose}
@@ -28,7 +65,7 @@
 			/>
 		</div>
 		<div class="scroll">
-			<svelte:component this={component} {...componentProps} />
+			<svelte:component this={component} {...componentProps} {navRegister} />
 		</div>
 	</div>
 </div>
@@ -76,12 +113,43 @@
 
 	.close {
 		position: absolute;
-		right: -5rem;
+		right: -2rem;
+		transform: translateX(100%);
 		text-align: center;
 	}
 
 	.close :global(button) {
 		width: 3.5rem;
 		height: 3.5rem;
+	}
+
+	nav {
+		position: absolute;
+		left: -2rem;
+		transform: translateX(-100%);
+		text-align: right;
+	}
+
+	nav button {
+		background: none;
+		color: inherit;
+		font: var(--text-large);
+		font-weight: 700;
+		opacity: 0.75;
+		padding: 1rem 0.5rem;
+	}
+
+	nav button:hover {
+		opacity: 1;
+	}
+
+	:global(.target_hint) {
+		animation: highlight 1000ms ease-out;
+	}
+
+	@keyframes highlight {
+		from {
+			background-color: var(--text-color-disabled);
+		}
 	}
 </style>

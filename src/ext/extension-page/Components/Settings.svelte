@@ -12,6 +12,8 @@
 	export let platform;
 	/** @type {import("webextension-polyfill").Runtime.Port} - native message port */
 	export let nativePort = undefined;
+	/** @type {import('svelte/action').Action<HTMLElement, string>} */
+	export let navRegister = () => undefined;
 
 	const items = Object.values(settingsDictionary);
 
@@ -155,7 +157,10 @@
 <div class="settings">
 	{#each groups as group}
 		<div class="section">
-			<div class="section__title">
+			<div
+				class="section__title"
+				use:navRegister={gl(`settings_section_${group}`)}
+			>
 				<div>{gl(`settings_section_${group}`)}</div>
 			</div>
 			{#each groupItems(group) as item}
@@ -259,7 +264,7 @@
 		</div>
 	{/each}
 	<div class="section">
-		<div class="section__title">
+		<div class="section__title" use:navRegister={gl(`settings_section_native`)}>
 			<div>{gl(`settings_section_native`)}</div>
 		</div>
 		<div class="section__row saveLocation">
@@ -284,7 +289,9 @@
 		</div>
 	</div>
 	<div class="section">
-		<div class="section__title">{gl(`settings_section_about`)}</div>
+		<div class="section__title" use:navRegister={gl(`settings_section_about`)}>
+			{gl(`settings_section_about`)}
+		</div>
 		<p>
 			Userscripts {import.meta.env.BROWSER ?? ""}
 			v{$settings["version"]}
@@ -335,6 +342,7 @@
 
 <style>
 	.settings {
+		background-color: var(--color-bg-secondary);
 		color: var(--text-color-secondary);
 		letter-spacing: var(--letter-spacing-medium);
 	}
@@ -343,6 +351,7 @@
 		align-items: center;
 		border-top: 1px solid var(--color-black);
 		border-bottom: 1px solid var(--color-black);
+		background-color: var(--color-bg-primary);
 		color: var(--text-color-primary);
 		display: flex;
 		font: var(--text-default);
