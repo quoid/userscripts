@@ -128,7 +128,10 @@
 		if (import.meta.env.SAFARI_PLATFORM === "mac") {
 			sendNativeMessage({ name: "OPEN_SAVE_LOCATION" });
 		} else {
-			// ios
+			const url = new URL(`shareddocuments://${$settings["saveLocation"]}`);
+			const a = document.createElement("a");
+			a.href = url.href;
+			a.click();
 		}
 	}
 
@@ -151,7 +154,9 @@
 			indicators.loading.changeSaveLocation = true;
 			sendNativeMessage({ name: "CHANGE_SAVE_LOCATION" });
 		} else {
-			// ios
+			const a = document.createElement("a");
+			a.href = `${$settings["scheme"]}://changesavelocation`;
+			a.click();
 		}
 	}
 

@@ -1609,6 +1609,7 @@ func getInitData() -> [String: Any]? {
 	}
 	return [
 		"saveLocation": saveLocation.path,
+		"scheme": Bundle.main.infoDictionary?["US_URL_SCHEME"] as! String,
 		"version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??",
 		"build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
 	]
