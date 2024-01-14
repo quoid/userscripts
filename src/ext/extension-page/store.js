@@ -129,10 +129,13 @@ function settingsStore() {
 			update((obj) => Object.assign(obj, sets));
 		});
 	};
-	const reset = async (keys) => {
+	/** @param {string|string[]} keys */
+	const reset = async (keys = undefined) => {
 		await settingsStorage.reset(keys);
 		const settings = await settingsStorage.get();
-		console.info("store.js settingsStore reset", settings);
+		if (import.meta.env.MODE === "development") {
+			console.info("store.js settingsStore reset", settings);
+		}
 		update((obj) => Object.assign(obj, settings));
 	};
 

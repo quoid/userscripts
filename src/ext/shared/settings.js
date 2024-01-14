@@ -51,6 +51,8 @@ const storageRef = async (area) => {
  * @property {any=} ipados - overriding defaults
  * @property {any=} ios - overriding defaults
  *
+ * @typedef {"INTERNAL"|"general"|"editor"} Group group name
+ *
  * @typedef {Object} Setting The setting item
  * @property {string} name - setting's name
  * @property {"string"|"number"|"boolean"|"object"|"array"} type - setting's value type
@@ -61,7 +63,7 @@ const storageRef = async (area) => {
  * @property {boolean=} protect - protected settings cannot be reset
  * @property {boolean=} confirm - double confirmation is required when change
  * @property {Platforms=} platforms - platform availability and overriding defaults
- * @property {"INTERNAL"|"general"|"editor"} group - setting's group name
+ * @property {Group} group - setting's group name
  * @property {string=} legacy - setting's legacy name
  * @property {"Toggle"|"select"|"textarea"=} nodeType - setting's node type
  * @property {Object=} nodeClass - node class name with setting's value
@@ -87,7 +89,7 @@ const settingDefault = deepFreeze({
 });
 
 /** @type {Readonly<Setting[]>} - Read-only settings definition */
-const settingsDefinition = [
+const settingsDefinition = /** @type {const} */ [
 	{
 		name: "error_native",
 		type: "object",
@@ -496,11 +498,11 @@ export async function reset(keys = undefined, area = undefined) {
 		const key = storageKey(keys);
 		// check if key exist in settings-dictionary
 		if (!Object.hasOwn(settingsDictionary, key)) {
-			return console.error("unexpected settings key:", key);
+			return console.error("unexpected settings key:", key, keys);
 		}
 		// check if key is protected
 		if (settingsDictionary[key].protect === true) {
-			return console.error("protected settings key:", key);
+			return console.error("protected settings key:", key, keys);
 		}
 		// eslint-disable-next-line no-param-reassign -- change the area is expected
 		settingsDictionary[key].local === true && (area = "local");
@@ -535,11 +537,11 @@ export async function reset(keys = undefined, area = undefined) {
 			const key = storageKey(k);
 			// check if key exist in settings-dictionary
 			if (!Object.hasOwn(settingsDictionary, key)) {
-				return console.error("unexpected settings key:", key);
+				return console.error("unexpected settings key:", key, k);
 			}
 			// check if key is protected
 			if (settingsDictionary[key].protect === true) {
-				return console.error("protected settings key:", key);
+				return console.error("protected settings key:", key, k);
 			}
 			// detach only locally stored settings
 			settingsDictionary[key].local === true

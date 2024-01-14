@@ -19,6 +19,9 @@
 	"settings_section_native": {
 		"message": "Native Settings"
 	},
+	"settings_section_tools": {
+		"message": "Tools"
+	},
 	"settings_section_about": {
 		"message": "About"
 	},
@@ -150,6 +153,30 @@
 	},
 	"settings_set_scripts_directory": {
 		"message": "Change save location"
+	},
+	"settings_section_tools_import": {
+		"message": "Import"
+	},
+	"settings_section_tools_export": {
+		"message": "Export"
+	},
+	"settings_section_tools_reset": {
+		"message": "Reset"
+	},
+	"settings_section_tools_goback": {
+		"message": "Go Back"
+	},
+	"settings_section_tools_reset_all": {
+		"message": "Reset All Settings"
+	},
+	"settings_section_tools_reset_single": {
+		"message": "Reset"
+	},
+	"settings_section_tools_reset_section": {
+		"message": "Reset Section"
+	},
+	"settings_scripts_tools_desc": {
+		"message": "These tools can help you import and export \"settings data\". Reset single, section or all settings."
 	},
 	"settings_about_text1": {
 		"message": "Get more information about this extension by visiting the open source project:"

@@ -1,5 +1,5 @@
 <script>
-	import { settingsDictionary } from "../../shared/settings.js";
+	import * as settingsStorage from "../../shared/settings.js";
 	import { settings, log } from "../store.js";
 	import { parseMatchPatterns, openInBlank, gl } from "../../shared/utils.js";
 	import { sendNativeMessage } from "../../shared/native.js";
@@ -15,16 +15,16 @@
 	/** @type {import('svelte/action').Action<HTMLElement, string>} */
 	export let navRegister = () => undefined;
 
-	const items = Object.values(settingsDictionary);
+	const items = Object.values(settingsStorage.settingsDictionary);
 
-	/** @type {("general"|"editor")[]} settings group names */
+	/** @type {settingsStorage.Group[]} settings group names */
 	let groups = ["general", "editor"];
 	if (platform === "ios") {
 		groups = ["general"];
 	}
 
 	/**
-	 * @param {typeof groups[number]} groupName settings group name
+	 * @param {settingsStorage.Group} groupName settings group name
 	 * @returns setting items for the specified group
 	 */
 	const groupItems = (groupName) => {
@@ -45,8 +45,10 @@
 		error: {},
 		saving: {},
 		loading: {},
+		resetting: false,
 	};
 
+	let settingsBox;
 	// indicates that a global exclude match save has initiated
 	indicators.saving["global_exclude_match"] = false;
 	// indicates that a global exclude match value has error
@@ -152,9 +154,25 @@
 			// ios
 		}
 	}
+
+	/** @param {string|string[]} keys */
+	async function reset(keys = undefined) {
+		await settings.reset(keys);
+		// update textarea value
+		if (keys === undefined || keys.includes("global_exclude_match")) {
+			gemValue = $settings["global_exclude_match"].join("\n");
+		}
+	}
+
+	/** @param {settingsStorage.Group} groupName */
+	async function resetGroup(groupName) {
+		const unprotectedItems = groupItems(groupName).filter((i) => !i.protect);
+		const settingNames = unprotectedItems.map((i) => i.name);
+		await reset(settingNames);
+	}
 </script>
 
-<div class="settings">
+<div class="settings_box" bind:this={settingsBox}>
 	{#each groups as group}
 		<div class="section">
 			<div
@@ -162,6 +180,11 @@
 				use:navRegister={gl(`settings_section_${group}`)}
 			>
 				<div>{gl(`settings_section_${group}`)}</div>
+				{#if indicators.resetting}
+					<button class="reset" on:click={() => resetGroup(group)}
+						>{gl("settings_section_tools_reset_section")}</button
+					>
+				{/if}
 			</div>
 			{#each groupItems(group) as item}
 				<div class="section__row {item.name}" class:disable={item.disable}>
@@ -203,6 +226,11 @@
 							</select>
 						{/if}
 					</label>
+					{#if indicators.resetting && !indicators.saving[item.name] && !item.protect}
+						<button class="reset" on:click={() => reset(item.name)}
+							>{gl("settings_section_tools_reset_single")}</button
+						>
+					{/if}
 					{#if item.nodeType === "textarea" && item.name === "global_exclude_match"}
 						{#if indicators.saving[item.name]}
 							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -289,6 +317,36 @@
 		</div>
 	</div>
 	<div class="section">
+		<div class="section__title" use:navRegister={gl(`settings_section_tools`)}>
+			<div>{gl(`settings_section_tools`)}</div>
+		</div>
+		<div class="section__row tools">
+			{#if indicators.resetting}
+				<div class="buttons buttons-2-columns">
+					<button
+						on:click={() => (reset(), (indicators.resetting = false))}
+						class="danger">{gl("settings_section_tools_reset_all")}</button
+					>
+					<button on:click={() => (indicators.resetting = false)}
+						>{gl("settings_section_tools_goback")}</button
+					>
+				</div>
+			{:else}
+				<div class="buttons buttons-3-columns">
+					<button>{gl("settings_section_tools_import")}</button>
+					<button>{gl("settings_section_tools_export")}</button>
+					<button
+						on:click={() => (
+							settingsBox.scrollIntoView({ behavior: "smooth" }),
+							(indicators.resetting = true)
+						)}>{gl("settings_section_tools_reset")}</button
+					>
+				</div>
+			{/if}
+			<div class="desc">{gl("settings_scripts_tools_desc")}</div>
+		</div>
+	</div>
+	<div class="section">
 		<div class="section__title" use:navRegister={gl(`settings_section_about`)}>
 			{gl(`settings_section_about`)}
 		</div>
@@ -341,10 +399,19 @@
 </div>
 
 <style>
-	.settings {
+	.settings_box {
+		--toggle-font-size: 1.1rem;
+
 		background-color: var(--color-bg-secondary);
 		color: var(--text-color-secondary);
 		letter-spacing: var(--letter-spacing-medium);
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		.settings_box {
+			--toggle-font-size: 1.8rem;
+		}
 	}
 
 	.section__title {
@@ -509,6 +576,85 @@
 	textarea:focus {
 		opacity: 1;
 		color: var(--text-color-primary);
+	}
+
+	.tools .buttons {
+		--buttons-gap: 1.5rem;
+
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--buttons-gap);
+		justify-content: space-between;
+		padding: calc(var(--buttons-gap) - 1rem) 0;
+	}
+
+	.tools .buttons-2-columns button {
+		flex: 1 0 calc(100% / 2 - var(--buttons-gap) / 2);
+	}
+
+	/* flex: 1 0 calc(100% / var(col) - var(gap) * calc(var(col) - 1) / var(col)); */
+	.tools .buttons-3-columns button {
+		flex: 1 0 calc(100% / 3 - var(--buttons-gap) * 2 / 3);
+	}
+
+	.tools button {
+		background: var(--color-black);
+		border-radius: var(--border-radius);
+		color: var(--text-color-primary);
+		font-weight: 600;
+		opacity: 0.75;
+		padding: 0.5rem 1rem;
+	}
+
+	.tools button.danger {
+		color: var(--color-red);
+		font-weight: 700;
+	}
+
+	@media (hover: hover) {
+		.tools button:hover {
+			background-color: var(--color-blue);
+			color: var(--color-black);
+			opacity: 1;
+		}
+
+		.tools button.danger:hover {
+			background: var(--color-red);
+			color: var(--text-color-primary);
+		}
+
+		button.reset:hover {
+			opacity: 1;
+		}
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		.tools button.danger {
+			background: var(--color-red);
+			color: var(--text-color-primary);
+		}
+	}
+
+	.tools button:active,
+	button.reset:active {
+		opacity: 0.75;
+	}
+
+	button.reset {
+		background: var(--color-red);
+		border-radius: var(--border-radius);
+		color: var(--text-color-primary);
+		font-weight: 700;
+		line-height: calc(var(--toggle-font-size) + 0.1rem);
+		margin-left: 0.5rem;
+		opacity: 0.75;
+		padding: 0 0.1rem;
+	}
+
+	.section__title button.reset {
+		margin-right: 1rem;
+		padding: 0 0.5rem;
 	}
 
 	p {

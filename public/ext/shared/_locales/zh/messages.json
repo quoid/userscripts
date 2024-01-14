@@ -15,6 +15,9 @@
 	"settings_section_native": {
 		"message": "本地设置"
 	},
+	"settings_section_tools": {
+		"message": "工具"
+	},
 	"settings_section_about": {
 		"message": "关于"
 	},
@@ -146,6 +149,30 @@
 	},
 	"settings_set_scripts_directory": {
 		"message": "更改保存位置"
+	},
+	"settings_section_tools_import": {
+		"message": "导入"
+	},
+	"settings_section_tools_export": {
+		"message": "导出"
+	},
+	"settings_section_tools_reset": {
+		"message": "还原"
+	},
+	"settings_section_tools_goback": {
+		"message": "返回"
+	},
+	"settings_section_tools_reset_all": {
+		"message": "还原所有设置"
+	},
+	"settings_section_tools_reset_single": {
+		"message": "还原"
+	},
+	"settings_section_tools_reset_section": {
+		"message": "还原该组"
+	},
+	"settings_scripts_tools_desc": {
+		"message": "这些工具可以帮助您导入和导出“设置数据”。重置单个、一组或所有设置。"
 	},
 	"settings_about_text1": {
 		"message": "获取有关此扩展的更多信息，请访问本开源项目："

@@ -18,7 +18,7 @@
 
 		cursor: pointer;
 		display: block;
-		font-size: 1.1rem;
+		font-size: var(--toggle-font-size, 1rem);
 		height: 1em;
 		min-width: 1.75em;
 		position: relative;
@@ -29,7 +29,7 @@
 	/* ios */
 	@supports (-webkit-touch-callout: none) {
 		label {
-			font-size: 1.8rem;
+			font-size: var(--toggle-font-size, 2rem);
 		}
 	}
 
