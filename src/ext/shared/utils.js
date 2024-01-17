@@ -377,14 +377,50 @@ export async function openExtensionPage() {
 	browser.windows.update(tab.windowId, { focused: true });
 }
 
-// Safari currently does not honor the target attribute of <a> elements in extension contexts
+/**
+ * Safari currently does not honor the target attribute of <a> elements in extension contexts
+ * @param {string} url
+ */
 export async function openInBlank(url) {
 	browser.tabs.create({ url });
 }
 
-// Safari currently does not honor the download attribute of <a> elements in extension contexts
-// Also not support https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/download
+/**
+ * Safari macos currently does not honor the download attribute of <a> elements in extension contexts
+ * Also not support https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/download
+ * @param {string} filename
+ * @param {string} content
+ * @param {string} type
+ */
 export async function downloadToFile(filename, content, type = "text/plain") {
+	let a;
+	// created only once in the current page so that it can be used repeatedly
+	if (!window["_download_helper"]) {
+		if (import.meta.env.SAFARI_PLATFORM === "mac") {
+			// bypassing safari issues through iframe
+			const iframe = document.createElement("iframe");
+			iframe.style.display = "none";
+			document.body.append(iframe);
+			a = iframe.contentDocument.createElement("a");
+		} else {
+			a = document.createElement("a");
+		}
+		window["_download_helper"] = a;
+	} else {
+		a = window["_download_helper"];
+	}
+	const blob = URL.createObjectURL(new Blob([content], { type }));
+	setTimeout(() => URL.revokeObjectURL(blob), 30000);
+	a.download = filename;
+	a.href = blob;
+	a.click();
+}
+
+// Safari macos currently does not honor the download attribute of <a> elements in extension contexts
+// Also not support https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/download
+// eslint-disable-next-line no-unused-vars -- the old implementation is left for reference
+async function downloadToFile_old(filename, content, type = "text/plain") {
+	// there must be an accessible url, otherwise the script cannot be successfully injected
 	const url = "https://quoid.github.io/userscripts/serve/download.html";
 	const tab = await browser.tabs.create({ url });
 	const exchange = { filename, content, type };

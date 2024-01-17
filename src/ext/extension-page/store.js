@@ -120,7 +120,7 @@ function settingsStore() {
 		// read settings from persistence storage
 		const settings = await settingsStorage.get();
 		if (import.meta.env.MODE === "development") {
-			console.info("store.js settingsStore init", initData, settings);
+			console.debug("store.js settingsStore init", initData, settings);
 		}
 		set({ ...initData, ...settings });
 		// sync popup, backgound, etc... settings changes
@@ -134,11 +134,15 @@ function settingsStore() {
 		await settingsStorage.reset(keys);
 		const settings = await settingsStorage.get();
 		if (import.meta.env.MODE === "development") {
-			console.info("store.js settingsStore reset", settings);
+			console.debug("store.js settingsStore reset", settings);
 		}
 		update((obj) => Object.assign(obj, settings));
+		// legacy updates
+		["global_active", "global_exclude_match"].forEach((s) => {
+			updateSingleSettingOld(s, settings[s]);
+		});
 	};
-
+	// temporarily keep the old storage method until it is confirmed that all dependencies are removed
 	const updateSingleSettingOld = (key, value) => {
 		// following settings logics is still handled in the native swift layer
 		if (key === "global_exclude_match") {
@@ -156,7 +160,7 @@ function settingsStore() {
 		update((settings) => ((settings[key] = value), settings));
 		// save settings to persistence storage
 		settingsStorage.set({ [key]: value });
-		// temporarily keep the old storage method until it is confirmed that all dependencies are removed
+		// legacy updates
 		updateSingleSettingOld(key, value);
 	};
 	return { subscribe, set, init, reset, updateSingleSetting };

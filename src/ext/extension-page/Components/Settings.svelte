@@ -1,7 +1,12 @@
 <script>
 	import * as settingsStorage from "../../shared/settings.js";
 	import { settings, log } from "../store.js";
-	import { parseMatchPatterns, openInBlank, gl } from "../../shared/utils.js";
+	import {
+		gl,
+		openInBlank,
+		downloadToFile,
+		parseMatchPatterns,
+	} from "../../shared/utils.js";
 	import { sendNativeMessage } from "../../shared/native.js";
 	import Toggle from "../../shared/Components/Toggle.svelte";
 	import IconButton from "../../shared/Components/IconButton.svelte";
@@ -160,12 +165,63 @@
 		}
 	}
 
+	async function backupExport() {
+		const exportable = items.filter(
+			(i) => !i.disable && !i.protect && i.group !== "INTERNAL",
+		);
+		const obj = await settingsStorage.get(exportable.map((i) => i.name));
+		const bak = {
+			app: "Userscripts",
+			build: $settings["build"],
+			version: $settings["version"],
+			platform: $settings["platform"],
+			timestamp: Date.now(),
+			settings: obj,
+		};
+		const filename = `userscripts-settings-backup.json`;
+		downloadToFile(filename, JSON.stringify(bak), "application/json");
+	}
+
+	let fileInput;
+	async function backupImport() {
+		if (!fileInput.files.length) return;
+		const file = fileInput.files[0];
+		const text = await file.text();
+		// clear value to avoid no event triggering when selecting the same file
+		fileInput.value = "";
+		let json;
+		try {
+			json = JSON.parse(text);
+		} catch (error) {
+			log.add(
+				`${gl("msg_invalid_backup_file")}: ${file.name} - ${error}`,
+				"error",
+				true,
+			);
+			return;
+		}
+		if (json.app !== "Userscripts" || !json.settings) {
+			log.add(`${gl("msg_invalid_backup_file")}: ${file.name}`, "error", true);
+			return;
+		}
+		if (await settingsStorage.set(json.settings)) {
+			log.add(gl("msg_backup_import_finish"), "info", true);
+			gemValue = $settings["global_exclude_match"].join("\n");
+		} else {
+			log.add(gl("msg_backup_import_failed"), "error", true);
+			return;
+		}
+	}
+
 	/** @param {string|string[]} keys */
 	async function reset(keys = undefined) {
 		await settings.reset(keys);
 		// update textarea value
 		if (keys === undefined || keys.includes("global_exclude_match")) {
 			gemValue = $settings["global_exclude_match"].join("\n");
+		}
+		if (keys === undefined) {
+			log.add(gl("msg_settings_reset_finish"), "info", true);
 		}
 	}
 
@@ -338,8 +394,12 @@
 				</div>
 			{:else}
 				<div class="buttons buttons-3-columns">
-					<button>{gl("settings_section_tools_import")}</button>
-					<button>{gl("settings_section_tools_export")}</button>
+					<button on:click={backupExport}
+						>{gl("settings_section_tools_export")}</button
+					>
+					<button on:click={() => fileInput.click()}
+						>{gl("settings_section_tools_import")}</button
+					>
 					<button
 						on:click={() => (
 							settingsBox.scrollIntoView({ behavior: "smooth" }),
@@ -347,6 +407,13 @@
 						)}>{gl("settings_section_tools_reset")}</button
 					>
 				</div>
+				<input
+					bind:this={fileInput}
+					on:change={backupImport}
+					type="file"
+					accept="application/json"
+					style:display="none"
+				/>
 			{/if}
 			<div class="desc">{gl("settings_scripts_tools_desc")}</div>
 		</div>

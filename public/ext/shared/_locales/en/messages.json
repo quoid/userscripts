@@ -237,5 +237,17 @@
 	},
 	"msg_invalid_match_pattern": {
 		"message": "Invalid match pattern"
+	},
+	"msg_invalid_backup_file": {
+		"message": "Not a valid backup file"
+	},
+	"msg_backup_import_finish": {
+		"message": "Import completed! ✅"
+	},
+	"msg_backup_import_failed": {
+		"message": "Import failed, please check the error log in the console"
+	},
+	"msg_settings_reset_finish": {
+		"message": "Reset all settings completed! ✅"
 	}
 }

@@ -233,5 +233,17 @@
 	},
 	"msg_invalid_match_pattern": {
 		"message": "无效的匹配模式"
+	},
+	"msg_invalid_backup_file": {
+		"message": "无效的备份文件"
+	},
+	"msg_backup_import_finish": {
+		"message": "导入完成！✅"
+	},
+	"msg_backup_import_failed": {
+		"message": "导入失败，请在控制台中检查错误日志"
+	},
+	"msg_settings_reset_finish": {
+		"message": "还原所有设置完成！✅"
 	}
 }
