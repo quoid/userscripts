@@ -283,19 +283,17 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			#endif
 		}
 		else if name == "PAGE_UPDATE_BLACKLIST" {
-			#if os(macOS)
-				if let blacklist = message?["blacklist"] as? [String] {
-					var manifest = getManifest()
-					manifest.blacklist = blacklist
-					if !updateManifest(with: manifest) {
-						response.userInfo = [SFExtensionMessageKey: ["error": "Failed to save blacklist to disk"]]
-					} else {
-						response.userInfo = [SFExtensionMessageKey: ["success": true]]
-					}
+			if let blacklist = message?["blacklist"] as? [String] {
+				var manifest = getManifest()
+				manifest.blacklist = blacklist
+				if !updateManifest(with: manifest) {
+					response.userInfo = [SFExtensionMessageKey: ["error": "Failed to save blacklist to disk"]]
 				} else {
-					inBoundError = true
+					response.userInfo = [SFExtensionMessageKey: ["success": true]]
 				}
-			#endif
+			} else {
+				inBoundError = true
+			}
 		}
 		// send inBoundError if found
 		if inBoundError {

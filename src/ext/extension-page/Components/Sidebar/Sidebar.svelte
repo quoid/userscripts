@@ -190,8 +190,8 @@
 			{disabled}
 		/>
 		<Dropdown icon={iconPlus} title={"New item"} {disabled}>
-			<button on:click={() => newItem("js")}>New JS</button><br />
-			<button on:click={() => newItem("css")}>New CSS</button><br />
+			<button on:click={() => newItem("js")}>New JS</button>
+			<button on:click={() => newItem("css")}>New CSS</button>
 			<button on:click={newRemote}>New Remote</button>
 		</Dropdown>
 	</div>

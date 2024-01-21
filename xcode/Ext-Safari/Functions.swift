@@ -1383,7 +1383,6 @@ func getFileContentsParsed(_ url: URL) -> [String: Any]? {
 func getInjectionFilenames(_ url: String) -> [String]? {
 	var filenames = [String]()
 	let manifest = getManifest()
-	let matched = getMatchedFiles(url, manifest, true)
 	guard let active = manifest.settings["active"] else {
 		logger?.error("\(#function, privacy: .public) - failed at (1)")
 		return nil
@@ -1392,6 +1391,7 @@ func getInjectionFilenames(_ url: String) -> [String]? {
 	if active != "true" {
 		return filenames
 	}
+	let matched = getMatchedFiles(url, manifest, true)
 	// filter out all disabled files
 	filenames = matched.filter{!manifest.disabled.contains($0)}
 	return filenames
@@ -1609,6 +1609,7 @@ func getInitData() -> [String: Any]? {
 	}
 	return [
 		"saveLocation": saveLocation.path,
+		"platform": getPlatform(),
 		"scheme": Bundle.main.infoDictionary?["US_URL_SCHEME"] as! String,
 		"version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??",
 		"build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"

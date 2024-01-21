@@ -66,7 +66,8 @@
 	}
 
 	.active ul {
-		display: block;
+		display: flex;
+		flex-direction: column;
 	}
 
 	ul :global(li) {
@@ -111,5 +112,9 @@
 	ul :global(button:hover) {
 		background-color: var(--color-blue);
 		color: var(--color-black);
+	}
+
+	ul :global(button:active) {
+		opacity: 0.75;
 	}
 </style>

@@ -34,22 +34,22 @@
 		"message": "在编辑器中启用自动关闭括号，这会影响以下字符：() [] {} \"\" ''"
 	},
 	"settings_editor_javascript_lint": {
-		"message": "Javascript Linter"
+		"message": "JavaScript Linter"
 	},
 	"settings_editor_javascript_lint_desc": {
-		"message": "在编辑器中启用基本的 Javascript linting 检查"
+		"message": "在编辑器中启用基本的 JavaScript Linting（代码检查）"
 	},
 	"settings_editor_list_descriptions": {
-		"message": "显示列表项目描述"
+		"message": "侧栏项目描述"
 	},
 	"settings_editor_list_descriptions_desc": {
-		"message": "显示或隐藏侧边栏中的用户脚本项目描述"
+		"message": "显示或隐藏侧边栏中项目的描述"
 	},
 	"settings_editor_list_sort": {
-		"message": "项目排序顺序"
+		"message": "侧栏项目排序"
 	},
 	"settings_editor_list_sort_desc": {
-		"message": "侧栏中项目的显示顺序"
+		"message": "侧边栏中项目的显示顺序"
 	},
 	"settings_editor_list_sort_nameAsc": {
 		"message": "项目名称: 升序"
@@ -87,6 +87,9 @@
 	"settings_global_exclude_match_desc": {
 		"message": "此输入接受以空白符（空格、换行等）分隔的 @match 模式列表，与此列表中的模式匹配的页面 URL 将在脚本注入时被忽略"
 	},
+	"settings_global_exclude_match_done": {
+		"message": "完成"
+	},
 	"settings_global_exclude_match_saving": {
 		"message": "保存中..."
 	},
@@ -95,18 +98,6 @@
 	},
 	"settings_global_exclude_match_refer": {
 		"message": "匹配模式结构请参考："
-	},
-	"settings_global_scripts_update_check": {
-		"message": "全局脚本更新检查"
-	},
-	"settings_global_scripts_update_check_desc": {
-		"message": "是否开启全局定期脚本更新检查"
-	},
-	"settings_scripts_settings": {
-		"message": "脚本更新检查激活"
-	},
-	"settings_scripts_settings_desc": {
-		"message": "是否开启单个脚本更新检查"
 	},
 	"settings_scripts_update_automation": {
 		"message": "自动更新脚本"
@@ -118,7 +109,7 @@
 		"message": "脚本更新检查间隔"
 	},
 	"settings_scripts_update_check_interval_desc": {
-		"message": "脚本在后台检查更新的间隔时间（天）"
+		"message": "禁用或设置用户脚本更新检查间隔（天）"
 	},
 	"settings_scripts_update_check_interval_0": {
 		"message": "从不"
@@ -127,7 +118,7 @@
 		"message": "脚本更新上次检查时间"
 	},
 	"settings_scripts_update_check_lasttime_desc": {
-		"message": "后台脚本更新上次检查时间"
+		"message": "后台脚本更新检查上次时间"
 	},
 	"settings_settings_sync": {
 		"message": "同步设置"

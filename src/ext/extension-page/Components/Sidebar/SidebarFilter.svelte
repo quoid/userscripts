@@ -1,5 +1,7 @@
 <script>
+	import { gl } from "../../../shared/utils.js";
 	import { items, settings, state } from "../../store.js";
+	import { settingsDictionary } from "../../../shared/settings.js";
 	import Dropdown from "../../../shared/Components/Dropdown.svelte";
 	import IconButton from "../../../shared/Components/IconButton.svelte";
 	import iconSort from "../../../shared/img/icon-sort.svg?raw";
@@ -23,8 +25,12 @@
 		});
 	}
 
+	const orders = Object.values(settingsDictionary).find(
+		(i) => i.name === "editor_list_sort",
+	).values;
+
 	function updateSortOrder(order) {
-		settings.updateSingleSetting("sortOrder", order);
+		settings.updateSingleSetting("editor_list_sort", order);
 	}
 </script>
 
@@ -39,37 +45,25 @@
 		bind:value={query}
 		{disabled}
 	/>
-	<Dropdown icon={iconSort} {disabled}>
-		<button
-			class:selected={sortOrder === "lastModifiedAsc"}
-			on:click={() => updateSortOrder("lastModifiedAsc")}
-		>
-			Last Modified: Asc{sortOrder === "lastModifiedAsc" ? " *" : ""}
-		</button>
-		<br />
-		<button
-			class:selected={sortOrder === "lastModifiedDesc"}
-			on:click={() => updateSortOrder("lastModifiedDesc")}
-		>
-			Last Modified: Desc{sortOrder === "lastModifiedDesc" ? " *" : ""}
-		</button>
-		<br />
-		<button
-			class:selected={sortOrder === "nameAsc"}
-			on:click={() => updateSortOrder("nameAsc")}
-		>
-			Name: Asc{sortOrder === "nameAsc" ? " *" : ""}
-		</button>
-		<br />
-		<button
-			class:selected={sortOrder === "nameDesc"}
-			on:click={() => updateSortOrder("nameDesc")}
-		>
-			Name: Desc{sortOrder === "nameDesc" ? " *" : ""}
-		</button>
+	<Dropdown icon={iconSort} {disabled} title={gl("settings_editor_list_sort")}>
+		{#each orders as order}
+			<button
+				class:selected={sortOrder === order}
+				on:click={() => updateSortOrder(order)}
+			>
+				{gl(`settings_editor_list_sort_${order}`)}{sortOrder === order
+					? " *"
+					: ""}
+			</button>
+		{/each}
 	</Dropdown>
 	{#if query}
-		<IconButton icon={iconClear} on:click={() => (query = "")} {disabled} />
+		<IconButton
+			icon={iconClear}
+			on:click={() => (query = "")}
+			{disabled}
+			title="Clear"
+		/>
 	{/if}
 </div>
 

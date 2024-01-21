@@ -13,9 +13,10 @@ const storagePrefix = "US_";
 const storageKey = (name) => storagePrefix + name.toUpperCase();
 
 /**
- * @typedef {"sync"|"local"|"managed"|"session"} Areas
+ * @typedef {"sync"|"local"|"managed"|"session"} PossibleAreas
+ * @typedef {"sync"|"local"} ParamArea
  *
- * @param {"sync"|"local"=} area - storage area
+ * @param {ParamArea} area - storage area
  * @returns Dynamic storage reference
  */
 const storageRef = async (area) => {
@@ -127,7 +128,7 @@ const settingsDefinition = /** @type {const} */ [
 		name: "toolbar_badge_count",
 		type: "boolean",
 		default: true,
-		platforms: { macos: true, ipados: true, ios: false },
+		platforms: { macos: true, ipados: false, ios: false },
 		group: "general",
 		legacy: "showCount",
 		nodeType: "Toggle",
@@ -141,13 +142,6 @@ const settingsDefinition = /** @type {const} */ [
 		legacy: "active",
 		nodeType: "Toggle",
 		nodeClass: { warn: false },
-	},
-	{
-		name: "global_scripts_update_check",
-		type: "boolean",
-		default: true,
-		group: "general",
-		nodeType: "Toggle",
 	},
 	{
 		name: "scripts_settings",
@@ -169,6 +163,7 @@ const settingsDefinition = /** @type {const} */ [
 		type: "number",
 		default: 0,
 		group: "INTERNAL",
+		legacy: "lastUpdateCheck",
 	},
 	{
 		name: "scripts_update_automation",
@@ -189,24 +184,6 @@ const settingsDefinition = /** @type {const} */ [
 		nodeType: "textarea",
 	},
 	{
-		name: "editor_close_brackets",
-		type: "boolean",
-		default: true,
-		platforms: { macos: undefined },
-		group: "editor",
-		legacy: "autoCloseBrackets",
-		nodeType: "Toggle",
-	},
-	{
-		name: "editor_auto_hint",
-		type: "boolean",
-		default: true,
-		platforms: { macos: undefined },
-		group: "editor",
-		legacy: "autoHint",
-		nodeType: "Toggle",
-	},
-	{
 		name: "editor_list_sort",
 		type: "string",
 		values: ["nameAsc", "nameDesc", "lastModifiedAsc", "lastModifiedDesc"],
@@ -223,6 +200,24 @@ const settingsDefinition = /** @type {const} */ [
 		platforms: { macos: undefined },
 		group: "editor",
 		legacy: "descriptions",
+		nodeType: "Toggle",
+	},
+	{
+		name: "editor_close_brackets",
+		type: "boolean",
+		default: true,
+		platforms: { macos: undefined },
+		group: "editor",
+		legacy: "autoCloseBrackets",
+		nodeType: "Toggle",
+	},
+	{
+		name: "editor_auto_hint",
+		type: "boolean",
+		default: true,
+		platforms: { macos: undefined },
+		group: "editor",
+		legacy: "autoHint",
 		nodeType: "Toggle",
 	},
 	{
@@ -306,18 +301,27 @@ if (Object.hasOwn === undefined) {
 /**
  * settings.get
  * @param {string|string[]} keys key | array of keys | undefined for all
- * @param {"local"|"sync"} area
+ * @typedef FnGetOptions
+ * @property {ParamArea=} area
+ * @property {keyof Platforms=} platform
+ * @param {FnGetOptions} options
  * @returns settings object
  */
-export async function get(keys = undefined, area = undefined) {
+export async function get(keys = undefined, options = {}) {
+	let { area, platform } = options;
 	if (![undefined, "local", "sync"].includes(area)) {
 		return console.error("Unexpected storage area:", area);
+	}
+	if (![undefined, "macos", "ios", "ipados"].includes(platform)) {
+		return console.error("Unexpected platform:", platform);
 	}
 	// validate setting value and fix surprises to default
 	/** @param {string} key @param {any} val  */
 	const valueFix = (key, val) => {
 		if (!key || !Object.hasOwn(settingsDictionary, key)) return;
-		const def = settingsDictionary[key].default;
+		const def =
+			settingsDictionary[key].platforms[platform] ??
+			settingsDictionary[key].default;
 		// check if value type conforms to settings-dictionary
 		const type = settingsDictionary[key].type;
 		// eslint-disable-next-line valid-typeof -- type known to be valid string literal
@@ -346,12 +350,14 @@ export async function get(keys = undefined, area = undefined) {
 			return console.error("unexpected settings key:", key);
 		}
 		// check if only locally stored setting
-		// eslint-disable-next-line no-param-reassign -- change the area is expected
 		settingsDictionary[key].local === true && (area = "local");
 		const storage = await storageRef(area);
 		const result = await storage.ref.get(key);
 		if (Object.hasOwn(result, key)) return valueFix(key, result[key]);
-		return settingsDictionary[key].default;
+		return (
+			settingsDictionary[key].platforms[platform] ??
+			settingsDictionary[key].default
+		);
 	}
 	const complexGet = async (settingsDefault, areaKeys) => {
 		const storage = await storageRef(area);
@@ -387,7 +393,9 @@ export async function get(keys = undefined, area = undefined) {
 			if (!Object.hasOwn(settingsDictionary, key)) {
 				return console.error("unexpected settings key:", key);
 			}
-			settingsDefault[key] = settingsDictionary[key].default;
+			settingsDefault[key] =
+				settingsDictionary[key].platforms[platform] ??
+				settingsDictionary[key].default;
 			// detach only locally stored settings
 			settingsDictionary[key].local === true
 				? areaKeys.local.push(key)
@@ -402,7 +410,9 @@ export async function get(keys = undefined, area = undefined) {
 		const settingsDefault = {};
 		const areaKeys = { local: [], sync: [], all: [] };
 		for (const key of Object.keys(settingsDictionary)) {
-			settingsDefault[key] = settingsDictionary[key].default;
+			settingsDefault[key] =
+				settingsDictionary[key].platforms[platform] ??
+				settingsDictionary[key].default;
 			// detach only locally stored settings
 			settingsDictionary[key].local === true
 				? areaKeys.local.push(key)
@@ -418,9 +428,12 @@ export async function get(keys = undefined, area = undefined) {
 /**
  * settings.set
  * @param {object} keys settings object
- * @param {"local"|"sync"} area
+ * @typedef FnSetOptions
+ * @property {ParamArea=} area
+ * @param {FnSetOptions} options
  */
-export async function set(keys, area = undefined) {
+export async function set(keys, options = {}) {
+	const { area } = options;
 	if (![undefined, "local", "sync"].includes(area)) {
 		return console.error("unexpected storage area:", area);
 	}
@@ -487,9 +500,12 @@ export async function set(keys, area = undefined) {
  * settings.reset
  * reset to default
  * @param {string|string[]} keys key | array of keys | undefined for all
- * @param {"local"|"sync"} area
+ * @typedef FnResetOptions
+ * @property {ParamArea=} area
+ * @param {FnResetOptions} options
  */
-export async function reset(keys = undefined, area = undefined) {
+export async function reset(keys = undefined, options = {}) {
+	let { area } = options;
 	if (![undefined, "local", "sync"].includes(area)) {
 		return console.error("unexpected storage area:", area);
 	}
@@ -504,7 +520,6 @@ export async function reset(keys = undefined, area = undefined) {
 		if (settingsDictionary[key].protect === true) {
 			return console.error("protected settings key:", key, keys);
 		}
-		// eslint-disable-next-line no-param-reassign -- change the area is expected
 		settingsDictionary[key].local === true && (area = "local");
 		const storage = await storageRef(area);
 		return storage.ref.remove(key);
@@ -564,6 +579,9 @@ export async function reset(keys = undefined, area = undefined) {
 				: areaKeys.sync.push(key);
 			// record all keys in case sync storage is not enabled
 			areaKeys.all.push(key);
+			// clean up the legacy keys at the same time
+			const legacyKey = settingsDictionary[key].legacy;
+			legacyKey && areaKeys.all.push(legacyKey);
 		}
 		return complexRemove(areaKeys);
 	}
@@ -575,7 +593,7 @@ export async function reset(keys = undefined, area = undefined) {
  * this function is convenient for the svelte store to update the state
  * @callback onChangedSettingsCallback
  * @param {{[key: string]: any}} settings - changed settings
- * @param {Areas} area - storage area
+ * @param {PossibleAreas} area - storage area
  * @returns {void}
  * @param {onChangedSettingsCallback} callback
  */
@@ -587,7 +605,7 @@ export function onChangedSettings(callback) {
 	/**
 	 * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/onChanged#listener}
 	 * @param {object} changes
-	 * @param {Areas} area
+	 * @param {PossibleAreas} area
 	 */
 	const listener = (changes, area) => {
 		// console.log(`storage.${area}.onChanged`, changes); // DEBUG
@@ -638,7 +656,7 @@ export async function legacyImport() {
 	}
 	// import complete tag, to ensure will only be import once
 	Object.assign(settings, { legacy_imported: Date.now() });
-	if (await set(settings, "local")) {
+	if (await set(settings, { area: "local" })) {
 		console.info("Import legacy settings complete");
 		// send a message to the Swift layer to safely clean up legacy data
 		// browser.runtime.sendNativeMessage({name: "PAGE_LEGACY_IMPORTED"});

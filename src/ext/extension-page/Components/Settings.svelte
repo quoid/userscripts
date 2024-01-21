@@ -13,7 +13,7 @@
 	import iconEdit from "../../shared/img/icon-edit.svg?raw";
 	import iconLoader from "../../shared/img/icon-loader.svg?raw";
 
-	/** @type {"macos"|"ios"} - native message port */
+	/** @type {"macos"|"ios"|"ipados"} */
 	export let platform;
 	/** @type {import("webextension-polyfill").Runtime.Port} - native message port */
 	export let nativePort = undefined;
@@ -24,7 +24,7 @@
 
 	/** @type {settingsStorage.Group[]} settings group names */
 	let groups = ["general", "editor"];
-	if (platform === "ios") {
+	if (platform !== "macos") {
 		groups = ["general"];
 	}
 
@@ -65,7 +65,7 @@
 	let gemRender;
 	let gemTextarea;
 	let gemStyleHeight;
-	let gemStyleOpacity;
+	let gemFocused = false;
 	let gemValue = $settings["global_exclude_match"].join("\n");
 	let gemParsed;
 	$: {
@@ -248,6 +248,11 @@
 				{/if}
 			</div>
 			{#each groupItems(group) as item}
+				{@const ariaAttributes = {
+					"aria-labelledby": `${item.name}_label`,
+					"aria-describedby": `${item.name}_desc`,
+					tabindex: 0,
+				}}
 				<div class="section__row {item.name}" class:disable={item.disable}>
 					<div
 						id={`${item.name}_label`}
@@ -259,36 +264,33 @@
 					>
 						{gl(`settings_${item.name}`)}
 					</div>
-					<label
-						aria-labelledby={`${item.name}_label`}
-						aria-describedby={`${item.name}_desc`}
-					>
-						{#if item.nodeType === "Toggle"}
-							<Toggle
-								checked={$settings[item.name]}
-								on:click={() =>
-									settings.updateSingleSetting(
-										item.name,
-										!$settings[item.name],
-									)}
-							/>
-						{/if}
-						{#if item.nodeType === "select"}
-							<select
-								bind:value={$settings[item.name]}
-								on:blur={() =>
-									settings.updateSingleSetting(item.name, $settings[item.name])}
-							>
-								{#each item.values as value}
-									<option {value}>
-										{gl(`settings_${item.name}_${value}`) || value}
-									</option>
-								{/each}
-							</select>
-						{/if}
-					</label>
-					{#if indicators.resetting && !indicators.saving[item.name] && !item.protect}
-						<button class="reset" on:click={() => reset(item.name)}
+					{#if item.nodeType === "Toggle"}
+						<Toggle
+							{ariaAttributes}
+							checked={$settings[item.name]}
+							on:click={() =>
+								settings.updateSingleSetting(item.name, !$settings[item.name])}
+						/>
+					{/if}
+					{#if item.nodeType === "select"}
+						<select
+							{...ariaAttributes}
+							bind:value={$settings[item.name]}
+							on:blur={() =>
+								settings.updateSingleSetting(item.name, $settings[item.name])}
+						>
+							{#each item.values as value}
+								<option {value}>
+									{gl(`settings_${item.name}_${value}`) || value}
+								</option>
+							{/each}
+						</select>
+					{/if}
+					{#if indicators.resetting && !indicators.saving[item.name] && !item.protect && (item.name !== "global_exclude_match" || !gemFocused)}
+						<button
+							{...ariaAttributes}
+							class="reset"
+							on:click={() => reset(item.name)}
 							>{gl("settings_section_tools_reset_single")}</button
 						>
 					{/if}
@@ -298,10 +300,14 @@
 							<span class="icon__loader">{@html iconLoader}</span>
 							{gl(`settings_${item.name}_saving`)}
 						{/if}
+						{#if gemFocused}
+							<button {...ariaAttributes} tabindex="-1" class="done"
+								>{gl("settings_global_exclude_match_done")}</button
+							>
+						{/if}
 						<div class="textarea_box">
 							<textarea
-								aria-labelledby={`${item.name}_label`}
-								aria-describedby={`${item.name}_desc`}
+								{...ariaAttributes}
 								class:warn={gemParsed.warn || indicators.warn[item.name]}
 								class:error={gemParsed.error || indicators.error[item.name]}
 								disabled={indicators.saving[item.name]}
@@ -309,9 +315,9 @@
 								spellcheck="false"
 								bind:this={gemTextarea}
 								bind:value={gemValue}
-								on:focus={() => (gemStyleOpacity = 1)}
+								on:focus={() => (gemFocused = true)}
 								on:blur={() => {
-									gemStyleOpacity = "revert-layer";
+									gemFocused = false;
 									saveGlobalExcludeMatch();
 								}}
 								on:scroll={(e) => (gemRender.scrollTop = e.target.scrollTop)}
@@ -320,7 +326,8 @@
 							></textarea>
 							<div
 								class="textarea"
-								style="height: {gemStyleHeight}px; opacity: {gemStyleOpacity};"
+								style:height="{gemStyleHeight}px"
+								style:opacity={gemFocused ? 1 : "revert-layer"}
 								bind:this={gemRender}
 							>
 								{#each gemParsed.items as p}
@@ -647,6 +654,18 @@
 
 	textarea:focus {
 		opacity: 1;
+		color: var(--text-color-primary);
+	}
+
+	button.done {
+		background: var(--color-black);
+		border-radius: var(--border-radius);
+		color: var(--text-color-primary);
+		font-weight: 600;
+		padding: 0 0.5rem;
+	}
+
+	select {
 		color: var(--text-color-primary);
 	}
 

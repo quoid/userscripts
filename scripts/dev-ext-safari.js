@@ -30,6 +30,7 @@ const defineConfig = {
 	envFile: false,
 	root: await rootDir(),
 	base: "./",
+	mode: "development",
 	define: {
 		"import.meta.env.BROWSER": JSON.stringify("Safari"),
 		"import.meta.env.NATIVE_APP": JSON.stringify("app"),

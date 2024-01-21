@@ -112,13 +112,15 @@ export const state = stateStore();
 
 function settingsStore() {
 	const { subscribe, update, set } = writable({});
+	let platform;
 	const init = async (initData) => {
+		platform = initData.platform;
 		if (import.meta.env.SAFARI_PLATFORM === "mac") {
 			// import legacy settings data just one-time
 			await settingsStorage.legacyImport();
 		}
 		// read settings from persistence storage
-		const settings = await settingsStorage.get();
+		const settings = await settingsStorage.get(undefined, { platform });
 		if (import.meta.env.MODE === "development") {
 			console.debug("store.js settingsStore init", initData, settings);
 		}
@@ -132,7 +134,7 @@ function settingsStore() {
 	/** @param {string|string[]} keys */
 	const reset = async (keys = undefined) => {
 		await settingsStorage.reset(keys);
-		const settings = await settingsStorage.get();
+		const settings = await settingsStorage.get(undefined, { platform });
 		if (import.meta.env.MODE === "development") {
 			console.debug("store.js settingsStore reset", settings);
 		}

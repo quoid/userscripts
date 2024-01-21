@@ -2,12 +2,17 @@
 	export let checked = false;
 	export let disabled = false;
 	export let title = "";
+	export let ariaAttributes = {};
 </script>
 
 <!-- prevent toggle label clicks from triggering parent element on:click -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<label on:click|stopPropagation={() => {}} class:disabled {title}>
+<label
+	on:click|stopPropagation={() => {}}
+	class:disabled
+	{title}
+	{...ariaAttributes}
+>
 	<input type="checkbox" on:click|stopPropagation bind:checked {disabled} />
 	<span></span>
 </label>

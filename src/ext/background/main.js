@@ -78,8 +78,8 @@ async function setBadgeCount() {
 		"global_active",
 		"toolbar_badge_count",
 	]);
-	if (settings.global_active === false) return clearBadge();
-	if (settings.toolbar_badge_count === false) return clearBadge();
+	if (settings["global_active"] === false) return clearBadge();
+	if (settings["toolbar_badge_count"] === false) return clearBadge();
 
 	const currentTab = await browser.tabs.getCurrent();
 	// no active tabs exist (user closed all windows)
@@ -297,6 +297,9 @@ async function handleMessage(request, sender, sendResponse) {
 			// send request to swift layer to provide code for page url
 			const message = { name: "REQ_USERSCRIPTS", url, isTop };
 			const response = await sendNativeMessage(message);
+			if (import.meta.env.MODE === "development") {
+				console.debug("REQ_USERSCRIPTS", message, response);
+			}
 			// if request failed, send error to content script for logging
 			if (response.error) return sendResponse(response);
 			// sort files

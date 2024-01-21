@@ -38,19 +38,22 @@
 		"message": "Toggles on/off auto closing of brackets in the editor, this affects the following characters: () [] {} \"\" ''"
 	},
 	"settings_editor_javascript_lint": {
-		"message": "Javascript Linter"
+		"message": "JavaScript Linter"
 	},
 	"settings_editor_javascript_lint_desc": {
-		"message": "Toggles basic Javascript linting within the editor"
+		"message": "Toggles the basic javascript linting within the editor"
 	},
 	"settings_editor_list_descriptions": {
-		"message": "Show List Descriptions"
+		"message": "Sidebar Item Descriptions"
 	},
 	"settings_editor_list_descriptions_desc": {
 		"message": "Show or hides the item descriptions in the sidebar"
 	},
 	"settings_editor_list_sort": {
-		"message": "Sort order"
+		"message": "Sidebar Item Sort Order"
+	},
+	"settings_editor_list_sort_desc": {
+		"message": "Display order of items in the sidebar"
 	},
 	"settings_editor_list_sort_nameAsc": {
 		"message": "Scripts Name: Asc"
@@ -64,11 +67,8 @@
 	"settings_editor_list_sort_lastModifiedDesc": {
 		"message": "Last Modified: Desc"
 	},
-	"settings_editor_list_sort_desc": {
-		"message": "Display order of items in sidebar"
-	},
 	"settings_editor_show_whitespace": {
-		"message": "Show whitespace characters"
+		"message": "Show Whitespace Characters"
 	},
 	"settings_editor_show_whitespace_desc": {
 		"message": "Toggles the display of invisible characters in the editor"
@@ -86,10 +86,13 @@
 		"message": "Toggle on/off script injection for the pages you visit"
 	},
 	"settings_global_exclude_match": {
-		"message": "Global exclude match patterns"
+		"message": "Global Exclude Match patterns"
 	},
 	"settings_global_exclude_match_desc": {
 		"message": "This input accepts a whitespace (spaces, newlines etc.) separated list of @match patterns, a page url that matches against a pattern in this list will be ignored for script injection"
+	},
+	"settings_global_exclude_match_done": {
+		"message": "Done"
 	},
 	"settings_global_exclude_match_saving": {
 		"message": "Saving..."
@@ -100,41 +103,29 @@
 	"settings_global_exclude_match_refer": {
 		"message": "Please refer to:"
 	},
-	"settings_global_scripts_update_check": {
-		"message": "Global scripts update check"
-	},
-	"settings_global_scripts_update_check_desc": {
-		"message": "Whether to enable global periodic script update check"
-	},
-	"settings_scripts_settings": {
-		"message": "Scripts update check active"
-	},
-	"settings_scripts_settings_desc": {
-		"message": "Whether to enable each single script update check"
-	},
 	"settings_scripts_update_automation": {
-		"message": "Scripts updates automatically"
+		"message": "Scripts Updates Automatically"
 	},
 	"settings_scripts_update_automation_desc": {
 		"message": "Script silently auto-updates in the background, which is dangerous and may introduce unconfirmed malicious code"
 	},
 	"settings_scripts_update_check_interval": {
-		"message": "Scripts update check interval"
+		"message": "Scripts Update Check Interval"
 	},
 	"settings_scripts_update_check_interval_desc": {
-		"message": "The interval for script update check in background (days)"
+		"message": "Disable or set user scripts update check interval (days)"
 	},
 	"settings_scripts_update_check_interval_0": {
 		"message": "Never"
 	},
 	"settings_scripts_update_check_lasttime": {
-		"message": "Scripts update check lasttime"
+		"message": "Scripts Update Check Lasttime"
 	},
 	"settings_scripts_update_check_lasttime_desc": {
 		"message": "The lasttime for script update check in background"
 	},
 	"settings_settings_sync": {
-		"message": "Sync settings"
+		"message": "Sync Settings"
 	},
 	"settings_settings_sync_desc": {
 		"message": "Sync settings across devices"

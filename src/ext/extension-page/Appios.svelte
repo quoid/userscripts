@@ -9,6 +9,9 @@
 
 	const logger = [];
 
+	/** @type {"ios"|"ipados"} */
+	let platform = "ios";
+
 	$: $log.some((item) => {
 		if (!logger.includes(item)) {
 			// eslint-disable-next-line no-console -- not arbitrary console command
@@ -21,6 +24,7 @@
 		log.add("Requesting initialization data", "info", false);
 		const initData = await sendNativeMessage({ name: "PAGE_INIT_DATA" });
 		if (initData.error) return console.error(initData.error);
+		if (initData.platform === "ipados") platform = "ipados";
 		await settings.init(initData);
 		state.remove("init");
 		state.loadUrlState();
@@ -46,7 +50,7 @@
 	{/each}
 </ul>
 {#if $state.includes("settings")}
-	<Settings platform="ios" />
+	<Settings {platform} />
 {/if}
 
 <style>

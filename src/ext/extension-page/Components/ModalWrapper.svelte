@@ -58,11 +58,7 @@
 			</nav>
 		{/if}
 		<div class="close">
-			<IconButton
-				icon={iconClose}
-				on:click={closeHandler}
-				title="Close settings"
-			/>
+			<IconButton icon={iconClose} on:click={closeHandler} title="Close" />
 		</div>
 		<div class="scroll">
 			<svelte:component this={component} {...componentProps} {navRegister} />
