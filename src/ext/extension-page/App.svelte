@@ -59,8 +59,6 @@
 			window.location.reload();
 		}
 	});
-
-	const settingsProps = { nativePort, platform: "macos" };
 </script>
 
 <svelte:window on:keydown={preventKeyCommands} />
@@ -86,11 +84,9 @@
 	{/each}
 </ul>
 {#if $state.includes("settings")}
-	<ModalWrapper
-		component={Settings}
-		componentProps={settingsProps}
-		closeHandler={() => state.remove("settings")}
-	/>
+	<ModalWrapper closeHandler={() => state.remove("settings")} let:navRegister>
+		<Settings platform="macos" {nativePort} {navRegister} />
+	</ModalWrapper>
 {/if}
 
 <style>

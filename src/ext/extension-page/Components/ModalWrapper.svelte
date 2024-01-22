@@ -1,6 +1,4 @@
 <script>
-	export let component;
-	export let componentProps;
 	export let closeHandler;
 	import { fade, fly } from "svelte/transition";
 	import IconButton from "../../shared/Components/IconButton.svelte";
@@ -36,6 +34,7 @@
 	in:fade={{ duration: 150 }}
 	out:fade={{ duration: 150, delay: 75 }}
 >
+	<!-- This is just an auxiliary close method, no need to consider a11y -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="mask" on:click|self={closeHandler}></div>
@@ -61,7 +60,7 @@
 			<IconButton icon={iconClose} on:click={closeHandler} title="Close" />
 		</div>
 		<div class="scroll">
-			<svelte:component this={component} {...componentProps} {navRegister} />
+			<slot {navRegister} />
 		</div>
 	</div>
 </div>
