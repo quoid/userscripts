@@ -656,8 +656,8 @@
 		transform: scale(0.9);
 	}
 
-	.header :global(label) {
-		font-size: 1.25rem !important;
+	.header :global(button:nth-of-type(4)) {
+		--toggle-font-size: 1.25rem;
 	}
 
 	.error,

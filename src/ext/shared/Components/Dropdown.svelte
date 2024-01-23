@@ -76,7 +76,7 @@
 		padding: 0.5rem 1rem;
 	}
 
-	.active :global(button) {
+	.active :global(button svg) {
 		opacity: 1;
 	}
 

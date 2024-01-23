@@ -23,7 +23,7 @@
 	const items = Object.values(settingsStorage.settingsDictionary);
 
 	/** @type {settingsStorage.Group[]} settings group names */
-	let groups = ["general", "editor"];
+	let groups = ["editor", "general"];
 	if (platform !== "macos") {
 		groups = ["general"];
 	}
@@ -251,7 +251,6 @@
 				{@const ariaAttributes = {
 					"aria-labelledby": `${item.name}_label`,
 					"aria-describedby": `${item.name}_desc`,
-					tabindex: 0,
 				}}
 				<div class="section__row {item.name}" class:disable={item.disable}>
 					<div
@@ -287,10 +286,7 @@
 						</select>
 					{/if}
 					{#if indicators.resetting && !indicators.saving[item.name] && !item.protect && (item.name !== "global_exclude_match" || !gemFocused)}
-						<button
-							{...ariaAttributes}
-							class="reset"
-							on:click={() => reset(item.name)}
+						<button class="reset" on:click={() => reset(item.name)}
 							>{gl("settings_section_tools_reset_single")}</button
 						>
 					{/if}
@@ -301,7 +297,7 @@
 							{gl(`settings_${item.name}_saving`)}
 						{/if}
 						{#if gemFocused}
-							<button {...ariaAttributes} tabindex="-1" class="done"
+							<button tabindex="-1" class="done"
 								>{gl("settings_global_exclude_match_done")}</button
 							>
 						{/if}
@@ -572,7 +568,7 @@
 	}
 
 	.global_exclude_match_refer {
-		padding: 0.25rem 0 0;
+		padding: 0.5rem 0 0;
 		font: var(--text-small);
 	}
 

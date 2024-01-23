@@ -94,14 +94,13 @@
 		background-color: var(--color-bg-secondary);
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);
-		max-height: 90%;
 		width: 35rem;
 		z-index: 99;
 		position: relative;
 	}
 
 	.scroll {
-		height: stretch;
+		max-height: calc(100svh - 5rem);
 		overflow-y: auto;
 		overscroll-behavior: none;
 	}
