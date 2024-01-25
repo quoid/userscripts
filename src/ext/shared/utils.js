@@ -252,7 +252,7 @@ export function checkMatchPatterns(input) {
 		labels = host.split(".");
 	}
 	if (hostPart.includes("*")) {
-		// The `*` should be independent or `*.` at the start
+		// The `*` in host component should be independent or `*.` at the start
 		result.point = gl("utils_check_match_patterns_6");
 		return result;
 	}

@@ -1,0 +1,240 @@
+{
+	"extension_description": {
+		"message": "使用者腳本和樣式管理器",
+		"description": "Description of what the extension does."
+	},
+	"settings": {
+		"message": "設定"
+	},
+	"settings_section_editor": {
+		"message": "編輯器設定"
+	},
+	"settings_section_general": {
+		"message": "一般設定"
+	},
+	"settings_section_native": {
+		"message": "本地設定"
+	},
+	"settings_section_tools": {
+		"message": "工具"
+	},
+	"settings_section_about": {
+		"message": "關於"
+	},
+	"settings_editor_auto_hint": {
+		"message": "自動提示（Hint）"
+	},
+	"settings_editor_auto_hint_desc": {
+		"message": "編輯時自動顯示完成提示"
+	},
+	"settings_editor_close_brackets": {
+		"message": "自動關閉括號"
+	},
+	"settings_editor_close_brackets_desc": {
+		"message": "在編輯器中啟用自動關閉括號，這會影響以下字元：() [] {} \"\" ''"
+	},
+	"settings_editor_javascript_lint": {
+		"message": "JavaScript Linter"
+	},
+	"settings_editor_javascript_lint_desc": {
+		"message": "在編輯器中啟用基本的 JavaScript Linting（程式碼檢查）"
+	},
+	"settings_editor_list_descriptions": {
+		"message": "側欄項目描述"
+	},
+	"settings_editor_list_descriptions_desc": {
+		"message": "顯示或隱藏側邊欄中項目的描述"
+	},
+	"settings_editor_list_sort": {
+		"message": "側欄項目排序"
+	},
+	"settings_editor_list_sort_desc": {
+		"message": "側邊欄中項目的顯示順序"
+	},
+	"settings_editor_list_sort_nameAsc": {
+		"message": "項目名稱: 升序"
+	},
+	"settings_editor_list_sort_nameDesc": {
+		"message": "項目名稱: 降序"
+	},
+	"settings_editor_list_sort_lastModifiedAsc": {
+		"message": "最後修改: 升序"
+	},
+	"settings_editor_list_sort_lastModifiedDesc": {
+		"message": "最後修改: 降序"
+	},
+	"settings_editor_show_whitespace": {
+		"message": "顯示空白字元"
+	},
+	"settings_editor_show_whitespace_desc": {
+		"message": "切換編輯器中不可見字元的顯示"
+	},
+	"settings_editor_tab_size": {
+		"message": "製表符大小"
+	},
+	"settings_editor_tab_size_desc": {
+		"message": "選擇渲染程式碼時製表符等於的空格數"
+	},
+	"settings_global_active": {
+		"message": "啟用注入"
+	},
+	"settings_global_active_desc": {
+		"message": "全域性腳本注入的開啟或關閉"
+	},
+	"settings_global_exclude_match": {
+		"message": "全域性排除匹配模式列表"
+	},
+	"settings_global_exclude_match_desc": {
+		"message": "此輸入接受以空白符（空格、換行等）分隔的 @match 模式列表，與此列表中的模式匹配的頁面 URL 將在腳本注入時被忽略"
+	},
+	"settings_global_exclude_match_done": {
+		"message": "完成"
+	},
+	"settings_global_exclude_match_saving": {
+		"message": "儲存中..."
+	},
+	"settings_global_exclude_match_placeholder": {
+		"message": "@match 模式列表，例如：\n*://*/*foo.bar\n*://*/*foo.bar?*\n*://*.example.net/*\nhttps://example.net/*/foo/*/\nhttps://*.example.net/a/b/c/?foo=/"
+	},
+	"settings_global_exclude_match_refer": {
+		"message": "匹配模式結構請參考："
+	},
+	"settings_scripts_update_automation": {
+		"message": "自動更新腳本"
+	},
+	"settings_scripts_update_automation_desc": {
+		"message": "腳本在後臺靜默自動更新，這是危險的，可能引入未經確認的惡意程式碼"
+	},
+	"settings_scripts_update_check_interval": {
+		"message": "腳本更新檢查間隔"
+	},
+	"settings_scripts_update_check_interval_desc": {
+		"message": "禁用或設定使用者腳本更新檢查間隔（天）"
+	},
+	"settings_scripts_update_check_interval_0": {
+		"message": "從不"
+	},
+	"settings_scripts_update_check_lasttime": {
+		"message": "腳本更新上次檢查時間"
+	},
+	"settings_scripts_update_check_lasttime_desc": {
+		"message": "後臺腳本更新檢查上次時間"
+	},
+	"settings_settings_sync": {
+		"message": "同步設定"
+	},
+	"settings_settings_sync_desc": {
+		"message": "跨裝置同步設定"
+	},
+	"settings_toolbar_badge_count": {
+		"message": "工具欄圖示顯示計數徽章"
+	},
+	"settings_toolbar_badge_count_desc": {
+		"message": "在工具欄圖示上顯示一個徽章，其中的數字代表有多少個已啟用的腳本與您所在頁面的 URL 匹配"
+	},
+	"settings_scripts_directory": {
+		"message": "儲存位置"
+	},
+	"settings_scripts_directory_desc": {
+		"message": "儲存使用者腳本的資料夾路徑"
+	},
+	"settings_set_scripts_directory": {
+		"message": "更改儲存位置"
+	},
+	"settings_section_tools_import": {
+		"message": "匯入"
+	},
+	"settings_section_tools_export": {
+		"message": "匯出"
+	},
+	"settings_section_tools_reset": {
+		"message": "還原"
+	},
+	"settings_section_tools_goback": {
+		"message": "返回"
+	},
+	"settings_section_tools_reset_all": {
+		"message": "還原所有設定"
+	},
+	"settings_section_tools_reset_single": {
+		"message": "還原"
+	},
+	"settings_section_tools_reset_section": {
+		"message": "還原該組"
+	},
+	"settings_scripts_tools_desc": {
+		"message": "這些工具可以幫助您匯入和匯出“設定資料”。重置單個、一組或所有設定。"
+	},
+	"settings_about_text1": {
+		"message": "獲取有關此延伸功能的更多資訊，請訪問本開源項目："
+	},
+	"settings_about_text2": {
+		"message": "如果您喜歡使用此延伸功能，請考慮在 App Store 上留下您的評論或註冊 Beta 測試新版本："
+	},
+	"settings_about_button_repo": {
+		"message": "代碼庫"
+	},
+	"settings_about_button_docs": {
+		"message": "文件"
+	},
+	"settings_about_button_issues": {
+		"message": "報告錯誤"
+	},
+	"settings_about_button_store": {
+		"message": "在 App Store 中開啟"
+	},
+	"settings_about_button_beta": {
+		"message": "註冊 Beta 測試版"
+	},
+	"utils_check_match_patterns_0": {
+		"message": "此匹配模式將匹配所有 URL"
+	},
+	"utils_check_match_patterns_1": {
+		"message": "這 scheme 部分應當為 *、https、http 之一"
+	},
+	"utils_check_match_patterns_2": {
+		"message": "這 scheme 和 host 部分應當用 `://` 分隔"
+	},
+	"utils_check_match_patterns_3": {
+		"message": "匹配模式缺少 path 部分（至少應當有`/`)"
+	},
+	"utils_check_match_patterns_4": {
+		"message": "這 `*.` 後面應當跟隨主機名的一部分"
+	},
+	"utils_check_match_patterns_5": {
+		"message": "這 host 部分長度應當為 1-255"
+	},
+	"utils_check_match_patterns_6": {
+		"message": "這 host 部分中的 `*` 應該是獨立的或為 `*.` 在開頭"
+	},
+	"utils_check_match_patterns_7": {
+		"message": "這 host 部分包含一個或多個空標籤"
+	},
+	"utils_check_match_patterns_8": {
+		"message": "主機名標籤不能以 `-` 字元開頭或結尾"
+	},
+	"utils_check_match_patterns_9": {
+		"message": "主機名標籤最大長度不能超過 63"
+	},
+	"utils_check_match_patterns_10": {
+		"message": "這 host 部分包含無效字元：$1"
+	},
+	"utils_check_match_patterns_11": {
+		"message": "這 path 部分包含無效字元：$1"
+	},
+	"msg_invalid_match_pattern": {
+		"message": "無效的匹配模式"
+	},
+	"msg_invalid_backup_file": {
+		"message": "無效的備份檔案"
+	},
+	"msg_backup_import_finish": {
+		"message": "匯入完成！✅"
+	},
+	"msg_backup_import_failed": {
+		"message": "匯入失敗，請在控制檯中檢查錯誤日誌"
+	},
+	"msg_settings_reset_finish": {
+		"message": "還原所有設定完成！✅"
+	}
+}

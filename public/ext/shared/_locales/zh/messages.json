@@ -205,7 +205,7 @@
 		"message": "这 host 部分长度应当为 1-255"
 	},
 	"utils_check_match_patterns_6": {
-		"message": "这 `*` 应该是独立的或者为 `*.` 在开头"
+		"message": "这 host 部分中的 `*` 应该是独立的或为 `*.` 在开头"
 	},
 	"utils_check_match_patterns_7": {
 		"message": "这 host 部分包含一个或多个空标签"

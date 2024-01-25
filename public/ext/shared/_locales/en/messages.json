@@ -209,7 +209,7 @@
 		"message": "The host component length should be 1-255"
 	},
 	"utils_check_match_patterns_6": {
-		"message": "The `*` should be independent or `*.` at the start"
+		"message": "The `*` in host component should be independent or `*.` at the start"
 	},
 	"utils_check_match_patterns_7": {
 		"message": "The host component contains empty label(s)"
