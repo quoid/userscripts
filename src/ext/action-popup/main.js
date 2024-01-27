@@ -8,11 +8,12 @@ if (import.meta.env.MODE === "development") {
 	const modules = import.meta.glob("../shared/dev.js", { eager: true });
 	const browser = modules["../shared/dev.js"]["browser"];
 	console.debug("DEV-ENV", import.meta.env, modules, browser);
-	// assign to window simulation WebExtension APIs
-	window.browser = browser;
-	// macos popup simulation
-	const style = document.createElement("style");
-	style.textContent = `
+	if (!window?.browser?.extension) {
+		// assign to window simulation WebExtension APIs
+		window.browser = browser;
+		// macos popup simulation
+		const style = document.createElement("style");
+		style.textContent = `
 body {
 	top: 20px;
 	left: 20px;
@@ -32,7 +33,8 @@ body:before {
 	border-radius: 9px;
 }
 `;
-	browser.platform === "macos" && document.head.append(style);
+		browser.platform === "macos" && document.head.append(style);
+	}
 }
 
 const app = new App({

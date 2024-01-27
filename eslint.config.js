@@ -14,13 +14,17 @@ import prettier from "eslint-config-prettier";
 import globals from "globals";
 
 export default [
-	// https://eslint.org/docs/latest/use/configure/configuration-files-new#using-predefined-configurations
-	// https://github.com/eslint/eslint/tree/main/packages/js
+	/**
+	 * @see {@link https://eslint.org/docs/latest/use/configure/configuration-files-new#using-predefined-configurations}
+	 * @see {@link https://github.com/eslint/eslint/tree/main/packages/js}
+	 */
 	js.configs.recommended,
 
-	// https://github.com/sveltejs/eslint-plugin-svelte
-	// currently no official svelte/recommended flat config
-	// flatten and call it through a custom config object
+	/**
+	 * @see {@link https://github.com/sveltejs/eslint-plugin-svelte}
+	 * currently no official svelte/recommended flat config
+	 * flatten and call it through a custom config object
+	 */
 	{
 		files: ["**/*.svelte"],
 		languageOptions: {
@@ -36,20 +40,38 @@ export default [
 		},
 	},
 
-	// https://github.com/prettier/eslint-config-prettier
-	// turns off the conflict rules, put it last
+	/**
+	 * @see {@link https://github.com/prettier/eslint-config-prettier}
+	 * turns off the conflict rules, put it last
+	 */
 	prettier,
 
-	// custom config objects
+	/** custom config objects */
 
-	// https://eslint.org/docs/latest/use/configure/configuration-files-new#globally-ignoring-files-with-ignores
+	/** @see {@link https://eslint.org/docs/latest/use/configure/configuration-files-new#globally-ignoring-files-with-ignores} */
 	{
 		ignores: ["**/dist/", "**/build/", "etc/", "xcode/", "public/"],
 	},
 
-	// https://eslint.org/docs/latest/use/configure/migration-guide#configuring-language-options
+	/** @see {@link https://eslint.org/docs/latest/use/configure/migration-guide#configuring-language-options} */
 	{
-		files: ["src/**/*.{js,svelte}"],
+		files: ["scripts/**/*.js"],
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
+		},
+	},
+	{
+		files: ["src/{app,dev}/**/*.{js,svelte}"],
+		languageOptions: {
+			globals: {
+				...globals.browser,
+			},
+		},
+	},
+	{
+		files: ["src/ext/**/*.{js,svelte}"],
 		languageOptions: {
 			globals: {
 				...globals.browser,

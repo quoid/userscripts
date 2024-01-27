@@ -24,6 +24,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
             // https://developer.apple.com/documentation/webkit/wkwebview/4111163-inspectable/
             self.webView.isInspectable = true
         }
+        logger?.debug("\(#function, privacy: .public) - DEBUG mode: isInspectable = true")
 #endif
         view = webView
         self.webView.scrollView.isScrollEnabled = false

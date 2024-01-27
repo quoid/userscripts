@@ -8,6 +8,7 @@ GENERATE_INFOPLIST_FILE = YES
 INFOPLIST_FILE = $(SRC_DIR)/Info.plist
 INFOPLIST_KEY_CFBundleDisplayName = $(PROJECT_NAME)
 INFOPLIST_KEY_CFBundleDisplayName[config=Debug] = $(PROJECT_NAME)-D
+INFOPLIST_KEY_CFBundleDisplayName[config=Vite] = $(PROJECT_NAME)-V
 INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES
 INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen
 INFOPLIST_KEY_UIMainStoryboardFile = Main

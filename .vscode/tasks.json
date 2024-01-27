@@ -23,33 +23,86 @@
 			}
 		},
 		{
-			"label": "npm: build",
-			"detail": "Build to xcode dist path",
+			"label": "npm: dev ext-safari-mac",
+			"detail": "Run dev server and build dev resource to xcode dist",
 			"type": "shell",
-			"command": "npm run build",
+			"command": "npm run dev:ext-safari-mac",
 			"group": "build",
 			"options": {
 				"cwd": "./"
 			}
 		},
 		{
-			"label": "xcode: build",
-			"detail": "xcodebuild",
+			"label": "npm: dev ext-safari-ios",
+			"detail": "Run dev server and build dev resource to xcode dist",
 			"type": "shell",
-			"command": "xcodebuild -scheme Userscripts build",
+			"command": "npm run dev:ext-safari-ios",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: build mac",
+			"detail": "Build to xcode dist path",
+			"type": "shell",
+			"command": "npm run build:mac",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: build ios",
+			"detail": "Build to xcode dist path",
+			"type": "shell",
+			"command": "npm run build:ios",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "xcodebuild: mac-debug",
+			"detail": "xcodebuild mac debug",
+			"type": "shell",
+			"command": "xcodebuild -scheme Mac -configuration Debug",
 			"group": "build",
 			"options": {
 				"cwd": "./xcode/"
 			}
 		},
 		{
-			"label": "build all",
-			"detail": "npm build + xcodebuild",
+			"label": "xcodebuild: mac-vite",
+			"detail": "xcodebuild mac vite",
+			"type": "shell",
+			"command": "xcodebuild -scheme Mac-Vite-Dev -configuration Vite",
+			"group": "build",
+			"options": {
+				"cwd": "./xcode/"
+			}
+		},
+		{
+			"label": "dev: ext-safari-mac",
+			"detail": "npm: dev ext-safari-mac + xcodebuild: mac-vite",
 			"presentation": {
 				"reveal": "silent"
 			},
 			"dependsOrder": "sequence",
-			"dependsOn": ["npm: build", "xcode: build"],
+			"dependsOn": ["npm: dev ext-safari-mac", "xcodebuild: mac-vite"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "build: mac debug",
+			"detail": "npm: build mac + xcodebuild: mac-debug",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"dependsOrder": "sequence",
+			"dependsOn": ["npm: build mac", "xcodebuild: mac-debug"],
 			"group": {
 				"kind": "build",
 				"isDefault": true

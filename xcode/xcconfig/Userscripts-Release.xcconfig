@@ -6,6 +6,8 @@ IOS_APP_VERSION = 1.5.0
 MAC_APP_BUILD = 83
 MAC_APP_VERSION = 4.5.0
 
+// Development
+CODE_SIGN_IDENTITY = Apple Development
 // Developer Team ID
 DEVELOPMENT_TEAM = J74Q8V8V8N
 // Organization Identifier

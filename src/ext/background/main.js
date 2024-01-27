@@ -321,7 +321,7 @@ async function handleMessage(request, sender, sendResponse) {
 		}
 		case "API_ADD_STYLE": {
 			const tabId = sender.tab.id;
-			/** @type {{code: string, cssOrigin: "user"|"author"}} */
+			/** @type {import("webextension-polyfill").ExtensionTypes.InjectDetails} */
 			const details = { code: request.css, cssOrigin: "user" };
 			return browser.tabs.insertCSS(tabId, details);
 		}

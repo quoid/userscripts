@@ -1,0 +1,26 @@
+// https://code.visualstudio.com/docs/languages/jsconfig
+// https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
+// https://www.typescriptlang.org/tsconfig
+
+// https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html
+// https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
+
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
+
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"resolveJsonModule": true,
+
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"sourceMap": true
+	},
+	"include": ["**/*.d.ts", "**/*.js"]
+}

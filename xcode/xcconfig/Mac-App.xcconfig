@@ -9,11 +9,13 @@ GENERATE_INFOPLIST_FILE = YES
 INFOPLIST_FILE = $(SRC_DIR)/Info.plist
 INFOPLIST_KEY_CFBundleDisplayName = $(PROJECT_NAME)-$(TARGET_NAME)
 INFOPLIST_KEY_CFBundleDisplayName[config=Debug] = $(PROJECT_NAME)-$(TARGET_NAME)-Debug
+INFOPLIST_KEY_CFBundleDisplayName[config=Vite] = $(PROJECT_NAME)-$(TARGET_NAME)-Vite
 LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
 MARKETING_VERSION = $(MAC_APP_VERSION)
 PRODUCT_BUNDLE_IDENTIFIER = $(APP_IDENTIFIER)
 PRODUCT_NAME = $(PROJECT_NAME)
 PRODUCT_NAME[config=Debug] = $(PROJECT_NAME)-Debug
+PRODUCT_NAME[config=Vite] = $(PROJECT_NAME)-Vite
 
 // Override this file
 #include? "Mac-App.dev.xcconfig"

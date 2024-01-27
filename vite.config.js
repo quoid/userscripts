@@ -1,34 +1,25 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 
-// [inline-svg]
-// TODO: remove this once vite resolved issue
-// https://github.com/vitejs/vite/issues/1204
-// import fs from "fs";
-// import svgpkg from "svg-inline-loader";
-// export function svgInline() { // custom plugin
-//     return {
-//         name: "transform-file",
-//         transform(code, id) {
-//             if (id.endsWith(".svg")) {
-//                 const svg = fs.readFileSync(id, "utf8");
-//                 const ret = svgpkg.getExtractedSVG(svg, {});
-//                 return `export default '${ret}'`;
-//             }
-//         }
-//     };
-// }
-// [inline-svg]
-// NOW: use `?raw` suffix import svg assets as inline
-// https://vitejs.dev/guide/assets.html#importing-asset-as-string
+/**
+ * About `inline-svg`
+ * use `?raw` suffix import svg assets as inline
+ * @see {@link https://vitejs.dev/guide/assets.html#importing-asset-as-string}
+ * Ignore lint errors `{@html}`, since these are deterministic local svg resources,
+ * there is no risk of Cross-Site Scripting (XSS) attacks and can be safely disabled.
+ * @see {@link https://sveltejs.github.io/eslint-plugin-svelte/rules/no-at-html-tags/}
+ */
 
-// [autoprefixer]
-// https://vitejs.dev/guide/features.html#postcss
-// have config with `.postcssrc.json` file
-// about `missing peer postcss` error, ignore it
+/**
+ * About `autoprefixer`
+ * have config with `.postcssrc.json` file
+ * @see {@link https://vitejs.dev/guide/features.html#postcss}
+ * about `missing peer postcss` error, ignore it
+ */
 
-// https://vitejs.dev/config/
+/** @see {@link https://vitejs.dev/config/} */
 export default defineConfig({
+	publicDir: "public/ext/vendor/",
 	plugins: [svelte()],
 	base: "./",
 });

@@ -25,17 +25,18 @@ Reviewing the template will help you understand the composition of the project.
 
 # Dev
 
-- `npm install`[^1]
-- `npm run dev`[^1]
+- `npm install` [^1]
+- `npm run dev` [^1]
 
 # Build
 
-- `npm run build`[^1]
+- `npm run build:mac` [^1][^2]
 - `cd ./xcode`
-- `xcodebuild`[^1][^2] or build with `Xcode` App
+- `xcodebuild -scheme Mac` [^1][^2][^3] or build with `Xcode` App
 
 [^1]: These commands can also be executed directly through the vscode tasks. Please refer to: [/.vscode/tasks.json](../.vscode/tasks.json)
-[^2]: Local setup may be required. Please refer to: [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
+[^2]: Select the corresponding target and platform to build. Please refer to: [/package.json](../package.json) and [xcode-schemes](../xcode/Userscripts.xcodeproj/xcshareddata/xcschemes/)
+[^3]: Local setup may be required. Please refer to: [Building from the Command Line with Xcode FAQ](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 # Xcode
 
