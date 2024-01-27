@@ -60,6 +60,7 @@ class UserscriptsTests: XCTestCase {
             "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js",
             "https://cdn.frankerfacez.com/static/ffz_injector.user.js",
             "http://www.k21p.com/example.user.js", // add http protocol
+            "https://example.test/%%%test.user.js", // removingPercentEncoding -> nil
             "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js"
         ]
         var result = [String]()
@@ -73,20 +74,25 @@ class UserscriptsTests: XCTestCase {
     }
     
     func testGetRemoteFileContents() throws {
-        let urls = [
+        var urls:[String] = [
             "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect%20外链跳转.user.js",
             "https://greasyfork.org/scripts/416338-redirect-外链跳转/code/redirect 外链跳转.user.js",
+            "https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=",
             "https://raw.githubusercontent.com/Anarios/return-youtube-dislike/main/Extensions/UserScript/Return%20Youtube%20Dislike.user.js",
             "https://cdn.frankerfacez.com/static/ffz_injector.user.js",
             "http://www.k21p.com/example.user.js" // add http protocol
         ]
-        var result = [String]()
+        if #available(macOS 14.0, iOS 17.0, *) {
+            urls += [
+                "https://☁️.com/", // IDN / Non-Punycode-encoded domain name
+            ]
+        }
         for url in urls {
-            if let contents = getRemoteFileContents(url) {
-                result.append(contents)
+            if getRemoteFileContents(url) == nil {
+                print(#function, url)
+                XCTAssert(false)
             }
         }
-        XCTAssert(result.count == urls.count)
     }
     
     func testFileRemoteUpdate() throws {
@@ -118,13 +124,12 @@ class UserscriptsTests: XCTestCase {
     }
     
     func testMatching() throws {
-        var count = 0
-        var result = [String]()
         let patternDict = [
             "*://*/*": [
                 "https://www.bing.com/",
                 "https://example.org/foo/bar.html",
-                "https://a.org/some/path/"
+                "https://a.org/some/path/",
+                "https://☁️.com/"
             ],
             "*://*.mozilla.org/*": [
                 "http://mozilla.org/",
@@ -174,22 +179,21 @@ class UserscriptsTests: XCTestCase {
             ]
         ]
         for (pattern, urls) in patternDict {
-            count = count + urls.count
             for url in urls {
-                if match(url, pattern) {
-                    result.append("1")
+                if !match(url, pattern) {
+                    print(#function, "patternDict", url, pattern)
+                    XCTAssert(false)
                 }
             }
         }
         for (pattern, urls) in patternDictFails {
-            // don't increment count since these tests should fail
             for url in urls {
                 if match(url, pattern) {
-                    result.removeLast()
+                    print(#function, "patternDictFails", url, pattern)
+                    XCTAssert(false)
                 }
             }
         }
-        XCTAssert(result.count == count)
     }
 
     func testPerformanceExample() throws {

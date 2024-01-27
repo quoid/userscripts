@@ -77,29 +77,12 @@ func openSaveLocation() -> Bool {
 }
 
 func validateUrl(_ urlString: String) -> Bool {
-    var urlChecked = urlString
-    // if the url is already encoded, decode it
-    if isEncoded(urlChecked) {
-        if let decodedUrl = urlChecked.removingPercentEncoding {
-            urlChecked = decodedUrl
-        } else {
-            logger?.error("\(#function, privacy: .public) - failed at (1), couldn't decode url, \(urlString, privacy: .public)")
-            return false
-        }
-    }
-    // encode all urls strings
-    if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-        urlChecked = encodedUrl
-    } else {
-        logger?.error("\(#function, privacy: .public) - failed at (2), couldn't percent encode url, \(urlString, privacy: .public)")
-        return false
-    }
     guard
-        let parts = getUrlProps(urlChecked),
+        let parts = jsLikeURL(urlString),
         let ptcl = parts["protocol"],
         let path = parts["pathname"]
     else {
-        logger?.error("\(#function, privacy: .public) - failed at (3) for \(urlString, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - Invalid URL: \(urlString, privacy: .public)")
         return false
     }
     if
@@ -129,7 +112,10 @@ func isVersionNewer(_ oldVersion: String, _ newVersion: String) -> Bool {
 }
 
 func isEncoded(_ str: String) -> Bool {
-    return str.removingPercentEncoding != str
+    if let decoded = str.removingPercentEncoding {
+        return decoded != str
+    }
+    return false
 }
 
 // parser
@@ -888,25 +874,9 @@ func getRemoteFileContents(_ url: String) -> String? {
         urlChecked = urlChecked.replacingOccurrences(of: "http:", with: "https:")
         logger?.info("\(#function, privacy: .public) - \(url, privacy: .public) is using insecure http, attempt to fetch remote content with https")
     }
-    // if the url is already encoded, decode it
-    if isEncoded(urlChecked) {
-        if let decodedUrl = urlChecked.removingPercentEncoding {
-            urlChecked = decodedUrl
-        } else {
-            logger?.error("\(#function, privacy: .public) - failed at (1), couldn't decode url, \(url, privacy: .public)")
-            return nil
-        }
-    }
-    // encode all urls strings
-    if let encodedUrl = urlChecked.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-        urlChecked = encodedUrl
-    } else {
-        logger?.error("\(#function, privacy: .public) - failed at (2), couldn't percent encode url, \(url, privacy: .public)")
-        return nil
-    }
     // convert url string to url
-    guard let solidURL = URL(string: urlChecked) else {
-        logger?.error("\(#function, privacy: .public) - failed at (3), couldn't convert string to url, \(url, privacy: .public)")
+    guard let solidURL = fixedURL(string: urlChecked) else {
+        logger?.error("\(#function, privacy: .public) - failed at (1), invalid URL: \(url, privacy: .public)")
         return nil
     }
     var contents = ""
@@ -917,7 +887,12 @@ func getRemoteFileContents(_ url: String) -> String? {
         if let r = response as? HTTPURLResponse, data != nil, error == nil {
             if r.statusCode == 200 {
                 contents = String(data: data!, encoding: .utf8) ?? ""
+            } else {
+                logger?.error("\(#function, privacy: .public) - http statusCode (\(r.statusCode, privacy: .public)): \(url, privacy: .public)")
             }
+        }
+        if let error = error {
+            logger?.error("\(#function, privacy: .public) - task error: \(error.localizedDescription, privacy: .public) (\(url, privacy: .public))")
         }
         semaphore.signal()
     }
@@ -925,11 +900,12 @@ func getRemoteFileContents(_ url: String) -> String? {
     // wait 30 seconds before timing out
     if semaphore.wait(timeout: .now() + 30) == .timedOut {
         task?.cancel()
+        logger?.error("\(#function, privacy: .public) - 30 seconds timeout: \(url, privacy: .public)")
     }
 
     // if made it to this point and contents still an empty string, something went wrong with the request
     if contents.isEmpty {
-        logger?.error("\(#function, privacy: .public) - failed at (4), contents empty, \(url, privacy: .public)")
+        logger?.error("\(#function, privacy: .public) - failed at (2), contents empty: \(url, privacy: .public)")
         return nil
     }
     logger?.info("\(#function, privacy: .public) - completed for \(url, privacy: .public)")
@@ -1032,28 +1008,6 @@ func checkDefaultDirectories() -> Bool {
 }
 
 // matching
-func getUrlProps(_ url: String) -> [String: String]? {
-    guard
-        let parts = URLComponents(string: url),
-        let ptcl = parts.scheme,
-        let host = parts.host
-    else {
-        logger?.error("\(#function, privacy: .public) - failed to parse url")
-        return nil
-    }
-    var search = ""
-    if let query = parts.query {
-        search = "?" + query
-    }
-    return [
-        "protocol": "\(ptcl):",
-        "host": host,
-        "pathname": parts.path,
-        "search": search,
-        "href": url
-    ]
-}
-
 func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
     let pattern = #"[\.|\?|\^|\$|\+|\{|\}|\[|\]|\||\\(|\)|\/]"#
     var patternReplace = "^\(stringPattern.replacingOccurrences(of: pattern, with: #"\\$0"#, options: .regularExpression))$"
@@ -1066,9 +1020,9 @@ func stringToRegex(_ stringPattern: String) -> NSRegularExpression? {
 
 func match(_ url: String, _ matchPattern: String) -> Bool {
     guard
-        let parts = getUrlProps(url),
+        let parts = jsLikeURL(url),
         let ptcl = parts["protocol"],
-        let host = parts["host"],
+        let host = parts["hostname"],
         var path = parts["pathname"]
     else {
         logger?.error("\(#function, privacy: .public) - invalid url \(url, privacy: .public)")
