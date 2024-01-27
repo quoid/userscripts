@@ -248,6 +248,7 @@
 				4A57B9ED227235CD008A9763 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
 		};
 		4A57B9ED227235CD008A9763 /* Products */ = {
 			isa = PBXGroup;
