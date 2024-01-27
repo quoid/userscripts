@@ -483,6 +483,12 @@
 			window.location.reload();
 		}
 	});
+
+	/**
+	 * Temporary settings page entrance for beta test (iOS)
+	 * @todo new permanent button will be added via popup refactoring
+	 */
+	let showBetaNews = true;
 </script>
 
 <svelte:window on:resize={resize} />
@@ -515,6 +521,17 @@
 </div>
 {#if !active}
 	<!-- <div class="warn" bind:this={warn}>Injection disabled</div> -->
+{/if}
+{#if showBetaNews && platform !== "macos"}
+	<div class="warn">
+		NEW: <button on:click={openExtensionPage}><b>Settings page</b></button> is
+		now available on iOS!
+		<IconButton
+			icon={iconClear}
+			on:click={() => (showBetaNews = false)}
+			title={"Close"}
+		/>
+	</div>
 {/if}
 {#if showInstallPrompt}
 	<div class="warn" class:done={scriptInstalled} bind:this={warn}>
@@ -672,13 +689,15 @@
 		text-align: center;
 	}
 
-	.error :global(button) {
+	.error :global(button),
+	.warn :global(button:has(svg)) {
 		position: absolute;
 		right: 0.5rem;
 		top: 0;
 	}
 
-	.error :global(button svg) {
+	.error :global(button svg),
+	.warn :global(button svg) {
 		transform: scale(0.5);
 	}
 
