@@ -83,12 +83,18 @@ const files = [
 	...Array.from({ length: 7 }, () => generateFile("js")),
 ];
 
+/** @type {"ios"|"macos"} */
+const platform = "macos";
+
 const _browser = {
 	delay: 200,
-	platform: "macos", // ios || macos
+	platform,
 	runtime: {
 		getURL() {
 			return "https://www.example.com/";
+		},
+		async getPlatformInfo() {
+			return { os: platform };
 		},
 		async sendMessage(message, responseCallback) {
 			const name = message.name;
@@ -473,6 +479,12 @@ const _browser = {
 		},
 		onChanged: {
 			addListener: () => undefined,
+		},
+	},
+	i18n: {
+		getMessage(n, s = undefined) {
+			if (!window["i18nMessages"]) return;
+			return window["i18nMessages"]?.[n]?.message.replace("$1", s);
 		},
 	},
 };

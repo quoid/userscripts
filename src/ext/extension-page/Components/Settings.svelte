@@ -297,6 +297,7 @@
 							{gl(`settings_${item.name}_saving`)}
 						{/if}
 						{#if gemFocused}
+							<!-- Must escape tab nav, otherwise it will cause an infinite loop -->
 							<button tabindex="-1" class="done"
 								>{gl("settings_global_exclude_match_done")}</button
 							>
