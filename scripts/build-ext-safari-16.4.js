@@ -30,8 +30,11 @@ const defineConfig = {
 	root: await rootDir(),
 	base: "./",
 	define: {
-		"import.meta.env.BROWSER": JSON.stringify("safari"),
+		"import.meta.env.BROWSER": JSON.stringify("Safari"),
 		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+		"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
+			process.env.SAFARI_PLATFORM,
+		),
 	},
 };
 
@@ -82,15 +85,6 @@ build({
 });
 
 /** Build shared modules */
-/** @type {import("rollup").InputOption} */
-let input = {
-	// background: "src/ext/background/main.js",
-	"action-popup": "entry-ext-action-popup.html",
-	"extension-page": "entry-ext-extension-page.html",
-};
-if (process.env.SAFARI_PLATFORM === "ios") {
-	delete input["extension-page"];
-}
 build({
 	...defineConfig,
 	plugins: [svelte()],
@@ -99,7 +93,11 @@ build({
 		outDir: `${SAFARI_EXT_RESOURCES}/dist/`,
 		emptyOutDir: false,
 		rollupOptions: {
-			input,
+			input: {
+				// background: "src/ext/background/main.js",
+				"action-popup": "entry-ext-action-popup.html",
+				"extension-page": "entry-ext-extension-page.html",
+			},
 			output: { entryFileNames: "[name].js" },
 		},
 	},

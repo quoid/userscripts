@@ -1,39 +1,38 @@
 <script>
 	export let checked = false;
 	export let disabled = false;
-	export let title;
+	export let title = undefined;
+	export let ariaAttributes = {};
 </script>
 
-<!-- prevent toggle label clicks from triggering parent element on:click -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<label on:click|stopPropagation={() => {}} class:disabled {title}>
-	<input type="checkbox" on:click|stopPropagation bind:checked {disabled} />
-	<span></span>
-</label>
+<!-- prevent toggle button clicks from triggering parent element on:click -->
+<button
+	on:click|stopPropagation
+	{...ariaAttributes}
+	aria-pressed={checked}
+	{disabled}
+	{title}
+>
+	<span aria-hidden="true"></span>
+</button>
 
 <style>
-	label {
+	button {
 		--switch-timing: 150ms 75ms;
 
-		cursor: pointer;
-		display: block;
-		font-size: 1rem;
+		background-color: transparent;
+		font-size: var(--toggle-font-size, 1rem);
 		height: 1em;
 		min-width: 1.75em;
 		position: relative;
-		user-select: none;
 		width: 1.75em;
 	}
 
-	label.disabled {
-		cursor: default;
-	}
-
-	input[type="checkbox"] {
-		display: block;
-		position: absolute;
-		visibility: hidden;
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		button {
+			font-size: var(--toggle-font-size, 2rem);
+		}
 	}
 
 	span {
@@ -58,15 +57,11 @@
 		width: 0.75em;
 	}
 
-	input:checked + span {
+	button[aria-pressed="true"] > span {
 		background-color: var(--color-blue);
 	}
 
-	input:checked + span::before {
+	button[aria-pressed="true"] > span::before {
 		left: calc(100% - (0.75em + 0.125em)); /* minus el width + left */
-	}
-
-	input:disabled + span {
-		opacity: var(--opacity-disabled);
 	}
 </style>

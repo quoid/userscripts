@@ -102,7 +102,7 @@ After installing Userscripts on macOS, you **do not** need to select a userscrip
 - **Show Toolbar Count** - displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on
 - **Save Location** - where your file are currently located and being saved to (click the blue text to open location)
 - **Change Save Location (cogs icon)** - this button, located directly to the right of the save location, is a shortcut for opening the host app, which will allow you to change the save location
-- **Global Blacklist** - this input accepts a comma separated list of [`@match` patterns](https://developer.chrome.com/docs/extensions/mv3/match_patterns/), a page url that matches against a pattern in this list will be ignored for script injection
+- **Global Blacklist** - this input accepts a comma separated list of `@match` patterns ([Match pattern structure](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns#match_pattern_structure)), a page url that matches against a pattern in this list will be ignored for script injection
 
 ### Popup:
 
@@ -125,7 +125,7 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@name` - This will be the name that displays in the sidebar and be used as the filename - you can _not_ use the same name for multiple files of the same type
 - `@description`- Use this to describe what your userscript does - this will be displayed in the sidebar - there is a setting to hide descriptions
 - `@icon` - This doesn't have a function with this userscript manager, but the **first value** provided in the metadata will be accessible in the `GM_/GM.info` object
-- `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - view [this article for more information on constructing patterns](https://developer.chrome.com/extensions/match_patterns)
+- `@match` - Domain match patterns - you can use several instances of this field if you'd like multiple domain matches - please refer to: [Match pattern structure](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns#match_pattern_structure)
   - **Note:** this extension only supports `http/s`
 - `@exclude-match` - Domain patterns where you do _not_ want the script to run
 - `@include` - Used to match against urls for injection, globs and regular expressions are allowed, [read more here](https://wiki.greasespot.net/Include_and_exclude_rules)
@@ -325,9 +325,7 @@ The quickest and easiest way to support the project is by [leaving a positive re
 
 The second best way to help out is to sign up to beta test new versions of the app. Since this extension values your privacy, and **does not collect any data from users**, it is difficult to gauge how the extension is being used. By signing up to be a beta tester it not only allows you to test upcoming features, but also gives me the opportunity to elicit direct feedback from real users.
 
-**[iOS Beta Sign Up Form](https://forms.gle/QB46uYQHVyCxULue9)**
-
-**[macOS Beta Sign Up Form](https://forms.gle/cUDtKg1ip4Vc9Xhc7)**
+**Please join and test the corresponding beta version in [releases](https://github.com/quoid/userscripts/releases) via the TestFlight public link.**
 
 ## Privacy Policy
 

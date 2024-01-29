@@ -66,7 +66,8 @@
 	}
 
 	.active ul {
-		display: block;
+		display: flex;
+		flex-direction: column;
 	}
 
 	ul :global(li) {
@@ -75,7 +76,7 @@
 		padding: 0.5rem 1rem;
 	}
 
-	.active :global(button) {
+	.active :global(button svg) {
 		opacity: 1;
 	}
 
@@ -111,5 +112,9 @@
 	ul :global(button:hover) {
 		background-color: var(--color-blue);
 		color: var(--color-black);
+	}
+
+	ul :global(button:active) {
+		opacity: 0.75;
 	}
 </style>

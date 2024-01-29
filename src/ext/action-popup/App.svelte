@@ -57,7 +57,9 @@
 	}
 
 	async function toggleExtension() {
-		await settingsStorage.set({ global_active: !active });
+		const keys = {};
+		keys["global_active"] = !active;
+		await settingsStorage.set(keys);
 		active = await settingsStorage.get("global_active");
 		// TODO: delete after migrating all related logic on the native
 		sendNativeMessage({ name: "TOGGLE_EXTENSION", active: String(active) });
@@ -158,41 +160,36 @@
 		}
 		// when an update check is run, a timestamp is saved to extension storage
 		// only check for updates every n milliseconds to avoid delaying popup load regularly
-		const checkInterval = 24 * 60 * 60 * 1000; // 24hr, 86400000
-		const timestampMs = Date.now();
-		let lastUpdateCheck = 0;
-		// check extension storage for saved key/val
-		// if there's an issue getting extension storage, skip the check
-		let lastUpdateCheckObj;
-		try {
-			lastUpdateCheckObj = await browser.storage.local.get(["lastUpdateCheck"]);
-		} catch (error) {
-			console.error(`Error checking extension storage ${error}`);
+		const days = await settingsStorage.get("scripts_update_check_interval");
+		// user set to never check
+		if (days === 0) {
+			console.info("user scripts update check disabled");
 			return false;
 		}
-		// if extension storage doesn't have key, run the check
-		// key/val will be saved after the update check runs
-		if (Object.keys(lastUpdateCheckObj).length === 0) {
+		const checkInterval = days * 24 * 60 * 60 * 1000; // 24hr, 86400000
+		const timestampMs = Date.now();
+		const checkLasttime = await settingsStorage.get(
+			"scripts_update_check_lasttime",
+		);
+		// If last check time does not exist, run the check
+		// new time will be saved after the update check runs
+		if (checkLasttime === 0) {
 			console.info("no last check saved, running update check");
 			return true;
 		}
 		// if the val is not a number, something went wrong, check anyway
 		// when update re-runs, new val of the proper type will be saved
-		if (!Number.isFinite(lastUpdateCheckObj.lastUpdateCheck)) {
+		if (!Number.isFinite(checkLasttime)) {
 			console.info("run check saved with wrong type, running update check");
 			return true;
 		}
-		// at this point it is known that key exists and value is a number
-		// update local var with the val saved to extension storage
-		lastUpdateCheck = lastUpdateCheckObj.lastUpdateCheck;
 		// if less than n milliseconds have passed, don't check
-		if (timestampMs - lastUpdateCheck < checkInterval) {
+		if (timestampMs - checkLasttime < checkInterval) {
 			console.info("not enough time has passed, not running update check");
 			return false;
 		}
-
 		console.info(
-			`${(timestampMs - lastUpdateCheck) / (1000 * 60 * 60)} hours have passed`,
+			`${(timestampMs - checkLasttime) / (1000 * 60 * 60)} hours have passed`,
 		);
 		console.info("running update check");
 		// otherwise run the check
@@ -316,7 +313,9 @@
 			try {
 				// save timestamp in ms to extension storage
 				const timestampMs = Date.now();
-				await browser.storage.local.set({ lastUpdateCheck: timestampMs });
+				const keys = {};
+				keys["scripts_update_check_lasttime"] = timestampMs;
+				await settingsStorage.set(keys);
 				abort = true;
 				updatesResponse = await sendNativeMessage({ name: "POPUP_UPDATES" });
 			} catch (error) {
@@ -484,6 +483,12 @@
 			window.location.reload();
 		}
 	});
+
+	/**
+	 * Temporary settings page entrance for beta test (iOS)
+	 * @todo new permanent button will be added via popup refactoring
+	 */
+	let showBetaNews = true;
 </script>
 
 <svelte:window on:resize={resize} />
@@ -496,7 +501,7 @@
 	/>
 	<IconButton
 		icon={iconUpdate}
-		notification={!!updates.length}
+		infoDot={!!updates.length}
 		on:click={() => (showUpdates = true)}
 		title={"Show updates"}
 		{disabled}
@@ -516,6 +521,17 @@
 </div>
 {#if !active}
 	<!-- <div class="warn" bind:this={warn}>Injection disabled</div> -->
+{/if}
+{#if showBetaNews && platform !== "macos"}
+	<div class="warn">
+		NEW: <button on:click={openExtensionPage}><b>Settings page</b></button> is
+		now available on iOS!
+		<IconButton
+			icon={iconClear}
+			on:click={() => (showBetaNews = false)}
+			title={"Close"}
+		/>
+	</div>
 {/if}
 {#if showInstallPrompt}
 	<div class="warn" class:done={scriptInstalled} bind:this={warn}>
@@ -657,8 +673,8 @@
 		transform: scale(0.9);
 	}
 
-	.header :global(label) {
-		font-size: 1.25rem !important;
+	.header :global(button:nth-of-type(4)) {
+		--toggle-font-size: 1.25rem;
 	}
 
 	.error,
@@ -673,13 +689,15 @@
 		text-align: center;
 	}
 
-	.error :global(button) {
+	.error :global(button),
+	.warn :global(button:has(svg)) {
 		position: absolute;
 		right: 0.5rem;
 		top: 0;
 	}
 
-	.error :global(button svg) {
+	.error :global(button svg),
+	.warn :global(button svg) {
 		transform: scale(0.5);
 	}
 

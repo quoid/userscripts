@@ -3,11 +3,15 @@
 	export let disabled = false;
 	export let icon;
 	export let title;
-	export let notification = false;
+	export let errorDot = false;
+	export let warnDot = false;
+	export let infoDot = false;
 </script>
 
 <button
-	class:notification
+	class:infoDot={infoDot || warnDot || errorDot}
+	class:warnDot
+	class:errorDot
 	on:click
 	{disabled}
 	style="--svg-fill: {color};"
@@ -31,8 +35,8 @@
 		width: 1.5rem;
 	}
 
-	button.notification::after {
-		background-color: var(--color-red);
+	button.infoDot::after {
+		background-color: var(--color-blue);
 		border: 2px solid var(--color-bg-secondary);
 		border-radius: 50%;
 		content: "";
@@ -41,6 +45,14 @@
 		position: absolute;
 		top: 0;
 		width: 0.75rem;
+	}
+
+	button.warnDot::after {
+		background-color: var(--color-yellow);
+	}
+
+	button.errorDot::after {
+		background-color: var(--color-red);
 	}
 
 	button:disabled {

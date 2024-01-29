@@ -6,16 +6,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	private var window: NSWindow!
 	private var windowForego = false
 	private var windowLoaded = false
+	private let logger = USLogger(#fileID)
 
 	@IBOutlet weak var enbaleNativeLogger: NSMenuItem!
 
-	func application(_ application: NSApplication, open urls: [URL]) {
+	@objc func handleGetURL(event: NSAppleEventDescriptor, replyEvent: NSAppleEventDescriptor) {
+		// issue: https://developer.apple.com/forums/thread/697217
+//		sendExtensionMessage(name: "URL_SCHEME_STARTED")
 		// if open panel is already open, stop processing the URL scheme
 		if NSApplication.shared.keyWindow?.accessibilityIdentifier() == "open-panel" { return }
-		for url in urls {
+		// handle URL scheme
+		if let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
+		   let url = URL(string: urlString) {
+			logger?.info("\(#function, privacy: .public) - \(urlString, privacy: .public)")
 			if url.host == "changesavelocation" {
 				// avoid opening the panel repeatedly and playing unnecessary warning sounds
-				if NSApplication.shared.keyWindow?.identifier?.rawValue == "changeSaveLocation" { continue }
+				if NSApplication.shared.keyWindow?.identifier?.rawValue == "changeSaveLocation" { return }
 				if windowLoaded {
 					let viewController = window.contentViewController as? ViewController
 					viewController?.changeSaveLocation(nil)
@@ -27,9 +33,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 	}
 
-	func applicationDidFinishLaunching(_ aNotification: Notification) {
+	// https://developer.apple.com/documentation/appkit/nsapplicationdelegate/1428623-applicationwillfinishlaunching/
+	func applicationWillFinishLaunching(_ notification: Notification) {
+		// https://developer.apple.com/documentation/foundation/nsappleeventmanager/1416131-seteventhandler
+		NSAppleEventManager.shared().setEventHandler(
+			self,
+			andSelector: #selector(handleGetURL(event:replyEvent:)),
+			forEventClass: AEEventClass(kInternetEventClass),
+			andEventID: AEEventID(kAEGetURL)
+		)
+	}
+
+	// https://developer.apple.com/documentation/appkit/nsapplicationdelegate/1428385-applicationdidfinishlaunching
+	func applicationDidFinishLaunching(_ notification: Notification) {
 		// Initialize menu items
 		enbaleNativeLogger.state = Preferences.enableLogger ? .on : .off
+		// Whether to initialize the main view
+		logger?.debug("\(#function, privacy: .public) - windowForego: \(self.windowForego, privacy: .public)")
 		if windowForego { return }
 		let storyboard = NSStoryboard(name: "View", bundle: Bundle.main)
 		let windowController = storyboard.instantiateInitialController() as! NSWindowController
@@ -43,7 +63,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		return true
 	}
 
-	func applicationWillTerminate(_ aNotification: Notification) {
+	func applicationWillTerminate(_ notification: Notification) {
 		// Insert code here to tear down your application
 	}
 

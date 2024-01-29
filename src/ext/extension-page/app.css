@@ -1,7 +1,17 @@
 html {
 	font-size: 100%;
 	height: 100vh;
+	height: 100svh; /* safari 15.4 */
 	overflow: hidden;
+	overscroll-behavior: none;
+}
+
+/* ios */
+@supports (-webkit-touch-callout: none) {
+	html {
+		height: auto;
+		overflow: visible;
+	}
 }
 
 body {

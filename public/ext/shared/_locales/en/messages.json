@@ -6,5 +6,239 @@
 	"extension_description": {
 		"message": "Save and run javascript for the web pages you visit",
 		"description": "Description of what the extension does."
+	},
+	"settings": {
+		"message": "Settings"
+	},
+	"settings_section_editor": {
+		"message": "Editor Settings"
+	},
+	"settings_section_general": {
+		"message": "General Settings"
+	},
+	"settings_section_native": {
+		"message": "Native Settings"
+	},
+	"settings_section_tools": {
+		"message": "Tools"
+	},
+	"settings_section_about": {
+		"message": "About"
+	},
+	"settings_editor_auto_hint": {
+		"message": "Auto Hint"
+	},
+	"settings_editor_auto_hint_desc": {
+		"message": "Automatically shows completion hints while editing"
+	},
+	"settings_editor_close_brackets": {
+		"message": "Auto Close Brackets"
+	},
+	"settings_editor_close_brackets_desc": {
+		"message": "Toggles on/off auto closing of brackets in the editor, this affects the following characters: () [] {} \"\" ''"
+	},
+	"settings_editor_javascript_lint": {
+		"message": "JavaScript Linter"
+	},
+	"settings_editor_javascript_lint_desc": {
+		"message": "Toggles the basic javascript linting within the editor"
+	},
+	"settings_editor_list_descriptions": {
+		"message": "Sidebar Item Descriptions"
+	},
+	"settings_editor_list_descriptions_desc": {
+		"message": "Show or hides the item descriptions in the sidebar"
+	},
+	"settings_editor_list_sort": {
+		"message": "Sidebar Item Sort Order"
+	},
+	"settings_editor_list_sort_desc": {
+		"message": "Display order of items in the sidebar"
+	},
+	"settings_editor_list_sort_nameAsc": {
+		"message": "Scripts Name: Asc"
+	},
+	"settings_editor_list_sort_nameDesc": {
+		"message": "Scripts Name: Desc"
+	},
+	"settings_editor_list_sort_lastModifiedAsc": {
+		"message": "Last Modified: Asc"
+	},
+	"settings_editor_list_sort_lastModifiedDesc": {
+		"message": "Last Modified: Desc"
+	},
+	"settings_editor_show_whitespace": {
+		"message": "Show Whitespace Characters"
+	},
+	"settings_editor_show_whitespace_desc": {
+		"message": "Toggles the display of invisible characters in the editor"
+	},
+	"settings_editor_tab_size": {
+		"message": "Tab Size"
+	},
+	"settings_editor_tab_size_desc": {
+		"message": "Choose the number of spaces a tab is equal to when rendering code"
+	},
+	"settings_global_active": {
+		"message": "Enable Injection"
+	},
+	"settings_global_active_desc": {
+		"message": "Toggle on/off script injection for the pages you visit"
+	},
+	"settings_global_exclude_match": {
+		"message": "Global Exclude Match patterns"
+	},
+	"settings_global_exclude_match_desc": {
+		"message": "This input accepts a whitespace (spaces, newlines etc.) separated list of @match patterns, a page url that matches against a pattern in this list will be ignored for script injection"
+	},
+	"settings_global_exclude_match_done": {
+		"message": "Done"
+	},
+	"settings_global_exclude_match_saving": {
+		"message": "Saving..."
+	},
+	"settings_global_exclude_match_placeholder": {
+		"message": "list of @match patterns, for example: \n*://*/*foo.bar\n*://*/*foo.bar?*\n*://*.example.net/*\nhttps://example.net/*/foo/*/\nhttps://*.example.net/a/b/c/?foo=/"
+	},
+	"settings_global_exclude_match_refer": {
+		"message": "Please refer to:"
+	},
+	"settings_scripts_update_automation": {
+		"message": "Scripts Updates Automatically"
+	},
+	"settings_scripts_update_automation_desc": {
+		"message": "Script silently auto-updates in the background, which is dangerous and may introduce unconfirmed malicious code"
+	},
+	"settings_scripts_update_check_interval": {
+		"message": "Scripts Update Check Interval"
+	},
+	"settings_scripts_update_check_interval_desc": {
+		"message": "Disable or set user scripts update check interval (days)"
+	},
+	"settings_scripts_update_check_interval_0": {
+		"message": "Never"
+	},
+	"settings_scripts_update_check_lasttime": {
+		"message": "Scripts Update Check Lasttime"
+	},
+	"settings_scripts_update_check_lasttime_desc": {
+		"message": "The lasttime for script update check in background"
+	},
+	"settings_settings_sync": {
+		"message": "Sync Settings"
+	},
+	"settings_settings_sync_desc": {
+		"message": "Sync settings across devices"
+	},
+	"settings_toolbar_badge_count": {
+		"message": "Show Toolbar Count Badge"
+	},
+	"settings_toolbar_badge_count_desc": {
+		"message": "Displays a badge on the toolbar icon with a number that represents how many enabled scripts match the url for the page you are on"
+	},
+	"settings_scripts_directory": {
+		"message": "Save Location"
+	},
+	"settings_scripts_directory_desc": {
+		"message": "Path to the folder where user scripts are stored"
+	},
+	"settings_set_scripts_directory": {
+		"message": "Change save location"
+	},
+	"settings_section_tools_import": {
+		"message": "Import"
+	},
+	"settings_section_tools_export": {
+		"message": "Export"
+	},
+	"settings_section_tools_reset": {
+		"message": "Reset"
+	},
+	"settings_section_tools_goback": {
+		"message": "Go Back"
+	},
+	"settings_section_tools_reset_all": {
+		"message": "Reset All Settings"
+	},
+	"settings_section_tools_reset_single": {
+		"message": "Reset"
+	},
+	"settings_section_tools_reset_section": {
+		"message": "Reset Section"
+	},
+	"settings_scripts_tools_desc": {
+		"message": "These tools can help you import and export \"settings data\". Reset single, section or all settings."
+	},
+	"settings_about_text1": {
+		"message": "Get more information about this extension by visiting the open source project:"
+	},
+	"settings_about_text2": {
+		"message": "If you enjoy using this extension, please consider leaving a review on the App Store or sign up to beta test new versions:"
+	},
+	"settings_about_button_repo": {
+		"message": "Code repository"
+	},
+	"settings_about_button_docs": {
+		"message": "Documentation"
+	},
+	"settings_about_button_issues": {
+		"message": "Report bugs"
+	},
+	"settings_about_button_store": {
+		"message": "Open in the App Store"
+	},
+	"settings_about_button_beta": {
+		"message": "Sign up for beta testing"
+	},
+	"utils_check_match_patterns_0": {
+		"message": "The match pattern will match all URLs"
+	},
+	"utils_check_match_patterns_1": {
+		"message": "The scheme component should one of *, https, http"
+	},
+	"utils_check_match_patterns_2": {
+		"message": "The scheme and host should separated by `://`"
+	},
+	"utils_check_match_patterns_3": {
+		"message": "The match pattern has no path component"
+	},
+	"utils_check_match_patterns_4": {
+		"message": "The `*.` should followed by part of the hostname"
+	},
+	"utils_check_match_patterns_5": {
+		"message": "The host component length should be 1-255"
+	},
+	"utils_check_match_patterns_6": {
+		"message": "The `*` in host component should be independent or `*.` at the start"
+	},
+	"utils_check_match_patterns_7": {
+		"message": "The host component contains empty label(s)"
+	},
+	"utils_check_match_patterns_8": {
+		"message": "The hostname label cannot start or end with `-` character"
+	},
+	"utils_check_match_patterns_9": {
+		"message": "The maximum length of the hostname label cannot exceed 63"
+	},
+	"utils_check_match_patterns_10": {
+		"message": "The host component contains invalid character(s): $1"
+	},
+	"utils_check_match_patterns_11": {
+		"message": "The path component contains invalid character(s): $1"
+	},
+	"msg_invalid_match_pattern": {
+		"message": "Invalid match pattern"
+	},
+	"msg_invalid_backup_file": {
+		"message": "Not a valid backup file"
+	},
+	"msg_backup_import_finish": {
+		"message": "Import completed! ✅"
+	},
+	"msg_backup_import_failed": {
+		"message": "Import failed, please check the error log in the console"
+	},
+	"msg_settings_reset_finish": {
+		"message": "Reset all settings completed! ✅"
 	}
 }

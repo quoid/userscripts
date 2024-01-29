@@ -307,6 +307,7 @@
 
 	.editor__header__buttons {
 		display: flex;
+		margin-right: 1rem;
 	}
 
 	:global(.editor__header__buttons > button:nth-of-type(2)) {

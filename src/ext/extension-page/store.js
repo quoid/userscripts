@@ -37,7 +37,7 @@ function stateStore() {
 	// store oldState to see how state transitioned
 	// ex. if (newState === foo && oldState === bar) baz();
 	let oldState = [];
-	const add = (stateModifier) =>
+	const add = (stateModifier) => {
 		update((state) => {
 			// list of acceptable states, mostly for state definition tracking
 			const states = [
@@ -68,7 +68,14 @@ function stateStore() {
 			);
 			return state;
 		});
-	const remove = (stateModifier) =>
+		// URL hash handle
+		const params = new URLSearchParams(location.hash.slice(1));
+		if (["settings"].includes(stateModifier)) {
+			params.set("state", stateModifier);
+			location.hash = params.toString();
+		}
+	};
+	const remove = (stateModifier) => {
 		update((state) => {
 			// save pre-changed state to oldState var
 			oldState = [...state];
@@ -84,20 +91,39 @@ function stateStore() {
 			);
 			return state;
 		});
+		// URL hash handle
+		const params = new URLSearchParams(location.hash.slice(1));
+		const state = params.get("state");
+		if (state === stateModifier) {
+			params.delete("state");
+			location.hash = params.toString();
+		}
+	};
 	const getOldState = () => oldState;
-	return { subscribe, add, getOldState, remove };
+	// URL hash handle
+	const loadUrlState = () => {
+		const params = new URLSearchParams(location.hash.slice(1));
+		const state = params.get("state");
+		state && add(state);
+	};
+	return { subscribe, add, getOldState, remove, loadUrlState };
 }
 export const state = stateStore();
 
 function settingsStore() {
 	const { subscribe, update, set } = writable({});
+	let platform;
 	const init = async (initData) => {
-		// import legacy settings data just one-time
-		await settingsStorage.legacyImport();
-		// for compatibility with legacy getting names only
-		// once all new name is used, use settingsStorage.get()
-		const settings = await settingsStorage.legacyGet();
-		console.info("store.js settingsStore init", initData, settings);
+		platform = initData.platform;
+		if (import.meta.env.SAFARI_PLATFORM === "mac") {
+			// import legacy settings data just one-time
+			await settingsStorage.legacyImport();
+		}
+		// read settings from persistence storage
+		const settings = await settingsStorage.get(undefined, { platform });
+		if (import.meta.env.MODE === "development") {
+			console.debug("store.js settingsStore init", initData, settings);
+		}
 		set({ ...initData, ...settings });
 		// sync popup, backgound, etc... settings changes
 		settingsStorage.onChangedSettings((sets, area) => {
@@ -105,37 +131,38 @@ function settingsStore() {
 			update((obj) => Object.assign(obj, sets));
 		});
 	};
-	const reset = async (keys) => {
+	/** @param {string|string[]} keys */
+	const reset = async (keys = undefined) => {
 		await settingsStorage.reset(keys);
-		// once all new name is used, use settingsStorage.get()
-		const settings = await settingsStorage.legacyGet();
-		console.info("store.js settingsStore reset", settings);
+		const settings = await settingsStorage.get(undefined, { platform });
+		if (import.meta.env.MODE === "development") {
+			console.debug("store.js settingsStore reset", settings);
+		}
 		update((obj) => Object.assign(obj, settings));
+		// legacy updates
+		["global_active", "global_exclude_match"].forEach((s) => {
+			updateSingleSettingOld(s, settings[s]);
+		});
 	};
-
+	// temporarily keep the old storage method until it is confirmed that all dependencies are removed
 	const updateSingleSettingOld = (key, value) => {
-		// blacklist not stored in normal setting object in manifest, so handle differently
-		if (key === "blacklist") {
-			// update blacklist on swift side
+		// following settings logics is still handled in the native swift layer
+		if (key === "global_exclude_match") {
 			const message = { name: "PAGE_UPDATE_BLACKLIST", blacklist: value };
 			sendNativeMessage(message).then((response) => {
 				response.error && log.add(response.error, "error", true);
 			});
 		}
-		if (key === "active") {
+		if (key === "global_active") {
 			sendNativeMessage({ name: "TOGGLE_EXTENSION", active: String(value) });
 		}
 	};
+	/** @param {string} key @param {any} value */
 	const updateSingleSetting = (key, value) => {
-		// update(settings => (settings[key] = value, settings));
-		update((settings) => {
-			settings[key] = value;
-			return settings;
-		});
-		// for compatibility with legacy setting names only
-		// once all new name is used, use settingsStorage.set()
-		settingsStorage.legacySet({ [key]: value }); // Durable Storage
-		// temporarily keep the old storage method until it is confirmed that all dependencies are removed
+		update((settings) => ((settings[key] = value), settings));
+		// save settings to persistence storage
+		settingsStorage.set({ [key]: value });
+		// legacy updates
 		updateSingleSettingOld(key, value);
 	};
 	return { subscribe, set, init, reset, updateSingleSetting };

@@ -139,6 +139,9 @@ async function injection() {
 	const response = await browser.runtime.sendMessage({
 		name: "REQ_USERSCRIPTS",
 	});
+	if (import.meta.env.MODE === "development") {
+		console.debug("REQ_USERSCRIPTS", response);
+	}
 	// cancel injection if errors detected
 	if (!response || response.error) {
 		console.error(response?.error || "REQ_USERSCRIPTS returned undefined");

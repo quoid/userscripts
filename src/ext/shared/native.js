@@ -12,7 +12,7 @@ const application = () => import.meta.env.NATIVE_APP ?? "application";
 
 /**
  * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/connectNative}
- * @returns {object} A `runtime.Port` object
+ * @returns {import("webextension-polyfill").Runtime.Port} A `runtime.Port` object
  */
 export function connectNative() {
 	return browser.runtime.connectNative(application());

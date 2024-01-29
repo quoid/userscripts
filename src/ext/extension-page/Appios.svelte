@@ -1,16 +1,16 @@
 <script>
 	import { onMount } from "svelte";
 	import { blur } from "svelte/transition";
-	import { items, log, notifications, settings, state } from "./store.js";
-	import Sidebar from "./Components/Sidebar/Sidebar.svelte";
-	import Editor from "./Components/Editor/Editor.svelte";
+	import { log, notifications, settings, state } from "./store.js";
 	import Settings from "./Components/Settings.svelte";
-	import ModalWrapper from "./Components/ModalWrapper.svelte";
 	import Notification from "./Components/Notification.svelte";
 	import logo from "../shared/img/logo.svg?raw";
-	import { connectNative, sendNativeMessage } from "../shared/native.js";
+	import { sendNativeMessage } from "../shared/native.js";
 
 	const logger = [];
+
+	/** @type {"ios"|"ipados"} */
+	let platform = "ios";
 
 	$: $log.some((item) => {
 		if (!logger.includes(item)) {
@@ -20,48 +20,18 @@
 		}
 	});
 
-	// disables default cmd+s (save) and cmd+f (find) behavior
-	function preventKeyCommands(e) {
-		if (e.metaKey && (e.code === "KeyS" || e.code === "KeyF")) {
-			return e.preventDefault();
-		}
-	}
-
-	// currently inactive, but could be used to globally prevent auto text replacement in app
-	// function preventAutoTextReplacements(e) {
-	// 	if (e.inputType === "insertReplacementText" && e.data === ". ") {
-	// 		e.preventDefault();
-	// 		e.target.value += " ";
-	// 	}
-	// }
-
 	onMount(async () => {
 		log.add("Requesting initialization data", "info", false);
 		const initData = await sendNativeMessage({ name: "PAGE_INIT_DATA" });
 		if (initData.error) return console.error(initData.error);
+		if (initData.platform === "ipados") platform = "ipados";
 		await settings.init(initData);
-		state.add("items-loading");
 		state.remove("init");
-
-		log.add("Requesting all files in save location", "info", false);
-		const files = await sendNativeMessage({ name: "PAGE_ALL_FILES" });
-		if (files.error) return console.error(files.error);
-		items.set(files);
-		state.remove("items-loading");
 		state.loadUrlState();
-	});
-
-	// handle native app messages
-	const nativePort = connectNative();
-	nativePort.onMessage.addListener((message) => {
-		// console.info(message); // DEBUG
-		if (message.name === "SAVE_LOCATION_CHANGED") {
-			window.location.reload();
-		}
+		// Since now the only view on iOS
+		state.add("settings");
 	});
 </script>
-
-<svelte:window on:keydown={preventKeyCommands} />
 
 {#if $state.includes("init")}
 	<div class="initializer" out:blur={{ duration: 350 }}>
@@ -74,19 +44,13 @@
 		{/if}
 	</div>
 {/if}
-<div>
-	<Sidebar />
-	<Editor />
-</div>
 <ul>
 	{#each $notifications as item (item.id)}
 		<Notification on:click={() => notifications.remove(item.id)} {item} />
 	{/each}
 </ul>
 {#if $state.includes("settings")}
-	<ModalWrapper closeHandler={() => state.remove("settings")} let:navRegister>
-		<Settings platform="macos" {nativePort} {navRegister} />
-	</ModalWrapper>
+	<Settings {platform} />
 {/if}
 
 <style>

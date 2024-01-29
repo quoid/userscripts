@@ -168,9 +168,9 @@
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);
 		display: flex;
-		padding: 0.25rem 0;
+		padding: 0.25rem;
 		position: absolute;
-		right: 0.5rem;
+		right: 1.5rem;
 		top: 0;
 		z-index: 4;
 	}
@@ -195,10 +195,6 @@
 
 	:global(.editor__search button) {
 		flex-shrink: 0;
-	}
-
-	:global(button:nth-of-type(3)) {
-		margin-right: 0.25rem;
 	}
 
 	:global(div.editor__search button svg) {
