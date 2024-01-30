@@ -9,6 +9,8 @@
 		"dev:ext-safari-ios": "SAFARI_PLATFORM=ios node scripts/dev-ext-safari.js",
 		"build:mac": "npm run build:app && npm run build:ext-safari-mac",
 		"build:ios": "npm run build:app && npm run build:ext-safari-ios",
+		"build:mac-beta": "npm run build:app && BETA=1 npm run build:ext-safari-mac",
+		"build:ios-beta": "npm run build:app && BETA=1 npm run build:ext-safari-ios",
 		"build:app": "node scripts/build-app.js",
 		"build:ext-safari-mac": "SAFARI_PLATFORM=mac node scripts/build-ext-safari-15.js",
 		"build:ext-safari-ios": "SAFARI_PLATFORM=ios node scripts/build-ext-safari-15.js",

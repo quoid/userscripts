@@ -37,6 +37,7 @@ const defineConfig = {
 		),
 	},
 };
+const sourcemap = process.env.BETA ? true : false;
 
 /**
  * Empty resources directory
@@ -58,6 +59,7 @@ cp("public/ext/safari-16.4", SAFARI_EXT_RESOURCES);
 			outDir: `${SAFARI_EXT_RESOURCES}/dist/content-scripts/`,
 			emptyOutDir: false,
 			copyPublicDir: false,
+			sourcemap,
 			rollupOptions: {
 				input,
 				output: { entryFileNames: "[name].js" },
@@ -77,6 +79,7 @@ build({
 		outDir: `${SAFARI_EXT_RESOURCES}/dist/`,
 		emptyOutDir: false,
 		copyPublicDir: false,
+		sourcemap,
 		rollupOptions: {
 			input: { background: "src/ext/background/main.js" },
 			output: { entryFileNames: "[name].js" },
@@ -92,6 +95,7 @@ build({
 	build: {
 		outDir: `${SAFARI_EXT_RESOURCES}/dist/`,
 		emptyOutDir: false,
+		sourcemap,
 		rollupOptions: {
 			input: {
 				// background: "src/ext/background/main.js",
