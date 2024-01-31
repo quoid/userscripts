@@ -484,6 +484,11 @@
 		}
 	});
 
+	async function gotoExtensionPage() {
+		await openExtensionPage();
+		window.close();
+	}
+
 	/**
 	 * Temporary settings page entrance for beta test (iOS)
 	 * @todo new permanent button will be added via popup refactoring
@@ -524,7 +529,7 @@
 {/if}
 {#if showBetaNews && platform !== "macos"}
 	<div class="warn">
-		NEW: <button on:click={openExtensionPage}><b>Settings page</b></button> is
+		NEW: <button on:click={gotoExtensionPage}><b>Settings page</b></button> is
 		now available on iOS!
 		<IconButton
 			icon={iconClear}
@@ -594,13 +599,7 @@
 </div>
 {#if !inactive && platform === "macos"}
 	<div class="footer">
-		<button
-			class="link"
-			on:click={() => {
-				openExtensionPage();
-				window.close();
-			}}
-		>
+		<button class="link" on:click={gotoExtensionPage}>
 			Open Extension Page
 		</button>
 	</div>

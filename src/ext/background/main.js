@@ -496,10 +496,10 @@ browser.webNavigation.onCompleted.addListener(setBadgeCount);
 
 // handle native app messages
 const port = connectNative();
-port.onMessage.addListener((message) => {
+port.onMessage.addListener(async (message) => {
 	// console.info(message); // DEBUG
 	if (message.name === "SAVE_LOCATION_CHANGED") {
-		openExtensionPage();
+		await openExtensionPage();
 		if (message?.userInfo?.returnApp === true) {
 			sendNativeMessage({ name: "OPEN_APP" });
 		}
