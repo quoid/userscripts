@@ -288,7 +288,12 @@ async function nativeChecks() {
 	return true;
 }
 
-// handles messages sent with browser.runtime.sendMessage
+/**
+ * handles messages sent with browser.runtime.sendMessage
+ * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#listener}
+ * @type {Parameters<typeof browser.runtime.onMessage.addListener>[0]}
+ * @param {(response: any) => void} sendResponse send a response to the message
+ */
 async function handleMessage(request, sender, sendResponse) {
 	switch (request.name) {
 		case "REQ_USERSCRIPTS": {
@@ -470,6 +475,17 @@ async function handleMessage(request, sender, sendResponse) {
 		}
 		case "REFRESH_CONTEXT_MENU_SCRIPTS": {
 			getContextMenuItems();
+			break;
+		}
+		case "WEB_DOT_USER_JS": {
+			// always inject contentScripts before 16.4
+			if (import.meta.env.SAFARI_VERSION < 16.4) {
+				const enable = await settingsStorage.get("augmented_userjs_install");
+				if (!enable) break;
+			}
+			const currentTab = await browser.tabs.getCurrent();
+			// avoid popup when toggle on the setting
+			if (sender.tab.id === currentTab.id) browser.browserAction.openPopup();
 			break;
 		}
 	}
