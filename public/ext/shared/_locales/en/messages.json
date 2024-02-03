@@ -130,6 +130,12 @@
 	"settings_settings_sync_desc": {
 		"message": "Sync settings across devices"
 	},
+	"settings_augmented_userjs_install": {
+		"message": "Enhanced installation prompts"
+	},
+	"settings_augmented_userjs_install_desc": {
+		"message": "Automatically pop up the installation interface when opening a user script URL (.user.js), and takes over the install button of the user scripts market"
+	},
 	"settings_toolbar_badge_count": {
 		"message": "Show Toolbar Count Badge"
 	},

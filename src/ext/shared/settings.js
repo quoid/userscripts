@@ -125,15 +125,6 @@ const settingsDefinition = /** @type {const} */ [
 		nodeType: "Toggle",
 	},
 	{
-		name: "toolbar_badge_count",
-		type: "boolean",
-		default: true,
-		platforms: { macos: true, ipados: false, ios: false },
-		group: "general",
-		legacy: "showCount",
-		nodeType: "Toggle",
-	},
-	{
 		name: "global_active",
 		type: "boolean",
 		local: true,
@@ -142,6 +133,22 @@ const settingsDefinition = /** @type {const} */ [
 		legacy: "active",
 		nodeType: "Toggle",
 		nodeClass: { warn: false },
+	},
+	{
+		name: "augmented_userjs_install",
+		type: "boolean",
+		default: true,
+		group: "general",
+		nodeType: "Toggle",
+	},
+	{
+		name: "toolbar_badge_count",
+		type: "boolean",
+		default: true,
+		platforms: { macos: true, ipados: false, ios: false },
+		group: "general",
+		legacy: "showCount",
+		nodeType: "Toggle",
 	},
 	{
 		name: "scripts_settings",
