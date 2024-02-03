@@ -397,7 +397,7 @@
 			if (!res.ok) throw new Error(`httpcode-${res.status}`);
 		} catch (error) {
 			console.error("Error fetching .user.js url", error);
-			errorNotification = "Fetching failed, refresh to retry.";
+			errorNotification = `Userscript fetching failed (${res.status})`;
 			showInstallPrompt = undefined;
 			return;
 		}
@@ -423,6 +423,7 @@
 			showInstallPrompt = response.success;
 		}
 		scriptChecking = false;
+		showInstallView();
 	}
 
 	async function showInstallView() {
