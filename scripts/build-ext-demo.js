@@ -23,6 +23,7 @@ const defineConfig = {
 	define: {
 		"import.meta.env.BROWSER": JSON.stringify("Safari"),
 		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+		"import.meta.env.SAFARI_VERSION": JSON.stringify(15),
 		"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
 			process.env.SAFARI_PLATFORM,
 		),

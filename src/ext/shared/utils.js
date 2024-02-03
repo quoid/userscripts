@@ -467,3 +467,48 @@ async function downloadToFile_old(filename, content, type = "text/plain") {
 		browser.tabs.onRemoved.addListener(handleRemoved);
 	}
 }
+
+/**
+ * Dynamic registration of content scripts [Safari >= 16.4]
+ * @param {boolean} enable - whether to register content scripts
+ */
+export async function contentScriptRegistration(enable) {
+	if (import.meta.env.SAFARI_VERSION < 16.4) return;
+	const scripts = [
+		{
+			id: "dot-user-js",
+			js: ["dist/content-scripts/dot-user-js.js"],
+			matches: [
+				"*://*/*.user.js",
+				"*://*/*.user.js?*",
+				"*://*/*.user.css",
+				"*://*/*.user.css?*",
+			],
+			run_at: "document_start",
+		},
+		{
+			id: "greasyfork",
+			js: ["dist/content-scripts/greasyfork.js"],
+			matches: ["*://*.greasyfork.org/*"],
+			run_at: "document_start",
+		},
+	];
+	const regScripts = await browser.scripting.getRegisteredContentScripts();
+	const ids = regScripts.map((script) => script.id);
+	for (const script of scripts) {
+		if (enable && !ids.includes(script.id)) {
+			await browser.scripting.registerContentScripts([script]);
+			if (import.meta.env.MODE === "development") {
+				console.debug("registerContentScripts", script.id);
+			}
+		}
+		if (!enable && ids.includes(script.id)) {
+			await browser.scripting.unregisterContentScripts({
+				ids: [script.id],
+			});
+			if (import.meta.env.MODE === "development") {
+				console.debug("unregisterContentScripts", script.id);
+			}
+		}
+	}
+}

@@ -40,14 +40,12 @@
 				"*://*/*.user.css",
 				"*://*/*.user.css?*"
 			],
-			"run_at": "document_start",
-			"all_frames": false
+			"run_at": "document_start"
 		},
 		{
 			"js": ["dist/content-scripts/greasyfork.js"],
 			"matches": ["*://*.greasyfork.org/*"],
-			"run_at": "document_start",
-			"all_frames": false
+			"run_at": "document_start"
 		}
 	],
 	"permissions": [

@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import { uniqueId } from "../shared/utils.js";
+import { uniqueId, contentScriptRegistration } from "../shared/utils.js";
 import * as settingsStorage from "../shared/settings.js";
 import { sendNativeMessage } from "../shared/native.js";
 
@@ -162,6 +162,10 @@ function settingsStore() {
 		update((settings) => ((settings[key] = value), settings));
 		// save settings to persistence storage
 		settingsStorage.set({ [key]: value });
+		// make specific changes take effect
+		if (key === "augmented_userjs_install") {
+			contentScriptRegistration(value);
+		}
 		// legacy updates
 		updateSingleSettingOld(key, value);
 	};

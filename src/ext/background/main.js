@@ -1,4 +1,7 @@
-import { openExtensionPage } from "../shared/utils.js";
+import {
+	contentScriptRegistration,
+	openExtensionPage,
+} from "../shared/utils.js";
 import * as settingsStorage from "../shared/settings.js";
 import { connectNative, sendNativeMessage } from "../shared/native.js";
 
@@ -472,7 +475,9 @@ async function handleMessage(request, sender, sendResponse) {
 	}
 }
 browser.runtime.onInstalled.addListener(async () => {
-	nativeChecks();
+	await nativeChecks();
+	const enable = await settingsStorage.get("augmented_userjs_install");
+	await contentScriptRegistration(enable);
 });
 browser.runtime.onStartup.addListener(async () => {
 	setSessionRules();
