@@ -251,9 +251,9 @@ function listeners() {
 }
 
 async function initialize() {
-	const results = await browser.storage.local.get("US_GLOBAL_ACTIVE");
-	if (results?.US_GLOBAL_ACTIVE === false)
-		return console.info("Userscripts off");
+	const key = "US_GLOBAL_ACTIVE";
+	const results = await browser.storage.local.get(key);
+	if (results[key] === false) return console.info("Userscripts off");
 	// start the injection process and add the listeners
 	injection();
 	listeners();

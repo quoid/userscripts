@@ -490,7 +490,7 @@ export async function contentScriptRegistration(enable) {
 			id: "greasyfork",
 			js: ["dist/content-scripts/greasyfork.js"],
 			matches: ["*://*.greasyfork.org/*"],
-			run_at: "document_start",
+			run_at: "document_end",
 		},
 	];
 	const regScripts = await browser.scripting.getRegisteredContentScripts();

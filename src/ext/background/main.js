@@ -477,15 +477,11 @@ async function handleMessage(request, sender, sendResponse) {
 			getContextMenuItems();
 			break;
 		}
-		case "WEB_DOT_USER_JS": {
-			// always inject contentScripts before 16.4
-			if (import.meta.env.SAFARI_VERSION < 16.4) {
-				const enable = await settingsStorage.get("augmented_userjs_install");
-				if (!enable) break;
-			}
+		case "WEB_USERJS_POPUP": {
 			const currentTab = await browser.tabs.getCurrent();
-			// avoid popup when toggle on the setting
-			if (sender.tab.id === currentTab.id) browser.browserAction.openPopup();
+			if (currentTab.id === sender.tab.id) {
+				browser.browserAction.openPopup();
+			}
 			break;
 		}
 	}

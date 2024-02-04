@@ -336,15 +336,8 @@
 			abort = false;
 		}
 
-		// check if current page url is a userscript
-		if (strippedUrl.endsWith(".user.js")) {
-			// set checking state
-			scriptChecking = true;
-			// show checking banner
-			showInstallPrompt = "checking...";
-			// start async check
-			installCheck(currentTab);
-		}
+		// start async check
+		installCheck(currentTab);
 
 		loading = false;
 		disabled = false;
@@ -389,11 +382,29 @@
 		}, 25);
 	}
 
+	/**
+	 * Check if the current page contains a user script
+	 * @param {import("webextension-polyfill").Tabs.Tab} currentTab
+	 */
 	async function installCheck(currentTab) {
+		const url = new URL(currentTab.url);
+		let userjs;
+		// check if current page url is a userscript
+		if (url.pathname.endsWith(".user.js")) {
+			userjs = url;
+		} else if (url.hostname.endsWith("greasyfork.org")) {
+			userjs = await browser.tabs.sendMessage(currentTab.id, "USERJS");
+		} else {
+			return;
+		}
+		// set checking state
+		scriptChecking = true;
+		// show checking banner
+		showInstallPrompt = "checking...";
 		// refetch script from URL to avoid tampered DOM content
 		let res; // fetch response
 		try {
-			res = await fetch(currentTab.url);
+			res = await fetch(userjs);
 			if (!res.ok) throw new Error(`httpcode-${res.status}`);
 		} catch (error) {
 			console.error("Error fetching .user.js url", error);
@@ -423,7 +434,7 @@
 			showInstallPrompt = response.success;
 		}
 		scriptChecking = false;
-		showInstallView();
+		scriptInstalled || showInstallView();
 	}
 
 	async function showInstallView() {
