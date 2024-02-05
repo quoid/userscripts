@@ -474,23 +474,23 @@ async function downloadToFile_old(filename, content, type = "text/plain") {
  */
 export async function contentScriptRegistration(enable) {
 	if (import.meta.env.SAFARI_VERSION < 16.4) return;
+	/**
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/scripting/RegisteredContentScript}
+	 * @type {Parameters<typeof browser.scripting.registerContentScripts>[0]}
+	 */
 	const scripts = [
 		{
 			id: "dot-user-js",
 			js: ["dist/content-scripts/dot-user-js.js"],
-			matches: [
-				"*://*/*.user.js",
-				"*://*/*.user.js?*",
-				"*://*/*.user.css",
-				"*://*/*.user.css?*",
-			],
-			run_at: "document_start",
+			matches: ["*://*/*.user.js", "*://*/*.user.js?*"],
+			runAt: "document_start",
 		},
 		{
-			id: "greasyfork",
-			js: ["dist/content-scripts/greasyfork.js"],
+			id: "script-market",
+			js: ["dist/content-scripts/script-market.js"],
 			matches: ["*://*.greasyfork.org/*"],
-			run_at: "document_end",
+			excludeMatches: ["*://*/*.user.js", "*://*/*.user.js?*"],
+			runAt: "document_end",
 		},
 	];
 	const regScripts = await browser.scripting.getRegisteredContentScripts();

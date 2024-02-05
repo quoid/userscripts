@@ -1,10 +1,14 @@
 let url;
 
 async function injection() {
-	const links = document.querySelectorAll("#install-area a.install-link");
+	const tabUrl = new URL(location.href);
+	let links;
+	if (tabUrl.hostname.endsWith("greasyfork.org")) {
+		links = document.querySelectorAll(
+			'#install-area a.install-link[data-install-format="js"]',
+		);
+	}
 	for (const link of links) {
-		if (!url) url = link["href"];
-		console.debug(link);
 		link.addEventListener(
 			"click",
 			(e) => {
@@ -23,14 +27,18 @@ async function listeners() {
 		if (import.meta.env.MODE === "development") {
 			console.debug(message, url);
 		}
-		if (message === "USERJS") return url;
+		if (message === "TAB_CLICK_USERJS") {
+			const response = url;
+			url = undefined; // respond only once of click event
+			return response;
+		}
 	});
 }
 
 async function initialize() {
 	// avoid duplicate injection of content scripts
-	if (window["CS_ENTRY_GREASYFORK"]) return;
-	window["CS_ENTRY_GREASYFORK"] = 1;
+	if (window["CS_ENTRY_SCRIPT_MARKET"]) return;
+	window["CS_ENTRY_SCRIPT_MARKET"] = 1;
 	// check user settings
 	const key = "US_AUGMENTED_USERJS_INSTALL";
 	if ((await browser.storage.local.get(key))[key] === false) return;

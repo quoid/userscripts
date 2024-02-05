@@ -1942,7 +1942,7 @@ func installCheck(_ content: String) -> [String: Any] {
 	];
 }
 
-func installUserscript(_ content: String) -> [String: Any] {
+func installUserscript(_ url: String, _ type: String, _ content: String) -> [String: Any] {
 	guard
 		let parsed = parse(content),
 		let metadata = parsed["metadata"] as? [String: [String]],
@@ -1952,8 +1952,8 @@ func installUserscript(_ content: String) -> [String: Any] {
 		return ["error": "installUserscript failed at (1)"]
 	}
 	let name = sanitize(n)
-	let filename = "\(name).user.js"
+	let filename = "\(name).user.\(type)"
 
-	let saved = saveFile(["filename": filename, "type": "js"], content)
+	let saved = saveFile(["filename": filename, "type": type], content)
 	return saved
 }

@@ -53,7 +53,7 @@ cp("public/ext/safari-15", SAFARI_EXT_RESOURCES);
 [
 	{ userscripts: "src/ext/content-scripts/entry-userscripts.js" },
 	{ "dot-user-js": "src/ext/content-scripts/entry-dot-user-js.js" },
-	{ greasyfork: "src/ext/content-scripts/entry-greasyfork.js" },
+	{ "script-market": "src/ext/content-scripts/entry-script-market.js" },
 ].forEach((input) => {
 	build({
 		...defineConfig,

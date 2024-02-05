@@ -71,7 +71,7 @@ async function buildResources(server, origin) {
 	[
 		{ userscripts: "src/ext/content-scripts/entry-userscripts.js" },
 		{ "dot-user-js": "src/ext/content-scripts/entry-dot-user-js.js" },
-		{ greasyfork: "src/ext/content-scripts/entry-greasyfork.js" },
+		{ "script-market": "src/ext/content-scripts/entry-script-market.js" },
 	].forEach((input) => {
 		/** build proxy content scripts replace actual code */
 		build({
