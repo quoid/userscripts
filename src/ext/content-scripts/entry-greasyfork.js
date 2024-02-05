@@ -28,9 +28,13 @@ async function listeners() {
 }
 
 async function initialize() {
+	// avoid duplicate injection of content scripts
+	if (window["CS_ENTRY_GREASYFORK"]) return;
+	window["CS_ENTRY_GREASYFORK"] = 1;
+	// check user settings
 	const key = "US_AUGMENTED_USERJS_INSTALL";
 	if ((await browser.storage.local.get(key))[key] === false) return;
-
+	// actual execution content
 	injection();
 	listeners();
 }

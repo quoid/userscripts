@@ -84,6 +84,8 @@ async function buildResources(server, origin) {
 						const url = `${origin}/dist/content-scripts/${name}`;
 						return `// proxy content
 						(function () {
+							if (window["${id}"]) return;
+							window["${id}"] = 1;
 							const xhr = new XMLHttpRequest();
 							xhr.open("GET", "${url}", false);
 							xhr.send();
