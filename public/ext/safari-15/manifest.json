@@ -34,20 +34,14 @@
 		},
 		{
 			"js": ["dist/content-scripts/dot-user-js.js"],
-			"matches": [
-				"*://*/*.user.js",
-				"*://*/*.user.js?*",
-				"*://*/*.user.css",
-				"*://*/*.user.css?*"
-			],
-			"run_at": "document_start",
-			"all_frames": false
+			"matches": ["*://*/*.user.js", "*://*/*.user.js?*"],
+			"run_at": "document_start"
 		},
 		{
-			"js": ["dist/content-scripts/greasyfork.js"],
+			"js": ["dist/content-scripts/script-market.js"],
 			"matches": ["*://*.greasyfork.org/*"],
-			"run_at": "document_start",
-			"all_frames": false
+			"exclude_matches": ["*://*/*.user.js", "*://*/*.user.js?*"],
+			"run_at": "document_end"
 		}
 	],
 	"permissions": [

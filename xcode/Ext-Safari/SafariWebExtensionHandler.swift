@@ -179,8 +179,12 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "POPUP_INSTALL_SCRIPT" {
-			if let content = message?["content"] as? String {
-				response.userInfo = [SFExtensionMessageKey: installUserscript(content)]
+			if
+				let url = message?["url"] as? String,
+				let type = message?["type"] as? String,
+				let content = message?["content"] as? String
+			{
+				response.userInfo = [SFExtensionMessageKey: installUserscript(url, type, content)]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get script content (2)"]]
 			}

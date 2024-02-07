@@ -1,4 +1,7 @@
-import { openExtensionPage } from "../shared/utils.js";
+import {
+	contentScriptRegistration,
+	openExtensionPage,
+} from "../shared/utils.js";
 import * as settingsStorage from "../shared/settings.js";
 import { connectNative, sendNativeMessage } from "../shared/native.js";
 
@@ -285,7 +288,12 @@ async function nativeChecks() {
 	return true;
 }
 
-// handles messages sent with browser.runtime.sendMessage
+/**
+ * handles messages sent with browser.runtime.sendMessage
+ * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#listener}
+ * @type {Parameters<typeof browser.runtime.onMessage.addListener>[0]}
+ * @param {(response: any) => void} sendResponse send a response to the message
+ */
 async function handleMessage(request, sender, sendResponse) {
 	switch (request.name) {
 		case "REQ_USERSCRIPTS": {
@@ -469,10 +477,19 @@ async function handleMessage(request, sender, sendResponse) {
 			getContextMenuItems();
 			break;
 		}
+		case "WEB_USERJS_POPUP": {
+			const currentTab = await browser.tabs.getCurrent();
+			if (currentTab.id === sender.tab.id) {
+				browser.browserAction.openPopup();
+			}
+			break;
+		}
 	}
 }
 browser.runtime.onInstalled.addListener(async () => {
-	nativeChecks();
+	await nativeChecks();
+	const enable = await settingsStorage.get("augmented_userjs_install");
+	await contentScriptRegistration(enable);
 });
 browser.runtime.onStartup.addListener(async () => {
 	setSessionRules();

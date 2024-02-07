@@ -126,6 +126,12 @@
 	"settings_settings_sync_desc": {
 		"message": "跨设备同步设置"
 	},
+	"settings_augmented_userjs_install": {
+		"message": "增强的脚本安装提示"
+	},
+	"settings_augmented_userjs_install_desc": {
+		"message": "当打开一个用户脚本 URL（.user.js）时自动弹出安装界面，并接管用户脚本市场的安装按钮"
+	},
 	"settings_toolbar_badge_count": {
 		"message": "工具栏图标显示计数徽章"
 	},

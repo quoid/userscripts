@@ -33,6 +33,7 @@ const defineConfig = {
 	define: {
 		"import.meta.env.BROWSER": JSON.stringify("Safari"),
 		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+		"import.meta.env.SAFARI_VERSION": JSON.stringify(15),
 		"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
 			process.env.SAFARI_PLATFORM,
 		),
@@ -52,7 +53,7 @@ cp("public/ext/safari-15", SAFARI_EXT_RESOURCES);
 [
 	{ userscripts: "src/ext/content-scripts/entry-userscripts.js" },
 	{ "dot-user-js": "src/ext/content-scripts/entry-dot-user-js.js" },
-	{ greasyfork: "src/ext/content-scripts/entry-greasyfork.js" },
+	{ "script-market": "src/ext/content-scripts/entry-script-market.js" },
 ].forEach((input) => {
 	build({
 		...defineConfig,

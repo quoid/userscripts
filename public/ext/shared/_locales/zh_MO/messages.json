@@ -126,6 +126,12 @@
 	"settings_settings_sync_desc": {
 		"message": "跨裝置同步設定"
 	},
+	"settings_augmented_userjs_install": {
+		"message": "增強的腳本安裝提示"
+	},
+	"settings_augmented_userjs_install_desc": {
+		"message": "當開啟一個使用者腳本 URL（.user.js）時自動彈出安裝介面，並接管使用者腳本市場的安裝按鈕"
+	},
 	"settings_toolbar_badge_count": {
 		"message": "工具欄圖示顯示計數徽章"
 	},

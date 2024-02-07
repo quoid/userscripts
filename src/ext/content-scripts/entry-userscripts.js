@@ -251,9 +251,13 @@ function listeners() {
 }
 
 async function initialize() {
-	const results = await browser.storage.local.get("US_GLOBAL_ACTIVE");
-	if (results?.US_GLOBAL_ACTIVE === false)
-		return console.info("Userscripts off");
+	// avoid duplicate injection of content scripts
+	if (window["CS_ENTRY_USERSCRIPTS"]) return;
+	window["CS_ENTRY_USERSCRIPTS"] = 1;
+	// check user settings
+	const key = "US_GLOBAL_ACTIVE";
+	const results = await browser.storage.local.get(key);
+	if (results[key] === false) return console.info("Userscripts off");
 	// start the injection process and add the listeners
 	injection();
 	listeners();

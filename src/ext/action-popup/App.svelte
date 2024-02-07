@@ -37,7 +37,15 @@
 	let scriptInstalled;
 	let showInstallPrompt;
 	let showInstall;
-	let installUserscript; // url, content
+	/**
+	 * @typedef CheckedUserscript
+	 * @prop {import("webextension-polyfill").Tabs.Tab} tab - checked tab
+	 * @prop {URL} url - userjs/usercss url
+	 * @prop {"js"|"css"} type - userscript or userstyle
+	 * @prop {string} content - userjs/usercss content
+	 */
+	/** @type {CheckedUserscript} */
+	let checkedUserscript;
 	let installViewUserscript; // metadata
 	let installViewUserscriptError;
 	let showAll;
@@ -336,15 +344,8 @@
 			abort = false;
 		}
 
-		// check if current page url is a userscript
-		if (strippedUrl.endsWith(".user.js")) {
-			// set checking state
-			scriptChecking = true;
-			// show checking banner
-			showInstallPrompt = "checking...";
-			// start async check
-			installCheck(currentTab);
-		}
+		// start async check
+		installCheck(currentTab);
 
 		loading = false;
 		disabled = false;
@@ -389,21 +390,43 @@
 		}, 25);
 	}
 
+	/**
+	 * Check if the current page contains a user script
+	 * @param {import("webextension-polyfill").Tabs.Tab} currentTab
+	 */
 	async function installCheck(currentTab) {
+		const tabUrl = new URL(currentTab.url);
+		/** @type {URL} */
+		let url;
+		// check if current page url is a userscript
+		if (tabUrl.pathname.endsWith(".user.js")) {
+			url = tabUrl;
+		} else {
+			const res = await browser.tabs.sendMessage(
+				currentTab.id,
+				"TAB_CLICK_USERJS",
+			);
+			if (!res) return;
+			url = new URL(res);
+		}
+		// set checking state
+		scriptChecking = true;
+		// show checking banner
+		showInstallPrompt = "checking...";
 		// refetch script from URL to avoid tampered DOM content
 		let res; // fetch response
 		try {
-			res = await fetch(currentTab.url);
+			res = await fetch(url);
 			if (!res.ok) throw new Error(`httpcode-${res.status}`);
 		} catch (error) {
 			console.error("Error fetching .user.js url", error);
-			errorNotification = "Fetching failed, refresh to retry.";
+			errorNotification = `Userscript fetching failed (${res.status})`;
 			showInstallPrompt = undefined;
 			return;
 		}
 		const content = await res.text();
 		// caching script data
-		installUserscript = { url: currentTab.url, content };
+		checkedUserscript = { tab: currentTab, url, type: "js", content };
 		// send native swift a message, parse metadata and check if installed
 		const response = await sendNativeMessage({
 			name: "POPUP_INSTALL_CHECK",
@@ -423,6 +446,7 @@
 			showInstallPrompt = response.success;
 		}
 		scriptChecking = false;
+		scriptInstalled || showInstallView();
 	}
 
 	async function showInstallView() {
@@ -441,11 +465,11 @@
 		// go back to main view
 		showInstall = false;
 		// double check before send install message
-		if (!installUserscript || !installUserscript.content) {
+		if (!checkedUserscript || !checkedUserscript.content) {
 			errorNotification = "Install failed: userscript missing";
 		}
 		const currentTab = await browser.tabs.getCurrent();
-		if (currentTab.url !== installUserscript.url) {
+		if (currentTab.id !== checkedUserscript.tab.id) {
 			errorNotification = "Install failed: tab changed unexpectedly";
 		}
 		if (errorNotification) {
@@ -456,7 +480,9 @@
 		// send native swift a message, which will start the install process
 		const response = await sendNativeMessage({
 			name: "POPUP_INSTALL_SCRIPT",
-			content: installUserscript.content,
+			url: checkedUserscript.url.href,
+			type: checkedUserscript.type,
+			content: checkedUserscript.content,
 		});
 		if (response.error) {
 			errorNotification = response.error;
