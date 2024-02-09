@@ -69,9 +69,21 @@ function setClipboard(data, type = "text/plain") {
 }
 
 async function setBadgeCount() {
-	const clearBadge = () => browser.browserAction.setBadgeText({ text: "" });
+	const clearBadge = () => {
+		if (import.meta.env.SAFARI_VERSION < 16.4) {
+			browser.browserAction.setBadgeText({ text: "" });
+		} else {
+			browser.browserAction.setBadgeText({ text: null });
+		}
+	};
 	// @todo until better introduce in ios, only set badge on macOS
 	const platform = await getPlatform();
+	// set a text badge or an empty string in visionOS will cause the extension's icon to no longer be displayed
+	// set it to null to fix already affected users
+	if (platform === "visionos") {
+		browser.browserAction.setBadgeText({ text: null });
+		return;
+	}
 	if (platform !== "macos") return clearBadge();
 	// @todo settingsStorage.get("global_exclude_match")
 	const settings = await settingsStorage.get([
