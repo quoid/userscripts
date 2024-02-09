@@ -5,12 +5,24 @@
 	export let abort = false;
 	export let abortClick = () => {};
 	export let backgroundColor = "var(--color-bg-secondary)";
+
+	/**
+	 * Avoid icon bouncing due to viewport height changes or banner insertion
+	 * @type {import('svelte/action').Action}
+	 */
+	function lockIconTopPosition(node) {
+		const icon = node.querySelector("svg");
+		const rect = icon.getBoundingClientRect();
+		icon.style.top = rect.top.toString();
+		icon.style.position = "fixed";
+	}
 </script>
 
 <div
 	class="loader"
 	style="background-color: {backgroundColor};"
 	out:fade={{ duration: 125 }}
+	use:lockIconTopPosition
 >
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html iconLoader}
