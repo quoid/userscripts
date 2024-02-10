@@ -29,7 +29,6 @@
 	let platform;
 	let initError;
 	let firstGuide;
-	let windowHeight = 0;
 	let header;
 	let warn;
 	let err;
@@ -42,12 +41,9 @@
 	let installViewUserscriptError;
 	let showAll;
 	let allItems = [];
-	let resizeTimer;
 	let abort = false;
 
 	$: list = items.sort((a, b) => a.name.localeCompare(b.name));
-
-	$: if (platform) document.body.classList.add(platform);
 
 	function getItemBackgroundColor(elements, index) {
 		if (elements.length < 2) return null;
@@ -259,9 +255,6 @@
 		// set toggle state
 		active = await settingsStorage.get("global_active");
 
-		// set popup height
-		resize();
-
 		// get matches
 		const currentTab = await browser.tabs.getCurrent();
 		const url = currentTab.url;
@@ -361,35 +354,20 @@
 		window.location.reload();
 	}
 
-	async function resize() {
-		if (!platform || platform === "macos") return;
-		clearTimeout(resizeTimer);
-		resizeTimer = setTimeout(async () => {
-			if (platform === "ipados") {
-				if (window.matchMedia("(max-width: 360px)").matches) {
-					// the popup window is no greater than 360px
-					// ensure body & main element have no leftover styling
-					main.removeAttribute("style");
-					document.body.removeAttribute("style");
-					return;
-				}
-				main.style.maxHeight = "unset";
-				document.body.style.width = "100vw";
-			}
-			// on ios and ipados (split view) programmatically set the height of the scrollable container
-			// first get the header height
-			const headerHeight = header.offsetHeight;
-			// then check if a warning or error is visible (ie. taking up height)
-			let addHeight = 0;
-			// if warn or error elements visible, also subtract that from applied height
-			if (warn) addHeight += warn.offsetHeight;
-			if (err) addHeight += err.offsetHeight;
-			windowHeight = window.outerHeight - (headerHeight + addHeight);
-			main.style.height = `${windowHeight}px`;
-			main.style.paddingBottom = `${headerHeight + addHeight}px`;
-		}, 25);
-	}
+	/** @type {import("svelte/elements").UIEventHandler<Window>} */
+	// async function resizeHandler(event) {
+	// 	if (platform !== "macos") {
+	// 		const viewport = event.currentTarget.visualViewport;
+	// 		console.debug(platform, viewport);
+	// 		// add max limits after the window size has been rendered
+	// 		// avoid display overflow when window shrinks dynamically
+	// 	}
+	// }
 
+	/**
+	 * Check if the current page contains a user script
+	 * @param {import("webextension-polyfill").Tabs.Tab} currentTab
+	 */
 	async function installCheck(currentTab) {
 		// refetch script from URL to avoid tampered DOM content
 		let res; // fetch response
@@ -472,8 +450,6 @@
 
 	onMount(async () => {
 		await initialize();
-		// run resize again for good measure
-		resize();
 	});
 
 	// handle native app messages
@@ -491,103 +467,6 @@
 	}
 </script>
 
-<svelte:window on:resize={resize} />
-<div class="header" bind:this={header}>
-	<IconButton
-		icon={iconOpen}
-		title={"Open save location"}
-		on:click={openSaveLocation}
-		{disabled}
-	/>
-	<IconButton
-		icon={iconUpdate}
-		notification={!!updates.length}
-		on:click={() => (showUpdates = true)}
-		title={"Show updates"}
-		{disabled}
-	/>
-	<IconButton
-		icon={iconRefresh}
-		on:click={refreshView}
-		title={"Refresh view"}
-		{disabled}
-	/>
-	<Toggle
-		checked={active}
-		title={"Toggle injection"}
-		on:click={toggleExtension}
-		{disabled}
-	/>
-</div>
-{#if !active}
-	<!-- <div class="warn" bind:this={warn}>Injection disabled</div> -->
-{/if}
-{#if showInstallPrompt}
-	<div class="warn" class:done={scriptInstalled} bind:this={warn}>
-		Userscript
-		{#if scriptChecking}
-			{showInstallPrompt}
-		{:else}
-			{scriptInstalled ? "Installed" : "Detected"}:
-			<button on:click={showInstallView}>{showInstallPrompt}</button>
-		{/if}
-	</div>
-{/if}
-{#if errorNotification}
-	<div class="error" bind:this={err}>
-		{errorNotification}
-		<IconButton
-			icon={iconClear}
-			on:click={() => (errorNotification = undefined)}
-			title={"Clear error"}
-		/>
-	</div>
-{/if}
-<div class="main {rowColors || ''}" bind:this={main}>
-	{#if loading}
-		<Loader abortClick={abortUpdates} {abort} />
-	{:else if inactive}
-		<div class="none">Popup inactive on extension page</div>
-	{:else if firstGuide}
-		<div class="none">
-			<p>Welcome, first use please:&nbsp;</p>
-			<button class="link" on:click={openContainingApp}>
-				Open Userscripts App
-			</button>
-			<p>to complete the initialization</p>
-		</div>
-	{:else if initError}
-		<div class="none">
-			Something went wrong:&nbsp;
-			<button class="link" on:click={() => window.location.reload()}>
-				click to retry
-			</button>
-		</div>
-	{:else if items.length < 1}
-		<div class="none">No matched userscripts</div>
-	{:else}
-		<div class="items" class:disabled>
-			{#each list as item, i (item.filename)}
-				<PopupItem
-					background={getItemBackgroundColor(list, i)}
-					enabled={!item.disabled}
-					name={item.name}
-					subframe={item.subframe}
-					type={item.type}
-					request={!!item.request}
-					on:click={() => toggleItem(item)}
-				/>
-			{/each}
-		</div>
-	{/if}
-</div>
-{#if !inactive && platform === "macos"}
-	<div class="footer">
-		<button class="link" on:click={gotoExtensionPage}>
-			Open Extension Page
-		</button>
-	</div>
-{/if}
 {#if showUpdates}
 	<View
 		headerTitle={"Updates"}
@@ -630,34 +509,140 @@
 	>
 		<AllItemsView {allItems} allItemsToggleItem={toggleItem} />
 	</View>
+{:else}
+	<div class="header" bind:this={header}>
+		<div class="buttons">
+			<IconButton
+				icon={iconOpen}
+				title={"Open save location"}
+				on:click={openSaveLocation}
+				{disabled}
+			/>
+			<IconButton
+				icon={iconUpdate}
+				notification={!!updates.length}
+				on:click={() => (showUpdates = true)}
+				title={"Show updates"}
+				{disabled}
+			/>
+			<IconButton
+				icon={iconRefresh}
+				on:click={refreshView}
+				title={"Refresh view"}
+				{disabled}
+			/>
+			<Toggle
+				checked={active}
+				title={"Toggle injection"}
+				on:click={toggleExtension}
+				{disabled}
+			/>
+		</div>
+		{#if !active}
+			<!-- <div class="warn" bind:this={warn}>Injection disabled</div> -->
+		{/if}
+		{#if showInstallPrompt}
+			<div class="warn" class:done={scriptInstalled} bind:this={warn}>
+				Userscript
+				{#if scriptChecking}
+					{showInstallPrompt}
+				{:else}
+					{scriptInstalled ? "Installed" : "Detected"}:
+					<button on:click={showInstallView}>{showInstallPrompt}</button>
+				{/if}
+			</div>
+		{/if}
+		{#if errorNotification}
+			<div class="error" bind:this={err}>
+				{errorNotification}
+				<IconButton
+					icon={iconClear}
+					on:click={() => (errorNotification = undefined)}
+					title={"Clear error"}
+				/>
+			</div>
+		{/if}
+	</div>
+	<div class="main {rowColors || ''}" bind:this={main}>
+		{#if loading}
+			<Loader abortClick={abortUpdates} {abort} />
+		{:else if inactive}
+			<div class="none">Popup inactive on extension page</div>
+		{:else if firstGuide}
+			<div class="none">
+				<p>Welcome, first use please:&nbsp;</p>
+				<button class="link" on:click={openContainingApp}>
+					Open Userscripts App
+				</button>
+				<p>to complete the initialization</p>
+			</div>
+		{:else if initError}
+			<div class="none">
+				Something went wrong:&nbsp;
+				<button class="link" on:click={() => window.location.reload()}>
+					click to retry
+				</button>
+			</div>
+		{:else if items.length < 1}
+			<div class="none">No matched userscripts</div>
+		{:else}
+			<div class="items" class:disabled>
+				{#each list as item, i (item.filename)}
+					<PopupItem
+						background={getItemBackgroundColor(list, i)}
+						enabled={!item.disabled}
+						name={item.name}
+						subframe={item.subframe}
+						type={item.type}
+						request={!!item.request}
+						on:click={() => toggleItem(item)}
+					/>
+				{/each}
+			</div>
+		{/if}
+	</div>
+	{#if !inactive && platform === "macos"}
+		<div class="footer">
+			<button class="link" on:click={gotoExtensionPage}>
+				Open Extension Page
+			</button>
+		</div>
+	{/if}
 {/if}
 
 <style>
 	.header {
+		background-color: var(--color-bg-secondary);
+		position: sticky;
+		top: 0;
+		z-index: 1;
+	}
+
+	.header .buttons {
 		align-items: center;
 		border-bottom: 1px solid var(--color-black);
 		display: flex;
 		padding: 0.5rem 1rem calc(0.5rem - 1px) 1rem;
 	}
 
-	.header :global(button:nth-of-type(2)) {
+	.header .buttons :global(button:nth-of-type(2)) {
 		margin: 0 auto 0 1rem;
 	}
 
-	.header :global(button:nth-of-type(3)) {
+	.header .buttons :global(button:nth-of-type(3)) {
 		margin-right: 1rem;
 	}
 
-	.header :global(button:nth-of-type(1) svg) {
+	.header .buttons :global(button:nth-of-type(1) svg) {
 		transform: scale(0.75);
 	}
 
-	.header :global(button:nth-of-type(2) svg) {
+	.header .buttons :global(button:nth-of-type(2) svg) {
 		transform: scale(0.9);
 	}
 
-	.header :global(label) {
-		font-size: 1.25rem !important;
+	.header .buttons :global(button:nth-of-type(4)) {
+		--toggle-font-size: 1.25rem;
 	}
 
 	.error,
@@ -702,13 +687,10 @@
 	}
 
 	.main {
+		flex-grow: 1;
 		min-height: 12.5rem;
 		overflow-y: auto;
 		position: relative;
-	}
-
-	:global(body:not(.ios) .main) {
-		max-height: 20rem;
 	}
 
 	.none {
