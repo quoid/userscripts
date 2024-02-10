@@ -374,6 +374,7 @@ export async function openExtensionPage() {
 	const tab = tabs.find((e) => e.url.startsWith(url));
 	if (!tab) return browser.tabs.create({ url });
 	await browser.tabs.update(tab.id, { active: true });
+	if (!browser.windows.update) return;
 	await browser.windows.update(tab.windowId, { focused: true });
 }
 

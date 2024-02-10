@@ -76,11 +76,6 @@
 		padding: 0 1rem;
 	}
 
-	:global(body.ios) .view--install,
-	:global(body.ipados) .view--install {
-		padding-bottom: calc(39px + 1rem);
-	}
-
 	.install__error {
 		color: var(--text-color-disabled);
 		font-weight: 600;
