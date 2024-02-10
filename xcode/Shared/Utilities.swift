@@ -32,6 +32,7 @@ func getPlatform() -> String {
 	return "macos"
 #elseif os(iOS)
 	// https://developer.apple.com/documentation/uikit/uiuserinterfaceidiom
+	// There is no reliable way to detect visionOS for now, will match `.phone` in Apple Vision (Designed for iPad) mode
 	switch UIDevice.current.userInterfaceIdiom {
 	case .phone:
 		return "ios"
