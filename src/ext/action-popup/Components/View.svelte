@@ -40,11 +40,12 @@
 		background-color: var(--color-bg-secondary);
 		display: flex;
 		flex-direction: column;
-		left: 0;
 		position: absolute;
 		text-align: center;
 		top: 0;
+		left: 0;
 		width: 100%;
+		height: 100%;
 		z-index: 3;
 	}
 
@@ -71,6 +72,18 @@
 
 	.view__body {
 		flex-grow: 1;
+		overflow-y: auto;
 		position: relative;
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		.view {
+			height: auto;
+		}
+
+		.view__body {
+			overflow-y: visible;
+		}
 	}
 </style>
