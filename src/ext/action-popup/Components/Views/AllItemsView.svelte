@@ -47,12 +47,10 @@
 	}
 
 	.none {
-		align-items: center;
-		color: var(--text-color-disabled);
-		display: flex;
 		font-weight: 600;
-		justify-content: center;
-		inset: 0;
-		position: absolute;
+		color: var(--text-color-disabled);
+		text-align: center;
+		padding: 3rem 0;
+		line-height: 2.5;
 	}
 </style>
