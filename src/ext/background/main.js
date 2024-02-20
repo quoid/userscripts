@@ -72,8 +72,9 @@ function setClipboard(data, type = "text/plain") {
 }
 
 async function setBadgeCount() {
-	const clearBadge = () => browser.browserAction.setBadgeText({ text: "" });
+	const clearBadge = () => browser.browserAction.setBadgeText({ text: null });
 	// @todo until better introduce in ios, only set badge on macOS
+	// set a text badge or an empty string in visionOS will cause the extension's icon to no longer be displayed
 	const platform = await getPlatform();
 	if (platform !== "macos") return clearBadge();
 	// @todo settingsStorage.get("global_exclude_match")

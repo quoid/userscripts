@@ -28,16 +28,26 @@ func directoryExists(path: String) -> Bool {
 }
 
 func getPlatform() -> String {
-	var platform:String
-#if os(iOS)
-	if UIDevice.current.userInterfaceIdiom == .pad {
-		platform = "ipados"
+#if os(macOS)
+	return "macos"
+#elseif os(iOS)
+	// https://developer.apple.com/documentation/uikit/uiuserinterfaceidiom
+	// There is no reliable way to detect visionOS for now, will match `.phone` in Apple Vision (Designed for iPad) mode
+	switch UIDevice.current.userInterfaceIdiom {
+	case .phone:
+		return "ios"
+	case .pad, .mac:
+		return "ipados"
+	case .vision:
+		return "visionos"
+	case .tv:
+		return "tvos"
+	case .carPlay:
+		return "carplay"
+	case .unspecified:
+		return "unspecified"
+	@unknown default:
+		return "unknown"
 	}
-	else {
-		platform = "ios"
-	}
-#elseif os(macOS)
-	platform = "macos"
 #endif
-	return platform
 }

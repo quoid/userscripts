@@ -37,29 +37,31 @@
 
 <style>
 	.view {
-		background-color: var(--color-bg-primary);
+		background-color: var(--color-bg-secondary);
 		display: flex;
 		flex-direction: column;
-		height: 100%;
-		left: 0;
 		position: absolute;
 		text-align: center;
 		top: 0;
+		left: 0;
 		width: 100%;
+		height: 100%;
 		z-index: 3;
 	}
 
 	.view__header {
-		background-color: var(--color-bg-primary);
+		background-color: var(--color-bg-secondary);
 		border-bottom: 1px solid var(--color-black);
 		flex-shrink: 0;
 		font-weight: 600;
 		padding: 0.5rem 1rem calc(0.5rem - 1px) 1rem;
+		position: sticky;
 		top: 0;
+		z-index: 5;
 	}
 
 	.view :global(.loader) {
-		background-color: var(--color-bg-primary);
+		background-color: var(--color-bg-secondary);
 	}
 
 	.view__header :global(button) {
@@ -72,5 +74,16 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		position: relative;
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		.view {
+			height: auto;
+		}
+
+		.view__body {
+			overflow-y: visible;
+		}
 	}
 </style>
