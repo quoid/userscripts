@@ -23,6 +23,20 @@ body {
 		overscroll-behavior: none;
 	}
 
+	/**
+	 * Dynamic Type
+	 * https://support.apple.com/102453
+	 * https://webkit.org/blog/3709/using-the-system-font-in-web-content/
+	 * https://developer.apple.com/library/archive/releasenotes/General/WhatsNewInSafari/Articles/Safari_7_0.html#//apple_ref/doc/uid/TP40014305-CH5-SW10
+	 * https://github.com/w3c/csswg-drafts/issues/3708
+	 */
+	@supports (font: -apple-system-body) {
+		html {
+			/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+			font: -apple-system-title3; /* default 20px */
+		}
+	}
+
 	body {
 		width: auto;
 		min-width: 16rem;
@@ -35,6 +49,13 @@ body {
 			width: 18rem;
 			min-height: 16rem;
 		}
+	}
+
+	/* Avoid page zoom */
+	input,
+	textarea,
+	select {
+		font-size: max(1rem, 16px);
 	}
 }
 
