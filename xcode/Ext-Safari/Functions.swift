@@ -677,12 +677,81 @@ func updateSettings(_ settings: [String: String]) -> Bool {
 }
 
 // files
+func loadScript(at url: URL, includeCode: Bool, manifest: Manifest, onQueue queue: OperationQueue) async -> [String: Any]? {
+	let fc = NSFileCoordinator()
+	let intent = NSFileAccessIntent.readingIntent(with: url)
+
+	let filename = url.lastPathComponent
+
+	guard let (content, dateMod): (String, Date?) = (await withCheckedContinuation { continuation in
+		fc.coordinate(with: [intent], queue: queue) { error in
+			if let error {
+				logger?.info("\(#function, privacy: .public) - failed to access file, ignoring: \(error)")
+				continuation.resume(returning: nil)
+			}
+
+			do {
+				let content = try String(contentsOf: url, encoding: .utf8)
+				let dateMod = try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+				continuation.resume(returning: (content, dateMod))
+			} catch let error {
+				logger?.info("\(#function, privacy: .public) - failed to read file, ignoring: \(error)")
+				continuation.resume(returning: nil)
+			}
+		}
+	})
+	else {
+		return nil
+	}
+
+	// file will be skipped if metablock is missing
+	guard
+		let dateMod,
+		let parsed = parse(content),
+		let metadata = parsed["metadata"] as? [String: [String]],
+		let type = filename.split(separator: ".").last
+	else {
+		logger?.info("\(#function, privacy: .public) - ignoring \(filename, privacy: .public), file missing or metadata missing from file contents")
+		return nil
+	}
+
+	var fileData: [String: Any] = [:]
+	fileData["canUpdate"] = false
+	fileData["content"] = content
+	fileData["disabled"] = manifest.disabled.contains(filename)
+	fileData["filename"] = filename
+	fileData["lastModified"] = dateToMilliseconds(dateMod)
+	fileData["metadata"] = metadata
+	// force unwrap name since parser ensure it exists
+	fileData["name"] = metadata["name"]![0]
+	fileData["type"] = "\(type)"
+	// add extra data if a request userscript
+	let runAt = metadata["run-at"]?[0] ?? "document-end"
+	if runAt == "request" {
+	   fileData["request"] = true
+	}
+	if metadata["description"] != nil {
+	   fileData["description"] = metadata["description"]![0]
+	}
+	if metadata["version"] != nil && metadata["updateURL"] != nil {
+	   fileData["canUpdate"] = true
+	}
+	fileData["noframes"] = metadata["noframes"] != nil ? true : false
+
+	// if asked, also return the code string
+	if (includeCode) {
+	   // can force unwrap because always returned from parser
+	   fileData["code"] = parsed["code"] as! String
+	}
+
+	return fileData
+}
+
 func getAllFiles(includeCode: Bool = false) async -> [[String: Any]]? {
 	logger?.info("\(#function, privacy: .public) - started")
 
 	let queue = OperationQueue()
 	queue.underlyingQueue = .global()
-	let fc = NSFileCoordinator()
 
 	// returns all files of proper type with filenames, metadata & more
 	var files = [[String: Any]]()
@@ -703,74 +772,22 @@ func getAllFiles(includeCode: Bool = false) async -> [[String: Any]]? {
 		return nil
 	}
 
-	for url in urls {
+	let tasks: [Task<[String: Any]?, Never>] = urls.compactMap { url in Task {
 		// only read contents for css & js files
 		let filename = url.lastPathComponent
 		if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
-			continue
+			return nil
 		}
 
-		let intent = NSFileAccessIntent.readingIntent(with: url);
+		return await loadScript(at: url, includeCode: includeCode, manifest: manifest, onQueue: queue)
+	}}
 
-		let fileData: [String: Any]? = await withCheckedContinuation { continuation in
-			fc.coordinate(with: [intent], queue: queue) { error in
-				if let error {
-					logger?.error("\(error)")
-					continuation.resume(returning: nil)
-					return
-				}
-
-				let fm = FileManager.default
-
-				// file will be skipped if metablock is missing
-				guard
-					let content = try? String(contentsOf: url, encoding: .utf8),
-					let dateMod = try? fm.attributesOfItem(atPath: url.path)[.modificationDate] as? Date,
-					let parsed = parse(content),
-					let metadata = parsed["metadata"] as? [String: [String]],
-					let type = filename.split(separator: ".").last
-				else {
-					logger?.info("\(#function, privacy: .public) - ignoring \(filename, privacy: .public), file missing or metadata missing from file contents")
-					continuation.resume(returning: nil)
-					return
-				}
-
-				var fileData: [String: Any] = [:]
-				fileData["canUpdate"] = false
-				fileData["content"] = content
-				fileData["disabled"] = manifest.disabled.contains(filename)
-				fileData["filename"] = filename
-				fileData["lastModified"] = dateToMilliseconds(dateMod)
-				fileData["metadata"] = metadata
-				// force unwrap name since parser ensure it exists
-				fileData["name"] = metadata["name"]![0]
-				fileData["type"] = "\(type)"
-				// add extra data if a request userscript
-				let runAt = metadata["run-at"]?[0] ?? "document-end"
-				if runAt == "request" {
-					fileData["request"] = true
-				}
-				if metadata["description"] != nil {
-					fileData["description"] = metadata["description"]![0]
-				}
-				if metadata["version"] != nil && metadata["updateURL"] != nil {
-					fileData["canUpdate"] = true
-				}
-				fileData["noframes"] = metadata["noframes"] != nil ? true : false
-				// if asked, also return the code string
-				if (includeCode) {
-					// can force unwrap because always returned from parser
-					fileData["code"] = parsed["code"] as! String
-				}
-
-				continuation.resume(returning: fileData)
-			};
-		}
-
-		if let fileData {
+	for task in tasks {
+		if let fileData = await task.value {
 			files.append(fileData)
 		}
 	}
+
 	logger?.info("\(#function, privacy: .public) - completed")
 	return files
 }
