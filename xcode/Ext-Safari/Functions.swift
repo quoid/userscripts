@@ -267,16 +267,8 @@ func getManifest() -> Manifest {
 	}
 }
 
-func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) async -> Bool {
+func updateManifestMatches(files: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
-	// only get all files if files were not provided
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = await getAllFiles() else {return false}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
 	var manifest = getManifest()
 	for file in files {
 		// can be force unwrapped because getAllFiles didn't return nil
@@ -385,19 +377,8 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
 	return returnDictionary
 }
 
-func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) async -> Bool {
+func updateManifestRequired(files: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
-	// only get all files if files were not provided
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = await getAllFiles() else {
-			logger?.info("\(#function, privacy: .public) - count not get files")
-			return false
-		}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
 	logger?.info("\(#function, privacy: .public) - will loop through \(files.count, privacy: .public)")
 	var manifest = getManifest()
 	for file in files {
@@ -436,18 +417,8 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) async ->
 	return true
 }
 
-func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] = []) async -> Bool {
+func updateManifestDeclarativeNetRequests(files: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = await getAllFiles() else {
-			logger?.error("\(#function, privacy: .public) - failed at (1)")
-			return false
-		}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
 	var manifest = getManifest()
 	for file in files {
 		// can be force unwrapped because getAllFiles didn't return nil
@@ -507,19 +478,10 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
 	return true
 }
 
-func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) async -> Bool {
+func purgeManifest(files allFiles: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
 	// purge all manifest keys of any stale entries
 	var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
-	// only get all files if files were not provided
-	var allFiles = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		// if getAllFiles fails to return, ignore and pass an empty array
-		let getFiles = await getAllFiles() ?? []
-		allFiles = getFiles
-	} else {
-		allFiles = optionalFilesArray
-	}
 	// populate array with filenames
 	for file in allFiles {
 		if let filename = file["filename"] as? String {
@@ -865,19 +827,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 	return true
 }
 
-func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) async -> [[String: String]]? {
-	// only get all files if files were not provided
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = await getAllFiles() else {
-			logger?.error("\(#function, privacy: .public) - failed at (1)")
-			return nil
-		}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
-
+func checkForRemoteUpdates(files: [[String: Any]]) -> [[String: String]]? {
 	var hasUpdates = [[String: String]]()
 	for file in files {
 		// can be force unwrapped because getAllFiles didn't return nil
@@ -957,10 +907,10 @@ func getRemoteFileContents(_ url: String) -> String? {
 	return contents
 }
 
-func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) async -> Bool {
+func updateAllFiles(files: [[String: Any]]) -> Bool {
 	// get names of all files with updates available
 	guard
-		let filesWithUpdates = await checkForRemoteUpdates(optionalFilesArray),
+		let filesWithUpdates = checkForRemoteUpdates(files: files),
 		let saveLocation = getSaveLocation()
 	else {
 		logger?.error("\(#function, privacy: .public) - failed to update files (1)")
@@ -1575,10 +1525,10 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) async -> [[String:
 func popupUpdateAll() async -> Bool {
 	guard
 		let files = await getAllFiles(),
-		await updateAllFiles(files),
-		await updateManifestMatches(files),
-		await updateManifestRequired(files),
-		await purgeManifest(files)
+		updateAllFiles(files: files),
+		updateManifestMatches(files: files),
+		updateManifestRequired(files: files),
+		purgeManifest(files: files)
 	else {
 		return false
 	}
@@ -1635,9 +1585,9 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
 	}
 	guard
 		let files = await getAllFiles(),
-		await updateManifestMatches(files),
-		await updateManifestRequired(files),
-		await purgeManifest(files),
+		updateManifestMatches(files: files),
+		updateManifestRequired(files: files),
+		purgeManifest(files: files),
 		let matches = await getPopupMatches(url, subframeUrls)
 	else {
 		logger?.error("\(#function, privacy: .public) - failed at (4)")
@@ -1765,10 +1715,10 @@ func saveFile(_ item: [String: Any],_ content: String) async -> [String: Any] {
 	// update manifest for new file and purge anything from old file
 	guard
 		let allFiles = await getAllFiles(),
-		await updateManifestMatches(allFiles),
-		await updateManifestRequired(allFiles),
-		await updateManifestDeclarativeNetRequests(allFiles),
-		await purgeManifest(allFiles)
+		updateManifestMatches(files: allFiles),
+		updateManifestRequired(files: allFiles),
+		updateManifestDeclarativeNetRequests(files: allFiles),
+		purgeManifest(files: allFiles)
 	else {
 		logger?.error("\(#function, privacy: .public) - failed at (4)")
 		return ["error": "file save but manifest couldn't be updated"]
@@ -1822,7 +1772,12 @@ func trashFile(_ item: [String: Any]) async -> Bool {
 		}
 	}
 	// update manifest
-	guard await updateManifestMatches(), await updateManifestRequired(), await purgeManifest() else {
+	guard
+		let files = await getAllFiles(),
+		updateManifestMatches(files: files),
+		updateManifestRequired(files: files),
+		purgeManifest(files: files)
+	else {
 		logger?.error("\(#function, privacy: .public) - failed at (2)")
 		return false
 	}
@@ -1912,22 +1867,22 @@ func nativeChecks() async -> [String: String] {
 		return ["error": "Native checks error (3)"]
 	}
 	// purge the manifest of old records
-	guard await purgeManifest(allFiles) else {
+	guard purgeManifest(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - purgeManifest failed")
 		return ["error": "Native checks error (4)"]
 	}
 	// update matches in manifest
-	guard await updateManifestMatches(allFiles) else {
+	guard updateManifestMatches(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - updateManifestMatches failed")
 		return ["error": "Native checks error (5)"]
 	}
 	// update the required resources
-	guard await updateManifestRequired(allFiles) else {
+	guard updateManifestRequired(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - updateManifestRequired failed")
 		return ["error": "Native checks error (6)"]
 	}
 	// update declarativeNetRequest
-	guard await updateManifestDeclarativeNetRequests(allFiles) else {
+	guard updateManifestDeclarativeNetRequests(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - updateManifestDeclarativeNetRequests failed")
 		return ["error": "Native checks error (7)"]
 	}

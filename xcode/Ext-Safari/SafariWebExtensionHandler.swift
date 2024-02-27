@@ -102,14 +102,14 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "POPUP_UPDATES" {
-			if let updates = await checkForRemoteUpdates() {
+			if let updates = checkForRemoteUpdates(files: await getAllFiles() ?? []) {
 				response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get updates"]]
 			}
 		}
 		else if name == "POPUP_UPDATE_ALL" {
-			if await popupUpdateAll(), let updates = await checkForRemoteUpdates() {
+			if await popupUpdateAll(), let updates = checkForRemoteUpdates(files: await getAllFiles() ?? []) {
 				response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
 			} else {
 			   response.userInfo = [SFExtensionMessageKey: ["error": "failed to run update sequence"]]
@@ -131,7 +131,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "POPUP_CHECK_UPDATES" {
-			if let updates = await checkForRemoteUpdates() {
+			if let updates = checkForRemoteUpdates(files: await getAllFiles() ?? []) {
 				response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to check for updates"]]
