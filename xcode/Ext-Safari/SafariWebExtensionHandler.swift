@@ -2,13 +2,30 @@ import SafariServices
 
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 	func beginRequest(with context: NSExtensionContext) {
+		let lock = DispatchSemaphore(value: 0)
+
+		Task {
+			guard
+				let request = context.inputItems[0] as? NSExtensionItem,
+				let response = await asyncBeginRequest(request: request)
+			else {
+				return
+			}
+
+			context.completeRequest(returningItems: [response], completionHandler: nil)
+			lock.signal()
+		}
+
+		lock.wait()
+	}
+
+	func asyncBeginRequest(request item: NSExtensionItem) async -> NSExtensionItem? {
 		let logger = USLogger(#fileID)
-		let item = context.inputItems[0] as? NSExtensionItem
-		let message = item?.userInfo?[SFExtensionMessageKey] as? [String: Any]
+		let message = item.userInfo?[SFExtensionMessageKey] as? [String: Any]
 		// if message received without name, ignore
 		guard let name = message?["name"] as? String else {
 			logger?.error("\(#function, privacy: .public) - could not get message name from web extension")
-			return
+			return nil
 		}
 		logger?.info("\(#function, privacy: .public) - Got message with name: \(name, privacy: .public)")
 		// got a valid message, construct response based on message received
@@ -27,7 +44,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "NATIVE_CHECKS" {
-			let result = nativeChecks()
+			let result = await nativeChecks()
 			response.userInfo = [SFExtensionMessageKey: result]
 		}
 		else if name == "REQ_PLATFORM" {
@@ -49,14 +66,14 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "REQ_REQUESTS" {
-			if let requestScripts = getRequestScripts() {
+			if let requestScripts = await getRequestScripts() {
 				response.userInfo = [SFExtensionMessageKey: requestScripts]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get requestScripts"]]
 			}
 		}
 		else if name == "REQ_CONTEXT_MENU_SCRIPTS" {
-			if let contextMenuScripts = getContextMenuScripts() {
+			if let contextMenuScripts = await getContextMenuScripts() {
 				response.userInfo = [SFExtensionMessageKey: contextMenuScripts]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get contextMenuScripts"]]
@@ -64,7 +81,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 		}
 		else if name == "POPUP_BADGE_COUNT" {
 			if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-				if let matches = getPopupBadgeCount(url, frameUrls) {
+				if let matches = await getPopupBadgeCount(url, frameUrls) {
 					response.userInfo = [SFExtensionMessageKey: ["count": matches]]
 				} else {
 					response.userInfo = [SFExtensionMessageKey: ["error": "failed to update badge count"]]
@@ -75,7 +92,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 		}
 		else if name == "POPUP_MATCHES"{
 			if let url = message?["url"] as? String, let frameUrls = message?["frameUrls"] as? [String] {
-				if let matches = getPopupMatches(url, frameUrls) {
+				if let matches = await getPopupMatches(url, frameUrls) {
 					response.userInfo = [SFExtensionMessageKey: ["matches": matches]]
 				} else {
 					response.userInfo = [SFExtensionMessageKey: ["error": "failed to get matches"]]
@@ -85,14 +102,14 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "POPUP_UPDATES" {
-			if let updates = checkForRemoteUpdates() {
+			if let updates = await checkForRemoteUpdates() {
 				response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get updates"]]
 			}
 		}
 		else if name == "POPUP_UPDATE_ALL" {
-			if popupUpdateAll(), let updates = checkForRemoteUpdates() {
+			if await popupUpdateAll(), let updates = await checkForRemoteUpdates() {
 				response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
 			} else {
 			   response.userInfo = [SFExtensionMessageKey: ["error": "failed to run update sequence"]]
@@ -104,7 +121,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 				let url = message?["url"] as? String,
 				let frameUrls = message?["frameUrls"] as? [String]
 			{
-				if let matches = popupUpdateSingle(filename, url, frameUrls) {
+				if let matches = await popupUpdateSingle(filename, url, frameUrls) {
 					response.userInfo = [SFExtensionMessageKey: ["items": matches]]
 				} else {
 					response.userInfo = [SFExtensionMessageKey: ["error": "failed to update file"]]
@@ -114,7 +131,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 		}
 		else if name == "POPUP_CHECK_UPDATES" {
-			if let updates = checkForRemoteUpdates() {
+			if let updates = await checkForRemoteUpdates() {
 				response.userInfo = [SFExtensionMessageKey: ["updates": updates]]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to check for updates"]]
@@ -156,7 +173,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 					response.userInfo = [SFExtensionMessageKey: ["success": true]]
 				}
 			#elseif os(iOS)
-				if let files = getAllFiles() {
+				if let files = await getAllFiles() {
 					response.userInfo = [SFExtensionMessageKey: ["items": files]]
 				} else {
 					response.userInfo = [SFExtensionMessageKey: ["error": "failed to get all files"]]
@@ -173,7 +190,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 		}
 		else if name == "POPUP_INSTALL_CHECK" {
 			if let content = message?["content"] as? String {
-				response.userInfo = [SFExtensionMessageKey: installCheck(content)]
+				response.userInfo = [SFExtensionMessageKey: await installCheck(content)]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get script content"]]
 			}
@@ -184,7 +201,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 				let type = message?["type"] as? String,
 				let content = message?["content"] as? String
 			{
-				response.userInfo = [SFExtensionMessageKey: installUserscript(url, type, content)]
+				response.userInfo = [SFExtensionMessageKey: await installUserscript(url, type, content)]
 			} else {
 				response.userInfo = [SFExtensionMessageKey: ["error": "failed to get script content (2)"]]
 			}
@@ -207,7 +224,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 		}
 		else if name == "PAGE_ALL_FILES" {
 			#if os(macOS)
-				if let files = getAllFiles() {
+				if let files = await getAllFiles() {
 					response.userInfo = [SFExtensionMessageKey: files]
 				} else {
 					response.userInfo = [SFExtensionMessageKey: ["error": "failed to get all files"]]
@@ -220,7 +237,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 					let item = message?["item"] as? [String: Any],
 					let content = message?["content"] as? String
 				{
-					let saveResponse = saveFile(item, content)
+					let saveResponse = await saveFile(item, content)
 					response.userInfo = [SFExtensionMessageKey: saveResponse]
 				} else {
 					inBoundError = true
@@ -230,7 +247,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 		else if name == "PAGE_TRASH" {
 			#if os(macOS)
 				if let item = message?["item"] as? [String: Any] {
-					if trashFile(item) {
+					if await trashFile(item) {
 						response.userInfo = [SFExtensionMessageKey: ["success": true]]
 					} else {
 						response.userInfo = [SFExtensionMessageKey: ["error": "failed to trash file"]]
@@ -303,6 +320,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 		if inBoundError {
 			response.userInfo = [SFExtensionMessageKey: ["error": "Failed to parse inbound message"]]
 		}
-		context.completeRequest(returningItems: [response], completionHandler: nil)
+
+		return response
 	}
 }
