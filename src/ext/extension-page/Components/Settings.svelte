@@ -237,10 +237,10 @@
 	{#each groups as group}
 		<div class="section">
 			<div
-				class="section__title"
+				class="section_header"
 				use:navRegister={gl(`settings_section_${group}`)}
 			>
-				<div>{gl(`settings_section_${group}`)}</div>
+				<div class="name">{gl(`settings_section_${group}`)}</div>
 				{#if indicators.resetting}
 					<button class="reset" on:click={() => resetGroup(group)}
 						>{gl("settings_section_tools_reset_section")}</button
@@ -252,56 +252,75 @@
 					"aria-labelledby": `${item.name}_label`,
 					"aria-describedby": `${item.name}_desc`,
 				}}
-				<div class="section__row {item.name}" class:disable={item.disable}>
-					<div
-						id={`${item.name}_label`}
-						class="name"
-						class:warn={item.nodeClass.warn === $settings[item.name] ||
-							indicators.warn[item.name]}
-						class:error={item.nodeClass.error === $settings[item.name] ||
-							indicators.error[item.name]}
-					>
-						{gl(`settings_${item.name}`)}
+				<div class="section_row {item.name}" class:disable={item.disable}>
+					<div class="row_grid">
+						<div
+							id={`${item.name}_label`}
+							class="name"
+							class:warn={item.nodeClass.warn === $settings[item.name] ||
+								indicators.warn[item.name]}
+							class:error={item.nodeClass.error === $settings[item.name] ||
+								indicators.error[item.name]}
+						>
+							{gl(`settings_${item.name}`)}
+						</div>
+						<div class="desc" id={`${item.name}_desc`}>
+							{gl(`settings_${item.name}_desc`)}
+						</div>
+						<div class="action1">
+							{#if item.nodeType === "Toggle"}
+								<Toggle
+									{ariaAttributes}
+									checked={$settings[item.name]}
+									on:click={() =>
+										settings.updateSingleSetting(
+											item.name,
+											!$settings[item.name],
+										)}
+								/>
+							{/if}
+							{#if item.nodeType === "select"}
+								<select
+									{...ariaAttributes}
+									bind:value={$settings[item.name]}
+									on:blur={() =>
+										settings.updateSingleSetting(
+											item.name,
+											$settings[item.name],
+										)}
+								>
+									{#each item.values as value}
+										<option {value}>
+											{gl(`settings_${item.name}_${value}`) || value}
+										</option>
+									{/each}
+								</select>
+							{/if}
+						</div>
+						<div class="action2 type_{item.nodeType}">
+							{#if indicators.resetting && !indicators.saving[item.name] && !item.protect && (item.name !== "global_exclude_match" || !gemFocused)}
+								<button class="reset" on:click={() => reset(item.name)}
+									>{gl("settings_section_tools_reset_single")}</button
+								>
+							{/if}
+							{#if item.nodeType === "textarea"}
+								{#if indicators.saving[item.name]}
+									<div class="circling saving">
+										<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+										{@html iconLoader}
+										{gl(`settings_${item.name}_saving`)}
+									</div>
+								{/if}
+								{#if gemFocused}
+									<!-- Must escape tab nav, otherwise it will cause an infinite loop -->
+									<button tabindex="-1" class="done"
+										>{gl("settings_global_exclude_match_done")}</button
+									>
+								{/if}
+							{/if}
+						</div>
 					</div>
-					{#if item.nodeType === "Toggle"}
-						<Toggle
-							{ariaAttributes}
-							checked={$settings[item.name]}
-							on:click={() =>
-								settings.updateSingleSetting(item.name, !$settings[item.name])}
-						/>
-					{/if}
-					{#if item.nodeType === "select"}
-						<select
-							{...ariaAttributes}
-							bind:value={$settings[item.name]}
-							on:blur={() =>
-								settings.updateSingleSetting(item.name, $settings[item.name])}
-						>
-							{#each item.values as value}
-								<option {value}>
-									{gl(`settings_${item.name}_${value}`) || value}
-								</option>
-							{/each}
-						</select>
-					{/if}
-					{#if indicators.resetting && !indicators.saving[item.name] && !item.protect && (item.name !== "global_exclude_match" || !gemFocused)}
-						<button class="reset" on:click={() => reset(item.name)}
-							>{gl("settings_section_tools_reset_single")}</button
-						>
-					{/if}
 					{#if item.nodeType === "textarea" && item.name === "global_exclude_match"}
-						{#if indicators.saving[item.name]}
-							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-							<span class="icon__loader">{@html iconLoader}</span>
-							{gl(`settings_${item.name}_saving`)}
-						{/if}
-						{#if gemFocused}
-							<!-- Must escape tab nav, otherwise it will cause an infinite loop -->
-							<button tabindex="-1" class="done"
-								>{gl("settings_global_exclude_match_done")}</button
-							>
-						{/if}
 						<div class="textarea_box">
 							<textarea
 								{...ariaAttributes}
@@ -336,7 +355,7 @@
 								{/each}
 							</div>
 						</div>
-						<div class="global_exclude_match_refer">
+						<div class="global_exclude_match_refer desc">
 							{gl(`settings_${item.name}_refer`)}
 							<button
 								class="link"
@@ -349,28 +368,32 @@
 							</button>
 						</div>
 					{/if}
-					<div class="desc" id={`${item.name}_desc`}>
-						{gl(`settings_${item.name}_desc`)}
-					</div>
 				</div>
 			{/each}
 		</div>
 	{/each}
 	<div class="section">
-		<div class="section__title" use:navRegister={gl(`settings_section_native`)}>
+		<div class="section_header" use:navRegister={gl(`settings_section_native`)}>
 			<div>{gl(`settings_section_native`)}</div>
 		</div>
-		<div class="section__row saveLocation">
-			<div class="name">{gl("settings_scripts_directory")}</div>
-			{#if indicators.loading.changeSaveLocation}
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				<span class="icon__loader">{@html iconLoader}</span>
-			{/if}
-			<IconButton
-				icon={iconEdit}
-				on:click={changeSaveLocation}
-				title={gl("settings_set_scripts_directory")}
-			/>
+		<div class="section_row saveLocation">
+			<div class="row_grid">
+				<div class="name">{gl("settings_scripts_directory")}</div>
+				<div class="desc">{gl("settings_scripts_directory_desc")}</div>
+				<div class="action1">
+					<div class="circling">
+						{#if indicators.loading.changeSaveLocation}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html iconLoader}
+						{/if}
+						<IconButton
+							icon={iconEdit}
+							on:click={changeSaveLocation}
+							title={gl("settings_set_scripts_directory")}
+						/>
+					</div>
+				</div>
+			</div>
 			<button
 				class="link"
 				title={$settings["saveLocation"]}
@@ -378,16 +401,15 @@
 			>
 				{$settings["saveLocation"]}
 			</button>
-			<div class="desc">{gl("settings_scripts_directory_desc")}</div>
 		</div>
 	</div>
 	<div class="section">
-		<div class="section__title" use:navRegister={gl(`settings_section_tools`)}>
+		<div class="section_header" use:navRegister={gl(`settings_section_tools`)}>
 			<div>{gl(`settings_section_tools`)}</div>
 		</div>
-		<div class="section__row tools">
-			{#if indicators.resetting}
-				<div class="buttons buttons-2-columns">
+		<div class="section_row tools">
+			<div class="buttons">
+				{#if indicators.resetting}
 					<button
 						on:click={() => (reset(), (indicators.resetting = false))}
 						class="danger">{gl("settings_section_tools_reset_all")}</button
@@ -395,9 +417,7 @@
 					<button on:click={() => (indicators.resetting = false)}
 						>{gl("settings_section_tools_goback")}</button
 					>
-				</div>
-			{:else}
-				<div class="buttons buttons-3-columns">
+				{:else}
 					<button on:click={backupExport}
 						>{gl("settings_section_tools_export")}</button
 					>
@@ -410,73 +430,81 @@
 							(indicators.resetting = true)
 						)}>{gl("settings_section_tools_reset")}</button
 					>
-				</div>
-				<input
-					bind:this={fileInput}
-					on:change={backupImport}
-					type="file"
-					accept="application/json"
-					style:display="none"
-				/>
-			{/if}
+				{/if}
+			</div>
+			<input
+				bind:this={fileInput}
+				on:change={backupImport}
+				type="file"
+				accept="application/json"
+				style:display="none"
+			/>
 			<div class="desc">{gl("settings_scripts_tools_desc")}</div>
 		</div>
 	</div>
 	<div class="section">
-		<div class="section__title" use:navRegister={gl(`settings_section_about`)}>
+		<div class="section_header" use:navRegister={gl(`settings_section_about`)}>
 			{gl(`settings_section_about`)}
 		</div>
-		<p>
-			Userscripts {import.meta.env.BROWSER ?? ""}
-			v{$settings["version"]}
-			({$settings["build"]})
-			<br /><br />
-			{gl("settings_about_text1")}
-			<button
-				class="link"
-				on:click={() => openInBlank("https://github.com/quoid/userscripts")}
-			>
-				{gl("settings_about_button_repo")}
-			</button>
-			<button
-				class="link"
-				on:click={() =>
-					openInBlank(
-						`https://github.com/quoid/userscripts/blob/v${$settings["version"]}/README.md`,
-					)}
-			>
-				{gl("settings_about_button_docs")}
-			</button>
-			<button
-				class="link"
-				on:click={() =>
-					openInBlank("https://github.com/quoid/userscripts/issues")}
-			>
-				{gl("settings_about_button_issues")}
-			</button>
-			<br /><br />
-			{gl("settings_about_text2")}
-			<button
-				class="link"
-				on:click={() =>
-					openInBlank("https://geo.itunes.apple.com/app/id1463298887")}
-			>
-				{gl("settings_about_button_store")}
-			</button>
-			<button
-				class="link"
-				on:click={() =>
-					openInBlank("https://github.com/quoid/userscripts#support")}
-			>
-				{gl("settings_about_button_beta")}
-			</button>
-		</p>
+		<div class="section_row">
+			<article>
+				<p>
+					Userscripts {import.meta.env.BROWSER ?? ""}
+					v{$settings["version"]}
+					({$settings["build"]})
+				</p>
+				<p>
+					{gl("settings_about_text1")}
+					<button
+						class="link"
+						on:click={() => openInBlank("https://github.com/quoid/userscripts")}
+					>
+						{gl("settings_about_button_repo")}
+					</button>
+					<button
+						class="link"
+						on:click={() =>
+							openInBlank(
+								`https://github.com/quoid/userscripts/blob/v${$settings["version"]}/README.md`,
+							)}
+					>
+						{gl("settings_about_button_docs")}
+					</button>
+					<button
+						class="link"
+						on:click={() =>
+							openInBlank("https://github.com/quoid/userscripts/issues")}
+					>
+						{gl("settings_about_button_issues")}
+					</button>
+				</p>
+				<p>
+					{gl("settings_about_text2")}
+					<button
+						class="link"
+						on:click={() =>
+							openInBlank("https://geo.itunes.apple.com/app/id1463298887")}
+					>
+						{gl("settings_about_button_store")}
+					</button>
+					<button
+						class="link"
+						on:click={() =>
+							openInBlank("https://github.com/quoid/userscripts#support")}
+					>
+						{gl("settings_about_button_beta")}
+					</button>
+				</p>
+			</article>
+		</div>
 	</div>
 </div>
 
 <style>
 	.settings_box {
 		--toggle-font-size: 1.1rem;
+		--row-gap: 0.25rem;
+		--column-gap: 1.25rem;
 
 		background-color: var(--color-bg-secondary);
 		color: var(--text-color-secondary);
@@ -490,49 +518,33 @@
 		}
 	}
 
-	.section__title {
+	.section_header {
+		display: flex;
 		align-items: center;
 		border-top: 1px solid var(--color-black);
 		border-bottom: 1px solid var(--color-black);
 		background-color: var(--color-bg-primary);
 		color: var(--text-color-primary);
-		display: flex;
 		font: var(--text-default);
 		font-weight: 500;
 		letter-spacing: var(--letter-spacing-default);
 		padding: calc(1rem - 2px) 1rem 1rem 1rem;
 	}
 
-	.section__title div {
-		flex-grow: 1;
+	.section_header .name {
+		flex: 1;
 	}
 
-	.section__row {
-		align-items: center;
-		border-bottom: 1px solid var(--color-black);
+	.section_row {
 		display: flex;
-		flex-wrap: wrap;
-		padding: 1rem 0;
+		flex-direction: column;
+		gap: var(--row-gap);
+		border-bottom: 1px solid var(--color-black);
 		margin: 0 2rem;
+		padding: 1rem 0;
 	}
 
-	.section__row:last-child {
-		border-bottom: none;
-	}
-
-	.section__row div {
-		flex-grow: 1;
-	}
-
-	.section__row div.warn {
-		color: var(--color-yellow);
-	}
-
-	.section__row div.error {
-		color: var(--color-red);
-	}
-
-	.section__row.disable {
+	.section_row.disable {
 		background: repeating-linear-gradient(
 			50deg,
 			transparent 0 20px,
@@ -540,43 +552,82 @@
 		);
 	}
 
-	.section__row .name {
-		color: var(--text-color-primary);
+	.section_row:last-child {
+		border-bottom: none;
 	}
 
-	.section__row .desc {
-		width: 100%;
-		padding: 0.25rem 0 0;
+	.section_row div.warn {
+		color: var(--color-yellow);
+	}
+
+	.section_row div.error {
+		color: var(--color-red);
+	}
+
+	.section_row .desc {
 		color: var(--text-color-secondary);
 		font: var(--text-small);
 	}
 
-	.saveLocation > button {
-		width: 100%;
-		text-align: left;
-		overflow-wrap: anywhere;
+	.row_grid {
+		display: grid;
+		align-items: center;
+		grid-template-columns: 1fr auto;
+		grid-template-areas:
+			"name action1"
+			"desc action2";
+		gap: var(--row-gap) var(--column-gap);
 	}
 
-	.icon__loader {
+	.row_grid .name {
+		grid-area: name;
+		color: var(--text-color-primary);
+	}
+
+	.row_grid .desc {
+		grid-area: desc;
+	}
+
+	.row_grid .action1 {
+		grid-area: action1;
+	}
+
+	.row_grid .action2 {
+		grid-area: action2;
+		align-self: start;
+	}
+
+	.row_grid .action2.type_textarea {
+		align-self: end;
+		min-width: 5rem;
+	}
+
+	.row_grid .action1,
+	.row_grid .action2 {
+		display: flex;
+		flex-direction: column;
+		align-items: end;
+	}
+
+	select {
+		color: var(--text-color-primary);
+	}
+
+	.circling {
 		display: flex;
 		align-items: center;
-		margin-right: 0.25rem;
+		gap: var(--row-gap);
 	}
 
-	.icon__loader :global(svg) {
+	.circling > :global(svg) {
 		height: 0.75rem;
 		width: 0.75rem;
-	}
-
-	.global_exclude_match_refer {
-		padding: 0.5rem 0 0;
-		font: var(--text-small);
 	}
 
 	.textarea_box {
 		position: relative;
 		width: 100%;
-		margin-top: 0.5rem;
+		margin: var(--row-gap) 0;
 	}
 
 	.textarea mark {
@@ -633,7 +684,7 @@
 	/* ios */
 	@supports (-webkit-touch-callout: none) {
 		textarea {
-			min-height: 20rem;
+			min-height: 15rem;
 		}
 	}
 
@@ -662,30 +713,21 @@
 		padding: 0 0.5rem;
 	}
 
-	select {
-		color: var(--text-color-primary);
+	.saveLocation > button {
+		text-align: left;
+		overflow-wrap: anywhere;
 	}
 
 	.tools .buttons {
-		--buttons-gap: 1.5rem;
-
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--buttons-gap);
+		gap: var(--column-gap);
 		justify-content: space-between;
-		padding: calc(var(--buttons-gap) - 1rem) 0;
-	}
-
-	.tools .buttons-2-columns button {
-		flex: 1 0 calc(100% / 2 - var(--buttons-gap) / 2);
-	}
-
-	/* flex: 1 0 calc(100% / var(col) - var(gap) * calc(var(col) - 1) / var(col)); */
-	.tools .buttons-3-columns button {
-		flex: 1 0 calc(100% / 3 - var(--buttons-gap) * 2 / 3);
+		padding: 0.5rem 0;
 	}
 
 	.tools button {
+		flex: 1;
 		background: var(--color-black);
 		border-radius: var(--border-radius);
 		color: var(--text-color-primary);
@@ -735,21 +777,23 @@
 		color: var(--text-color-primary);
 		font-weight: 700;
 		line-height: calc(var(--toggle-font-size) + 0.1rem);
-		margin-left: 0.5rem;
 		opacity: 0.75;
 		padding: 0 0.1rem;
 	}
 
-	.section__title button.reset {
+	.section_header button.reset {
 		margin-right: 1rem;
 		padding: 0 0.5rem;
 	}
 
-	p {
-		padding: 1rem 2rem 2rem;
+	article {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: 0.5rem 0 1rem;
 	}
 
-	p button {
-		margin-right: 0.25rem;
+	article button {
+		margin-right: var(--row-gap);
 	}
 </style>
