@@ -100,6 +100,7 @@
 	}
 
 	.scroll {
+		border-radius: var(--border-radius);
 		max-height: calc(100svh - 5rem);
 		overflow-y: auto;
 		overscroll-behavior: none;
