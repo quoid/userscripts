@@ -267,16 +267,8 @@ func getManifest() -> Manifest {
 	}
 }
 
-func updateManifestMatches(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+func updateManifestMatches(files: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
-	// only get all files if files were not provided
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = getAllFiles() else {return false}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
 	var manifest = getManifest()
 	for file in files {
 		// can be force unwrapped because getAllFiles didn't return nil
@@ -385,19 +377,8 @@ func updatePatternDict(_ filename: String, _ filePatterns: [String], _ manifestK
 	return returnDictionary
 }
 
-func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+func updateManifestRequired(files: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
-	// only get all files if files were not provided
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = getAllFiles() else {
-			logger?.info("\(#function, privacy: .public) - count not get files")
-			return false
-		}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
 	logger?.info("\(#function, privacy: .public) - will loop through \(files.count, privacy: .public)")
 	var manifest = getManifest()
 	for file in files {
@@ -436,18 +417,8 @@ func updateManifestRequired(_ optionalFilesArray: [[String: Any]] = []) -> Bool 
 	return true
 }
 
-func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+func updateManifestDeclarativeNetRequests(files: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = getAllFiles() else {
-			logger?.error("\(#function, privacy: .public) - failed at (1)")
-			return false
-		}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
 	var manifest = getManifest()
 	for file in files {
 		// can be force unwrapped because getAllFiles didn't return nil
@@ -507,19 +478,10 @@ func updateManifestDeclarativeNetRequests(_ optionalFilesArray: [[String: Any]] 
 	return true
 }
 
-func purgeManifest(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+func purgeManifest(files allFiles: [[String: Any]]) -> Bool {
 	logger?.info("\(#function, privacy: .public) - started")
 	// purge all manifest keys of any stale entries
 	var update = false, manifest = getManifest(), allSaveLocationFilenames = [String]()
-	// only get all files if files were not provided
-	var allFiles = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		// if getAllFiles fails to return, ignore and pass an empty array
-		let getFiles = getAllFiles() ?? []
-		allFiles = getFiles
-	} else {
-		allFiles = optionalFilesArray
-	}
 	// populate array with filenames
 	for file in allFiles {
 		if let filename = file["filename"] as? String {
@@ -677,8 +639,82 @@ func updateSettings(_ settings: [String: String]) -> Bool {
 }
 
 // files
-func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
+func loadScript(at url: URL, includeCode: Bool, manifest: Manifest, onQueue queue: OperationQueue) async -> [String: Any]? {
+	let fc = NSFileCoordinator()
+	let intent = NSFileAccessIntent.readingIntent(with: url)
+
+	let filename = url.lastPathComponent
+
+	guard let (content, dateMod): (String, Date?) = (await withCheckedContinuation { continuation in
+		fc.coordinate(with: [intent], queue: queue) { error in
+			if let error {
+				logger?.info("\(#function, privacy: .public) - failed to access file, ignoring: \(error)")
+				continuation.resume(returning: nil)
+			}
+
+			do {
+				let content = try String(contentsOf: url, encoding: .utf8)
+				let dateMod = try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+				continuation.resume(returning: (content, dateMod))
+			} catch let error {
+				logger?.info("\(#function, privacy: .public) - failed to read file, ignoring: \(error)")
+				continuation.resume(returning: nil)
+			}
+		}
+	})
+	else {
+		return nil
+	}
+
+	// file will be skipped if metablock is missing
+	guard
+		let dateMod,
+		let parsed = parse(content),
+		let metadata = parsed["metadata"] as? [String: [String]],
+		let type = filename.split(separator: ".").last
+	else {
+		logger?.info("\(#function, privacy: .public) - ignoring \(filename, privacy: .public), file missing or metadata missing from file contents")
+		return nil
+	}
+
+	var fileData: [String: Any] = [:]
+	fileData["canUpdate"] = false
+	fileData["content"] = content
+	fileData["disabled"] = manifest.disabled.contains(filename)
+	fileData["filename"] = filename
+	fileData["lastModified"] = dateToMilliseconds(dateMod)
+	fileData["metadata"] = metadata
+	// force unwrap name since parser ensure it exists
+	fileData["name"] = metadata["name"]![0]
+	fileData["type"] = "\(type)"
+	// add extra data if a request userscript
+	let runAt = metadata["run-at"]?[0] ?? "document-end"
+	if runAt == "request" {
+	   fileData["request"] = true
+	}
+	if metadata["description"] != nil {
+	   fileData["description"] = metadata["description"]![0]
+	}
+	if metadata["version"] != nil && metadata["updateURL"] != nil {
+	   fileData["canUpdate"] = true
+	}
+	fileData["noframes"] = metadata["noframes"] != nil ? true : false
+
+	// if asked, also return the code string
+	if (includeCode) {
+	   // can force unwrap because always returned from parser
+	   fileData["code"] = parsed["code"] as! String
+	}
+
+	return fileData
+}
+
+func getAllFiles(includeCode: Bool = false) async -> [[String: Any]]? {
 	logger?.info("\(#function, privacy: .public) - started")
+
+	let queue = OperationQueue()
+	queue.underlyingQueue = .global()
+
 	// returns all files of proper type with filenames, metadata & more
 	var files = [[String: Any]]()
 	let fm = FileManager.default
@@ -697,52 +733,23 @@ func getAllFiles(includeCode: Bool = false) -> [[String: Any]]? {
 		logger?.error("\(#function, privacy: .public) - failed at (2)")
 		return nil
 	}
-	for url in urls {
-		var fileData = [String: Any]()
+
+	let tasks: [Task<[String: Any]?, Never>] = urls.compactMap { url in Task {
 		// only read contents for css & js files
 		let filename = url.lastPathComponent
 		if (!filename.hasSuffix(".css") && !filename.hasSuffix(".js")) {
-			continue
+			return nil
 		}
-		// file will be skipped if metablock is missing
-		guard
-			let content = try? String(contentsOf: url, encoding: .utf8),
-			let dateMod = try? fm.attributesOfItem(atPath: url.path)[.modificationDate] as? Date,
-			let parsed = parse(content),
-			let metadata = parsed["metadata"] as? [String: [String]],
-			let type = filename.split(separator: ".").last
-		else {
-			logger?.info("\(#function, privacy: .public) - ignoring \(filename, privacy: .public), file missing or metadata missing from file contents")
-			continue
+
+		return await loadScript(at: url, includeCode: includeCode, manifest: manifest, onQueue: queue)
+	}}
+
+	for task in tasks {
+		if let fileData = await task.value {
+			files.append(fileData)
 		}
-		fileData["canUpdate"] = false
-		fileData["content"] = content
-		fileData["disabled"] = manifest.disabled.contains(filename)
-		fileData["filename"] = filename
-		fileData["lastModified"] = dateToMilliseconds(dateMod)
-		fileData["metadata"] = metadata
-		// force unwrap name since parser ensure it exists
-		fileData["name"] = metadata["name"]![0]
-		fileData["type"] = "\(type)"
-		// add extra data if a request userscript
-		let runAt = metadata["run-at"]?[0] ?? "document-end"
-		if runAt == "request" {
-			fileData["request"] = true
-		}
-		if metadata["description"] != nil {
-			fileData["description"] = metadata["description"]![0]
-		}
-		if metadata["version"] != nil && metadata["updateURL"] != nil {
-			fileData["canUpdate"] = true
-		}
-		fileData["noframes"] = metadata["noframes"] != nil ? true : false
-		// if asked, also return the code string
-		if (includeCode) {
-			// can force unwrap because always returned from parser
-			fileData["code"] = parsed["code"] as! String
-		}
-		files.append(fileData)
 	}
+
 	logger?.info("\(#function, privacy: .public) - completed")
 	return files
 }
@@ -820,19 +827,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 	return true
 }
 
-func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[String: String]]? {
-	// only get all files if files were not provided
-	var files = [[String: Any]]()
-	if optionalFilesArray.isEmpty {
-		guard let getFiles = getAllFiles() else {
-			logger?.error("\(#function, privacy: .public) - failed at (1)")
-			return nil
-		}
-		files = getFiles
-	} else {
-		files = optionalFilesArray
-	}
-
+func checkForRemoteUpdates(files: [[String: Any]]) -> [[String: String]]? {
 	var hasUpdates = [[String: String]]()
 	for file in files {
 		// can be force unwrapped because getAllFiles didn't return nil
@@ -912,10 +907,10 @@ func getRemoteFileContents(_ url: String) -> String? {
 	return contents
 }
 
-func updateAllFiles(_ optionalFilesArray: [[String: Any]] = []) -> Bool {
+func updateAllFiles(files: [[String: Any]]) -> Bool {
 	// get names of all files with updates available
 	guard
-		let filesWithUpdates = checkForRemoteUpdates(optionalFilesArray),
+		let filesWithUpdates = checkForRemoteUpdates(files: files),
 		let saveLocation = getSaveLocation()
 	else {
 		logger?.error("\(#function, privacy: .public) - failed to update files (1)")
@@ -1397,7 +1392,7 @@ func getInjectionFilenames(_ url: String) -> [String]? {
 	return filenames
 }
 
-func getRequestScripts() -> [[String: String]]? {
+func getRequestScripts() async -> [[String: String]]? {
 	var requestScripts = [[String: String]]()
 	// check the manifest to see if injection is enabled
 	let manifest = getManifest()
@@ -1409,7 +1404,7 @@ func getRequestScripts() -> [[String: String]]? {
 	if active != "true" {
 		return requestScripts
 	}
-	guard let files = getAllFiles(includeCode: true) else {
+	guard let files = await getAllFiles(includeCode: true) else {
 		logger?.error("\(#function, privacy: .public) - failed at (2)")
 		return nil
 	}
@@ -1431,7 +1426,7 @@ func getRequestScripts() -> [[String: String]]? {
 	return requestScripts
 }
 
-func getContextMenuScripts() -> [String: Any]? {
+func getContextMenuScripts() async -> [String: Any]? {
 	var menuFilenames = [String]()
 	// check the manifest to see if injection is enabled
 	let manifest = getManifest()
@@ -1444,7 +1439,7 @@ func getContextMenuScripts() -> [String: Any]? {
 		return ["files": ["menu": []]]
 	}
 	// get all files at save location
-	guard let files = getAllFiles() else {
+	guard let files = await getAllFiles() else {
 		logger?.error("\(#function, privacy: .public) - failed at (2)")
 		return nil
 	}
@@ -1473,7 +1468,7 @@ func getContextMenuScripts() -> [String: Any]? {
 }
 
 // popup
-func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+func getPopupMatches(_ url: String, _ subframeUrls: [String]) async -> [[String: Any]]? {
 	var matches = [[String: Any]]()
 	// if the url doesn't start with http/s return empty array
 	if !url.starts(with: "http://") && !url.starts(with: "https://") {
@@ -1483,7 +1478,7 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]
 	let matched = getMatchedFiles(url, nil, false)
 	// get all the files at the save location
 	guard
-		let files = getAllFiles()
+		let files = await getAllFiles()
 	else {
 		logger?.error("\(#function, privacy: .public) - failed at (1)")
 		return nil
@@ -1527,26 +1522,26 @@ func getPopupMatches(_ url: String, _ subframeUrls: [String]) -> [[String: Any]]
 	return matches
 }
 
-func popupUpdateAll() -> Bool {
+func popupUpdateAll() async -> Bool {
 	guard
-		let files = getAllFiles(),
-		updateAllFiles(files),
-		updateManifestMatches(files),
-		updateManifestRequired(files),
-		purgeManifest(files)
+		let files = await getAllFiles(),
+		updateAllFiles(files: files),
+		updateManifestMatches(files: files),
+		updateManifestRequired(files: files),
+		purgeManifest(files: files)
 	else {
 		return false
 	}
 	return true
 }
 
-func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
+func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) async -> Int? {
 	if !url.starts(with: "http://") && !url.starts(with: "https://") {
 		return 0
 	}
 	let manifest = getManifest()
 	guard
-		var matches = getPopupMatches(url, subframeUrls)
+		var matches = await getPopupMatches(url, subframeUrls)
 	else {
 		logger?.error("\(#function, privacy: .public) - failed at (1)")
 		return nil
@@ -1560,7 +1555,7 @@ func getPopupBadgeCount(_ url: String, _ subframeUrls: [String]) -> Int? {
 	return matches.count
 }
 
-func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [String]) -> [[String: Any]]? {
+func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [String]) async -> [[String: Any]]? {
 	guard let saveLocation = getSaveLocation() else {
 		logger?.error("\(#function, privacy: .public) - failed at (1)")
 		return nil
@@ -1589,11 +1584,11 @@ func popupUpdateSingle(_ filename: String, _ url: String, _ subframeUrls: [Strin
 		return nil
 	}
 	guard
-		let files = getAllFiles(),
-		updateManifestMatches(files),
-		updateManifestRequired(files),
-		purgeManifest(files),
-		let matches = getPopupMatches(url, subframeUrls)
+		let files = await getAllFiles(),
+		updateManifestMatches(files: files),
+		updateManifestRequired(files: files),
+		purgeManifest(files: files),
+		let matches = await getPopupMatches(url, subframeUrls)
 	else {
 		logger?.error("\(#function, privacy: .public) - failed at (4)")
 		return nil
@@ -1623,7 +1618,7 @@ func getLegacyData() -> [String: Any]? {
 	return data
 }
 
-func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
+func saveFile(_ item: [String: Any],_ content: String) async -> [String: Any] {
 	var response = [String: Any]()
 	let newContent = content
 	guard let saveLocation = getSaveLocation() else {
@@ -1719,11 +1714,11 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
 
 	// update manifest for new file and purge anything from old file
 	guard
-		let allFiles = getAllFiles(),
-		updateManifestMatches(allFiles),
-		updateManifestRequired(allFiles),
-		updateManifestDeclarativeNetRequests(allFiles),
-		purgeManifest(allFiles)
+		let allFiles = await getAllFiles(),
+		updateManifestMatches(files: allFiles),
+		updateManifestRequired(files: allFiles),
+		updateManifestDeclarativeNetRequests(files: allFiles),
+		purgeManifest(files: allFiles)
 	else {
 		logger?.error("\(#function, privacy: .public) - failed at (4)")
 		return ["error": "file save but manifest couldn't be updated"]
@@ -1753,7 +1748,7 @@ func saveFile(_ item: [String: Any],_ content: String) -> [String: Any] {
 	return response
 }
 
-func trashFile(_ item: [String: Any]) -> Bool {
+func trashFile(_ item: [String: Any]) async -> Bool {
 	guard
 		let saveLocation = getSaveLocation(),
 		let filename = item["filename"] as? String
@@ -1777,7 +1772,12 @@ func trashFile(_ item: [String: Any]) -> Bool {
 		}
 	}
 	// update manifest
-	guard updateManifestMatches(), updateManifestRequired(), purgeManifest() else {
+	guard
+		let files = await getAllFiles(),
+		updateManifestMatches(files: files),
+		updateManifestRequired(files: files),
+		purgeManifest(files: files)
+	else {
 		logger?.error("\(#function, privacy: .public) - failed at (2)")
 		return false
 	}
@@ -1838,7 +1838,7 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
 }
 
 // background
-func nativeChecks() -> [String: String] {
+func nativeChecks() async -> [String: String] {
 	logger?.info("\(#function, privacy: .public) - started")
 	#if os(iOS)
 		// check the save location is set
@@ -1862,27 +1862,27 @@ func nativeChecks() -> [String: String] {
 		return ["error": "Native checks error (2)"]
 	}
 	// get all files to pass as arguments to function below
-	guard let allFiles = getAllFiles() else {
+	guard let allFiles = await getAllFiles() else {
 		logger?.error("\(#function, privacy: .public) - getAllFiles failed")
 		return ["error": "Native checks error (3)"]
 	}
 	// purge the manifest of old records
-	guard purgeManifest(allFiles) else {
+	guard purgeManifest(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - purgeManifest failed")
 		return ["error": "Native checks error (4)"]
 	}
 	// update matches in manifest
-	guard updateManifestMatches(allFiles) else {
+	guard updateManifestMatches(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - updateManifestMatches failed")
 		return ["error": "Native checks error (5)"]
 	}
 	// update the required resources
-	guard updateManifestRequired(allFiles) else {
+	guard updateManifestRequired(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - updateManifestRequired failed")
 		return ["error": "Native checks error (6)"]
 	}
 	// update declarativeNetRequest
-	guard updateManifestDeclarativeNetRequests(allFiles) else {
+	guard updateManifestDeclarativeNetRequests(files: allFiles) else {
 		logger?.error("\(#function, privacy: .public) - updateManifestDeclarativeNetRequests failed")
 		return ["error": "Native checks error (7)"]
 	}
@@ -1892,10 +1892,10 @@ func nativeChecks() -> [String: String] {
 }
 
 // userscript install
-func installCheck(_ content: String) -> [String: Any] {
+func installCheck(_ content: String) async -> [String: Any] {
 	// this func checks a userscript's metadata to determine if it's already installed
 
-	guard let files = getAllFiles() else {
+	guard let files = await getAllFiles() else {
 		logger?.error("\(#function, privacy: .public) - failed at (1)")
 		return ["error": "installCheck failed at (1)"]
 	}
@@ -1942,7 +1942,7 @@ func installCheck(_ content: String) -> [String: Any] {
 	];
 }
 
-func installUserscript(_ url: String, _ type: String, _ content: String) -> [String: Any] {
+func installUserscript(_ url: String, _ type: String, _ content: String) async -> [String: Any] {
 	guard
 		let parsed = parse(content),
 		let metadata = parsed["metadata"] as? [String: [String]],
@@ -1954,6 +1954,6 @@ func installUserscript(_ url: String, _ type: String, _ content: String) -> [Str
 	let name = sanitize(n)
 	let filename = "\(name).user.\(type)"
 
-	let saved = saveFile(["filename": filename, "type": type], content)
+	let saved = await saveFile(["filename": filename, "type": type], content)
 	return saved
 }
