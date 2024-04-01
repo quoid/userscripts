@@ -606,7 +606,7 @@
 	.row_grid .action2 {
 		display: flex;
 		flex-direction: column;
-		align-items: end;
+		align-items: flex-end;
 	}
 
 	select {
