@@ -43,6 +43,9 @@
 	// message dispatcher
 	const dispatch = createEventDispatcher();
 
+	// indicates whether the codemirror instance has completed initialization
+	let initialized = false;
+
 	// save ref to textarea element for codemirror initialization
 	let textarea;
 
@@ -170,6 +173,9 @@
 		instance.on("change", onChange);
 
 		instance.on("beforeChange", preventAutoFullStops);
+
+		// update indicator
+		initialized = true;
 	}
 
 	function activateSearch() {
@@ -414,7 +420,7 @@
 	instance will remain undefined, which would require importing cmGetInstance in search component
 	and creating circular dependency
 -->
-{#if instance}
+{#if initialized}
 	<svelte:component
 		this={EditorSearch}
 		active={searchActive}
