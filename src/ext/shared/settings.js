@@ -331,7 +331,6 @@ export async function get(keys = undefined, options = {}) {
 			settingsDictionary[key].default;
 		// check if value type conforms to settings-dictionary
 		const type = settingsDictionary[key].type;
-		// eslint-disable-next-line valid-typeof -- type known to be valid string literal
 		if (typeof val != type) {
 			console.warn(
 				`Unexpected ${key} value type '${typeof val}' should '${type}', fix to default`,
@@ -459,7 +458,6 @@ export async function set(keys, options = {}) {
 		}
 		// check if value type conforms to settings-dictionary
 		const type = settingsDictionary[key].type;
-		// eslint-disable-next-line valid-typeof -- type known to be valid string literal
 		if (typeof keys[k] != type) {
 			if (type === "number" && !Number.isNaN(Number(keys[k]))) {
 				// compatible with string numbers

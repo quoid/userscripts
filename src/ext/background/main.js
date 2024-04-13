@@ -244,6 +244,7 @@ async function addContextMenuItem(userscript) {
 			patterns[index] = `${url.protocol}//${url.hostname}${pathname}`;
 		} catch (error) {
 			// prevent breaking when non-url pattern present
+			console.error(error);
 		}
 	});
 
@@ -345,7 +346,7 @@ async function handleMessage(request, sender, sendResponse) {
 					// if tabData is null, can still parse it and return that
 					tab = JSON.parse(tabData);
 				} catch (error) {
-					console.error("failed to parse tab data for getTab");
+					console.error("failed to parse tab data for getTab", error);
 				}
 			} else {
 				console.error("unable to deliver tab due to empty tab id");
