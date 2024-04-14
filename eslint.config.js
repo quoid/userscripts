@@ -8,10 +8,9 @@
  */
 
 import js from "@eslint/js";
-import sveltePlugin from "eslint-plugin-svelte";
-import svelteParser from "svelte-eslint-parser";
-import prettier from "eslint-config-prettier";
 import globals from "globals";
+import eslintPluginSvelte from "eslint-plugin-svelte";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
 	/**
@@ -22,29 +21,15 @@ export default [
 
 	/**
 	 * @see {@link https://github.com/sveltejs/eslint-plugin-svelte}
-	 * currently no official svelte/recommended flat config
-	 * flatten and call it through a custom config object
 	 */
-	{
-		files: ["**/*.svelte"],
-		languageOptions: {
-			parser: svelteParser,
-		},
-		processor: "svelte/svelte",
-		plugins: {
-			svelte: sveltePlugin,
-		},
-		rules: {
-			...sveltePlugin.configs.base.overrides[0].rules,
-			...sveltePlugin.configs.recommended.rules,
-		},
-	},
+	...eslintPluginSvelte.configs["flat/recommended"],
+	...eslintPluginSvelte.configs["flat/prettier"],
 
 	/**
 	 * @see {@link https://github.com/prettier/eslint-config-prettier}
 	 * turns off the conflict rules, put it last
 	 */
-	prettier,
+	eslintConfigPrettier,
 
 	/** custom config objects */
 

@@ -14,7 +14,6 @@
 
 	$: $log.some((item) => {
 		if (!logger.includes(item)) {
-			// eslint-disable-next-line no-console -- not arbitrary console command
 			console[item.type](item.message);
 			logger.push(item);
 		}

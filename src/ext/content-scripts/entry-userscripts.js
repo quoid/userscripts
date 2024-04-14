@@ -74,14 +74,14 @@ function injectJS(userscript) {
 		(document.body ?? document.head ?? document.documentElement).append(div);
 	} else {
 		try {
-			// eslint-disable-next-line no-new-func
-			return Function(
+			Function(
 				`{${Object.keys(userscript.apis).join(",")}}`,
 				code,
 			)(userscript.apis);
 		} catch (error) {
 			console.error(`"${filename}" error:`, error);
 		}
+		return;
 	}
 }
 
