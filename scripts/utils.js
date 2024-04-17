@@ -1,3 +1,18 @@
+/**
+ * node:process
+ * @see {@link https://nodejs.org/api/process.html#processchdirdirectory chdir}
+ * @see {@link https://nodejs.org/api/process.html#processcwd cwd}
+ * node:url
+ * @see {@link https://nodejs.org/api/url.html#urlfileurltopathurl fileURLToPath}
+ * node:fs/promises
+ * @see {@link https://nodejs.org/api/fs.html#fspromisescopyfilesrc-dest-mode copyFile}
+ * @see {@link https://nodejs.org/api/fs.html#fspromisesmkdirpath-options mkdir}
+ * @see {@link https://nodejs.org/api/fs.html#fspromisesreaddirpath-options readdir}
+ * @see {@link https://nodejs.org/api/fs.html#fspromisesreadfilepath-options readFile}
+ * @see {@link https://nodejs.org/api/fs.html#fspromisesrealpathpath-options realpath}
+ * @see {@link https://nodejs.org/api/fs.html#fspromisesrmpath-options rm}
+ * @see {@link https://nodejs.org/api/fs.html#fspromisesstatpath-options stat}
+ */
 import { chdir, cwd } from "node:process";
 import { fileURLToPath } from "node:url";
 import {
@@ -16,6 +31,7 @@ export const SAFARI_EXT_RESOURCES = "xcode/Ext-Safari/Resources";
 
 /**
  * If not then cd to root dir and returns the path
+ * @see {@link https://nodejs.org/api/esm.html#importmetaurl}
  * @returns {Promise<string>} project root directory
  */
 export async function rootDir() {
@@ -29,6 +45,7 @@ export async function rootDir() {
 
 /**
  * Empty the build directory safely
+ * @see {@link https://nodejs.org/api/errors.html#common-system-errors ENOENT}
  * @param {string} dir
  * @returns {Promise<boolean>}
  */
@@ -47,6 +64,10 @@ export async function emptyBuildDir(dir) {
 		}
 		return true;
 	} catch (error) {
+		if (error.code === "ENOENT") {
+			console.info("[SKIPPED] emptyBuildDir:", error.message);
+			return true;
+		}
 		console.error("emptyBuildDir:", error);
 		return false;
 	}
