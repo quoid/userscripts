@@ -528,7 +528,7 @@
 		font: var(--text-default);
 		font-weight: 500;
 		letter-spacing: var(--letter-spacing-default);
-		padding: calc(1rem - 2px) 1rem 1rem 1rem;
+		padding: calc(1rem - 2px) 1rem 1rem;
 	}
 
 	.section_header .name {
