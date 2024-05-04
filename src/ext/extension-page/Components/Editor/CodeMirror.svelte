@@ -26,7 +26,6 @@
 </script>
 
 <script>
-	import { createEventDispatcher } from "svelte";
 	import CodeMirror from "../../codemirror.js";
 	import "../../codemirror.css";
 	import { settings, state } from "../../store.js";
@@ -38,10 +37,10 @@
 	} from "../../../shared/utils.js";
 
 	// the function to be called when save keybind is pressed
-	export let saveHandler = () => {};
+	export let saveHandler;
 
-	// message dispatcher
-	const dispatch = createEventDispatcher();
+	// message handler
+	export let handleMessage;
 
 	// indicates whether the codemirror instance has completed initialization
 	let initialized = false;
@@ -223,11 +222,11 @@
 		// below is all other input actions
 		if (inputAction !== "setValue") {
 			sessionCode = cm.getValue();
-			if (cmChanged()) dispatch("message", { name: "enableButtons" });
+			if (cmChanged()) handleMessage({ name: "enableButtons" });
 		}
 		if ((inputAction === "undo" || inputAction === "redo") && !cmChanged()) {
 			// back to the point where session and saved code are equal, and buttons enabled
-			dispatch("message", { name: "disableButtons" });
+			handleMessage({ name: "disableButtons" });
 		}
 	}
 
@@ -403,7 +402,7 @@
 			instance.setValue(savedCode);
 			sessionCode = null;
 			instance.focus();
-			dispatch("message", { name: "disableButtons" });
+			handleMessage({ name: "disableButtons" });
 		}
 	}
 
