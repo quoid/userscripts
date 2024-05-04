@@ -1,6 +1,7 @@
 import "../shared/reset.css";
 import "../shared/variables.css";
 import "./app.css";
+import { mount } from "svelte";
 import App from "./App.svelte";
 import Appios from "./Appios.svelte";
 
@@ -44,20 +45,16 @@ if (import.meta.env.MODE === "development") {
 	const platform = await browser.runtime.getPlatformInfo();
 	// @ts-ignore -- incomplete polyfill types
 	if (platform.os === "ios") {
-		app = new Appios({ target });
+		app = mount(Appios, { target });
 	} else {
-		app = new App({ target });
+		app = mount(App, { target });
 	}
 } else {
 	if (import.meta.env.SAFARI_PLATFORM === "ios") {
-		app = new Appios({ target });
+		app = mount(Appios, { target });
 	} else {
-		app = new App({ target });
+		app = mount(App, { target });
 	}
 }
-
-// const app = new App({
-// 	target: document.getElementById("app"),
-// });
 
 export default app;
