@@ -24,7 +24,7 @@ An open-source userscript editor for Safari
 
 ## Installation
 
-Userscripts is available for iOS (+ipadOS) and macOS. For all versions, installation is done through [Apple's App Store](https://itunes.apple.com/us/app/userscripts/id1463298887). On macOS, versions prior to `4.x` were made available to download and install directly from the repository, but due to [changes in the way Apple allows developers to distribute apps built with the WebExtension API](https://github.com/quoid/userscripts/issues/154), that is no longer an option.
+Userscripts is available for iOS (iPadOS) and macOS. For all versions, installation is done through [Apple's App Store](https://itunes.apple.com/us/app/userscripts/id1463298887). On macOS, versions prior to `4.x` were made available to download and install directly from the repository, but due to [changes in the way Apple allows developers to distribute apps built with the WebExtension API](https://github.com/quoid/userscripts/issues/154), that is no longer an option.
 
 To run Userscripts on iOS you should be on iOS 15.1 or higher.
 
@@ -40,21 +40,38 @@ It's recommend to read this documentation and, if you have time, watch the follo
 
 Once the app is downloaded and installed the following steps should be taken:
 
-**iOS**
+### **iOS (iPadOS)**
 
-- Go to `Settings > Safari > Extensions > Userscripts`
-- Turn Userscripts `on`
-- For optimal experience it's recommended that you allow Userscripts for `All Websites`
-- Once the above is complete **open the containing app**
-- Click the "Set Userscripts Directory" button and select the directory, _within the Files.app_, where your userscripts are located and where you wish newly installed userscripts to be placed
-  - **Tip:** for optimal cross platform experience it's a good idea to use an iCloud folder for syncing between macOS and iOS
-  - **Note:** syncing between macOS and iOS is not immediate, it is sometimes necessary to open Files.app in order to applying changes made in macOS to be reflected in iOS - that includes userscript deletions, additions and edits
-- Once the directory is set you can close the containing app and open Safari.app
-- It **may be necessary** to apply further permissions and it's to `Always Allow` Userscripts for `All Websites`
+After installing the iOS App, you need two main steps to make the extension work:
 
-**macOS**
+- **Open the App and set a directory** (For saving and loading userscripts)
+  - After Userscripts for ios v1.5.0, a local default directory will be set automatically
+  - In earlier versions please click the `Set Userscripts Directory` button and select the directory
+- **Enable the extension in Safari** (And grant permissions)
+
+  - Manage extensions from Settings App (Settings > Safari > Extensions) or Safari App (`AA` button on iPhone, `extension-icon` on iPad, also where you open the extension's `popup` interface)
+  - For optimal experience it's recommended that you `Always Allow` Userscripts for `All Websites`
+
+> [!NOTE]
+>
+> The App cannot detect whether you have enabled the extension in Safari, therefore, the App prompt will not change after you enable the extension. Currently the App interface is only used to set or change the userscripts directory.
+> You could select an iCloud folder for syncing scripts between macOS and iOS, but please note that there may be delays in synchronization, and you may encounter files be evictioned due to iCloud optimization, please refer to [#424](https://github.com/quoid/userscripts/issues/424).
+
+There are two main ways to install a user script from the iOS version:
+
+- Visit any `.user.js` URL in Safari, then open the extension `popup` and you will see an installation prompt
+- You can also save `.user.js` files directly to the Userscripts directory you set above
+
+> [!TIP]
+>
+> Both of the above work equally well in the macOS version.
+> The iOS version does not include the script editor provided in the macOS version, but you can always edit script files in the directory you set directly on iOS. (use any third-party code editor apps, support in-place opening and editing)
+
+### **macOS**
 
 After installing Userscripts on macOS, you **do not** need to select a userscripts directory if you do not plan on syncing your userscripts between multiple devices. Instead you can choose to use the default directory, which is located at `~/User/Library/Containers/Userscripts/Data/Documents/scripts` - again, this is default (and automatic) behavior. You only need to select a new location if you want to store your userscripts elsewhere, which is especially useful if you are using an external code editor such as Sublime Text or VSCode.
+
+Refer to Apple's official guide page: [Use Safari extensions on your Mac](https://support.apple.com/102343)
 
 [**Here's a short clip showing how to easily create/add a userscript in Safari using this extension on macOS**](https://youtu.be/x1r3-L7pdYQ?t=14)
 
