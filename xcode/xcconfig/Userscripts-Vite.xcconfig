@@ -1,10 +1,8 @@
 #include "Userscripts-Base.xcconfig"
 
 INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © Userscripts
-IOS_APP_BUILD = 2
-IOS_APP_VERSION = 2.0.0
-MAC_APP_BUILD = 5
-MAC_APP_VERSION = 5.0.0
+CURRENT_PROJECT_VERSION = 2
+MARKETING_VERSION = 2.0.0
 
 // Sign to Run Locally
 CODE_SIGN_IDENTITY = -

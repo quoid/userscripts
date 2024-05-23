@@ -2,13 +2,11 @@
 #include? "Safari-Extension.xcconfig"
 
 CODE_SIGN_ENTITLEMENTS = $(SRC_DIR)/iOS.entitlements
-CURRENT_PROJECT_VERSION = $(IOS_APP_BUILD)
 GENERATE_INFOPLIST_FILE = YES
 INFOPLIST_FILE = $(SRC_DIR)/Info.plist
 INFOPLIST_KEY_CFBundleDisplayName = $(PRODUCT_NAME)
 INFOPLIST_KEY_CFBundleDisplayName[config=Debug] = $(PROJECT_NAME)-D
 LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks @executable_path/../../Frameworks
-MARKETING_VERSION = $(IOS_APP_VERSION)
 OTHER_LDFLAGS = -framework SafariServices
 PRODUCT_BUNDLE_IDENTIFIER = $(EXT_IDENTIFIER)
 PRODUCT_NAME = $(PROJECT_NAME)-$(TARGET_NAME)
