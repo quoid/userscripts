@@ -32,13 +32,31 @@
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html logo}
 		<span>
-			<span>{version}</span>
-			<span>{build}</span>
+			{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
+				<a
+					href="https://github.com/quoid/userscripts/releases/tag/{import.meta
+						.env.GIT_TAG}"
+				>
+					{import.meta.env.GIT_TAG}
+				</a>
+				(<a
+					href="https://github.com/quoid/userscripts/commit/{import.meta.env
+						.GIT_COMMIT}"
+				>
+					{import.meta.env.GIT_COMMIT.slice(0, 7)}
+				</a>)
+			{:else}
+				<span>{version}</span>
+				<span>{build}</span>
+			{/if}
 		</span>
 	</div>
 	<p>
 		You can turn on the Userscripts iOS Safari extension in Settings.
-		<a href="https://github.com/quoid/userscripts#userscripts-safari">
+		<a
+			href="https://github.com/quoid/userscripts/blob/{import.meta.env
+				.GIT_TAG ?? 'main'}/README.md"
+		>
 			Read the docs.
 		</a>
 	</p>

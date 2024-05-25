@@ -450,8 +450,33 @@
 			<article>
 				<p>
 					Userscripts {import.meta.env.BROWSER ?? ""}
-					v{$settings["version"]}
-					({$settings["build"]})
+					{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
+						<button
+							class="link"
+							on:click={() =>
+								openInBlank(
+									`https://github.com/quoid/userscripts/releases/tag/${
+										import.meta.env.GIT_TAG
+									}`,
+								)}
+						>
+							{import.meta.env.GIT_TAG}
+						</button>
+						(<button
+							class="link"
+							on:click={() =>
+								openInBlank(
+									`https://github.com/quoid/userscripts/commit/${
+										import.meta.env.GIT_COMMIT
+									}`,
+								)}
+						>
+							{import.meta.env.GIT_COMMIT.slice(0, 7)}
+						</button>)
+					{:else}
+						v{$settings["version"]}
+						({$settings["build"]})
+					{/if}
 				</p>
 				<p>
 					{gl("settings_about_text1")}
@@ -461,15 +486,19 @@
 					>
 						{gl("settings_about_button_repo")}
 					</button>
+					|
 					<button
 						class="link"
 						on:click={() =>
 							openInBlank(
-								`https://github.com/quoid/userscripts/blob/v${$settings["version"]}/README.md`,
+								`https://github.com/quoid/userscripts/blob/${
+									import.meta.env.GIT_TAG ?? "main"
+								}/README.md`,
 							)}
 					>
 						{gl("settings_about_button_docs")}
 					</button>
+					|
 					<button
 						class="link"
 						on:click={() =>
@@ -487,6 +516,7 @@
 					>
 						{gl("settings_about_button_store")}
 					</button>
+					|
 					<button
 						class="link"
 						on:click={() =>
@@ -791,9 +821,5 @@
 		flex-direction: column;
 		gap: 1rem;
 		padding: 0.5rem 0 1rem;
-	}
-
-	article button {
-		margin-right: var(--row-gap);
 	}
 </style>
