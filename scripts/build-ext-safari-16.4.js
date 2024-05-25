@@ -15,27 +15,14 @@
 
 import { build } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { cp, emptyBuildDir, rootDir, SAFARI_EXT_RESOURCES } from "./utils.js";
+import * as Utils from "./utils.js";
 
-/**
- * Define default vite config options
- * Disable auto resolving {@link vite.config.js}
- * @see {@link https://vitejs.dev/config/ Config}
- * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
- * @type {import("vite").InlineConfig}
- */
-const defineConfig = {
-	configFile: false,
-	envFile: false,
-	root: await rootDir(),
-	base: "./",
+/** @type {import("vite").InlineConfig} */
+const sharedConfig = {
+	...Utils.baseConfig,
 	define: {
-		"import.meta.env.BROWSER": JSON.stringify("Safari"),
-		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+		...Utils.baseConfig.define,
 		"import.meta.env.SAFARI_VERSION": JSON.stringify(16.4),
-		"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
-			process.env.SAFARI_PLATFORM,
-		),
 	},
 };
 const sourcemap = process.env.BETA ? true : false;
@@ -44,9 +31,9 @@ const sourcemap = process.env.BETA ? true : false;
  * Empty resources directory
  * Copy public static assets
  */
-await emptyBuildDir(SAFARI_EXT_RESOURCES);
-cp("public/ext/shared", SAFARI_EXT_RESOURCES);
-cp("public/ext/safari-16.4", SAFARI_EXT_RESOURCES);
+await Utils.emptyBuildDir(Utils.SAFARI_EXT_RESOURCES);
+Utils.cp("public/ext/shared", Utils.SAFARI_EXT_RESOURCES);
+Utils.cp("public/ext/safari-16.4", Utils.SAFARI_EXT_RESOURCES);
 
 /** Build content scripts */
 [
@@ -55,9 +42,9 @@ cp("public/ext/safari-16.4", SAFARI_EXT_RESOURCES);
 	{ "script-market": "src/ext/content-scripts/entry-script-market.js" },
 ].forEach((input) => {
 	build({
-		...defineConfig,
+		...sharedConfig,
 		build: {
-			outDir: `${SAFARI_EXT_RESOURCES}/dist/content-scripts/`,
+			outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/content-scripts/`,
 			emptyOutDir: false,
 			copyPublicDir: false,
 			sourcemap,
@@ -75,9 +62,9 @@ cp("public/ext/safari-16.4", SAFARI_EXT_RESOURCES);
  * Currently build classic script separately to avoid this error
  */
 build({
-	...defineConfig,
+	...sharedConfig,
 	build: {
-		outDir: `${SAFARI_EXT_RESOURCES}/dist/`,
+		outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/`,
 		emptyOutDir: false,
 		copyPublicDir: false,
 		sourcemap,
@@ -90,11 +77,11 @@ build({
 
 /** Build shared modules */
 build({
-	...defineConfig,
+	...sharedConfig,
 	plugins: [svelte()],
 	publicDir: "public/ext/vendor/",
 	build: {
-		outDir: `${SAFARI_EXT_RESOURCES}/dist/`,
+		outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/`,
 		emptyOutDir: false,
 		sourcemap,
 		rollupOptions: {
