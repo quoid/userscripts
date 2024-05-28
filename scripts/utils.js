@@ -2,6 +2,10 @@
  * node:process
  * @see {@link https://nodejs.org/api/process.html#processchdirdirectory chdir}
  * @see {@link https://nodejs.org/api/process.html#processcwd cwd}
+ * node:child_process
+ * @see {@link https://nodejs.org/api/child_process.html#child_processexecfilefile-args-options-callback execFile}
+ * node:util
+ * @see {@link https://nodejs.org/api/util.html#utilpromisifyoriginal promisify}
  * node:url
  * @see {@link https://nodejs.org/api/url.html#urlfileurltopathurl fileURLToPath}
  * node:fs/promises
@@ -14,6 +18,8 @@
  * @see {@link https://nodejs.org/api/fs.html#fspromisesstatpath-options stat}
  */
 import { chdir, cwd } from "node:process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import {
 	copyFile,
@@ -24,6 +30,9 @@ import {
 	rm,
 	stat,
 } from "node:fs/promises";
+
+/** Promisified execFile */
+const execFileAsync = promisify(execFile);
 
 /** Define shared constants */
 export const SAFARI_APP_RESOURCES = "xcode/App-Shared/Resources";
@@ -111,3 +120,75 @@ export const sharedServerOptions = async () => ({
 	key: await read("./local/key.pem"),
 	cert: await read("./local/cert.pem"),
 });
+
+/**
+ * @see {@link https://git-scm.com/docs/git-describe}
+ * @returns {Promise<string|void>} git tag, eg: v5.0.0-beta.1
+ */
+async function getGitTag() {
+	try {
+		const { stdout, stderr } = await execFileAsync("git", [
+			"describe",
+			"--tags",
+			"--abbrev=0",
+		]);
+		stderr && console.log(stderr);
+		if (stdout) return stdout.trim();
+	} catch (error) {
+		console.error(error);
+		process.exit(error.code);
+	}
+}
+
+/**
+ * @see {@link https://git-scm.com/docs/git-rev-parse}
+ * @returns {Promise<string|void>} git commit, eg: 700c978ccbd387921084ee185f495aa1f795d2e0
+ */
+async function getGitCommit() {
+	try {
+		const { stdout, stderr } = await execFileAsync("git", [
+			"rev-parse",
+			"HEAD",
+		]);
+		stderr && console.log(stderr);
+		if (stdout) return stdout.trim();
+	} catch (error) {
+		console.error(error);
+		process.exit(error.code);
+	}
+}
+
+const gitTag = await getGitTag();
+const gitCommit = await getGitCommit();
+if (!gitTag || !gitCommit) {
+	console.error("Failed to get git infos, please check.");
+	process.exit(1);
+}
+
+/**
+ * Define default vite config options
+ * Disable auto resolving {@link vite.config.js}
+ * @see {@link https://vitejs.dev/config/ Config}
+ * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig InlineConfig}
+ * @type {import("vite").InlineConfig}
+ */
+export const baseConfig = {
+	configFile: false,
+	envFile: false,
+	root: await rootDir(),
+	base: "./",
+	define: process.env.SAFARI_PLATFORM
+		? {
+				"import.meta.env.BROWSER": JSON.stringify("Safari"),
+				"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+				"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
+					process.env.SAFARI_PLATFORM,
+				),
+				"import.meta.env.GIT_TAG": JSON.stringify(gitTag),
+				"import.meta.env.GIT_COMMIT": JSON.stringify(gitCommit),
+		  }
+		: {
+				"import.meta.env.GIT_TAG": JSON.stringify(gitTag),
+				"import.meta.env.GIT_COMMIT": JSON.stringify(gitCommit),
+		  },
+};

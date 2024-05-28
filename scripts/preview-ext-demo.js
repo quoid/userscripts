@@ -4,25 +4,14 @@
  */
 
 import { preview } from "vite";
-
-/**
- * Define default vite config options
- * Disable auto resolving {@link vite.config.js}
- * @see {@link https://vitejs.dev/config/ Config}
- * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
- * @type {import("vite").InlineConfig}
- */
-const defineConfig = {
-	base: "./",
-	configFile: false,
-};
+import { baseConfig } from "./utils.js";
 
 /**
  * Preview App-Shared WebView resources from xcode dist
  */
 (async () => {
 	const previewServer = await preview({
-		...defineConfig,
+		...baseConfig,
 		preview: {
 			// port: 4173,
 			open: "entry-ext-extension-page.html",

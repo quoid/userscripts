@@ -9,35 +9,16 @@
 
 import { build, createServer } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import {
-	cp,
-	emptyBuildDir,
-	sharedServerOptions,
-	rootDir,
-	SAFARI_EXT_RESOURCES,
-} from "./utils.js";
+import * as Utils from "./utils.js";
 import https from "node:https";
 
-/**
- * Define default vite config options
- * Disable auto resolving {@link vite.config.js}
- * @see {@link https://vitejs.dev/config/ Config}
- * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig configFile}
- * @type {import("vite").InlineConfig}
- */
-const defineConfig = {
-	configFile: false,
-	envFile: false,
-	root: await rootDir(),
-	base: "./",
+/** @type {import("vite").InlineConfig} */
+const sharedConfig = {
+	...Utils.baseConfig,
 	mode: "development",
 	define: {
-		"import.meta.env.BROWSER": JSON.stringify("Safari"),
-		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+		...Utils.baseConfig.define,
 		"import.meta.env.SAFARI_VERSION": JSON.stringify(16.4),
-		"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
-			process.env.SAFARI_PLATFORM,
-		),
 	},
 };
 
@@ -51,19 +32,19 @@ async function buildResources(server, origin) {
 	 * empty resources directory
 	 * copy public static assets
 	 */
-	await emptyBuildDir("dist");
-	await emptyBuildDir(SAFARI_EXT_RESOURCES);
-	cp("public/ext/shared", SAFARI_EXT_RESOURCES);
-	cp("public/ext/shared-dev", SAFARI_EXT_RESOURCES);
+	await Utils.emptyBuildDir("dist");
+	await Utils.emptyBuildDir(Utils.SAFARI_EXT_RESOURCES);
+	Utils.cp("public/ext/shared", Utils.SAFARI_EXT_RESOURCES);
+	Utils.cp("public/ext/shared-dev", Utils.SAFARI_EXT_RESOURCES);
 	if (process.env.SAFARI_PLATFORM === "ios") {
-		cp(
+		Utils.cp(
 			"public/ext/safari-dev/manifest-ios.json",
-			`${SAFARI_EXT_RESOURCES}/manifest.json`,
+			`${Utils.SAFARI_EXT_RESOURCES}/manifest.json`,
 		);
 	} else {
-		cp(
+		Utils.cp(
 			"public/ext/safari-dev/manifest-mac.json",
-			`${SAFARI_EXT_RESOURCES}/manifest.json`,
+			`${Utils.SAFARI_EXT_RESOURCES}/manifest.json`,
 		);
 	}
 
@@ -75,7 +56,7 @@ async function buildResources(server, origin) {
 	].forEach((input) => {
 		/** build proxy content scripts replace actual code */
 		build({
-			...defineConfig,
+			...sharedConfig,
 			plugins: [
 				{
 					name: "generate-content-proxy",
@@ -100,7 +81,7 @@ async function buildResources(server, origin) {
 				},
 			],
 			build: {
-				outDir: `${SAFARI_EXT_RESOURCES}/dist/content-scripts/`,
+				outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/content-scripts/`,
 				emptyOutDir: false,
 				copyPublicDir: false,
 				rollupOptions: {
@@ -111,7 +92,7 @@ async function buildResources(server, origin) {
 		});
 		/** build content scripts for dev server and watch changes */
 		build({
-			...defineConfig,
+			...sharedConfig,
 			build: {
 				outDir: `dist/content-scripts/`,
 				emptyOutDir: false,
@@ -128,7 +109,7 @@ async function buildResources(server, origin) {
 
 	/** generate entrance dist */
 	build({
-		...defineConfig,
+		...sharedConfig,
 		publicDir: "public/ext/vendor/",
 		plugins: [
 			/**
@@ -147,7 +128,7 @@ async function buildResources(server, origin) {
 			},
 		],
 		build: {
-			outDir: `${SAFARI_EXT_RESOURCES}/dist/`,
+			outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/`,
 			emptyOutDir: false,
 			rollupOptions: {
 				input: {
@@ -170,7 +151,7 @@ async function buildResources(server, origin) {
  * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_Security_Policy}
  * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/content_security_policy}
  */
-const serverOptions = await sharedServerOptions();
+const serverOptions = await Utils.sharedServerOptions();
 const SERVER_PORT = 55173;
 const SERVER_ORIGIN = `https://userscripts.test:${SERVER_PORT}`;
 
@@ -204,7 +185,7 @@ async function serverCheck(url) {
 (async () => {
 	/** run development server */
 	const server = await createServer({
-		...defineConfig,
+		...sharedConfig,
 		plugins: [svelte()],
 		server: {
 			host: true,

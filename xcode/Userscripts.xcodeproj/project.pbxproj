@@ -572,7 +572,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "sed \"s/_VERSION_/$MAC_APP_VERSION/\" $SRCROOT/$MANIFEST_FILE > $TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/manifest.json\nsed -i \"\" \"s/_NAME_/$MANIFEST_NAME/\" $TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/_locales/en/messages.json\n";
+			shellScript = "sed \"s/_VERSION_/$MARKETING_VERSION/\" $SRCROOT/$MANIFEST_FILE > $TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/manifest.json\nsed -i \"\" \"s/_NAME_/$MANIFEST_NAME/\" $TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/_locales/en/messages.json\n";
 		};
 		039F59592ADFA415002E9977 /* UScript: Produce ext manifest.json */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -594,7 +594,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "sed \"s/_VERSION_/$IOS_APP_VERSION/\" $SRCROOT/$MANIFEST_FILE > $TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/manifest.json\nsed -i \"\" \"s/_NAME_/$MANIFEST_NAME/\" $TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/_locales/en/messages.json\n";
+			shellScript = "sed \"s/_VERSION_/$MARKETING_VERSION/\" $SRCROOT/$MANIFEST_FILE > $TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/manifest.json\nsed -i \"\" \"s/_NAME_/$MANIFEST_NAME/\" $TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/_locales/en/messages.json\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

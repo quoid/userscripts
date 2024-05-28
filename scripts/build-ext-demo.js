@@ -5,28 +5,16 @@
 
 import { build } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { cp, emptyBuildDir, rootDir } from "./utils.js";
+import * as Utils from "./utils.js";
 
-/**
- * Define default vite config options
- * Disable auto resolving {@link vite.config.js}
- * @see {@link https://vitejs.dev/config/ Config}
- * @see {@link https://vitejs.dev/guide/api-javascript.html#inlineconfig InlineConfig}
- * @type {import("vite").InlineConfig}
- */
-const defineConfig = {
-	configFile: false,
-	envFile: false,
-	root: await rootDir(),
-	base: "./",
+/** @type {import("vite").InlineConfig} */
+const sharedConfig = {
+	...Utils.baseConfig,
 	mode: "development",
+
 	define: {
-		"import.meta.env.BROWSER": JSON.stringify("Safari"),
-		"import.meta.env.NATIVE_APP": JSON.stringify("app"),
+		...Utils.baseConfig.define,
 		"import.meta.env.SAFARI_VERSION": JSON.stringify(15),
-		"import.meta.env.SAFARI_PLATFORM": JSON.stringify(
-			process.env.SAFARI_PLATFORM,
-		),
 		"import.meta.env.EXT_DEMO_BUILD": JSON.stringify(true),
 	},
 };
@@ -35,12 +23,12 @@ const defineConfig = {
  * Empty resources directory
  * Copy public static assets
  */
-await emptyBuildDir("dist");
-cp("public/ext/shared", "dist");
+await Utils.emptyBuildDir("dist");
+Utils.cp("public/ext/shared", "dist");
 
 /** Build shared modules */
 build({
-	...defineConfig,
+	...sharedConfig,
 	plugins: [svelte()],
 	publicDir: "public/ext/vendor/",
 	build: {
