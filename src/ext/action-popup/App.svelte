@@ -660,7 +660,7 @@
 		align-items: center;
 		border-bottom: 1px solid var(--color-black);
 		display: flex;
-		padding: 0.5rem 1rem calc(0.5rem - 1px) 1rem;
+		padding: 0.5rem 1rem calc(0.5rem - 1px);
 	}
 
 	.header .buttons :global(button:nth-of-type(2)) {

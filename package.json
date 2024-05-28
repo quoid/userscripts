@@ -25,16 +25,16 @@
 		"@types/webextension-polyfill": "^0.10.7",
 		"autoprefixer": "^10.4.19",
 		"cm-show-invisibles": "^3.1.0",
-		"codemirror": "^5.65.15",
-		"eslint": "^9.0.0",
+		"codemirror": "^5.65.16",
+		"eslint": "^9.2.0",
 		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-svelte": "^2.37.0",
+		"eslint-plugin-svelte": "^2.38.0",
 		"prettier": "3.0.3",
-		"prettier-plugin-svelte": "3.0.3",
-		"stylelint": "^16.3.1",
+		"prettier-plugin-svelte": "3.2.3",
+		"stylelint": "^16.5.0",
 		"stylelint-config-html": "^1.1.0",
 		"stylelint-config-standard": "^36.0.0",
-		"svelte": "^4.2.14",
-		"vite": "^5.2.8"
+		"svelte": "^5.0.0-next.123",
+		"vite": "^5.2.11"
 	}
 }

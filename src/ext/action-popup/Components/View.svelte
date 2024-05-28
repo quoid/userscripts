@@ -54,7 +54,7 @@
 		border-bottom: 1px solid var(--color-black);
 		flex-shrink: 0;
 		font-weight: 600;
-		padding: 0.5rem 1rem calc(0.5rem - 1px) 1rem;
+		padding: 0.5rem 1rem calc(0.5rem - 1px);
 		position: sticky;
 		top: 0;
 		z-index: 5;

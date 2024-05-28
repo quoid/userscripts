@@ -149,7 +149,7 @@
 	}
 
 	function handleMessage(e) {
-		const n = e.detail.name;
+		const n = e.name;
 		// temp files keep save button enabled until save
 		if (n === "enableButtons" && !temp) {
 			toggleButtons(false, false);
@@ -215,11 +215,7 @@
 		</div>
 	</div>
 	<div class="editor__code">
-		<CodeMirror
-			bind:this={codemirror}
-			on:message={handleMessage}
-			saveHandler={save}
-		/>
+		<CodeMirror bind:this={codemirror} {handleMessage} saveHandler={save} />
 	</div>
 	<div class="editor__footer">
 		<button on:click={discard} disabled={disabled || discardDisabled}>
