@@ -1,0 +1,14 @@
+// https://code.visualstudio.com/docs/editor/workspaces
+{
+	"folders": [
+		{
+			"name": "Userscripts-JS",
+			"path": "."
+		},
+		{
+			"name": "Userscripts-Xcode",
+			"path": "xcode"
+		}
+	],
+	"settings": {}
+}
