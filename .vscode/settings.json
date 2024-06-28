@@ -16,7 +16,6 @@
 	"[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
 	// https://github.com/microsoft/vscode-eslint#settings-options
 	"eslint.validate": ["javascript", "svelte"],
-	"eslint.experimental.useFlatConfig": true,
 	// https://github.com/stylelint/vscode-stylelint#stylelintvalidate
 	"stylelint.validate": ["css", "postcss", "svelte"]
 }
