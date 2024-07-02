@@ -12,5 +12,8 @@ PRODUCT_BUNDLE_IDENTIFIER = $(EXT_IDENTIFIER)
 PRODUCT_NAME = $(PROJECT_NAME)-$(TARGET_NAME)
 SKIP_INSTALL = YES
 
+// Provisioning Profile
+PROVISIONING_PROFILE_SPECIFIER[config=Release] = match AppStore $(EXT_IDENTIFIER) macos
+
 // Override this file
 #include? "Mac-Safari-Extension.dev.xcconfig"
