@@ -1,0 +1,67 @@
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+
+name: Userscripts deployment
+on:
+  release:
+    types: [published] # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+jobs:
+  Deployment:
+    strategy:
+      matrix: # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+        platform: [mac, ios]
+    runs-on: macos-latest # https://github.com/actions/runner-images
+    steps:
+      - uses: actions/checkout@v4 # https://github.com/actions/checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true # https://github.com/actions/checkout/issues/1781
+      - uses: actions/setup-node@v4 # https://github.com/actions/setup-node
+        with:
+          node-version: latest
+      - id: semver # Parse semver from github ref
+        uses: userscriptsup/actions/semver-parser@main
+      - name: Verify release type
+        run: |
+          if ${{ github.event.release.prerelease }}; then
+            ${{ steps.semver.outputs.beta }} || exit 11
+          else
+            ${{ steps.semver.outputs.alpha }} && exit 12
+            ${{ steps.semver.outputs.beta }} && exit 13
+            [ -n "${{ steps.semver.outputs.prerelease }}" ] && exit 14
+            exit 0
+          fi
+      - run: npm install
+      - run: npm run lint:js
+      - run: npm run lint:css
+      - run: npm run build:${{ matrix.platform }}-beta
+        if: ${{ github.event.release.prerelease }}
+      - run: npm run build:${{ matrix.platform }}
+        if: ${{ ! github.event.release.prerelease }}
+      - name: Set xcode version
+        run: sudo xcode-select -s "/Applications/Xcode_15.4.app" # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
+      - name: Run fastlane
+        working-directory: ./fastlane
+        env:
+          FASTLANE_OPT_OUT_USAGE: "YES"
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_PRIVATE_KEY: "fastlane/${{ secrets.GIT_PRIVATE_KEY_FILE }}"
+          GIT_PRIVATE_KEY_FILE: ${{ secrets.GIT_PRIVATE_KEY_FILE }}
+          GIT_PRIVATE_KEY_BASE64: ${{ secrets.GIT_PRIVATE_KEY_BASE64 }} # https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#storing-base64-binary-blobs-as-secrets
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          GYM_INSTALLER_CERT_NAME: ${{ secrets.GYM_INSTALLER_CERT_NAME }} # required for mac (unable to auto-detect)
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          MARKETING_VERSION: ${{ steps.semver.outputs.core }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          echo $GIT_PRIVATE_KEY_BASE64 | base64 --decode  > $GIT_PRIVATE_KEY_FILE
+          chmod 600 $GIT_PRIVATE_KEY_FILE
+          bundle install
+          $IS_PRERELEASE && bundle exec fastlane ${{ matrix.platform }} beta
+          $IS_PRERELEASE || bundle exec fastlane ${{ matrix.platform }} release
+      - name: Artifact dSYM
+        uses: actions/upload-artifact@v4 # https://github.com/actions/upload-artifact
+        with:
+          name: Userscripts_${{ matrix.platform }}_${{ github.ref_name }}.app.dSYM
+          path: build/*.dSYM.zip
