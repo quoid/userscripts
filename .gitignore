@@ -52,3 +52,7 @@ xcode/Ext-Safari/Resources/
 local
 *.local
 /scripts/*.local.js
+
+# fastlane
+/fastlane/report.xml
+/fastlane/**/*.local.rb

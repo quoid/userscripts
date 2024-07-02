@@ -17,5 +17,8 @@ PRODUCT_NAME = $(PROJECT_NAME)
 PRODUCT_NAME[config=Debug] = $(PROJECT_NAME)-Debug
 PRODUCT_NAME[config=Vite] = $(PROJECT_NAME)-Vite
 
+// Provisioning Profile
+PROVISIONING_PROFILE_SPECIFIER[config=Release] = match AppStore $(APP_IDENTIFIER) macos
+
 // Override this file
 #include? "Mac-App.dev.xcconfig"

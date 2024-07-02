@@ -18,5 +18,8 @@ SWIFT_EMIT_LOC_STRINGS = YES
 TARGETED_DEVICE_FAMILY = 1,2
 VALIDATE_PRODUCT[config=Release] = YES
 
+// Provisioning Profile
+PROVISIONING_PROFILE_SPECIFIER[config=Release] = match AppStore $(EXT_IDENTIFIER)
+
 // Override this file
 #include? "iOS-Safari-Extension.dev.xcconfig"
