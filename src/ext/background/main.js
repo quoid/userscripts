@@ -297,9 +297,17 @@ async function nativeChecks() {
 	return true;
 }
 
-// handles messages sent with browser.runtime.sendMessage
-async function handleMessage(request, sender, sendResponse) {
-	switch (request.name) {
+/**
+ * Handles messages sent with `browser.runtime.sendMessage`
+ * Make sure not to return `undefined` or `rejection`, otherwise the reply may never be delivered
+ * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#listener}
+ * @type {Parameters<typeof browser.runtime.onMessage.addListener>[0]}
+ * @returns {Promise<{status: "pending"|"fulfilled"|"rejected", result: any}>}
+ */
+async function handleMessage(message, sender) {
+	/** @type {Promise} */
+	let promise;
+	switch (message.name) {
 		case "REQ_USERSCRIPTS": {
 			// get the page url from the content script that sent request
 			const url = sender.url;
@@ -308,70 +316,75 @@ async function handleMessage(request, sender, sendResponse) {
 			const isTop = sender.frameId === 0;
 			// send request to swift layer to provide code for page url
 			const message = { name: "REQ_USERSCRIPTS", url, isTop };
-			const response = await sendNativeMessage(message);
-			// if request failed, send error to content script for logging
-			if (response.error) return sendResponse(response);
-			// sort files
-			response.files.js.sort(userscriptSort);
-			response.files.css.sort((a, b) => {
-				return Number(a.weight) < Number(b.weight);
-			});
-			// return sorted files for injection
-			return response;
+			try {
+				const response = await sendNativeMessage(message);
+				if (import.meta.env.MODE === "development") {
+					console.debug("REQ_USERSCRIPTS", message, response);
+				}
+				// if request failed, send error to content script for logging
+				if (response.error) return response;
+				// sort files
+				response.files.js.sort(userscriptSort);
+				response.files.css.sort((a, b) => Number(a.weight) < Number(b.weight));
+				// return sorted files for injection
+				return response;
+			} catch (error) {
+				console.error(error);
+				// @ts-ignore -- ignore for now and will reconstruct this in the future.
+				return { error };
+			}
 		}
 		case "API_CLOSE_TAB": {
-			const tabId = request.tabId || sender.tab.id;
-			return browser.tabs.remove(tabId);
+			promise = browser.tabs.remove(message.tabId || sender.tab.id);
+			break;
 		}
 		case "API_OPEN_TAB": {
-			const props = {
-				active: request.active,
+			promise = browser.tabs.create({
+				active: message.active,
 				index: sender.tab.index + 1,
-				url: request.url,
-			};
-			return browser.tabs.create(props);
+				url: message.url,
+			});
+			break;
 		}
 		case "API_ADD_STYLE": {
-			const tabId = sender.tab.id;
-			/** @type {import("webextension-polyfill").ExtensionTypes.InjectDetails} */
-			const details = { code: request.css, cssOrigin: "user" };
-			return browser.tabs.insertCSS(tabId, details);
+			promise = browser.tabs.insertCSS(sender.tab.id, {
+				code: message.css,
+				cssOrigin: "user",
+			});
+			break;
 		}
 		case "API_GET_TAB": {
-			let tab = null;
-			if (typeof sender.tab !== "undefined") {
-				const tabData = sessionStorage.getItem(`tab-${sender.tab.id}`);
-				try {
-					// if tabData is null, can still parse it and return that
-					tab = JSON.parse(tabData);
-				} catch (error) {
-					console.error("failed to parse tab data for getTab");
-				}
-			} else {
-				console.error("unable to deliver tab due to empty tab id");
+			if (typeof sender.tab === "undefined") {
+				const error = "unable to deliver tab due to empty tab id";
+				return { status: "rejected", result: error };
 			}
-			sendResponse(tab == null ? {} : tab);
-			break;
+			try {
+				const tabData = sessionStorage.getItem(`tab-${sender.tab.id}`);
+				// if tabData is null, can still parse it and return that
+				const tabObj = JSON.parse(tabData);
+				return { status: "fulfilled", result: tabObj };
+			} catch (error) {
+				console.error("failed to parse tab data for getTab", error);
+				return { status: "rejected", result: error };
+			}
 		}
 		case "API_SAVE_TAB": {
 			if (sender.tab != null && sender.tab.id) {
 				const key = `tab-${sender.tab.id}`;
-				sessionStorage.setItem(key, JSON.stringify(request.tab));
-				sendResponse({ success: true });
+				sessionStorage.setItem(key, JSON.stringify(message.tabObj));
+				return { status: "fulfilled", result: undefined };
 			} else {
-				console.error("unable to save tab, empty tab id");
-				sendResponse({ success: false });
+				const error = "unable to save tab, empty tab id";
+				return { status: "rejected", result: error };
 			}
-			break;
 		}
 		case "API_SET_CLIPBOARD": {
-			const result = setClipboard(request.clipboardData, request.type);
-			sendResponse(result);
-			break;
+			const result = setClipboard(message.clipboardData, message.type);
+			return { status: "fulfilled", result };
 		}
 		case "API_XHR": {
 			// parse details and set up for XMLHttpRequest
-			const details = request.details;
+			const details = message.details;
 			const method = details.method ? details.method : "GET";
 			const user = details.user || null;
 			const password = details.password || null;
@@ -386,7 +399,7 @@ async function handleMessage(request, sender, sendResponse) {
 			}
 			// establish a long-lived port connection to content script
 			const port = browser.tabs.connect(sender.tab.id, {
-				name: request.xhrPortName,
+				name: message.xhrPortName,
 			});
 			// set up XMLHttpRequest
 			const xhr = new XMLHttpRequest();
@@ -396,7 +409,7 @@ async function handleMessage(request, sender, sendResponse) {
 				xhr.overrideMimeType(details.overrideMimeType);
 			}
 			// add required listeners and send result back to the content script
-			for (const e of request.events) {
+			for (const e of message.events) {
 				if (!details[e]) continue;
 				xhr[e] = async (event) => {
 					// can not send xhr through postMessage
@@ -478,6 +491,14 @@ async function handleMessage(request, sender, sendResponse) {
 			getContextMenuItems();
 			break;
 		}
+
+	}
+	try {
+		const result = await promise;
+		return { status: "fulfilled", result };
+	} catch (error) {
+		console.error(message, sender, error);
+		return { status: "rejected", result: error };
 	}
 }
 browser.runtime.onInstalled.addListener(async () => {
