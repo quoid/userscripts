@@ -484,6 +484,11 @@
 			window.location.reload();
 		}
 	});
+
+	async function gotoExtensionPage() {
+		await openExtensionPage();
+		window.close();
+	}
 </script>
 
 <svelte:window on:resize={resize} />
@@ -578,13 +583,7 @@
 </div>
 {#if !inactive && platform === "macos"}
 	<div class="footer">
-		<button
-			class="link"
-			on:click={() => {
-				openExtensionPage();
-				window.close();
-			}}
-		>
+		<button class="link" on:click={gotoExtensionPage}>
 			Open Extension Page
 		</button>
 	</div>

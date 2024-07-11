@@ -195,8 +195,8 @@ export async function openExtensionPage() {
 	const tabs = await browser.tabs.query({ url });
 	const tab = tabs.find((e) => e.url.startsWith(url));
 	if (!tab) return browser.tabs.create({ url });
-	browser.tabs.update(tab.id, { active: true });
-	browser.windows.update(tab.windowId, { focused: true });
+	await browser.tabs.update(tab.id, { active: true });
+	await browser.windows.update(tab.windowId, { focused: true });
 }
 
 // Safari currently does not honor the target attribute of <a> elements in extension contexts
