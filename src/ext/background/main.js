@@ -491,7 +491,6 @@ async function handleMessage(message, sender) {
 			getContextMenuItems();
 			break;
 		}
-
 	}
 	try {
 		const result = await promise;
