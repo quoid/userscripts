@@ -302,11 +302,9 @@ async function nativeChecks() {
  * Make sure not to return `undefined` or `rejection`, otherwise the reply may never be delivered
  * @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#listener}
  * @type {Parameters<typeof browser.runtime.onMessage.addListener>[0]}
- * @returns {Promise<{status: "pending"|"fulfilled"|"rejected", result: any}>}
+ * @returns {Promise<{status: "pending"|"fulfilled"|"rejected", result?: any}>}
  */
 async function handleMessage(message, sender) {
-	/** @type {Promise} */
-	let promise;
 	switch (message.name) {
 		case "REQ_USERSCRIPTS": {
 			// get the page url from the content script that sent request
@@ -331,27 +329,42 @@ async function handleMessage(message, sender) {
 			} catch (error) {
 				console.error(error);
 				// @ts-ignore -- ignore for now and will reconstruct this in the future.
-				return { error };
+				return { error: String(error) };
 			}
 		}
 		case "API_CLOSE_TAB": {
-			promise = browser.tabs.remove(message.tabId || sender.tab.id);
-			break;
+			try {
+				await browser.tabs.remove(message.tabId || sender.tab.id);
+				return { status: "fulfilled" };
+			} catch (error) {
+				console.error(message, sender, error);
+				return { status: "rejected", result: String(error) };
+			}
 		}
 		case "API_OPEN_TAB": {
-			promise = browser.tabs.create({
-				active: message.active,
-				index: sender.tab.index + 1,
-				url: message.url,
-			});
-			break;
+			try {
+				const tab = await browser.tabs.create({
+					active: message.active,
+					index: sender.tab.index + 1,
+					url: message.url,
+				});
+				return { status: "fulfilled", result: tab };
+			} catch (error) {
+				console.error(message, sender, error);
+				return { status: "rejected", result: String(error) };
+			}
 		}
 		case "API_ADD_STYLE": {
-			promise = browser.tabs.insertCSS(sender.tab.id, {
-				code: message.css,
-				cssOrigin: "user",
-			});
-			break;
+			try {
+				await browser.tabs.insertCSS(sender.tab.id, {
+					code: message.css,
+					cssOrigin: "user",
+				});
+				return { status: "fulfilled" };
+			} catch (error) {
+				console.error(message, sender, error);
+				return { status: "rejected", result: String(error) };
+			}
 		}
 		case "API_GET_TAB": {
 			if (typeof sender.tab === "undefined") {
@@ -365,17 +378,17 @@ async function handleMessage(message, sender) {
 				return { status: "fulfilled", result: tabObj };
 			} catch (error) {
 				console.error("failed to parse tab data for getTab", error);
-				return { status: "rejected", result: error };
+				return { status: "rejected", result: String(error) };
 			}
 		}
 		case "API_SAVE_TAB": {
 			if (sender.tab != null && sender.tab.id) {
 				const key = `tab-${sender.tab.id}`;
 				sessionStorage.setItem(key, JSON.stringify(message.tabObj));
-				return { status: "fulfilled", result: undefined };
+				return { status: "fulfilled" };
 			} else {
 				const error = "unable to save tab, empty tab id";
-				return { status: "rejected", result: error };
+				return { status: "rejected", result: String(error) };
 			}
 		}
 		case "API_SET_CLIPBOARD": {
@@ -481,7 +494,7 @@ async function handleMessage(message, sender) {
 					port.postMessage({ name: "onloadend", event });
 				};
 			}
-			break;
+			return { status: "fulfilled" };
 		}
 		case "REFRESH_SESSION_RULES": {
 			setSessionRules();
@@ -491,13 +504,6 @@ async function handleMessage(message, sender) {
 			getContextMenuItems();
 			break;
 		}
-	}
-	try {
-		const result = await promise;
-		return { status: "fulfilled", result };
-	} catch (error) {
-		console.error(message, sender, error);
-		return { status: "rejected", result: error };
 	}
 }
 browser.runtime.onInstalled.addListener(async () => {
