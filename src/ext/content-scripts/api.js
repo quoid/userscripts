@@ -52,43 +52,56 @@ async function listValues() {
 	return keys;
 }
 
+async function sendMessageProxy(message) {
+	try {
+		/** @type {{status: "fulfilled"|"rejected", result: any}} */
+		const response = await browser.runtime.sendMessage(message);
+		if (response.status === "fulfilled") {
+			return response.result;
+		} else {
+			return Promise.reject(response.result);
+		}
+	} catch (error) {
+		console.error(error);
+		return Promise.reject(error);
+	}
+}
+
 async function openInTab(url, openInBackground = false) {
 	try {
 		new URL(url);
 	} catch (error) {
 		return Promise.reject(error);
 	}
-	return browser.runtime.sendMessage({
+	return sendMessageProxy({
 		name: "API_OPEN_TAB",
 		url,
 		active: !openInBackground,
 	});
 }
 
-async function getTab() {
-	return browser.runtime.sendMessage({ name: "API_GET_TAB" });
-}
-
-async function saveTab(tab) {
-	if (tab == null) {
-		return Promise.reject(new Error("saveTab invalid arg"));
-	}
-	return browser.runtime.sendMessage({ name: "API_SAVE_TAB", tab });
-}
-
 async function closeTab(tabId) {
-	return browser.runtime.sendMessage({ name: "API_CLOSE_TAB", tabId });
+	return sendMessageProxy({ name: "API_CLOSE_TAB", tabId });
+}
+
+async function getTab() {
+	return sendMessageProxy({ name: "API_GET_TAB" });
+}
+
+async function saveTab(tabObj) {
+	if (tabObj == null) return Promise.reject(new Error("saveTab invalid arg"));
+	return sendMessageProxy({ name: "API_SAVE_TAB", tabObj });
 }
 
 async function addStyle(css) {
 	if (typeof css !== "string" || !css.length) {
 		return Promise.reject(new Error("addStyle invalid css arg"));
 	}
-	return browser.runtime.sendMessage({ name: "API_ADD_STYLE", css });
+	return sendMessageProxy({ name: "API_ADD_STYLE", css });
 }
 
 async function setClipboard(clipboardData, type) {
-	return browser.runtime.sendMessage({
+	return sendMessageProxy({
 		name: "API_SET_CLIPBOARD",
 		clipboardData,
 		type,
@@ -174,7 +187,7 @@ function xhr(details) {
 		xhrPortName,
 		events,
 	};
-	browser.runtime.sendMessage(message);
+	sendMessageProxy(message);
 	return response;
 }
 
