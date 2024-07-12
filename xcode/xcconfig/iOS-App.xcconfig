@@ -26,5 +26,8 @@ SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO
 TARGETED_DEVICE_FAMILY = 1,2
 VALIDATE_PRODUCT[config=Release] = YES
 
+// Provisioning Profile
+PROVISIONING_PROFILE_SPECIFIER[config=Release] = match AppStore $(APP_IDENTIFIER)
+
 // Override this file
 #include? "iOS-App.dev.xcconfig"

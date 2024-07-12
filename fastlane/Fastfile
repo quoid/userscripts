@@ -1,0 +1,75 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+
+LOCAL_FASTFILE = "local/Fastfile.local.rb"
+if File.file?(LOCAL_FASTFILE)
+	import(LOCAL_FASTFILE)
+end
+
+PROJECT_PATH = "xcode/Userscripts.xcodeproj"
+
+# https://docs.fastlane.tools/actions/is_ci/
+if is_ci
+	setup_ci
+	IS_CI = true
+else
+	IS_CI = false
+end
+
+# https://docs.fastlane.tools/actions/app_store_connect_api_key/
+app_store_connect_api_key(
+	key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+	issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+	key_content: ENV['APP_STORE_CONNECT_API_KEY_KEY'],
+	key_filepath: ENV['APP_STORE_CONNECT_API_KEY_KEY_FILEPATH'],
+)
+
+default_platform(:ios)
+
+platform :ios do
+	lane :beta do
+		match
+		BUILD_NUMBER = latest_testflight_build_number(platform: "ios") + 1
+		build_app(
+			project: PROJECT_PATH,
+			scheme: "iOS",
+			xcargs: {
+				CURRENT_PROJECT_VERSION: BUILD_NUMBER.to_s,
+				MARKETING_VERSION: ENV['MARKETING_VERSION'],
+			},
+			output_directory: "build",
+			output_name: "Userscripts-iOS-Beta",
+			silent: IS_CI,
+		)
+		upload_to_testflight(skip_submission: true)
+	end
+
+	lane :release do
+		puts "ios release #{ENV['MARKETING_VERSION']}"
+		beta
+	end
+end
+
+platform :mac do
+	lane :beta do
+		match
+		BUILD_NUMBER = latest_testflight_build_number(platform: "osx") + 1
+		build_mac_app(
+			project: PROJECT_PATH,
+			scheme: "Mac",
+			xcargs: {
+				CURRENT_PROJECT_VERSION: BUILD_NUMBER.to_s,
+				MARKETING_VERSION: ENV['MARKETING_VERSION'],
+			},
+			output_directory: "build",
+			output_name: "Userscripts-Mac-Beta",
+			silent: IS_CI,
+		)
+		upload_to_testflight(skip_submission: true)
+	end
+
+	lane :release do
+		puts "mac release #{ENV['MARKETING_VERSION']}"
+		beta
+	end
+end
