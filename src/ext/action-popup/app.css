@@ -1,0 +1,76 @@
+html {
+	font-size: 100%;
+	overflow: hidden;
+}
+
+body {
+	background-color: var(--color-bg-secondary);
+	color: var(--text-color-primary);
+	font: var(--text-medium);
+	letter-spacing: var(--letter-spacing-medium);
+	text-rendering: optimizelegibility;
+	-webkit-font-smoothing: antialiased;
+	position: relative;
+	width: 18rem;
+	height: 26rem;
+}
+
+/* ios */
+@supports (-webkit-touch-callout: none) {
+	html {
+		font-size: 125%;
+		overflow: visible;
+		overscroll-behavior: none;
+	}
+
+	body {
+		width: auto;
+		min-width: 16rem;
+		height: auto;
+	}
+
+	/* non-fixed width need to stretch */
+	@media (width < 320px) {
+		body {
+			width: 18rem;
+			min-height: 16rem;
+		}
+	}
+}
+
+noscript {
+	display: block;
+}
+
+#app {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	justify-content: space-between;
+}
+
+button {
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	user-select: none;
+}
+
+button:disabled {
+	opacity: var(--opacity-disabled);
+	pointer-events: none;
+}
+
+a,
+.link {
+	background: none;
+	color: var(--color-blue);
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.truncate {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

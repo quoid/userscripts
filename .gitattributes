@@ -1,3 +1,7 @@
-pnpm-lock.yaml linguist-generated
+# https://git-scm.com/docs/gitattributes
+# https://git-scm.com/book/en/Customizing-Git-Git-Attributes
+* text=auto
+
+# https://docs.github.com/en/repositories/working-with-files/managing-files/customizing-how-changed-files-appear-on-github
+# https://github.com/github-linguist/linguist/blob/master/docs/overrides.md
 public linguist-generated
-xcode/iOS-App/Base.lproj/Main.html linguist-generated

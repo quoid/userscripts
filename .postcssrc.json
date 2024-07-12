@@ -1,5 +1,5 @@
 {
-    "plugins": {
-        "autoprefixer": {"overrideBrowserslist": ["safari >= 13"]}
-    }
+	"plugins": {
+		"autoprefixer": { "overrideBrowserslist": ["safari >= 13"] }
+	}
 }

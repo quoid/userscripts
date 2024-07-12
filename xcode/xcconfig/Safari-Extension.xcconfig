@@ -1,0 +1,5 @@
+SRC_DIR = Ext-Safari
+MANIFEST_FILE = $(SRC_DIR)/Resources/manifest.json
+MANIFEST_NAME = $(PROJECT_NAME)
+MANIFEST_NAME[config=Debug] = $(PROJECT_NAME)-Debug
+MANIFEST_NAME[config=Vite] = $(PROJECT_NAME)-Vite

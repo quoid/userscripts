@@ -1,63 +1,142 @@
+// https://code.visualstudio.com/docs/editor/tasks
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "pnpm: install",
-            "detail": "Install dev dependencies",
-            "type": "shell",
-            "command": "pnpm install",
-            "group": "build",
-            "options": {
-                "cwd": "./"
-            }
-        },
-        {
-            "label": "pnpm: dev",
-            "detail": "Run dev server",
-            "type": "shell",
-            "command": "pnpm dev",
-            "group": "build",
-            "options": {
-                "cwd": "./"
-            }
-        },
-        {
-            "label": "pnpm: build",
-            "detail": "Build to xcode dist path",
-            "type": "shell",
-            "command": "pnpm build",
-            "group": "build",
-            "options": {
-                "cwd": "./"
-            }
-        },
-        {
-            "label": "xcode: build",
-            "detail": "xcodebuild",
-            "type": "shell",
-            "command": "xcodebuild -scheme Userscripts build",
-            "group": "build",
-            "options": {
-                "cwd": "./xcode/"
-            }
-        },
-        {
-            "label": "xcode: rebuild",
-            "detail": "pnpm build + xcodebuild",
-            "presentation": {
-                "reveal": "silent"
-            },
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "pnpm: build",
-                "xcode: build"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm: install",
+			"detail": "Install dev dependencies",
+			"type": "shell",
+			"command": "npm install",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: dev",
+			"detail": "Run dev server",
+			"type": "shell",
+			"command": "npm run dev",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: dev ext-safari-mac",
+			"detail": "Run dev server and build dev resource to xcode dist",
+			"type": "shell",
+			"command": "npm run dev:ext-safari-mac",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: dev ext-safari-ios",
+			"detail": "Run dev server and build dev resource to xcode dist",
+			"type": "shell",
+			"command": "npm run dev:ext-safari-ios",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: build mac",
+			"detail": "Build to xcode dist path",
+			"type": "shell",
+			"command": "npm run build:mac",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "npm: build ios",
+			"detail": "Build to xcode dist path",
+			"type": "shell",
+			"command": "npm run build:ios",
+			"group": "build",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "xcodebuild: mac-debug",
+			"detail": "xcodebuild mac debug",
+			"type": "shell",
+			"command": "xcodebuild -scheme Mac -configuration Debug",
+			"group": "build",
+			"options": {
+				"cwd": "./xcode/"
+			}
+		},
+		{
+			"label": "xcodebuild: mac-vite",
+			"detail": "xcodebuild mac vite",
+			"type": "shell",
+			"command": "xcodebuild -scheme Mac-Vite-Dev -configuration Vite",
+			"group": "build",
+			"options": {
+				"cwd": "./xcode/"
+			}
+		},
+		{
+			"label": "dev: ext-safari-mac",
+			"detail": "npm: dev ext-safari-mac + xcodebuild: mac-vite",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"dependsOrder": "sequence",
+			"dependsOn": ["npm: dev ext-safari-mac", "xcodebuild: mac-vite"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "build: mac debug",
+			"detail": "npm: build mac + xcodebuild: mac-debug",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"dependsOrder": "sequence",
+			"dependsOn": ["npm: build mac", "xcodebuild: mac-debug"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "lint: js",
+			"detail": "lint js with eslint",
+			"type": "shell",
+			"command": "npm run lint:js",
+			"group": "test",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "lint: css",
+			"detail": "lint css with stylelint",
+			"type": "shell",
+			"command": "npm run lint:css",
+			"group": "test",
+			"options": {
+				"cwd": "./"
+			}
+		},
+		{
+			"label": "prettier",
+			"detail": "applying prettier formatting for all supported files",
+			"type": "shell",
+			"command": "npm run prettier",
+			"options": {
+				"cwd": "./"
+			},
+			"problemMatcher": []
+		}
+	]
 }

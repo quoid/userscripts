@@ -1,0 +1,12 @@
+# https://docs.fastlane.tools/actions/match
+
+readonly(true)
+type("appstore")
+app_identifier([
+	"com.userscripts.macos",
+	"com.userscripts.macos.Userscripts-Extension",
+])
+
+for_platform :mac do
+	additional_cert_types(["mac_installer_distribution"])
+end

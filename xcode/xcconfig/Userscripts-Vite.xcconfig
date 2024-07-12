@@ -1,0 +1,24 @@
+#include "Userscripts-Base.xcconfig"
+
+INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © Userscripts
+IOS_APP_BUILD = 2
+IOS_APP_VERSION = 2.0.0
+MAC_APP_BUILD = 5
+MAC_APP_VERSION = 5.0.0
+
+// Sign to Run Locally
+CODE_SIGN_IDENTITY = -
+// Organization Identifier
+ORG_IDENTIFIER = dev.vite
+// Application Identifier
+APP_IDENTIFIER = $(ORG_IDENTIFIER).userscripts
+// Safari Extension Identifier
+EXT_IDENTIFIER = $(APP_IDENTIFIER).ext.safari
+// App Groups and Group Containers
+IOS_SHARED_GID = group.$(ORG_IDENTIFIER).userscripts
+MAC_SHARED_GID = 00000.$(ORG_IDENTIFIER).userscripts
+// App URL Scheme
+APP_URL_SCHEME = userscripts-vite
+
+// Override this file
+#include? "Userscripts-Vite.dev.xcconfig"
