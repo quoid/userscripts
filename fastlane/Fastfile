@@ -30,6 +30,9 @@ platform :ios do
 	lane :beta do
 		match
 		BUILD_NUMBER = latest_testflight_build_number(platform: "ios") + 1
+		File.open(ENV['GITHUB_OUTPUT'], 'a') do |file|
+			file.puts "ver=v#{ENV['MARKETING_VERSION']}(#{BUILD_NUMBER})"
+		end
 		build_app(
 			project: PROJECT_PATH,
 			scheme: "iOS",
@@ -58,6 +61,9 @@ platform :mac do
 	lane :beta do
 		match
 		BUILD_NUMBER = latest_testflight_build_number(platform: "osx") + 1
+		File.open(ENV['GITHUB_OUTPUT'], 'a') do |file|
+			file.puts "ver=v#{ENV['MARKETING_VERSION']}(#{BUILD_NUMBER})"
+		end
 		build_mac_app(
 			project: PROJECT_PATH,
 			scheme: "Mac",
