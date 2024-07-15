@@ -41,7 +41,11 @@ platform :ios do
 			output_name: "Userscripts-iOS-Beta",
 			silent: IS_CI,
 		)
-		upload_to_testflight(skip_submission: true)
+		upload_to_testflight(
+			changelog: "QA v#{ENV['MARKETING_VERSION']}(#{BUILD_NUMBER})",
+			distribute_external: true,
+			groups: ["QA"],
+		)
 	end
 
 	lane :release do
@@ -65,7 +69,11 @@ platform :mac do
 			output_name: "Userscripts-Mac-Beta",
 			silent: IS_CI,
 		)
-		upload_to_testflight(skip_submission: true)
+		upload_to_testflight(
+			changelog: "QA v#{ENV['MARKETING_VERSION']}(#{BUILD_NUMBER})",
+			distribute_external: true,
+			groups: ["QA"],
+		)
 	end
 
 	lane :release do
