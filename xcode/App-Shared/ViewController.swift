@@ -27,7 +27,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 		logger?.debug("\(#function, privacy: .public) - DEBUG mode: isInspectable = true")
 #endif
 		view = webView
-		self.webView.scrollView.isScrollEnabled = false
+//		self.webView.scrollView.isScrollEnabled = false
 		self.webView.isOpaque = false
 		let backgroundColor = UIColor.init(red: (47/255.0), green: (51/255.0), blue: (55/255.0), alpha: 1.0)
 		view.setValue(backgroundColor, forKey: "backgroundColor")

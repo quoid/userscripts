@@ -31,33 +31,36 @@
 	<div class="logo">
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html logo}
-		<span>
-			{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
-				<a
-					href="https://github.com/quoid/userscripts/releases/tag/{import.meta
-						.env.GIT_TAG}"
-				>
-					{import.meta.env.GIT_TAG}
-				</a>
-				(<a
-					href="https://github.com/quoid/userscripts/commit/{import.meta.env
-						.GIT_COMMIT}"
-				>
-					{import.meta.env.GIT_COMMIT.slice(0, 7)}
-				</a>)
-			{:else}
-				<span>{version}</span>
-				<span>{build}</span>
-			{/if}
-		</span>
 	</div>
+	<div class="version">
+		{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
+			<a
+				href="https://github.com/quoid/userscripts/releases/tag/{import.meta.env
+					.GIT_TAG}"
+			>
+				{import.meta.env.GIT_TAG}
+			</a>
+			(<a
+				href="https://github.com/quoid/userscripts/commit/{import.meta.env
+					.GIT_COMMIT}"
+			>
+				{import.meta.env.GIT_COMMIT.slice(0, 7)}
+			</a>)
+		{:else}
+			<span>{version}</span>
+			<span>{build}</span>
+		{/if}
+	</div>
+	<br />
 	<p>
-		You can turn on the Userscripts iOS Safari extension in Settings.
+		You can turn on the Userscripts iOS Safari extension in Settings or Safari,
+		then use the extension in Safari.
+		<br />
 		<a
 			href="https://github.com/quoid/userscripts/blob/{import.meta.env
 				.GIT_TAG ?? 'main'}/README.md"
 		>
-			Read the docs.
+			Read online documentation
 		</a>
 	</p>
 	<button id="change-directory" on:click={changeDirectory}>
@@ -76,7 +79,7 @@
 		flex-direction: column;
 		height: 100%;
 		justify-content: center;
-		padding: 0 1rem;
+		padding: 16px;
 		text-align: center;
 		-webkit-touch-callout: none;
 		user-select: none;
@@ -87,27 +90,22 @@
 	}
 
 	.icon {
-		height: 8rem;
-		width: 8rem;
+		margin-top: 80px;
+		height: min(8rem, 256px);
+		width: min(8rem, 256px);
 	}
 
 	.logo {
 		align-items: flex-end;
 		display: flex;
-		margin: 1rem 0;
+		margin: min(1rem, 32px) 0;
 	}
 
 	.logo :global(svg) {
-		height: 1.5rem;
+		height: min(1.5rem, 32px);
 	}
 
-	.logo > span {
-		text-align: left;
-		min-width: 3.5rem;
-		margin-left: 0.5rem;
-	}
-
-	.logo span,
+	.version,
 	.current {
 		color: var(--text-color-disabled);
 		font: var(--text-small);
@@ -123,7 +121,7 @@
 		font: var(--text-default);
 		font-weight: 500;
 		letter-spacing: var(--letter-spacing-default);
-		margin: 2rem 0 1rem;
+		margin: 2rem 0;
 		padding: 0.5rem 1rem;
 	}
 
@@ -137,8 +135,6 @@
 		font-size: 0.875rem;
 		font-weight: 400;
 		word-break: break-all;
-		min-height: 7rem;
-		max-height: 10rem;
 	}
 
 	#directory button {
