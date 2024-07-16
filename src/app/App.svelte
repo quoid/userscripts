@@ -35,10 +35,10 @@
 		<div class="logo">{@html logo}</div>
 		<div class="version">
 			{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
-				<a href="${baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
+				<a href="{baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
 					{import.meta.env.GIT_TAG}
 				</a>
-				(<a href="${baseUrl}/commit/{import.meta.env.GIT_COMMIT}">
+				(<a href="{baseUrl}/commit/{import.meta.env.GIT_COMMIT}">
 					{import.meta.env.GIT_COMMIT.slice(0, 7)}
 				</a>)
 			{:else}
@@ -53,7 +53,7 @@
 			Safari, then use the extension in Safari. Please refer to the "Usage"
 			section in the
 			<a
-				href="${baseUrl}/blob/{import.meta.env.GIT_TAG ??
+				href="{baseUrl}/blob/{import.meta.env.GIT_TAG ??
 					'main'}/README.md#usage">README of this version</a
 			>.
 		</p>
@@ -69,12 +69,12 @@
 	</div>
 	<div class="section footer">
 		<div class="links">
-			<a href="${baseUrl}/blob/{import.meta.env.GIT_TAG ?? 'main'}/README.md"
+			<a href="{baseUrl}/blob/{import.meta.env.GIT_TAG ?? 'main'}/README.md"
 				>Documentation</a
 			>
-			<a href="${baseUrl}/discussions">Discussions</a>
-			<a href="${baseUrl}/issues">Report an Issue</a>
-			<a href="${baseUrl}#privacy-policy">Privacy Policy</a>
+			<a href="{baseUrl}/discussions">Discussions</a>
+			<a href="{baseUrl}/issues">Report an Issue</a>
+			<a href="{baseUrl}#privacy-policy">Privacy Policy</a>
 		</div>
 	</div>
 </main>
