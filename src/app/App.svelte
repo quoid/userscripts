@@ -54,14 +54,11 @@
 	<br />
 	<p>
 		You can turn on the Userscripts iOS Safari extension in Settings or Safari,
-		then use the extension in Safari.
-		<br />
+		then use the extension in Safari. Please refer to the "Usage" section in the
 		<a
 			href="https://github.com/quoid/userscripts/blob/{import.meta.env
-				.GIT_TAG ?? 'main'}/README.md"
-		>
-			Read online documentation
-		</a>
+				.GIT_TAG ?? 'main'}/README.md#usage">README of this version</a
+		>.
 	</p>
 	<button id="change-directory" on:click={changeDirectory}>
 		Change Userscripts Directory
@@ -69,6 +66,20 @@
 	<div class="current">CURRENT DIRECTORY:</div>
 	<div id="directory">
 		<button class="link" on:click={openDirectory}>{directory}</button>
+	</div>
+	<div class="footer">
+		<a
+			href="https://github.com/quoid/userscripts/blob/{import.meta.env
+				.GIT_TAG ?? 'main'}/README.md">Documentation</a
+		>
+		|
+		<a href="https://github.com/quoid/userscripts/discussions">Discussions</a>
+		|
+		<a href="https://github.com/quoid/userscripts/issues">Report an Issue</a>
+		|
+		<a href="https://github.com/quoid/userscripts#privacy-policy"
+			>Privacy Policy</a
+		>
 	</div>
 </main>
 
@@ -105,6 +116,7 @@
 		height: min(1.5rem, 32px);
 	}
 
+	.footer,
 	.version,
 	.current {
 		color: var(--text-color-disabled);
@@ -140,5 +152,9 @@
 	#directory button {
 		color: inherit;
 		text-decoration: none;
+	}
+
+	.footer {
+		margin-top: 80px;
 	}
 </style>
