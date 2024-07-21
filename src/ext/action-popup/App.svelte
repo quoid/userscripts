@@ -24,7 +24,6 @@
 	let showUpdates = false;
 	let updates = [];
 	let main;
-	let rowColors;
 	let inactive = false;
 	let platform;
 	let initError;
@@ -601,7 +600,7 @@
 			</div>
 		{/if}
 	</div>
-	<div class="main {rowColors || ''}" bind:this={main}>
+	<div class="main" bind:this={main}>
 		{#if loading}
 			<Loader abortClick={abortUpdates} {abort} />
 		{:else if inactive}
