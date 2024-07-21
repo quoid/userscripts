@@ -5,7 +5,7 @@
 	export let allItemsToggleItem;
 
 	let disabled;
-	let rowColorsAll;
+	let rowColorsAll = "";
 
 	$: list = allItems.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -14,12 +14,12 @@
 	} else if (list.length > 1 && list.length % 2 !== 0) {
 		rowColorsAll = "odd--all";
 	} else {
-		rowColorsAll = undefined;
+		rowColorsAll = "";
 	}
 </script>
 
 {#if allItems.length}
-	<div class="items view--all {rowColorsAll || ''}" class:disabled>
+	<div class="items view--all {rowColorsAll}" class:disabled>
 		{#each list as item (item.filename)}
 			<PopupItem
 				enabled={!item.disabled}
