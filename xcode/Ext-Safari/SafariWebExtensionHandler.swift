@@ -258,21 +258,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 			}
 			response.userInfo = [SFExtensionMessageKey: ["success": true]]
 		}
-		else if name == "PAGE_NEW_REMOTE" {
-			#if os(macOS)
-				if let url = message?["url"] as? String {
-					if !validateUrl(url) {
-						response.userInfo = [SFExtensionMessageKey: ["error": "Failed to get remote content, invalid url"]]
-					} else if let content = getRemoteFileContents(url) {
-						response.userInfo = [SFExtensionMessageKey: content]
-					} else {
-						response.userInfo = [SFExtensionMessageKey: ["error": "Failed to get remote content"]]
-					}
-				} else {
-					inBoundError = true
-				}
-			#endif
-		}
 		else if name == "PAGE_UPDATE_SETTINGS" {
 			#if os(macOS)
 				if let settings = message?["settings"] as? [String: String] {
