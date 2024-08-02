@@ -32,7 +32,13 @@
 		scrollToEl(active.filename);
 	}
 
+	/**
+	 * @param {"js"|"css"} type
+	 * @param {string=} content
+	 * @param {string=} remote
+	 */
 	async function newItem(type, content, remote) {
+		if (!["js", "css", "dnr"].includes(type)) return;
 		// warn if there are unsaved changes or another temp script
 		const temp = $items.find((i) => i.temp);
 		if ((cmChanged() || temp) && !warn()) return;
@@ -141,7 +147,7 @@
 			const res = await fetch(url);
 			if (!res.ok) throw new Error(`httpcode-${res.status}`);
 			const content = await res.text();
-			newItem(type, content, url);
+			newItem(type, content, url.href);
 		} catch (error) {
 			log.add(`Failed to get remote content - ${error}`, "error", true);
 		}
