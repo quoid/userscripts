@@ -32,7 +32,13 @@
 		scrollToEl(active.filename);
 	}
 
+	/**
+	 * @param {"js"|"css"} type
+	 * @param {string=} content
+	 * @param {string=} remote
+	 */
 	async function newItem(type, content, remote) {
+		if (!["js", "css", "dnr"].includes(type)) return;
 		// warn if there are unsaved changes or another temp script
 		const temp = $items.find((i) => i.temp);
 		if ((cmChanged() || temp) && !warn()) return;
@@ -60,7 +66,10 @@
 		};
 		// if it's a remotely added script add prop to item object
 		// is used to display url in editor and will be removed on save
-		if (remote) item.remote = remote;
+		if (remote) {
+			item.remote = remote;
+			item.name = remote;
+		}
 		items.update((i) => [item, ...i]);
 		await tick(); // if omitted invalid arg in activate function
 		activate(item);
@@ -111,17 +120,36 @@
 		const temp = $items.find((i) => i.temp);
 		if ((cmChanged() || temp) && !warn()) return;
 		// prompt user for url
-		const url = prompt("Enter remote url:");
+		const input = prompt("Enter remote url:");
 		// stop execution is user cancels prompt
-		if (!url) return;
-		state.add("fetching");
-		const message = { name: "PAGE_NEW_REMOTE", url };
-		const response = await sendNativeMessage(message);
-		if (response.error) {
-			log.add(response.error, "error", true);
+		if (input === null) return;
+		/** @type {URL} */
+		let url;
+		/** @type {"js"|"css"} */
+		let type;
+		try {
+			url = new URL(input.trim());
+		} catch {
+			log.add("Failed to get remote content, invalid url", "error", true);
+			return;
+		}
+		// check file type
+		if (url.pathname.endsWith(".js")) {
+			type = "js";
+		} else if (url.pathname.endsWith(".css")) {
+			type = "css";
 		} else {
-			const type = url.substring(url.lastIndexOf(".") + 1);
-			newItem(type, response, url);
+			log.add("Failed to get remote content, invalid file type", "error", true);
+			return;
+		}
+		state.add("fetching");
+		try {
+			const res = await fetch(url);
+			if (!res.ok) throw new Error(`httpcode-${res.status}`);
+			const content = await res.text();
+			newItem(type, content, url.href);
+		} catch (error) {
+			log.add(`Failed to get remote content - ${error}`, "error", true);
 		}
 		state.remove("fetching");
 	}
