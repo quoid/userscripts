@@ -100,7 +100,7 @@ const _browser = {
 			const name = message.name;
 			console.info(`Got message: ${name}`);
 			let response = {};
-			if (name === "REFRESH_SESSION_RULES") {
+			if (name === "REFRESH_DNR_RULES") {
 				response = { success: true };
 			}
 			if (!responseCallback) {

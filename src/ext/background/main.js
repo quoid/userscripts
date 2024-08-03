@@ -124,71 +124,82 @@ async function setBadgeCount() {
 	}
 }
 
-// on startup get declarativeNetRequests
-// and set the requests for the session
+// on startup set declarativeNetRequest rulesets
 // should also check and refresh when:
 // 1. dnr item save event in the page occurs
 // 2. dnr item toggle event in the page occurs
 // 3. external editor changes script file content
-async function setSessionRules() {
+async function setDNRRulesets() {
 	// not supported below safari 15.4
-	if (!browser.declarativeNetRequest.updateSessionRules) return;
-	await clearAllSessionRules();
+	if (!browser.declarativeNetRequest.updateDynamicRules) return;
 	const message = { name: "REQ_REQUESTS" };
 	const response = await sendNativeMessage(message);
 	if (response.error) {
 		console.error(response.error);
 		return;
 	}
-	// there are no rules to apply
-	if (!response.length) return;
 	// loop through response, parse the rules, push to array and log
-	const rules = [];
+	/** @type {import("webextension-polyfill").DeclarativeNetRequest.Rule[]} */
+	const addRules = [];
+	let ruleId = 1;
 	for (let i = 0; i < response.length; i++) {
-		const rule = response[i];
-		const code = JSON.parse(rule.code);
-		// check if an array or single rule
-		if (Array.isArray(code)) {
-			code.forEach((r) => rules.push(r));
-			console.info(`Setting session rule: ${rule.name} (${code.length})`);
-		} else {
-			rules.push(code);
-			console.info(`Setting session rule: ${rule.name}`);
+		if (
+			ruleId >
+			browser.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES
+		) {
+			console.warn(
+				"Rules exceed the maximum number, some rules will be ignored",
+			);
+			break;
+		}
+		const ruleset = response[i];
+		/** @type {Array} */
+		let rules;
+		try {
+			const res = JSON.parse(ruleset.code);
+			// check if an array or single rule
+			if (Array.isArray(res)) {
+				rules = res;
+			} else if (typeof res === "object") {
+				rules = [res];
+			} else {
+				console.warn(`Not a valid DNR ruleset: ${ruleset.name}`);
+				continue;
+			}
+			console.info(`Setting DNR ruleset: ${ruleset.name} (${rules.length})`);
+		} catch (error) {
+			console.warn(
+				`Failed parsed into a valid DNR ruleset: ${ruleset.name}`,
+				error,
+			);
+			continue;
+		}
+		for (const rule of rules) {
+			// simple check if it is a rule object
+			if (!rule.action || !rule.condition || !rule.id) {
+				console.warn("Not a valid DNR rule:", rule);
+				continue;
+			}
+			// set unique ids for all rules to ensure no repeats
+			rule.id = ruleId++;
+			addRules.push(rule);
 		}
 	}
-	// generate unique ids for all rules to ensure no repeats
-	const ids = randomNumberSet(1000, rules.length);
-	rules.map((rule, index) => (rule.id = ids[index]));
+	// remove all then add declarativeNetRequest rules
 	try {
-		await browser.declarativeNetRequest.updateSessionRules({ addRules: rules });
+		const oldRules = await browser.declarativeNetRequest.getDynamicRules();
+		const removeRuleIds = oldRules.map((rule) => rule.id);
+		await browser.declarativeNetRequest.updateDynamicRules({
+			addRules,
+			removeRuleIds,
+		});
 	} catch (error) {
-		console.error(`Error setting session rules: ${error}`);
-		return;
+		return console.error(error);
 	}
-	console.info(`Finished setting ${rules.length} session rules`);
+	console.info(`Finished setting ${addRules.length} DNR rules`);
 }
 
-async function clearAllSessionRules() {
-	const rules = await browser.declarativeNetRequest.getSessionRules();
-	if (!rules.length) return;
-	console.info(`Clearing ${rules.length} session rules`);
-	const ruleIds = rules.map((a) => a.id);
-	await browser.declarativeNetRequest.updateSessionRules({
-		removeRuleIds: ruleIds,
-	});
-}
-
-function randomNumberSet(max, count) {
-	// generates a set of random unique numbers
-	// returns an array
-	const numbers = new Set();
-	while (numbers.size < count) {
-		numbers.add(Math.floor(Math.random() * (max - 1 + 1)) + 1);
-	}
-	return [...numbers];
-}
-
-// the current update logic is similar to setSessionRules()
+// the current update logic is similar to setDNRRulesets()
 // this feature needs a more detailed redesign in the future
 // https://github.com/quoid/userscripts/issues/453
 async function getContextMenuItems() {
@@ -489,8 +500,8 @@ async function handleMessage(message, sender) {
 			}
 			return { status: "fulfilled" };
 		}
-		case "REFRESH_SESSION_RULES": {
-			setSessionRules();
+		case "REFRESH_DNR_RULES": {
+			setDNRRulesets();
 			break;
 		}
 		case "REFRESH_CONTEXT_MENU_SCRIPTS": {
@@ -512,7 +523,7 @@ browser.runtime.onInstalled.addListener(async () => {
 	await contentScriptRegistration(enable);
 });
 browser.runtime.onStartup.addListener(async () => {
-	setSessionRules();
+	setDNRRulesets();
 	getContextMenuItems();
 });
 // listens for messages from content script, popup and page
@@ -526,7 +537,7 @@ browser.windows.onFocusChanged.addListener(async (windowId) => {
 	}
 	nativeChecks();
 	setBadgeCount();
-	setSessionRules();
+	setDNRRulesets();
 	getContextMenuItems();
 });
 browser.webNavigation.onCompleted.addListener(setBadgeCount);
