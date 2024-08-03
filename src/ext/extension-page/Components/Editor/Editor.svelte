@@ -86,7 +86,7 @@
 			// set the newly saved file contents in codemirror instance
 			cmSetSavedCode(response.content);
 			// refresh session rules
-			browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
+			browser.runtime.sendMessage({ name: "REFRESH_DNR_RULES" });
 			// refresh context-menu scripts
 			browser.runtime.sendMessage({ name: "REFRESH_CONTEXT_MENU_SCRIPTS" });
 		}

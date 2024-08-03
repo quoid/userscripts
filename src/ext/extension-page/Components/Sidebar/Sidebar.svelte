@@ -177,7 +177,7 @@
 				});
 				if (item.request) {
 					// refresh session rules
-					browser.runtime.sendMessage({ name: "REFRESH_SESSION_RULES" });
+					browser.runtime.sendMessage({ name: "REFRESH_DNR_RULES" });
 				}
 			} else {
 				log.add("Failed to toggle item", "error", true);
