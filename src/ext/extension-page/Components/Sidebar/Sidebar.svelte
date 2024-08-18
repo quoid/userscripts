@@ -120,7 +120,7 @@
 		const temp = $items.find((i) => i.temp);
 		if ((cmChanged() || temp) && !warn()) return;
 		// prompt user for url
-		const input = prompt("Enter remote url:");
+		const input = prompt("Enter remote URL:");
 		// stop execution is user cancels prompt
 		if (input === null) return;
 		/** @type {URL} */
