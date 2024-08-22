@@ -1247,13 +1247,19 @@ func getCode(_ filenames: [String], _ isTop: Bool)-> [String: Any]? {
 
 		// attempt to get all @grant value
 		var grants = metadata["grant"] ?? []
-		// remove duplicates, if any exist
-		if !grants.isEmpty {
-			grants = Array(Set(grants))
-		}
 
-		// filter out grant values that are not in validGrant set
-		grants = grants.filter{validGrants.contains($0)}
+		if !grants.isEmpty {
+			if grants.contains("none") {
+				// `@grant none` takes precedence
+				grants = []
+			} else {
+				// remove duplicates
+				grants = Array(Set(grants))
+				// filter out grant values that are not in validGrant set
+				grants = grants.filter{validGrants.contains($0)}
+			}
+		}
+		
 
 		// set GM.info data
 		let description = metadata["description"]?[0] ?? ""
