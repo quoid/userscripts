@@ -79,6 +79,9 @@ func jsLikeURL(_ urlString: String, baseString: String? = nil) -> [String: Strin
 		let host = (port == "") ? hostname : "\(hostname):\(port)"
 		let query = url.query ?? ""
 		let fragment = url.fragment ?? ""
+		/// If the path has a trailing slash, it is stripped. https://developer.apple.com/documentation/foundation/nsurl/1408809-path
+		let strippedPath = url.path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? url.path
+		let pathname = (strippedPath != "/" && url.hasDirectoryPath) ? "\(strippedPath)/" : strippedPath
 		return [
 			"hash": fragment == "" ? "" : "#\(fragment)",
 			"host": host,
@@ -86,7 +89,7 @@ func jsLikeURL(_ urlString: String, baseString: String? = nil) -> [String: Strin
 			// "href": url.absoluteString,
 			"origin": "\(scheme)://\(host)",
 			"password": url.password ?? "",
-			"pathname": url.path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? url.path,
+			"pathname": pathname,
 			"port": port,
 			"protocol": "\(scheme):",
 			"search": query == "" ? "" : "?\(query)",
