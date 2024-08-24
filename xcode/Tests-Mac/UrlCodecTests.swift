@@ -149,6 +149,20 @@ final class UrlCodecTests: XCTestCase {
 			"search": "",
 			"username": ""
 		]))
+		
+		XCTAssert(check("http://host.test/path//", [
+			"hash": "",
+			"host": "host.test",
+			"hostname": "host.test",
+			// "href": "http://host.test/path//",
+			"origin": "http://host.test",
+			"password": "",
+			"pathname": "/path//",
+			"port": "",
+			"protocol": "http:",
+			"search": "",
+			"username": ""
+		]))
 
 		XCTAssert(check("http://host.test/", [
 			"hash": "",
