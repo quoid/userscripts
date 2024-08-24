@@ -124,59 +124,160 @@ class UserscriptsTests: XCTestCase {
 	}
 
 	func testMatching() throws {
+		/// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns#examples
 		let patternDict = [
+			"<all_urls>": [
+				"http://example.org/",
+				"https://a.org/some/path/"
+			],
 			"*://*/*": [
-				"https://www.bing.com/",
-				"https://example.org/foo/bar.html",
+				"http://example.org/",
 				"https://a.org/some/path/",
-				"https://☁️.com/"
+				"https://www.example.com/",
+				"https://example.org/foo/bar.html",
+				"https://☁️.com/",
+				"https://🙂.☁️/",
 			],
 			"*://*.mozilla.org/*": [
 				"http://mozilla.org/",
 				"https://mozilla.org/",
-				"https://b.mozilla.org/path/"
+				"http://a.mozilla.org/",
+				"http://a.b.mozilla.org/",
+				"https://b.mozilla.org/path/",
+			],
+			"*://mozilla.org/": [
+				"http://mozilla.org/",
+				"https://mozilla.org/",
+			],
+			"https://*/path": [
+				"https://mozilla.org/path",
+				"https://a.mozilla.org/path",
+				"https://something.com/path",
+			],
+			"https://*/path/": [
+				"https://mozilla.org/path/",
+				"https://a.mozilla.org/path/",
+				"https://something.com/path/",
+			],
+			"https://mozilla.org/*": [
+				"https://mozilla.org/",
+				"https://mozilla.org/path",
+				"https://mozilla.org/another",
+				"https://mozilla.org/path/to/doc",
+				"https://mozilla.org/path/to/doc?foo=1",
+			],
+			"https://mozilla.org/a/b/c/": [
+				"https://mozilla.org/a/b/c/",
+				"https://mozilla.org/a/b/c/#section1",
+			],
+			"https://mozilla.org/*/b/*/": [
+				"https://mozilla.org/a/b/c/",
+				"https://mozilla.org/d/b/f/",
+				"https://mozilla.org/a/b/c/d/",
+				"https://mozilla.org/a/b/c/d/#section1",
+				"https://mozilla.org/a/b/c/d/?foo=/",
+				"https://mozilla.org/a?foo=21314&bar=/b/&extra=c/",
 			],
 			"*://www.google.com/*": [
 				"https://www.google.com/://aa",
 				"https://www.google.com/preferences?prev=https://www.google.com/",
 				"https://www.google.com/preferences?prev=",
-				"https://www.google.com/"
+				"https://www.google.com/",
 			],
 			"*://localhost/*": [
 				"http://localhost:8000/",
-				"https://localhost:3000/foo.html"
+				"https://localhost:3000/foo.html",
 			],
 			"http://127.0.0.1/*": [
 				"http://127.0.0.1/",
-				"http://127.0.0.1/foo/bar.html"
+				"http://127.0.0.1/foo/bar.html",
+				"http://127.0.0.1/?bar=1",
+				"http://127.0.0.1/foo?bar=1",
 			],
 			"*://*.example.com/*?a=1*": [
 				"http://example.com/?a=1",
-				"https://www.example.com/index?a=1&b=2"
-			]
+				"https://www.example.com/index?a=1&b=2",
+			],
+			"*://*.example.com/path/": [
+				"http://example.com/path/",
+				"http://a.example.com/path/",
+				"https://example.com/path/",
+				"https://a.b.example.com/path/",
+				"https://☁️.example.com/path/",
+			],
+			"*://*.example.com/path/*": [
+				"https://example.com/path/",
+				"https://example.com/path/foo",
+				"https://example.com/path/foo?bar",
+				"https://example.com/path/?foo=bar",
+				"https://example.com/path/☁️?☁️=🙂",
+			],
 		]
 		let patternDictFails = [
+			"*://*/*": [
+				"ftp://ftp.example.org/", // unmatched scheme)
+				"file:///a/", // unmatched scheme
+			],
+			"*://*.mozilla.org/*": [
+				"ftp://mozilla.org/", // unmatched scheme
+				"http://mozilla.com/", // unmatched host
+				"http://firefox.org/", // unmatched host
+			],
+			"*://mozilla.org/": [
+				"ftp://mozilla.org/", // unmatched scheme
+				"http://a.mozilla.org/", // unmatched host
+				"http://mozilla.org/a", // unmatched path
+			],
+			"https://*/path": [
+				"http://mozilla.org/path", // unmatched scheme
+				"https://mozilla.org/path/", // unmatched path
+				"https://mozilla.org/a", // unmatched path
+				"https://mozilla.org/", // unmatched path
+				"https://mozilla.org/path?foo=1", // unmatched path due to URL query string
+			],
+			"https://*/path/": [
+				"http://mozilla.org/path/", // unmatched scheme
+				"https://mozilla.org/path", // unmatched path
+				"https://mozilla.org/a", // unmatched path
+				"https://mozilla.org/", // unmatched path
+				"https://mozilla.org/path/?foo=1", // unmatched path due to URL query string
+			],
+			"https://mozilla.org/*": [
+				"http://mozilla.org/path", // unmatched scheme
+				"https://mozilla.com/path", // unmatched host
+			],
+			"https://mozilla.org/*/b/*/": [
+				"https://mozilla.org/b/*/", // unmatched path
+				"https://mozilla.org/a/b/", // unmatched path
+				"https://mozilla.org/a/b/c/d/?foo=bar", // unmatched path due to URL query string
+			],
 			"https://www.example.com/*": [
 				"file://www.example.com/",
 				"ftp://www.example.com/",
 				"ws://www.example.com/",
-				"http://www.example.com/"
+				"http://www.example.com/",
 			],
 			"http://www.example.com/index.html": [
 				"http://www.example.com/",
-				"https://www.example.com/index.html"
+				"https://www.example.com/index.html",
 			],
 			"*://localhost/*": [
 				"https://localhost.com/",
-				"ftp://localhost:8080/"
+				"ftp://localhost:8080/",
 			],
 			"https://www.example*/*": [
-				"https://www.example.com/"
+				"https://www.example.com/",
 			],
 			"*://*.example.com/*?a=1*": [
 				"http://example.com/",
-				"https://www.example.com/?a=2"
-			]
+				"https://www.example.com/?a=2",
+			],
+			"*://*.example.com/foo/": [
+				"https://example.com/foo",
+				"https://example.com/foo?bar",
+				"https://example.com/foo/bar",
+				"https://example.com/foo/?bar",
+			],
 		]
 		for (pattern, urls) in patternDict {
 			for url in urls {
