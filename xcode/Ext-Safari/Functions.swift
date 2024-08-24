@@ -1047,7 +1047,7 @@ func match(_ url: String, _ matchPattern: String) -> Bool {
 	let partsPatternReg = try! NSRegularExpression(pattern: partsPattern, options: .caseInsensitive)
 	let range = NSMakeRange(0, matchPattern.utf16.count)
 	guard let parts = partsPatternReg.firstMatch(in: matchPattern, options: [], range: range) else {
-		logger?.error("\(#function, privacy: .public) - malformed regex match pattern")
+		logger?.error("\(#function, privacy: .public) - malformed regex match pattern - \(matchPattern, privacy: .public)")
 		return false
 	}
 	// ensure url protocol matches pattern protocol
