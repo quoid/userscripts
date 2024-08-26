@@ -256,7 +256,7 @@ Userscripts currently supports the following api methods. All methods are asynch
     - `user: String` - optional
     - `password: String` - optional
     - `headers: Object` - optional
-    - `overrideMimeTyp: String` - optional
+    - `overrideMimeType: String` - optional
     - `timeout: Int` - optional
     - `binary: Bool` - optional
     - `data: String` - optional
