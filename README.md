@@ -327,16 +327,11 @@ If you encounter a problem while using this app/extension or are in need of some
 
 ## Contributing
 
-Code level contributions are welcome. _I prefer to collaborate directly with contributors rather than receiving spontaneous pull requests_. If you feel you can improve the project in some way, please reach out to me by email or by opening an issue with your improvement/feature request.
+Code level contributions please refer to [contributing.md](docs/contributing.md)
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
 
-Notes:
-
-- use [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)
-- under most circumstances, you should fork the most current version of the `develop` branch for your contributions
-
-**Please ensure your contributions align with the project's license before committing anything.**
+Participating and interacting with any existing [`Issues`](https://github.com/quoid/userscripts/issues) or [`Discussions`](https://github.com/quoid/userscripts/discussions) would be a great help to the project and open source communities. Thank you for your contributions.
 
 ## Support
 

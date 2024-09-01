@@ -1,5 +1,15 @@
 # Welcome to Userscripts contributing guide
 
+### Please note: the project is currently temporarily suspended from receiving direct code contributions.
+
+Please do not submit any new pull requests, they will be close immediately.
+
+If you have any ideas and suggestions, please submit them to us through [`Issues`](https://github.com/quoid/userscripts/issues) or [`Discussions`](https://github.com/quoid/userscripts/discussions).
+
+We apologize for the inconvenience and thank you for your understanding.
+
+### The following is the original guide for reference only.
+
 Thank you for investing your time in contributing to this open source project!
 
 We hope this guide will helps you understand how to contribute to this project.
@@ -10,7 +20,9 @@ For development and build environments please refer to [development guide](dev.m
 > Portions of this guide are outdated. Some processes are still being tweaked and optimized, we will update them in due course.
 
 > [!IMPORTANT]
-> Any pull requests must first go through code formatting and linters, otherwise you will fail the CI check. Refer to the `scripts` in [`package.json`](../package.json)
+> Please ensure your contributions align with the project's license before committing anything.
+>
+> Any pull requests must first go through code formatting and linters, otherwise you will fail the CI check. (Refer to the `scripts` in [`package.json`](../package.json))
 
 # Branches
 
