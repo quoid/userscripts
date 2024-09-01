@@ -331,7 +331,7 @@ Code level contributions please refer to [contributing.md](docs/contributing.md)
 
 Further, any issue marked "help wanted" is actively seeking assistance. Please respond to those issues with feedback, guidance or offers of coding assistance.
 
-Participating and interacting with any existing [`Issues`](https://github.com/quoid/userscripts/issues) or [`Discussions`](https://github.com/quoid/userscripts/discussions) would be a great help to the project and open source communities and thank you for your contribution.
+Participating and interacting with any existing [`Issues`](https://github.com/quoid/userscripts/issues) or [`Discussions`](https://github.com/quoid/userscripts/discussions) would be a great help to the project and open source communities. Thank you for your contributions.
 
 ## Support
 
