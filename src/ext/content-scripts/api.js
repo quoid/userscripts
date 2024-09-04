@@ -143,6 +143,28 @@ function xhr(details) {
 				if (["", "text"].includes(r.responseType)) {
 					r.responseText = r.response;
 				}
+				/**
+				 * only include responseXML when needed
+				 * NOTE: Only add implementation at this time, not enable, to avoid
+				 * unnecessary calculations, and this legacy default behavior is not
+				 * recommended, users should explicitly use `responseType: "document"`
+				 * to obtain it.
+				if (r.responseType === "") {
+					const mimeTypes = [
+						"text/xml",
+						"application/xml",
+						"application/xhtml+xml",
+						"image/svg+xml",
+					];
+					for (const mimeType of mimeTypes) {
+						if (r.contentType.includes(mimeType)) {
+							const parser = new DOMParser();
+							r.responseXML = parser.parseFromString(r.response, "text/xml");
+							break;
+						}
+					}
+				}
+				 */
 				// only process when xhr is complete and data exist
 				if (r.readyState === 4 && r.response !== null) {
 					if (r.responseType === "arraybuffer") {
