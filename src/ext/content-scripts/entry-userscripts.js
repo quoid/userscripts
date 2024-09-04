@@ -161,6 +161,7 @@ async function injection() {
 			scriptHandler: data.scriptHandler,
 			scriptHandlerVersion: data.scriptHandlerVersion,
 			scriptMetaStr: userscript.scriptMetaStr,
+			version: data.scriptHandlerVersion,
 		};
 		// add GM_info
 		userscript.apis.GM_info = userscript.apis.GM.info;
