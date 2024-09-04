@@ -145,22 +145,25 @@ function xhr(details) {
 						// arraybuffer responses had their data converted in background
 						// convert it back to arraybuffer
 						try {
-							const buffer = new Uint8Array(r.response).buffer;
-							r.response = buffer;
+							r.response = new Uint8Array(r.response).buffer;
 						} catch (err) {
 							console.error("error parsing xhr arraybuffer", err);
 						}
 					}
-					if (r.responseType === "blob" && r.response.data) {
+					if (r.responseType === "blob") {
 						// blob responses had their data converted in background
 						// convert it back to blob
-						const resp = await fetch(r.response.data);
-						const b = await resp.blob();
-						r.response = b;
+						try {
+							const typedArray = new Uint8Array(r.response);
+							const type = r.contentType ?? "";
+							r.response = new Blob([typedArray], { type });
+						} catch (err) {
+							console.error("error parsing xhr blob", err);
+						}
 					}
 					if (r.responseType === "document") {
 						// document responses had their data converted in background
-						// convert it back to blob
+						// convert it back to document
 						try {
 							const parser = new DOMParser();
 							const mimeType = r.contentType.includes("text/html")
