@@ -18,14 +18,6 @@ function userscriptSort(a, b) {
 	return Number(a.scriptObject.weight) < Number(b.scriptObject.weight);
 }
 
-async function readAsDataURL(blob) {
-	return new Promise((resolve) => {
-		const reader = new FileReader();
-		reader.readAsDataURL(blob);
-		reader.onloadend = () => resolve(reader.result); // base64data
-	});
-}
-
 async function getPlatform() {
 	let platform = localStorage.getItem("platform");
 	if (!platform) {
@@ -448,19 +440,12 @@ async function handleMessage(message, sender) {
 						x.responseText = xhr.responseText;
 					}
 					// only process when xhr is complete and data exist
-					if (xhr.readyState === 4 && xhr.response !== null) {
+					if (xhr.readyState === xhr.DONE && xhr.response !== null) {
 						// need to convert arraybuffer data to postMessage
 						if (xhr.responseType === "arraybuffer") {
-							const arr = Array.from(new Uint8Array(xhr.response));
-							x.response = arr;
-						}
-						// need to convert blob data to postMessage
-						if (xhr.responseType === "blob") {
-							const base64data = await readAsDataURL(xhr.response);
-							x.response = {
-								data: base64data,
-								type: xhr.responseType,
-							};
+							/** @type {ArrayBuffer} */
+							const buffer = xhr.response;
+							x.response = Array.from(new Uint8Array(buffer));
 						}
 					}
 					port.postMessage({ name: e, event, response: x });
@@ -468,6 +453,8 @@ async function handleMessage(message, sender) {
 			}
 			xhr.open(method, details.url, true, user, password);
 			xhr.responseType = details.responseType;
+			// transfer to content script via arraybuffer and then parse to blob
+			if (xhr.responseType === "blob") xhr.responseType = "arraybuffer";
 			// transfer to content script via text and then parse to document
 			if (xhr.responseType === "document") xhr.responseType = "text";
 			if (details.headers) {
