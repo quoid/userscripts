@@ -449,6 +449,8 @@ async function handleMessage(message, sender) {
 			}
 			xhr.open(method, details.url, true, user, password);
 			xhr.responseType = details.responseType;
+			// avoid unexpected behavior of legacy defaults such as parsing XML
+			if (xhr.responseType === "") xhr.responseType = "text";
 			// transfer to content script via arraybuffer and then parse to blob
 			if (xhr.responseType === "blob") xhr.responseType = "arraybuffer";
 			// transfer to content script via text and then parse to document
