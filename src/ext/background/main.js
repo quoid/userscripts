@@ -432,6 +432,7 @@ async function handleMessage(message, sender) {
 					// can not send xhr through postMessage
 					// construct new object to be sent as "response"
 					const x = {
+						contentType: undefined, // non-standard
 						readyState: xhr.readyState,
 						response: xhr.response,
 						responseHeaders: xhr.getAllResponseHeaders(),
@@ -442,6 +443,10 @@ async function handleMessage(message, sender) {
 						timeout: xhr.timeout,
 						withCredentials: xhr.withCredentials,
 					};
+					// get content-type when headers received
+					if (xhr.readyState >= xhr.HEADERS_RECEIVED) {
+						x.contentType = xhr.getResponseHeader("Content-Type");
+					}
 					// only include responseText when needed
 					if (["", "text"].indexOf(xhr.responseType) !== -1) {
 						x.responseText = xhr.responseText;
