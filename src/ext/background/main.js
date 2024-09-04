@@ -435,10 +435,6 @@ async function handleMessage(message, sender) {
 					if (xhr.readyState >= xhr.HEADERS_RECEIVED) {
 						x.contentType = xhr.getResponseHeader("Content-Type");
 					}
-					// only include responseText when needed
-					if (["", "text"].indexOf(xhr.responseType) !== -1) {
-						x.responseText = xhr.responseText;
-					}
 					// only process when xhr is complete and data exist
 					if (xhr.readyState === xhr.DONE && xhr.response !== null) {
 						// need to convert arraybuffer data to postMessage
