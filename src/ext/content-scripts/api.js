@@ -139,6 +139,10 @@ function xhr(details) {
 			) {
 				// process xhr response
 				const r = msg.response;
+				// only include responseText when needed
+				if (["", "text"].includes(r.responseType)) {
+					r.responseText = r.response;
+				}
 				// only process when xhr is complete and data exist
 				if (r.readyState === 4 && r.response !== null) {
 					if (r.responseType === "arraybuffer") {
