@@ -150,12 +150,27 @@ function xhr(details) {
 						} catch (err) {
 							console.error("error parsing xhr arraybuffer", err);
 						}
-					} else if (r.responseType === "blob" && r.response.data) {
+					}
+					if (r.responseType === "blob" && r.response.data) {
 						// blob responses had their data converted in background
 						// convert it back to blob
 						const resp = await fetch(r.response.data);
 						const b = await resp.blob();
 						r.response = b;
+					}
+					if (r.responseType === "document") {
+						// document responses had their data converted in background
+						// convert it back to blob
+						try {
+							const parser = new DOMParser();
+							const mimeType = r.contentType.includes("text/html")
+								? "text/html"
+								: "text/xml";
+							r.response = parser.parseFromString(r.response, mimeType);
+							r.responseXML = r.response;
+						} catch (err) {
+							console.error("error parsing xhr document", err);
+						}
 					}
 				}
 				// call userscript method

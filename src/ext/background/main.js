@@ -466,7 +466,9 @@ async function handleMessage(message, sender) {
 				};
 			}
 			xhr.open(method, details.url, true, user, password);
-			xhr.responseType = details.responseType || "";
+			xhr.responseType = details.responseType;
+			// transfer to content script via text and then parse to document
+			if (xhr.responseType === "document") xhr.responseType = "text";
 			if (details.headers) {
 				for (const key in details.headers) {
 					if (!key.startsWith("Proxy-") && !key.startsWith("Sec-")) {
