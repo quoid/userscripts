@@ -417,15 +417,11 @@ async function handleMessage(message, sender) {
 			const user = details.user || null;
 			const password = details.password || null;
 			let body = details.data || null;
+			// deprecate once body supports more data types
+			// the `binary` key will no longer needed
 			if (typeof body === "string" && details.binary) {
-				const len = body.length;
-				const arr = new Uint8Array(len);
-				for (let i = 0; i < len; i++) {
-					arr[i] = body.charCodeAt(i);
-				}
-				body = new Blob([arr], { type: "text/plain" });
+				body = new TextEncoder().encode(body);
 			}
-
 			// xhr instances automatically filter out unexpected user values
 			xhr.timeout = details.timeout;
 			xhr.responseType = details.responseType;
