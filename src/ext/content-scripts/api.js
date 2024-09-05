@@ -129,7 +129,10 @@ function xhr(details) {
 	const response = {
 		abort: () => console.error("xhr has not yet been initialized"),
 	};
-	// port listener, most of the messaging logic goes here
+	/**
+	 * port listener, most of the messaging logic goes here
+	 * @type {Parameters<typeof browser.runtime.onConnect.addListener>[0]}
+	 */
 	const listener = (port) => {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
@@ -167,7 +170,7 @@ function xhr(details) {
 				 */
 				// only process when xhr is complete and data exist
 				if (r.readyState === 4 && r.response !== null) {
-					if (r.responseType === "arraybuffer") {
+					if (r.responseType === "arraybuffer" && Array.isArray(r.response)) {
 						// arraybuffer responses had their data converted in background
 						// convert it back to arraybuffer
 						try {
@@ -176,7 +179,7 @@ function xhr(details) {
 							console.error("error parsing xhr arraybuffer", err);
 						}
 					}
-					if (r.responseType === "blob") {
+					if (r.responseType === "blob" && Array.isArray(r.response)) {
 						// blob responses had their data converted in background
 						// convert it back to blob
 						try {
@@ -187,7 +190,7 @@ function xhr(details) {
 							console.error("error parsing xhr blob", err);
 						}
 					}
-					if (r.responseType === "document") {
+					if (r.responseType === "document" && typeof r.response === "string") {
 						// document responses had their data converted in background
 						// convert it back to document
 						try {
@@ -211,7 +214,6 @@ function xhr(details) {
 				port.postMessage({ name: "DISCONNECT" });
 			}
 		});
-
 		// handle port disconnect and clean tasks
 		port.onDisconnect.addListener((p) => {
 			if (p?.error) {

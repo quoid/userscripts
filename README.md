@@ -280,7 +280,6 @@ Userscripts currently supports the following api methods. All methods are asynch
       - `status`
       - `statusText`
       - `timeout`
-      - `withCredentials`
       - `responseText` (when `responseType` is `text`)
   - returns an object with a single property, `abort`, which is a `Function`
     - usage: `const foo = GM.xmlHttpRequest({...});` ... `foo.abort();` to abort the request
