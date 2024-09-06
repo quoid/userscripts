@@ -129,7 +129,10 @@ function xhr(details) {
 	const response = {
 		abort: () => console.error("xhr has not yet been initialized"),
 	};
-	// port listener, most of the messaging logic goes here
+	/**
+	 * port listener, most of the messaging logic goes here
+	 * @type {Parameters<typeof browser.runtime.onConnect.addListener>[0]}
+	 */
 	const listener = (port) => {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
@@ -139,23 +142,67 @@ function xhr(details) {
 			) {
 				// process xhr response
 				const r = msg.response;
+				// only include responseText when needed
+				if (["", "text"].includes(r.responseType)) {
+					r.responseText = r.response;
+				}
+				/**
+				 * only include responseXML when needed
+				 * NOTE: Only add implementation at this time, not enable, to avoid
+				 * unnecessary calculations, and this legacy default behavior is not
+				 * recommended, users should explicitly use `responseType: "document"`
+				 * to obtain it.
+				if (r.responseType === "") {
+					const mimeTypes = [
+						"text/xml",
+						"application/xml",
+						"application/xhtml+xml",
+						"image/svg+xml",
+					];
+					for (const mimeType of mimeTypes) {
+						if (r.contentType.includes(mimeType)) {
+							const parser = new DOMParser();
+							r.responseXML = parser.parseFromString(r.response, "text/xml");
+							break;
+						}
+					}
+				}
+				 */
 				// only process when xhr is complete and data exist
 				if (r.readyState === 4 && r.response !== null) {
-					if (r.responseType === "arraybuffer") {
+					if (r.responseType === "arraybuffer" && Array.isArray(r.response)) {
 						// arraybuffer responses had their data converted in background
 						// convert it back to arraybuffer
 						try {
-							const buffer = new Uint8Array(r.response).buffer;
-							r.response = buffer;
+							r.response = new Uint8Array(r.response).buffer;
 						} catch (err) {
 							console.error("error parsing xhr arraybuffer", err);
 						}
-					} else if (r.responseType === "blob" && r.response.data) {
+					}
+					if (r.responseType === "blob" && Array.isArray(r.response)) {
 						// blob responses had their data converted in background
 						// convert it back to blob
-						const resp = await fetch(r.response.data);
-						const b = await resp.blob();
-						r.response = b;
+						try {
+							const typedArray = new Uint8Array(r.response);
+							const type = r.contentType ?? "";
+							r.response = new Blob([typedArray], { type });
+						} catch (err) {
+							console.error("error parsing xhr blob", err);
+						}
+					}
+					if (r.responseType === "document" && typeof r.response === "string") {
+						// document responses had their data converted in background
+						// convert it back to document
+						try {
+							const parser = new DOMParser();
+							const mimeType = r.contentType.includes("text/html")
+								? "text/html"
+								: "text/xml";
+							r.response = parser.parseFromString(r.response, mimeType);
+							r.responseXML = r.response;
+						} catch (err) {
+							console.error("error parsing xhr document", err);
+						}
 					}
 				}
 				// call userscript method
@@ -167,7 +214,6 @@ function xhr(details) {
 				port.postMessage({ name: "DISCONNECT" });
 			}
 		});
-
 		// handle port disconnect and clean tasks
 		port.onDisconnect.addListener((p) => {
 			if (p?.error) {
