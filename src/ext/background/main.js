@@ -416,7 +416,11 @@ async function handleMessage(message, sender) {
 			// deprecate once body supports more data types
 			// the `binary` key will no longer needed
 			if (typeof body === "string" && details.binary) {
-				body = new TextEncoder().encode(body);
+				const arr = new Uint8Array(body.length);
+				for (let i = 0; i < body.length; i++) {
+					arr[i] = body.charCodeAt(i);
+				}
+				body = arr;
 			}
 			// xhr instances automatically filter out unexpected user values
 			xhr.timeout = details.timeout;
