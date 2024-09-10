@@ -269,6 +269,13 @@ async function xhr(details, control, promise) {
 	if (!details.url) return console.error("xhr details missing url key");
 	// define control method, will be replaced after port is established
 	control.abort = () => console.error("xhr has not yet been initialized");
+	// depreciation notice
+	if (details.binary) {
+		console.warn(
+			"Please make sure your xhr `data` is a binary-string since you have set the `binary` true, however this legacy format is no longer recommended.",
+			"The `binary` key is deprecated and will be removed in the future, use binary data objects such as `Blob`, `ArrayBuffer`, `TypedArray`, etc. instead.",
+		);
+	}
 	// can not send details (func, blob, etc.) through message
 	// construct a new processed object send to background page
 	const detailsParsed = {
