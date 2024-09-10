@@ -168,12 +168,18 @@ Userscripts Safari currently supports the following userscript metadata:
 - `@noframes`
   - this key takes no value
   - prevents code from being injected into nested frames
+- `@grant`
+  - Imperative controls which special [`APIs`](#api) (if any) your script uses, one on each `@grant` line, only those API methods will be provided.
+  - If you don’t write `@grant`, value `none` will be assumed.
+  - If you specify `none` and something else, `none` takes precedence.
 
 **All userscripts need at least 1 `@match` or `@include` to run!**
 
 ## API
 
 Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. Users must `@grant` these methods in order to use them in a userscript. When using API methods, it's only possible to inject into the content script scope due to security concerns.
+
+For API type definitions, please refer to: [`types.d.ts`](https://github.com/userscriptsup/testscripts/blob/363b322208a6733c7e5f4b9d9705957889af6837/userscripts/types.d.ts)
 
 - `GM.addStyle(css)`
   - `css: String`
@@ -239,8 +245,8 @@ Userscripts currently supports the following api methods. All methods are asynch
     - `headers: Object` - optional
     - `overrideMimeTyp: String` - optional
     - `timeout: Int` - optional
-    - `binary: Bool` - optional
-    - `data: String` - optional
+    - `binary: Bool` - optional (Deprecated, use binary data objects such as `Blob`, `ArrayBuffer`, `TypedArray`, etc. instead.)
+    - `data: String | Blob | ArrayBuffer | TypedArray | DataView | FormData | URLSearchParams` - optional
     - `responseType: String` - optional
     - refer to [`XMLHttpRequests`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
   - event handlers:
@@ -262,10 +268,17 @@ Userscripts currently supports the following api methods. All methods are asynch
       - `statusText`
       - `timeout`
       - `responseText` (when `responseType` is `text`)
+  - returns a custom [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) contains an additional property `abort`, resolved with the response object.
+    - usage:
+      - `const xhr = GM.xmlHttpRequest({...});`
+      - `xhr.abort();` to abort the request
+      - `const response = await xhr;`
+    - or just:
+      - `const response = await GM.xmlHttpRequest({...});`
+- `GM_xmlhttpRequest(details)`
+  - Basically the same as `GM.xmlHttpRequest(details)`, except:
   - returns an object with a single property, `abort`, which is a `Function`
     - usage: `const foo = GM.xmlHttpRequest({...});` ... `foo.abort();` to abort the request
-- `GM_xmlhttpRequest(details)`
-  - an alias for `GM.xmlHttpRequest`, works exactly the same
 
 ## Scripts Directory
 
