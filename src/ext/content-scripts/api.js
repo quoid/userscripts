@@ -108,9 +108,17 @@ async function setClipboard(clipboardData, type) {
 	});
 }
 
-function xhr(details) {
+/**
+ * @param {Object} details
+ * @param {Object} control
+ * @param {{resolve: Function, reject: Function}=} promise
+ * @returns {Promise<void>}
+ */
+async function xhr(details, control, promise) {
 	if (details == null) return console.error("xhr invalid details arg");
 	if (!details.url) return console.error("xhr details missing url key");
+	// define control method, will be replaced after port is established
+	control.abort = () => console.error("xhr has not yet been initialized");
 	// generate random port name for single xhr
 	const xhrPortName = Math.random().toString(36).substring(1, 9);
 	// strip out functions from details
@@ -125,10 +133,6 @@ function xhr(details) {
 	for (const e of events) {
 		if (typeof details[e] === "function") detailsParsed[e] = true;
 	}
-	// define return method, will be populated after port is established
-	const response = {
-		abort: () => console.error("xhr has not yet been initialized"),
-	};
 	/**
 	 * port listener, most of the messaging logic goes here
 	 * @type {Parameters<typeof browser.runtime.onConnect.addListener>[0]}
@@ -209,8 +213,10 @@ function xhr(details) {
 				details[msg.name](msg.response);
 			}
 			// all messages received
-			// tell background it's safe to close port
-			if (msg.name === "onloadend") {
+			if (msg.handler === "onloadend") {
+				// resolving asynchronous xmlHttpRequest
+				promise && promise.resolve(msg.response);
+				// tell background it's safe to close port
 				port.postMessage({ name: "DISCONNECT" });
 			}
 		});
@@ -222,7 +228,7 @@ function xhr(details) {
 			browser.runtime.onConnect.removeListener(listener);
 		});
 		// fill the method returned to the user script
-		response.abort = () => port.postMessage({ name: "ABORT" });
+		control.abort = () => port.postMessage({ name: "ABORT" });
 	};
 	// wait for the background to establish a port connection
 	browser.runtime.onConnect.addListener(listener);
@@ -234,7 +240,21 @@ function xhr(details) {
 		events,
 	};
 	sendMessageProxy(message);
-	return response;
+}
+
+function xmlHttpRequest(details) {
+	let promise;
+	const control = new Promise((resolve, reject) => {
+		promise = { resolve, reject };
+	});
+	xhr(details, control, promise);
+	return control;
+}
+
+function GM_xmlhttpRequest(details) {
+	const control = {};
+	xhr(details, control);
+	return control;
 }
 
 export default {
@@ -251,6 +271,6 @@ export default {
 	// notification,
 	// registerMenuCommand,
 	// getResourceUrl,
-	xmlHttpRequest: xhr,
-	GM_xmlhttpRequest: xhr,
+	xmlHttpRequest,
+	GM_xmlhttpRequest,
 };
