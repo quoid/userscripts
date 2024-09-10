@@ -169,6 +169,96 @@ function xhrResponseProcessor(response) {
 }
 
 /**
+ * Process data into a transportable object
+ * @param {Parameters<XMLHttpRequest["send"]>[0]} data
+ * @returns {Promise<TypeExtMessages.XHRProcessedData>}
+ */
+async function xhrDataProcessor(data) {
+	if (typeof data === "undefined") return undefined;
+	if (typeof data === "string") {
+		return { data, type: "Text" };
+	}
+	if (data instanceof Document) {
+		if (data instanceof XMLDocument) {
+			try {
+				return {
+					data: new XMLSerializer().serializeToString(data),
+					type: "Document",
+					mime: data.contentType || "text/xml",
+				};
+			} catch (error) {
+				console.error(
+					"XML serialization failed, the data will be omitted",
+					error,
+				);
+			}
+		} else {
+			let html = data.documentElement.outerHTML;
+			if (data.doctype) {
+				html = `<!doctype ${data.doctype.name}>` + html;
+			}
+			return {
+				data: html,
+				type: "Document",
+				mime: data.contentType || "text/html",
+			};
+		}
+	}
+	if (data instanceof Blob) {
+		try {
+			const buffer = await data.arrayBuffer();
+			return {
+				data: Array.from(new Uint8Array(buffer)),
+				type: "Blob",
+				mime: data.type,
+			};
+		} catch (error) {
+			throw Error("Document serialization failed, the data will be omitted", {
+				cause: error,
+			});
+		}
+	}
+	if (data instanceof ArrayBuffer) {
+		return {
+			data: Array.from(new Uint8Array(data)),
+			type: "ArrayBuffer",
+		};
+	}
+	if (ArrayBuffer.isView(data)) {
+		return {
+			data: Array.from(new Uint8Array(data.buffer)),
+			type: "ArrayBufferView",
+		};
+	}
+	if (data instanceof FormData) {
+		/** @type {TypeExtMessages.XHRProcessedFormData} */
+		const entries = [];
+		for (const [k, v] of data.entries()) {
+			if (typeof v === "string") {
+				entries.push([k, v]);
+				continue;
+			} else {
+				const buffer = await v.arrayBuffer();
+				entries.push([
+					k,
+					{
+						data: Array.from(new Uint8Array(buffer)),
+						lastModified: v.lastModified,
+						name: v.name,
+						mime: v.type,
+					},
+				]);
+			}
+		}
+		return { data: entries, type: "FormData" };
+	}
+	if (data instanceof URLSearchParams) {
+		return { data: data.toString(), type: "URLSearchParams" };
+	}
+	throw Error("Unexpected data type, the data will be omitted");
+}
+
+/**
  * @param {Object} details
  * @param {Object} control
  * @param {{resolve: Function, reject: Function}=} promise
@@ -179,10 +269,33 @@ async function xhr(details, control, promise) {
 	if (!details.url) return console.error("xhr details missing url key");
 	// define control method, will be replaced after port is established
 	control.abort = () => console.error("xhr has not yet been initialized");
-	// generate random port name for single xhr
-	const xhrPortName = Math.random().toString(36).substring(1, 9);
-	// strip out functions from details
-	const detailsParsed = JSON.parse(JSON.stringify(details));
+	// can not send details (func, blob, etc.) through message
+	// construct a new processed object send to background page
+	const detailsParsed = {
+		binary: details.binary,
+		data: undefined,
+		headers: {},
+		method: details.method,
+		overrideMimeType: details.overrideMimeType,
+		password: details.password,
+		responseType: details.responseType,
+		timeout: details.timeout,
+		url: details.url,
+		user: details.user,
+		handlers: {},
+	};
+	// preprocess data key
+	try {
+		detailsParsed.data = await xhrDataProcessor(details.data);
+	} catch (error) {
+		console.error(error);
+	}
+	// preprocess headers key
+	if (typeof details.headers === "object") {
+		for (const [k, v] of Object.entries(details.headers)) {
+			detailsParsed.headers[k.toLowerCase()] = v;
+		}
+	}
 	// get all the "on" events from XMLHttpRequest object
 	for (const k in XMLHttpRequest.prototype) {
 		if (k.slice(0, 2) !== "on") continue;
@@ -192,6 +305,8 @@ async function xhr(details, control, promise) {
 			detailsParsed.handlers[k] = true;
 		}
 	}
+	// generate random port name for single xhr
+	const xhrPortName = Math.random().toString(36).substring(1, 9);
 	/**
 	 * port listener, most of the messaging logic goes here
 	 * @type {Parameters<typeof browser.runtime.onConnect.addListener>[0]}
@@ -200,6 +315,7 @@ async function xhr(details, control, promise) {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
 			if (
+				msg.response &&
 				detailsParsed.handlers[msg.handler] &&
 				typeof details[msg.handler] === "function"
 			) {
