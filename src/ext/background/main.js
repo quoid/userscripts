@@ -410,18 +410,75 @@ async function handleMessage(message, sender) {
 				});
 				// parse details and set up for xhr instance
 				const details = message.details;
+				/** @type {Parameters<XMLHttpRequest["open"]>[0]} */
 				const method = details.method || "GET";
+				/** @type {Parameters<XMLHttpRequest["open"]>[1]} */
+				const url = details.url;
+				/** @type {Parameters<XMLHttpRequest["open"]>[3]} */
 				const user = details.user || null;
+				/** @type {Parameters<XMLHttpRequest["open"]>[4]} */
 				const password = details.password || null;
-				let body = details.data || null;
-				// deprecate once body supports more data types
-				// the `binary` key will no longer needed
-				if (typeof body === "string" && details.binary) {
-					const arr = new Uint8Array(body.length);
-					for (let i = 0; i < body.length; i++) {
-						arr[i] = body.charCodeAt(i);
+				/** @type {Parameters<XMLHttpRequest["send"]>[0]} */
+				let body = null;
+				if (typeof details.data === "object") {
+					/** @type {TypeExtMessages.XHRProcessedData} */
+					const data = details.data;
+					if (typeof data.data === "string") {
+						if (data.type === "Text") {
+							// deprecate once body supports more data types
+							// the `binary` key will no longer needed
+							if (details.binary) {
+								const binaryString = data.data;
+								const view = new Uint8Array(binaryString.length);
+								for (let i = 0; i < binaryString.length; i++) {
+									view[i] = binaryString.charCodeAt(i);
+								}
+								body = view;
+							} else {
+								body = data.data;
+							}
+						}
+						if (data.type === "Document") {
+							body = data.data;
+							if (!("content-type" in details.headers)) {
+								details.headers["content-type"] = data.mime;
+							}
+						}
+						if (data.type === "URLSearchParams") {
+							body = new URLSearchParams(data.data);
+						}
 					}
-					body = arr;
+					if (Array.isArray(data.data)) {
+						if (
+							data.type === "ArrayBuffer" ||
+							data.type === "ArrayBufferView"
+						) {
+							body = new Uint8Array(data.data);
+						}
+						if (data.type === "Blob") {
+							body = new Uint8Array(data.data);
+							if (!("content-type" in details.headers)) {
+								details.headers["content-type"] = data.mime;
+							}
+						}
+						if (data.type === "FormData") {
+							body = new FormData();
+							for (const [k, v] of data.data) {
+								if (typeof v === "string") {
+									body.append(k, v);
+								} else {
+									const view = new Uint8Array(v.data);
+									body.append(
+										k,
+										new File([view], v.name, {
+											type: v.mime,
+											lastModified: v.lastModified,
+										}),
+									);
+								}
+							}
+						}
+					}
 				}
 				// xhr instances automatically filter out unexpected user values
 				xhr.timeout = details.timeout;
@@ -481,7 +538,7 @@ async function handleMessage(message, sender) {
 				if (details.overrideMimeType) {
 					xhr.overrideMimeType(details.overrideMimeType);
 				}
-				xhr.open(method, details.url, true, user, password);
+				xhr.open(method, url, true, user, password);
 				// must set headers after `xhr.open()`, but before `xhr.send()`
 				if (typeof details.headers === "object") {
 					for (const [key, val] of Object.entries(details.headers)) {
