@@ -108,6 +108,66 @@ async function setClipboard(clipboardData, type) {
 	});
 }
 
+function xhrResponseProcessor(response) {
+	const res = response;
+	/**
+	 * only include responseXML when needed
+	 * NOTE: Only add implementation at this time, not enable, to avoid
+	 * unnecessary calculations, and this legacy default behavior is not
+	 * recommended, users should explicitly use `responseType: "document"`
+	 * to obtain it.
+	if (res.responseType === "" && typeof res.response === "string") {
+		const mimeTypes = [
+			"text/xml",
+			"application/xml",
+			"application/xhtml+xml",
+			"image/svg+xml",
+		];
+		for (const mimeType of mimeTypes) {
+			if (res.contentType.includes(mimeType)) {
+				const parser = new DOMParser();
+				res.responseXML = parser.parseFromString(res.response, "text/xml");
+				break;
+			}
+		}
+	}
+	*/
+	if (res.responseType === "arraybuffer" && Array.isArray(res.response)) {
+		// arraybuffer responses had their data converted in background
+		// convert it back to arraybuffer
+		try {
+			res.response = new Uint8Array(res.response).buffer;
+		} catch (err) {
+			console.error("error parsing xhr arraybuffer", err);
+		}
+	}
+	if (res.responseType === "blob" && Array.isArray(res.response)) {
+		// blob responses had their data converted in background
+		// convert it back to blob
+		try {
+			const typedArray = new Uint8Array(res.response);
+			const type = res.contentType ?? "";
+			res.response = new Blob([typedArray], { type });
+		} catch (err) {
+			console.error("error parsing xhr blob", err);
+		}
+	}
+	if (res.responseType === "document" && typeof res.response === "string") {
+		// document responses had their data converted in background
+		// convert it back to document
+		try {
+			const parser = new DOMParser();
+			const mimeType = res.contentType.includes("text/html")
+				? "text/html"
+				: "text/xml";
+			res.response = parser.parseFromString(res.response, mimeType);
+			res.responseXML = res.response;
+		} catch (err) {
+			console.error("error parsing xhr document", err);
+		}
+	}
+}
+
 /**
  * @param {Object} details
  * @param {Object} control
@@ -145,69 +205,14 @@ async function xhr(details, control, promise) {
 				typeof details[msg.name] === "function"
 			) {
 				// process xhr response
-				const r = msg.response;
+				const response = msg.response;
 				// only include responseText when needed
-				if (["", "text"].includes(r.responseType)) {
-					r.responseText = r.response;
+				if (["", "text"].includes(response.responseType)) {
+					response.responseText = response.response;
 				}
-				/**
-				 * only include responseXML when needed
-				 * NOTE: Only add implementation at this time, not enable, to avoid
-				 * unnecessary calculations, and this legacy default behavior is not
-				 * recommended, users should explicitly use `responseType: "document"`
-				 * to obtain it.
-				if (r.responseType === "") {
-					const mimeTypes = [
-						"text/xml",
-						"application/xml",
-						"application/xhtml+xml",
-						"image/svg+xml",
-					];
-					for (const mimeType of mimeTypes) {
-						if (r.contentType.includes(mimeType)) {
-							const parser = new DOMParser();
-							r.responseXML = parser.parseFromString(r.response, "text/xml");
-							break;
-						}
-					}
-				}
-				 */
 				// only process when xhr is complete and data exist
-				if (r.readyState === 4 && r.response !== null) {
-					if (r.responseType === "arraybuffer" && Array.isArray(r.response)) {
-						// arraybuffer responses had their data converted in background
-						// convert it back to arraybuffer
-						try {
-							r.response = new Uint8Array(r.response).buffer;
-						} catch (err) {
-							console.error("error parsing xhr arraybuffer", err);
-						}
-					}
-					if (r.responseType === "blob" && Array.isArray(r.response)) {
-						// blob responses had their data converted in background
-						// convert it back to blob
-						try {
-							const typedArray = new Uint8Array(r.response);
-							const type = r.contentType ?? "";
-							r.response = new Blob([typedArray], { type });
-						} catch (err) {
-							console.error("error parsing xhr blob", err);
-						}
-					}
-					if (r.responseType === "document" && typeof r.response === "string") {
-						// document responses had their data converted in background
-						// convert it back to document
-						try {
-							const parser = new DOMParser();
-							const mimeType = r.contentType.includes("text/html")
-								? "text/html"
-								: "text/xml";
-							r.response = parser.parseFromString(r.response, mimeType);
-							r.responseXML = r.response;
-						} catch (err) {
-							console.error("error parsing xhr document", err);
-						}
-					}
+				if (response.readyState === 4 && response.response !== null) {
+					xhrResponseProcessor(response);
 				}
 				// call userscript method
 				details[msg.name](msg.response);
