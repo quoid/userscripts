@@ -184,14 +184,13 @@ async function xhr(details, control, promise) {
 	// strip out functions from details
 	const detailsParsed = JSON.parse(JSON.stringify(details));
 	// get all the "on" events from XMLHttpRequest object
-	const events = [];
 	for (const k in XMLHttpRequest.prototype) {
-		if (k.slice(0, 2) === "on") events.push(k);
-	}
-	// check which functions are included in the original details object
-	// add a bool to indicate if event listeners should be attached
-	for (const e of events) {
-		if (typeof details[e] === "function") detailsParsed[e] = true;
+		if (k.slice(0, 2) !== "on") continue;
+		// check which handlers are included in the original details object
+		if (typeof details[k] === "function") {
+			// add a bool to indicate if event listeners should be attached
+			detailsParsed.handlers[k] = true;
+		}
 	}
 	/**
 	 * port listener, most of the messaging logic goes here
@@ -201,8 +200,8 @@ async function xhr(details, control, promise) {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
 			if (
-				events.includes(msg.name) &&
-				typeof details[msg.name] === "function"
+				detailsParsed.handlers[msg.handler] &&
+				typeof details[msg.handler] === "function"
 			) {
 				// process xhr response
 				const response = msg.response;
@@ -215,7 +214,7 @@ async function xhr(details, control, promise) {
 					xhrResponseProcessor(response);
 				}
 				// call userscript method
-				details[msg.name](msg.response);
+				details[msg.handler](response);
 			}
 			// all messages received
 			if (msg.handler === "onloadend") {
@@ -242,7 +241,6 @@ async function xhr(details, control, promise) {
 		name: "API_XHR",
 		details: detailsParsed,
 		xhrPortName,
-		events,
 	};
 	sendMessageProxy(message);
 }
