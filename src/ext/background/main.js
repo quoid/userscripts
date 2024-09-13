@@ -512,12 +512,22 @@ async function handleMessage(message, sender) {
 							statusText: xhr.statusText,
 							timeout: xhr.timeout,
 						};
+						// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response#value
+						if (xhr.readyState < xhr.DONE && xhr.responseType !== "text") {
+							response.response = null;
+						}
 						// get content-type when headers received
 						if (xhr.readyState >= xhr.HEADERS_RECEIVED) {
 							response.contentType = xhr.getResponseHeader("Content-Type");
 						}
 						// only process when xhr is complete and data exist
-						if (xhr.readyState === xhr.DONE && xhr.response !== null) {
+						// note the status of the last `progress` event in Safari is DONE/4
+						// exclude this event to avoid unnecessary processing and transmission
+						if (
+							xhr.readyState === xhr.DONE &&
+							xhr.response !== null &&
+							handler !== "onprogress"
+						) {
 							// need to convert arraybuffer data to postMessage
 							if (
 								xhr.responseType === "arraybuffer" &&
