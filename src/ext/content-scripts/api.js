@@ -303,14 +303,44 @@ async function xhr(details, control, promise) {
 			detailsParsed.headers[k.toLowerCase()] = v;
 		}
 	}
-	// get all the "on" events from XMLHttpRequest object
-	for (const k in XMLHttpRequest.prototype) {
-		if (k.slice(0, 2) !== "on") continue;
+	// preprocess handlers
+	const XHRHandlers = [
+		"onreadystatechange",
+		"onloadstart",
+		"onprogress",
+		"onabort",
+		"onerror",
+		"onload",
+		"ontimeout",
+		"onloadend",
+	];
+	for (const handler of XHRHandlers) {
 		// check which handlers are included in the original details object
-		if (typeof details[k] === "function") {
+		if (
+			handler in XMLHttpRequest.prototype &&
+			typeof details[handler] === "function"
+		) {
 			// add a bool to indicate if event listeners should be attached
-			detailsParsed.handlers[k] = true;
+			detailsParsed.handlers[handler] = true;
 		}
+	}
+	// resolving asynchronous xmlHttpRequest
+	if (promise) {
+		detailsParsed.handlers.onloadend = true;
+		const _onloadend = details.onloadend;
+		details.onloadend = (response) => {
+			promise.resolve(response);
+			if (typeof _onloadend === "function") _onloadend(response);
+		};
+	}
+	// make sure to listen to XHR.DONE events only once, to avoid processing
+	// and transmitting the same response data multiple times
+	if (detailsParsed.handlers.onreadystatechange) {
+		delete detailsParsed.handlers.onload;
+		delete detailsParsed.handlers.onloadend;
+	}
+	if (detailsParsed.handlers.onload) {
+		delete detailsParsed.handlers.onloadend;
 	}
 	// generate random port name for single xhr
 	const xhrPortName = Math.random().toString(36).substring(1, 9);
@@ -321,10 +351,11 @@ async function xhr(details, control, promise) {
 	const listener = (port) => {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
+			const handler = msg.handler;
 			if (
 				msg.response &&
-				detailsParsed.handlers[msg.handler] &&
-				typeof details[msg.handler] === "function"
+				detailsParsed.handlers[handler] &&
+				typeof details[handler] === "function"
 			) {
 				// process xhr response
 				const response = msg.response;
@@ -337,12 +368,25 @@ async function xhr(details, control, promise) {
 					xhrResponseProcessor(response);
 				}
 				// call userscript method
-				details[msg.handler](response);
+				details[handler](response);
+				// call the deleted XHR.DONE handlers above
+				if (response.readyState === 4) {
+					if (handler === "onreadystatechange") {
+						if (typeof details.onload === "function") {
+							details.onload(response);
+						}
+						if (typeof details.onloadend === "function") {
+							details.onloadend(response);
+						}
+					} else if (handler === "onload") {
+						if (typeof details.onloadend === "function") {
+							details.onloadend(response);
+						}
+					}
+				}
 			}
 			// all messages received
-			if (msg.handler === "onloadend") {
-				// resolving asynchronous xmlHttpRequest
-				promise && promise.resolve(msg.response);
+			if (handler === "onloadend") {
 				// tell background it's safe to close port
 				port.postMessage({ name: "DISCONNECT" });
 			}
