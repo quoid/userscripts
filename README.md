@@ -170,7 +170,7 @@ Userscripts Safari currently supports the following userscript metadata:
   - prevents code from being injected into nested frames
 - `@grant`
   - Imperative controls which special [`APIs`](#api) (if any) your script uses, one on each `@grant` line, only those API methods will be provided.
-  - If you don’t write `@grant`, value `none` will be assumed.
+  - If no `@grant` values are provided, `none` will be assumed.
   - If you specify `none` and something else, `none` takes precedence.
 
 **All userscripts need at least 1 `@match` or `@include` to run!**
