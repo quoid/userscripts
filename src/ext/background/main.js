@@ -409,6 +409,7 @@ async function handleMessage(message, sender) {
 					}
 				});
 				// parse details and set up for xhr instance
+				/** @type {TypeExtMessages.XHRTransportableDetails} */
 				const details = message.details;
 				/** @type {Parameters<XMLHttpRequest["open"]>[0]} */
 				const method = details.method || "GET";
@@ -492,11 +493,12 @@ async function handleMessage(message, sender) {
 				// transfer to content script via text and then parse to document
 				if (responseType === "document") xhr.responseType = "text";
 				// add required listeners and send result back to the content script
-				const handlers = details.handlers || {};
+				const handlers = details.hasHandlers || {};
 				for (const handler of Object.keys(handlers)) {
 					xhr[handler] = async () => {
 						// can not send xhr through postMessage
 						// construct new object to be sent as "response"
+						/** @type {TypeExtMessages.XHRTransportableResponse} */
 						const response = {
 							contentType: undefined, // non-standard
 							readyState: xhr.readyState,

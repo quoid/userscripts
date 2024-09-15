@@ -108,8 +108,13 @@ async function setClipboard(clipboardData, type) {
 	});
 }
 
-function xhrResponseProcessor(response) {
-	const res = response;
+/**
+ * Restore `response.response` to required `responseType`
+ * @param {TypeExtMessages.XHRTransportableResponse} msgResponse
+ * @param {TypeExtMessages.XHRResponse} response
+ */
+function xhrResponseProcessor(msgResponse, response) {
+	const res = msgResponse;
 	/**
 	 * only include responseXML when needed
 	 * NOTE: Only add implementation at this time, not enable, to avoid
@@ -136,7 +141,7 @@ function xhrResponseProcessor(response) {
 		// arraybuffer responses had their data converted in background
 		// convert it back to arraybuffer
 		try {
-			res.response = new Uint8Array(res.response).buffer;
+			response.response = new Uint8Array(res.response).buffer;
 		} catch (err) {
 			console.error("error parsing xhr arraybuffer", err);
 		}
@@ -147,7 +152,7 @@ function xhrResponseProcessor(response) {
 		try {
 			const typedArray = new Uint8Array(res.response);
 			const type = res.contentType ?? "";
-			res.response = new Blob([typedArray], { type });
+			response.response = new Blob([typedArray], { type });
 		} catch (err) {
 			console.error("error parsing xhr blob", err);
 		}
@@ -160,8 +165,8 @@ function xhrResponseProcessor(response) {
 			const mimeType = res.contentType.includes("text/html")
 				? "text/html"
 				: "text/xml";
-			res.response = parser.parseFromString(res.response, mimeType);
-			res.responseXML = res.response;
+			response.response = parser.parseFromString(res.response, mimeType);
+			response.responseXML = response.response;
 		} catch (err) {
 			console.error("error parsing xhr document", err);
 		}
@@ -278,18 +283,19 @@ async function xhr(details, control, promise) {
 	}
 	// can not send details (func, blob, etc.) through message
 	// construct a new processed object send to background page
+	/** @type {TypeExtMessages.XHRTransportableDetails} */
 	const detailsParsed = {
-		binary: details.binary,
+		binary: Boolean(details.binary),
 		data: undefined,
 		headers: {},
-		method: details.method,
-		overrideMimeType: details.overrideMimeType,
-		password: details.password,
+		method: String(details.method),
+		overrideMimeType: String(details.overrideMimeType),
+		password: String(details.password),
 		responseType: details.responseType,
-		timeout: details.timeout,
-		url: details.url,
-		user: details.user,
-		handlers: {},
+		timeout: Number(details.timeout),
+		url: String(details.url),
+		user: String(details.user),
+		hasHandlers: {},
 	};
 	// preprocess data key
 	try {
@@ -304,6 +310,14 @@ async function xhr(details, control, promise) {
 		}
 	}
 	// preprocess handlers
+	/**
+	 * Record the handlers existing in details to a new object
+	 * to avoid modifying the original object, and to prevent
+	 * the original object from being changed by user scripts
+	 * @type {TypeExtMessages.XHRHandlersObj}
+	 */
+	const handlers = {};
+	/** @type {TypeExtMessages.XHRHandlers} */
 	const XHRHandlers = [
 		"onreadystatechange",
 		"onloadstart",
@@ -321,26 +335,28 @@ async function xhr(details, control, promise) {
 			typeof details[handler] === "function"
 		) {
 			// add a bool to indicate if event listeners should be attached
-			detailsParsed.handlers[handler] = true;
+			detailsParsed.hasHandlers[handler] = true;
+			// record to the new object
+			handlers[handler] = details[handler];
 		}
 	}
 	// resolving asynchronous xmlHttpRequest
 	if (promise) {
-		detailsParsed.handlers.onloadend = true;
-		const _onloadend = details.onloadend;
-		details.onloadend = (response) => {
+		detailsParsed.hasHandlers.onloadend = true;
+		const _onloadend = handlers.onloadend;
+		handlers.onloadend = (response) => {
 			promise.resolve(response);
-			if (typeof _onloadend === "function") _onloadend(response);
+			_onloadend?.(response);
 		};
 	}
 	// make sure to listen to XHR.DONE events only once, to avoid processing
 	// and transmitting the same response data multiple times
-	if (detailsParsed.handlers.onreadystatechange) {
-		delete detailsParsed.handlers.onload;
-		delete detailsParsed.handlers.onloadend;
+	if (detailsParsed.hasHandlers.onreadystatechange) {
+		delete detailsParsed.hasHandlers.onload;
+		delete detailsParsed.hasHandlers.onloadend;
 	}
-	if (detailsParsed.handlers.onload) {
-		delete detailsParsed.handlers.onloadend;
+	if (detailsParsed.hasHandlers.onload) {
+		delete detailsParsed.hasHandlers.onloadend;
 	}
 	// generate random port name for single xhr
 	const xhrPortName = Math.random().toString(36).substring(1, 9);
@@ -351,36 +367,40 @@ async function xhr(details, control, promise) {
 	const listener = (port) => {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
+			/** @type {TypeExtMessages.XHRHandlers[number]} */
 			const handler = msg.handler;
 			if (
 				msg.response &&
-				detailsParsed.handlers[handler] &&
-				typeof details[handler] === "function"
+				detailsParsed.hasHandlers[handler] &&
+				typeof handlers[handler] === "function"
 			) {
 				// process xhr response
-				const response = msg.response;
+				/** @type {TypeExtMessages.XHRTransportableResponse} */
+				const msgResponse = msg.response;
+				/** @type {TypeExtMessages.XHRResponse} */
+				const response = msgResponse;
 				// only include responseText when needed
 				if (["", "text"].includes(response.responseType)) {
 					response.responseText = response.response;
 				}
 				// only process when xhr is complete and data exist
 				if (response.readyState === 4 && response.response !== null) {
-					xhrResponseProcessor(response);
+					xhrResponseProcessor(msgResponse, response);
 				}
 				// call userscript method
-				details[handler](response);
+				handlers[handler](response);
 				// call the deleted XHR.DONE handlers above
 				if (response.readyState === 4) {
 					if (handler === "onreadystatechange") {
-						if (typeof details.onload === "function") {
-							details.onload(response);
+						if (typeof handlers.onload === "function") {
+							handlers.onload(response);
 						}
-						if (typeof details.onloadend === "function") {
-							details.onloadend(response);
+						if (typeof handlers.onloadend === "function") {
+							handlers.onloadend(response);
 						}
 					} else if (handler === "onload") {
-						if (typeof details.onloadend === "function") {
-							details.onloadend(response);
+						if (typeof handlers.onloadend === "function") {
+							handlers.onloadend(response);
 						}
 					}
 				}

@@ -179,7 +179,7 @@ Userscripts Safari currently supports the following userscript metadata:
 
 Userscripts currently supports the following api methods. All methods are asynchronous unless otherwise noted. Users must `@grant` these methods in order to use them in a userscript. When using API methods, it's only possible to inject into the content script scope due to security concerns.
 
-For API type definitions, please refer to: [`types.d.ts`](https://github.com/userscriptsup/testscripts/blob/363b322208a6733c7e5f4b9d9705957889af6837/userscripts/types.d.ts)
+For API type definitions, please refer to: [`types.d.ts`](https://github.com/userscriptsup/testscripts/blob/bfce18746cd6bcab0616727401fa7ab6ef4086ac/userscripts/types.d.ts)
 
 - `GM.addStyle(css)`
   - `css: String`
