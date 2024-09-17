@@ -392,102 +392,179 @@ async function handleMessage(message, sender) {
 			return { status: "fulfilled", result };
 		}
 		case "API_XHR": {
-			// initializing an xhr instance
-			const xhr = new XMLHttpRequest();
-			// establish a long-lived port connection to content script
-			const port = browser.tabs.connect(sender.tab.id, {
-				name: message.xhrPortName,
-			});
-			// receive messages from content script and process them
-			port.onMessage.addListener((msg) => {
-				if (msg.name === "ABORT") xhr.abort();
-				if (msg.name === "DISCONNECT") port.disconnect();
-			});
-			// handle port disconnect and clean tasks
-			port.onDisconnect.addListener((p) => {
-				if (p?.error) {
-					console.error(
-						`port disconnected due to an error: ${p.error.message}`,
-					);
-				}
-			});
-			// parse details and set up for xhr instance
-			const details = message.details;
-			const method = details.method || "GET";
-			const user = details.user || null;
-			const password = details.password || null;
-			let body = details.data || null;
-			// deprecate once body supports more data types
-			// the `binary` key will no longer needed
-			if (typeof body === "string" && details.binary) {
-				body = new TextEncoder().encode(body);
-			}
-			// xhr instances automatically filter out unexpected user values
-			xhr.timeout = details.timeout;
-			xhr.responseType = details.responseType;
-			// record parsed values for subsequent use
-			const responseType = xhr.responseType;
-			// avoid unexpected behavior of legacy defaults such as parsing XML
-			if (responseType === "") xhr.responseType = "text";
-			// transfer to content script via arraybuffer and then parse to blob
-			if (responseType === "blob") xhr.responseType = "arraybuffer";
-			// transfer to content script via text and then parse to document
-			if (responseType === "document") xhr.responseType = "text";
-			// add required listeners and send result back to the content script
-			for (const e of message.events) {
-				if (!details[e]) continue;
-				xhr[e] = async (event) => {
-					// can not send xhr through postMessage
-					// construct new object to be sent as "response"
-					const x = {
-						contentType: undefined, // non-standard
-						readyState: xhr.readyState,
-						response: xhr.response,
-						responseHeaders: xhr.getAllResponseHeaders(),
-						responseType,
-						responseURL: xhr.responseURL,
-						status: xhr.status,
-						statusText: xhr.statusText,
-						timeout: xhr.timeout,
-					};
-					// get content-type when headers received
-					if (xhr.readyState >= xhr.HEADERS_RECEIVED) {
-						x.contentType = xhr.getResponseHeader("Content-Type");
+			try {
+				// initializing an xhr instance
+				const xhr = new XMLHttpRequest();
+				// establish a long-lived port connection to content script
+				const port = browser.tabs.connect(sender.tab.id, {
+					name: message.xhrPortName,
+				});
+				// receive messages from content script and process them
+				port.onMessage.addListener((msg) => {
+					if (msg.name === "ABORT") xhr.abort();
+					if (msg.name === "DISCONNECT") port.disconnect();
+				});
+				// handle port disconnect and clean tasks
+				port.onDisconnect.addListener((p) => {
+					if (p?.error) {
+						console.error(
+							`port disconnected due to an error: ${p.error.message}`,
+						);
 					}
-					// only process when xhr is complete and data exist
-					if (xhr.readyState === xhr.DONE && xhr.response !== null) {
-						// need to convert arraybuffer data to postMessage
-						if (
-							xhr.responseType === "arraybuffer" &&
-							xhr.response instanceof ArrayBuffer
-						) {
-							const buffer = xhr.response;
-							x.response = Array.from(new Uint8Array(buffer));
+				});
+				// parse details and set up for xhr instance
+				/** @type {TypeExtMessages.XHRTransportableDetails} */
+				const details = message.details;
+				/** @type {Parameters<XMLHttpRequest["open"]>[0]} */
+				const method = details.method || "GET";
+				/** @type {Parameters<XMLHttpRequest["open"]>[1]} */
+				const url = details.url;
+				/** @type {Parameters<XMLHttpRequest["open"]>[3]} */
+				const user = details.user || null;
+				/** @type {Parameters<XMLHttpRequest["open"]>[4]} */
+				const password = details.password || null;
+				/** @type {Parameters<XMLHttpRequest["send"]>[0]} */
+				let body = null;
+				if (typeof details.data === "object") {
+					/** @type {TypeExtMessages.XHRProcessedData} */
+					const data = details.data;
+					if (typeof data.data === "string") {
+						if (data.type === "Text") {
+							// deprecate once body supports more data types
+							// the `binary` key will no longer needed
+							if (details.binary) {
+								const binaryString = data.data;
+								const view = new Uint8Array(binaryString.length);
+								for (let i = 0; i < binaryString.length; i++) {
+									view[i] = binaryString.charCodeAt(i);
+								}
+								body = view;
+							} else {
+								body = data.data;
+							}
+						}
+						if (data.type === "Document") {
+							body = data.data;
+							if (!("content-type" in details.headers)) {
+								details.headers["content-type"] = data.mime;
+							}
+						}
+						if (data.type === "URLSearchParams") {
+							body = new URLSearchParams(data.data);
 						}
 					}
-					port.postMessage({ name: e, event, response: x });
-				};
-			}
-			// if onloadend not set in xhr details
-			// onloadend event won't be passed to content script
-			// if that happens port DISCONNECT message won't be posted
-			// if details lacks onloadend attach listener
-			if (!details.onloadend) {
-				xhr.onloadend = (event) => {
-					port.postMessage({ name: "onloadend", event });
-				};
-			}
-			if (details.overrideMimeType) {
-				xhr.overrideMimeType(details.overrideMimeType);
-			}
-			xhr.open(method, details.url, true, user, password);
-			// must set headers after `xhr.open()`, but before `xhr.send()`
-			if (typeof details.headers === "object") {
-				for (const [key, val] of Object.entries(details.headers)) {
-					xhr.setRequestHeader(key, val);
+					if (Array.isArray(data.data)) {
+						if (
+							data.type === "ArrayBuffer" ||
+							data.type === "ArrayBufferView"
+						) {
+							body = new Uint8Array(data.data);
+						}
+						if (data.type === "Blob") {
+							body = new Uint8Array(data.data);
+							if (!("content-type" in details.headers)) {
+								details.headers["content-type"] = data.mime;
+							}
+						}
+						if (data.type === "FormData") {
+							body = new FormData();
+							for (const [k, v] of data.data) {
+								if (typeof v === "string") {
+									body.append(k, v);
+								} else {
+									const view = new Uint8Array(v.data);
+									body.append(
+										k,
+										new File([view], v.name, {
+											type: v.mime,
+											lastModified: v.lastModified,
+										}),
+									);
+								}
+							}
+						}
+					}
 				}
+				// xhr instances automatically filter out unexpected user values
+				xhr.timeout = details.timeout;
+				xhr.responseType = details.responseType;
+				// record parsed values for subsequent use
+				const responseType = xhr.responseType;
+				// avoid unexpected behavior of legacy defaults such as parsing XML
+				if (responseType === "") xhr.responseType = "text";
+				// transfer to content script via arraybuffer and then parse to blob
+				if (responseType === "blob") xhr.responseType = "arraybuffer";
+				// transfer to content script via text and then parse to document
+				if (responseType === "document") xhr.responseType = "text";
+				// add required listeners and send result back to the content script
+				const handlers = details.hasHandlers || {};
+				for (const handler of Object.keys(handlers)) {
+					xhr[handler] = async () => {
+						// can not send xhr through postMessage
+						// construct new object to be sent as "response"
+						/** @type {TypeExtMessages.XHRTransportableResponse} */
+						const response = {
+							contentType: undefined, // non-standard
+							readyState: xhr.readyState,
+							response: xhr.response,
+							responseHeaders: xhr.getAllResponseHeaders(),
+							responseType,
+							responseURL: xhr.responseURL,
+							status: xhr.status,
+							statusText: xhr.statusText,
+							timeout: xhr.timeout,
+						};
+						// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/response#value
+						if (xhr.readyState < xhr.DONE && xhr.responseType !== "text") {
+							response.response = null;
+						}
+						// get content-type when headers received
+						if (xhr.readyState >= xhr.HEADERS_RECEIVED) {
+							response.contentType = xhr.getResponseHeader("Content-Type");
+						}
+						// only process when xhr is complete and data exist
+						// note the status of the last `progress` event in Safari is DONE/4
+						// exclude this event to avoid unnecessary processing and transmission
+						if (
+							xhr.readyState === xhr.DONE &&
+							xhr.response !== null &&
+							handler !== "onprogress"
+						) {
+							// need to convert arraybuffer data to postMessage
+							if (
+								xhr.responseType === "arraybuffer" &&
+								xhr.response instanceof ArrayBuffer
+							) {
+								const buffer = xhr.response;
+								response.response = Array.from(new Uint8Array(buffer));
+							}
+						}
+						port.postMessage({ handler, response });
+					};
+				}
+				// if onloadend not set in xhr details
+				// onloadend event won't be passed to content script
+				// if that happens port DISCONNECT message won't be posted
+				// if details lacks onloadend attach listener
+				if (!handlers.onloadend) {
+					xhr.onloadend = () => {
+						port.postMessage({ handler: "onloadend" });
+					};
+				}
+				if (details.overrideMimeType) {
+					xhr.overrideMimeType(details.overrideMimeType);
+				}
+				xhr.open(method, url, true, user, password);
+				// must set headers after `xhr.open()`, but before `xhr.send()`
+				if (typeof details.headers === "object") {
+					for (const [key, val] of Object.entries(details.headers)) {
+						xhr.setRequestHeader(key, val);
+					}
+				}
+				xhr.send(body);
+			} catch (error) {
+				console.error(error);
 			}
-			xhr.send(body);
 			return { status: "fulfilled" };
 		}
 		case "REFRESH_DNR_RULES": {

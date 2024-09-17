@@ -108,27 +108,258 @@ async function setClipboard(clipboardData, type) {
 	});
 }
 
-function xhr(details) {
+/**
+ * Restore `response.response` to required `responseType`
+ * @param {TypeExtMessages.XHRTransportableResponse} msgResponse
+ * @param {TypeExtMessages.XHRResponse} response
+ */
+function xhrResponseProcessor(msgResponse, response) {
+	const res = msgResponse;
+	/**
+	 * only include responseXML when needed
+	 * NOTE: Only add implementation at this time, not enable, to avoid
+	 * unnecessary calculations, and this legacy default behavior is not
+	 * recommended, users should explicitly use `responseType: "document"`
+	 * to obtain it.
+	if (res.responseType === "" && typeof res.response === "string") {
+		const mimeTypes = [
+			"text/xml",
+			"application/xml",
+			"application/xhtml+xml",
+			"image/svg+xml",
+		];
+		for (const mimeType of mimeTypes) {
+			if (res.contentType.includes(mimeType)) {
+				const parser = new DOMParser();
+				res.responseXML = parser.parseFromString(res.response, "text/xml");
+				break;
+			}
+		}
+	}
+	*/
+	if (res.responseType === "arraybuffer" && Array.isArray(res.response)) {
+		// arraybuffer responses had their data converted in background
+		// convert it back to arraybuffer
+		try {
+			response.response = new Uint8Array(res.response).buffer;
+		} catch (err) {
+			console.error("error parsing xhr arraybuffer", err);
+		}
+	}
+	if (res.responseType === "blob" && Array.isArray(res.response)) {
+		// blob responses had their data converted in background
+		// convert it back to blob
+		try {
+			const typedArray = new Uint8Array(res.response);
+			const type = res.contentType ?? "";
+			response.response = new Blob([typedArray], { type });
+		} catch (err) {
+			console.error("error parsing xhr blob", err);
+		}
+	}
+	if (res.responseType === "document" && typeof res.response === "string") {
+		// document responses had their data converted in background
+		// convert it back to document
+		try {
+			const parser = new DOMParser();
+			const mimeType = res.contentType.includes("text/html")
+				? "text/html"
+				: "text/xml";
+			response.response = parser.parseFromString(res.response, mimeType);
+			response.responseXML = response.response;
+		} catch (err) {
+			console.error("error parsing xhr document", err);
+		}
+	}
+}
+
+/**
+ * Process data into a transportable object
+ * @param {Parameters<XMLHttpRequest["send"]>[0]} data
+ * @returns {Promise<TypeExtMessages.XHRProcessedData>}
+ */
+async function xhrDataProcessor(data) {
+	if (typeof data === "undefined") return undefined;
+	if (typeof data === "string") {
+		return { data, type: "Text" };
+	}
+	if (data instanceof Document) {
+		if (data instanceof XMLDocument) {
+			try {
+				return {
+					data: new XMLSerializer().serializeToString(data),
+					type: "Document",
+					mime: data.contentType || "text/xml",
+				};
+			} catch (error) {
+				console.error(
+					"XML serialization failed, the data will be omitted",
+					error,
+				);
+			}
+		} else {
+			let html = data.documentElement.outerHTML;
+			if (data.doctype) {
+				html = `<!doctype ${data.doctype.name}>` + html;
+			}
+			return {
+				data: html,
+				type: "Document",
+				mime: data.contentType || "text/html",
+			};
+		}
+	}
+	if (data instanceof Blob) {
+		try {
+			const buffer = await data.arrayBuffer();
+			return {
+				data: Array.from(new Uint8Array(buffer)),
+				type: "Blob",
+				mime: data.type,
+			};
+		} catch (error) {
+			throw Error("Document serialization failed, the data will be omitted", {
+				cause: error,
+			});
+		}
+	}
+	if (data instanceof ArrayBuffer) {
+		return {
+			data: Array.from(new Uint8Array(data)),
+			type: "ArrayBuffer",
+		};
+	}
+	if (ArrayBuffer.isView(data)) {
+		return {
+			data: Array.from(new Uint8Array(data.buffer)),
+			type: "ArrayBufferView",
+		};
+	}
+	if (data instanceof FormData) {
+		/** @type {TypeExtMessages.XHRProcessedFormData} */
+		const entries = [];
+		for (const [k, v] of data.entries()) {
+			if (typeof v === "string") {
+				entries.push([k, v]);
+				continue;
+			} else {
+				const buffer = await v.arrayBuffer();
+				entries.push([
+					k,
+					{
+						data: Array.from(new Uint8Array(buffer)),
+						lastModified: v.lastModified,
+						name: v.name,
+						mime: v.type,
+					},
+				]);
+			}
+		}
+		return { data: entries, type: "FormData" };
+	}
+	if (data instanceof URLSearchParams) {
+		return { data: data.toString(), type: "URLSearchParams" };
+	}
+	throw Error("Unexpected data type, the data will be omitted");
+}
+
+/**
+ * @param {Object} details
+ * @param {Object} control
+ * @param {{resolve: Function, reject: Function}=} promise
+ * @returns {Promise<void>}
+ */
+async function xhr(details, control, promise) {
 	if (details == null) return console.error("xhr invalid details arg");
 	if (!details.url) return console.error("xhr details missing url key");
+	// define control method, will be replaced after port is established
+	control.abort = () => console.error("xhr has not yet been initialized");
+	// depreciation notice
+	if (details.binary) {
+		console.warn(
+			"Please make sure your xhr `data` is a binary-string since you have set the `binary` true, however this legacy format is no longer recommended.",
+			"The `binary` key is deprecated and will be removed in the future, use binary data objects such as `Blob`, `ArrayBuffer`, `TypedArray`, etc. instead.",
+		);
+	}
+	// can not send details (func, blob, etc.) through message
+	// construct a new processed object send to background page
+	/** @type {TypeExtMessages.XHRTransportableDetails} */
+	const detailsParsed = {
+		binary: Boolean(details.binary),
+		data: undefined,
+		headers: {},
+		method: String(details.method),
+		overrideMimeType: String(details.overrideMimeType),
+		password: String(details.password),
+		responseType: details.responseType,
+		timeout: Number(details.timeout),
+		url: String(details.url),
+		user: String(details.user),
+		hasHandlers: {},
+	};
+	// preprocess data key
+	try {
+		detailsParsed.data = await xhrDataProcessor(details.data);
+	} catch (error) {
+		console.error(error);
+	}
+	// preprocess headers key
+	if (typeof details.headers === "object") {
+		for (const [k, v] of Object.entries(details.headers)) {
+			detailsParsed.headers[k.toLowerCase()] = v;
+		}
+	}
+	// preprocess handlers
+	/**
+	 * Record the handlers existing in details to a new object
+	 * to avoid modifying the original object, and to prevent
+	 * the original object from being changed by user scripts
+	 * @type {TypeExtMessages.XHRHandlersObj}
+	 */
+	const handlers = {};
+	/** @type {TypeExtMessages.XHRHandlers} */
+	const XHRHandlers = [
+		"onreadystatechange",
+		"onloadstart",
+		"onprogress",
+		"onabort",
+		"onerror",
+		"onload",
+		"ontimeout",
+		"onloadend",
+	];
+	for (const handler of XHRHandlers) {
+		// check which handlers are included in the original details object
+		if (
+			handler in XMLHttpRequest.prototype &&
+			typeof details[handler] === "function"
+		) {
+			// add a bool to indicate if event listeners should be attached
+			detailsParsed.hasHandlers[handler] = true;
+			// record to the new object
+			handlers[handler] = details[handler];
+		}
+	}
+	// resolving asynchronous xmlHttpRequest
+	if (promise) {
+		detailsParsed.hasHandlers.onloadend = true;
+		const _onloadend = handlers.onloadend;
+		handlers.onloadend = (response) => {
+			promise.resolve(response);
+			_onloadend?.(response);
+		};
+	}
+	// make sure to listen to XHR.DONE events only once, to avoid processing
+	// and transmitting the same response data multiple times
+	if (detailsParsed.hasHandlers.onreadystatechange) {
+		delete detailsParsed.hasHandlers.onload;
+		delete detailsParsed.hasHandlers.onloadend;
+	}
+	if (detailsParsed.hasHandlers.onload) {
+		delete detailsParsed.hasHandlers.onloadend;
+	}
 	// generate random port name for single xhr
 	const xhrPortName = Math.random().toString(36).substring(1, 9);
-	// strip out functions from details
-	const detailsParsed = JSON.parse(JSON.stringify(details));
-	// get all the "on" events from XMLHttpRequest object
-	const events = [];
-	for (const k in XMLHttpRequest.prototype) {
-		if (k.slice(0, 2) === "on") events.push(k);
-	}
-	// check which functions are included in the original details object
-	// add a bool to indicate if event listeners should be attached
-	for (const e of events) {
-		if (typeof details[e] === "function") detailsParsed[e] = true;
-	}
-	// define return method, will be populated after port is established
-	const response = {
-		abort: () => console.error("xhr has not yet been initialized"),
-	};
 	/**
 	 * port listener, most of the messaging logic goes here
 	 * @type {Parameters<typeof browser.runtime.onConnect.addListener>[0]}
@@ -136,81 +367,47 @@ function xhr(details) {
 	const listener = (port) => {
 		if (port.name !== xhrPortName) return;
 		port.onMessage.addListener(async (msg) => {
+			/** @type {TypeExtMessages.XHRHandlers[number]} */
+			const handler = msg.handler;
 			if (
-				events.includes(msg.name) &&
-				typeof details[msg.name] === "function"
+				msg.response &&
+				detailsParsed.hasHandlers[handler] &&
+				typeof handlers[handler] === "function"
 			) {
 				// process xhr response
-				const r = msg.response;
+				/** @type {TypeExtMessages.XHRTransportableResponse} */
+				const msgResponse = msg.response;
+				/** @type {TypeExtMessages.XHRResponse} */
+				const response = msgResponse;
 				// only include responseText when needed
-				if (["", "text"].includes(r.responseType)) {
-					r.responseText = r.response;
+				if (["", "text"].includes(response.responseType)) {
+					response.responseText = response.response;
 				}
-				/**
-				 * only include responseXML when needed
-				 * NOTE: Only add implementation at this time, not enable, to avoid
-				 * unnecessary calculations, and this legacy default behavior is not
-				 * recommended, users should explicitly use `responseType: "document"`
-				 * to obtain it.
-				if (r.responseType === "") {
-					const mimeTypes = [
-						"text/xml",
-						"application/xml",
-						"application/xhtml+xml",
-						"image/svg+xml",
-					];
-					for (const mimeType of mimeTypes) {
-						if (r.contentType.includes(mimeType)) {
-							const parser = new DOMParser();
-							r.responseXML = parser.parseFromString(r.response, "text/xml");
-							break;
-						}
-					}
-				}
-				 */
 				// only process when xhr is complete and data exist
-				if (r.readyState === 4 && r.response !== null) {
-					if (r.responseType === "arraybuffer" && Array.isArray(r.response)) {
-						// arraybuffer responses had their data converted in background
-						// convert it back to arraybuffer
-						try {
-							r.response = new Uint8Array(r.response).buffer;
-						} catch (err) {
-							console.error("error parsing xhr arraybuffer", err);
-						}
-					}
-					if (r.responseType === "blob" && Array.isArray(r.response)) {
-						// blob responses had their data converted in background
-						// convert it back to blob
-						try {
-							const typedArray = new Uint8Array(r.response);
-							const type = r.contentType ?? "";
-							r.response = new Blob([typedArray], { type });
-						} catch (err) {
-							console.error("error parsing xhr blob", err);
-						}
-					}
-					if (r.responseType === "document" && typeof r.response === "string") {
-						// document responses had their data converted in background
-						// convert it back to document
-						try {
-							const parser = new DOMParser();
-							const mimeType = r.contentType.includes("text/html")
-								? "text/html"
-								: "text/xml";
-							r.response = parser.parseFromString(r.response, mimeType);
-							r.responseXML = r.response;
-						} catch (err) {
-							console.error("error parsing xhr document", err);
-						}
-					}
+				if (response.readyState === 4 && response.response !== null) {
+					xhrResponseProcessor(msgResponse, response);
 				}
 				// call userscript method
-				details[msg.name](msg.response);
+				handlers[handler](response);
+				// call the deleted XHR.DONE handlers above
+				if (response.readyState === 4) {
+					if (handler === "onreadystatechange") {
+						if (typeof handlers.onload === "function") {
+							handlers.onload(response);
+						}
+						if (typeof handlers.onloadend === "function") {
+							handlers.onloadend(response);
+						}
+					} else if (handler === "onload") {
+						if (typeof handlers.onloadend === "function") {
+							handlers.onloadend(response);
+						}
+					}
+				}
 			}
 			// all messages received
-			// tell background it's safe to close port
-			if (msg.name === "onloadend") {
+			if (handler === "onloadend") {
+				// tell background it's safe to close port
 				port.postMessage({ name: "DISCONNECT" });
 			}
 		});
@@ -222,7 +419,7 @@ function xhr(details) {
 			browser.runtime.onConnect.removeListener(listener);
 		});
 		// fill the method returned to the user script
-		response.abort = () => port.postMessage({ name: "ABORT" });
+		control.abort = () => port.postMessage({ name: "ABORT" });
 	};
 	// wait for the background to establish a port connection
 	browser.runtime.onConnect.addListener(listener);
@@ -231,10 +428,23 @@ function xhr(details) {
 		name: "API_XHR",
 		details: detailsParsed,
 		xhrPortName,
-		events,
 	};
 	sendMessageProxy(message);
-	return response;
+}
+
+function xmlHttpRequest(details) {
+	let promise;
+	const control = new Promise((resolve, reject) => {
+		promise = { resolve, reject };
+	});
+	xhr(details, control, promise);
+	return control;
+}
+
+function GM_xmlhttpRequest(details) {
+	const control = {};
+	xhr(details, control);
+	return control;
 }
 
 export default {
@@ -251,6 +461,6 @@ export default {
 	// notification,
 	// registerMenuCommand,
 	// getResourceUrl,
-	xmlHttpRequest: xhr,
-	GM_xmlhttpRequest: xhr,
+	xmlHttpRequest,
+	GM_xmlhttpRequest,
 };
