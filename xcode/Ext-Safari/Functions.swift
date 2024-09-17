@@ -128,6 +128,7 @@ func parse(_ content: String) -> [String: Any]? {
 	let range = NSRange(location: 0, length: content.utf16.count)
 	// return nil/fail if metablock missing
 	guard let match = regex.firstMatch(in: content, options: [], range: range) else {
+		logger?.debug("\(#function, privacy: .public) - Non matched content: \(content, privacy: .public)")
 		return nil
 	}
 
@@ -136,15 +137,23 @@ func parse(_ content: String) -> [String: Any]? {
 	// rather than being too strict, text content can precede the opening userscript tag, however it will be ignored
 	// adjust start index of file content while assigning group numbers to account for any text content preceding opening tag
 	let contentStartIndex = content.index(content.startIndex, offsetBy: match.range.lowerBound)
-	var g1, g2, g3:Int
-	if (content[contentStartIndex..<content.endIndex].starts(with: "//")) {
+	let contentEndIndex = content.index(contentStartIndex, offsetBy: 15)
+	let metaHeadContent = content[contentStartIndex..<contentEndIndex]
+	var g1, g2, g3: Int
+	if (metaHeadContent.starts(with: "//")) {
 		g1 = 1; g2 = 2; g3 = 3
 	} else {
 		g1 = 4; g2 = 5; g3 = 6
 	}
 
+	// unlikely to happen but did see some crashes, add checking and logging
+	guard let metablockRange = Range(match.range(at: g1), in: content) else {
+		logger?.error("\(#function, privacy: .public) - Nil range (\(g1, privacy: .public)): \(metaHeadContent, privacy: .public)")
+		logger?.debug("\(#function, privacy: .public) - Nil range content: \(content, privacy: .public)")
+		return nil
+	}
 	// can force unwrap metablock since nil check was done above
-	let metablock = content[Range(match.range(at: g1), in: content)!]
+	let metablock = content[metablockRange]
 	// create var to store separated metadata keys/values
 	var metadata = [:] as [String: [String]]
 	// iterate through the possible metadata keys in file
