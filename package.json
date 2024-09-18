@@ -21,20 +21,20 @@
 		"prettier": "prettier --write . --plugin prettier-plugin-svelte"
 	},
 	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^3.1.1",
-		"@types/webextension-polyfill": "^0.10.7",
-		"autoprefixer": "^10.4.19",
+		"@sveltejs/vite-plugin-svelte": "^4.0.0-next.7",
+		"@types/webextension-polyfill": "^0.12.1",
+		"autoprefixer": "^10.4.20",
 		"cm-show-invisibles": "^3.1.0",
 		"codemirror": "^5.65.17",
-		"eslint": "^9.7.0",
+		"eslint": "^9.10.0",
 		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-svelte": "^2.43.0",
-		"prettier": "3.0.3",
-		"prettier-plugin-svelte": "3.2.3",
+		"eslint-plugin-svelte": "^2.44.0",
+		"prettier": "3.3.3",
+		"prettier-plugin-svelte": "3.2.6",
 		"stylelint": "^16.7.0",
 		"stylelint-config-html": "^1.1.0",
 		"stylelint-config-standard": "^36.0.0",
-		"svelte": "^5.0.0-next.192",
-		"vite": "^5.3.4"
+		"svelte": "^5.0.0-next.250",
+		"vite": "^5.4.6"
 	}
 }
