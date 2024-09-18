@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
 	// once initialized, references the codemirror instance
 	let instance;
 	// saved and session code vars are used to track unsaved changes
@@ -65,6 +65,7 @@
 		getAnnotations: linter,
 	};
 
+	// svelte-ignore reactive_declaration_module_script_dependency
 	// update settings when changed
 	$: if (instance) {
 		instance.setOption("autoCloseBrackets", $settings["editor_close_brackets"]);
@@ -76,11 +77,13 @@
 		);
 	}
 
+	// svelte-ignore reactive_declaration_module_script_dependency
 	// store cursor position and disable on save
 	$: if ($state.includes("saving")) {
 		cursor = instance.getCursor();
 		disable();
 	}
+	// svelte-ignore reactive_declaration_module_script_dependency
 	// re-enable after, focus and set cursor back save completes
 	$: if ($state.includes("ready") && state.getOldState().includes("saving")) {
 		enable();
@@ -92,6 +95,7 @@
 	$: if ($state.includes("trashing") || $state.includes("updating")) {
 		disable();
 	}
+	// svelte-ignore reactive_declaration_module_script_dependency
 	// reset saved and session code & re-enable after trashing completes
 	$: if ($state && state.getOldState().includes("trashing")) {
 		savedCode = null;
@@ -99,11 +103,13 @@
 		enable();
 	}
 	// update session code and re-enable after updating completes
+	// svelte-ignore reactive_declaration_module_script_dependency
 	$: if ($state && state.getOldState().includes("updating")) {
 		sessionCode = instance.getValue();
 		enable();
 	}
 
+	// svelte-ignore reactive_declaration_module_script_dependency
 	// track lint settings and update accordingly
 	$: if (instance && $settings["editor_javascript_lint"]) {
 		toggleLint("enable");

@@ -8,6 +8,7 @@
 			href="https://github.com/quoid/userscripts"
 			target="_blank"
 			rel="noreferrer"
+			aria-label="open userscripts github"
 		>
 			<img src={Logo} class="logo" alt="Logo" />
 		</a>
