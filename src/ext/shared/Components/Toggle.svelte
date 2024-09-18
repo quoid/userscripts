@@ -12,6 +12,7 @@
 	aria-pressed={checked}
 	{disabled}
 	{title}
+	aria-label="toggle"
 >
 	<span aria-hidden="true"></span>
 </button>
