@@ -186,9 +186,9 @@ export const baseConfig = {
 				),
 				"import.meta.env.GIT_TAG": JSON.stringify(gitTag),
 				"import.meta.env.GIT_COMMIT": JSON.stringify(gitCommit),
-		  }
+			}
 		: {
 				"import.meta.env.GIT_TAG": JSON.stringify(gitTag),
 				"import.meta.env.GIT_COMMIT": JSON.stringify(gitCommit),
-		  },
+			},
 };

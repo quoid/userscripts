@@ -19,8 +19,8 @@
 		item.type === "error"
 			? iconError
 			: item.type === "info"
-			? iconInfo
-			: iconWarn;
+				? iconInfo
+				: iconWarn;
 	let previousProgress;
 
 	function pause() {

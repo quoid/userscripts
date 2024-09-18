@@ -3,12 +3,12 @@
 	"folders": [
 		{
 			"name": "Userscripts-JS",
-			"path": "."
+			"path": ".",
 		},
 		{
 			"name": "Userscripts-Xcode",
-			"path": "xcode"
-		}
+			"path": "xcode",
+		},
 	],
-	"settings": {}
+	"settings": {},
 }
