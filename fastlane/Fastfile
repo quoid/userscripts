@@ -45,7 +45,7 @@ platform :ios do
 			silent: IS_CI,
 		)
 		upload_to_testflight(
-			changelog: "QA v#{ENV['MARKETING_VERSION']}(#{BUILD_NUMBER})",
+			changelog: "Release #{ENV['GITHUB_REF_NAME']}",
 			distribute_external: true,
 			groups: ["QA"],
 		)
@@ -76,7 +76,7 @@ platform :mac do
 			silent: IS_CI,
 		)
 		upload_to_testflight(
-			changelog: "QA v#{ENV['MARKETING_VERSION']}(#{BUILD_NUMBER})",
+			changelog: "Release #{ENV['GITHUB_REF_NAME']}",
 			distribute_external: true,
 			groups: ["QA"],
 		)
