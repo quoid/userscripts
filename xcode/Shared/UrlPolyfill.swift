@@ -64,7 +64,7 @@ func jsLikeURL(_ urlString: String, baseString: String? = nil) -> [String: Strin
 	var port = (url.port == nil) ? "" : String(url.port!)
 	if (scheme == "http" && port == "80") { port = "" }
 	if (scheme == "https" && port == "443") { port = "" }
-	if #available(macOS 13.0, iOS 16.0, *) {
+	if #available(macOS 15.0, iOS 18.0, *) {
 //		let hostname = url.host(percentEncoded: true) ?? ""
 		let host = (port == "") ? hostname : "\(hostname):\(port)"
 		let query = url.query(percentEncoded: true) ?? ""
