@@ -52,20 +52,18 @@ func jsLikeURL(_ urlString: String, baseString: String? = nil) -> [String: Strin
 	guard let scheme = url.scheme else {
 		return nil
 	}
+	var port = ""
+	if let portInt = url.port { port = String(portInt) }
+	if (scheme == "http" && port == "80") { port = "" }
+	if (scheme == "https" && port == "443") { port = "" }
 	/*
 	 The issue still exists as of macOS 14.4, iOS 17.0
 	 https://stackoverflow.com/questions/74445926/url-host-deprecated-but-replacement-crashes
 	 https://forums.swift.org/t/does-url-query-percentencoded-calls-url-host-percentencoded-under-the-hood/70452
 	 https://forums.developer.apple.com/forums/thread/722451
 	 */
-	guard let hostname = url.host else {
-		return nil
-	}
-	var port = (url.port == nil) ? "" : String(url.port!)
-	if (scheme == "http" && port == "80") { port = "" }
-	if (scheme == "https" && port == "443") { port = "" }
-	if #available(macOS 13.0, iOS 16.0, *) {
-//		let hostname = url.host(percentEncoded: true) ?? ""
+	if #available(macOS 15.0, iOS 18.0, *) {
+		guard let hostname = url.host(percentEncoded: true) else { return nil }
 		let host = (port == "") ? hostname : "\(hostname):\(port)"
 		let query = url.query(percentEncoded: true) ?? ""
 		let fragment = url.fragment(percentEncoded: true) ?? ""
@@ -83,6 +81,7 @@ func jsLikeURL(_ urlString: String, baseString: String? = nil) -> [String: Strin
 			"username": url.user(percentEncoded: true) ?? ""
 		]
 	} else {
+		guard let hostname = url.host else { return nil }
 		let host = (port == "") ? hostname : "\(hostname):\(port)"
 		let query = url.query ?? ""
 		let fragment = url.fragment ?? ""
