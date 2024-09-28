@@ -4,8 +4,10 @@ INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © Userscripts
 CURRENT_PROJECT_VERSION = 1
 MARKETING_VERSION = 1.0.0
 
-// Sign to Run Locally
-CODE_SIGN_IDENTITY = -
+// Development
+CODE_SIGN_IDENTITY = Apple Development
+// Developer Team ID
+DEVELOPMENT_TEAM = XXXXXXXXXX
 // Organization Identifier
 ORG_IDENTIFIER = dev.debug
 // Application Identifier
@@ -14,7 +16,7 @@ APP_IDENTIFIER = $(ORG_IDENTIFIER).userscripts
 EXT_IDENTIFIER = $(APP_IDENTIFIER).ext.safari
 // App Groups and Group Containers
 IOS_SHARED_GID = group.$(ORG_IDENTIFIER).userscripts
-MAC_SHARED_GID = 00000.$(ORG_IDENTIFIER).userscripts
+MAC_SHARED_GID = $(DEVELOPMENT_TEAM).$(ORG_IDENTIFIER).userscripts
 // App URL Scheme
 APP_URL_SCHEME = userscriptsdebug
 

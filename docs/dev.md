@@ -22,6 +22,7 @@ Reviewing the template will help you understand the composition of the project.
 
 - [`Node.js`](https://nodejs.org/)
 - [`Xcode`](https://geo.itunes.apple.com/app/id497799835)
+- `Developer Team ID` (i.e. Apple Account, see [Xcode section](#xcode))
 
 # Dev
 
@@ -29,6 +30,10 @@ Reviewing the template will help you understand the composition of the project.
 - `npm run dev` [^1]
 
 # Build
+
+> [!NOTE]
+> Before building the app with Xcode make sure you create the `.dev.xcconfig` files [below](#xcconfig) and fill in your `Developer Team ID`.
+> Otherwise `App groups` related functions will not work properly.
 
 - `npm run build:mac` [^1][^2]
 - `cd ./xcode`
@@ -42,32 +47,27 @@ Reviewing the template will help you understand the composition of the project.
 
 # Xcode
 
+Please note that a developer account is required, which can be a free Apple Account that has agreed to the Apple Developer Agreement. This is required to obtain a `Team ID` and use the `App groups` capability.
+
 ### Configurations
 
-The Xcode project contains two configurations, which have independent `xcconfig` configuration files, and can run on your local at the same time without conflicts.
+The Xcode project contains several configurations, which have independent `xcconfig` configuration files, and can run on your local at the same time without conflicts.
 
-- `Debug`: No developer account is required, that is `Sign to Run Locally` by default, which will speed up the build during development. This is convenient for developers without an account, and contributors who only need to do simple local debugging.
+- `Vite`: for vite real-time development.
 
-- `Release`: A developer account is required, which means it can be used for distribution as well as running on real iOS/iPadOS devices. You will need to override your developer account information in `xcconfig` to complete the build.
+- `Debug`: for development and debugging.
+
+- `Release`: for building and distributing.
 
 ### xcconfig
 
 All `xcconfig` files are in the [`/xcode/xcconfig/`](../xcode/xcconfig) directory. Each `.xcconfig` file can be overridden by `.dev.xcconfig` in the same path, they will be ignored by `git`, so you can override any build settings locally.
 
-For example, you can create an `Userscripts-Release.dev.xcconfig` file to override [`Userscripts-Release.xcconfig`](../xcode/xcconfig/Userscripts-Release.xcconfig) and fill in your own developer account information there:
-
-`Userscripts-Release.dev.xcconfig`
-
-```
-DEVELOPMENT_TEAM = XXXXXXXXXX
-```
-
-Another example, if you want `Debug` builds to be also signed, so instead of enabling `Allow Unsigned Extensions` every time in Safari, you can create:
+For example, you can create an `Userscripts-Debug.dev.xcconfig` file to override [`Userscripts-Debug.xcconfig`](../xcode/xcconfig/Userscripts-Debug.xcconfig) and fill in your own developer account `Team ID` there:
 
 `Userscripts-Debug.dev.xcconfig`
 
 ```
-CODE_SIGN_IDENTITY = Apple Development
 DEVELOPMENT_TEAM = XXXXXXXXXX
 ```
 
@@ -79,4 +79,4 @@ Note that all existing `.xcconfig` files already include `.dev.xcconfig` files o
 
 # About
 
-[Userscripts](https://github.com/quoid/userscripts) @ 2018-2023
+[Userscripts](https://github.com/quoid/userscripts) @ 2018-2024
