@@ -65,14 +65,16 @@ class ViewController: NSViewController {
 			// update user interface text display
 			self.saveLocation.stringValue = url.absoluteString
 			self.saveLocation.toolTip = url.absoluteString
-			// notify browser extension of relevant updates
-			sendExtensionMessage(
-				name: "SAVE_LOCATION_CHANGED",
-				userInfo: [
-					"saveLocation": url.absoluteString.removingPercentEncoding ?? url.absoluteString,
-					"returnApp": true
-				]
-			)
+			// notify browser extension of relevant updates only when Safari is running
+			if !NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Safari").isEmpty {
+				sendExtensionMessage(
+					name: "SAVE_LOCATION_CHANGED",
+					userInfo: [
+						"saveLocation": url.absoluteString.removingPercentEncoding ?? url.absoluteString,
+						"returnApp": true
+					]
+				)
+			}
 		})
 	}
 
