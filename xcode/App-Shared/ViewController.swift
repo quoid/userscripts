@@ -2,7 +2,7 @@ import WebKit
 
 private let logger = USLogger(#fileID)
 
-class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, UIDocumentPickerDelegate {
+class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandlerWithReply, UIDocumentPickerDelegate {
 
 	@IBOutlet var webView: WKWebView!
 
@@ -13,7 +13,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 		// https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/2875766-seturlschemehandler
 		configuration.setURLSchemeHandler(USchemeHandler(), forURLScheme: AppWebViewUrlScheme)
 		// https://developer.apple.com/documentation/webkit/wkusercontentcontroller
-		configuration.userContentController.add(self, name: "controller")
+		configuration.userContentController.addScriptMessageHandler(self, contentWorld: .page, name: "controller")
 		// https://developer.apple.com/documentation/webkit/wkwebview
 		self.webView = WKWebView(frame: .zero, configuration: configuration)
 		// https://developer.apple.com/documentation/webkit/wknavigationdelegate
@@ -79,10 +79,13 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 		decisionHandler(.allow)
 	}
 
-	func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+	func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (
+		Any?,
+		String?
+	) {
 		guard let name = message.body as? String else {
 			logger?.error("\(#function, privacy: .public) - Userscripts iOS received a message without a name")
-			return
+			return (nil, "bad message body")
 		}
 		if name == "CHANGE_DIRECTORY" {
 			// https://developer.apple.com/documentation/uikit/view_controllers/providing_access_to_directories
@@ -101,6 +104,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 				UIApplication.shared.open(url)
 			}
 		}
+		return (nil, nil)
 	}
 
 	func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
