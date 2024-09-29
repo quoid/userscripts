@@ -120,6 +120,6 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 
 	func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
 		Preferences.scriptsDirectoryUrl = url
-		webView.evaluateJavaScript("APP.printDirectory('\(getCurrentScriptsDirectoryString())')")
+		webView.evaluateJavaScript("webapp.updateDirectory('\(getCurrentScriptsDirectoryString())')")
 	}
 }

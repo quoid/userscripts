@@ -7,15 +7,8 @@
 
 	let directory = "init";
 
-	window.APP = {
-		show: () => {},
-		printVersion: (v, b) => {
-			version = v;
-			build = b;
-		},
-		printDirectory: (d) => {
-			directory = d;
-		},
+	window.webapp = {
+		updateDirectory: (newDir) => (directory = newDir),
 	};
 
 	async function initialize() {
@@ -25,11 +18,11 @@
 	}
 
 	function changeDirectory() {
-		window.webkit?.messageHandlers.controller.postMessage("CHANGE_DIRECTORY");
+		webkit.postMessage("CHANGE_DIRECTORY");
 	}
 
 	function openDirectory() {
-		window.webkit?.messageHandlers.controller.postMessage("OPEN_DIRECTORY");
+		webkit.postMessage("OPEN_DIRECTORY");
 	}
 </script>
 
