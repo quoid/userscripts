@@ -8,6 +8,12 @@ func getSaveLocationURL() -> URL {
 }
 
 func setSaveLocationURL(url: URL) -> Bool {
+	guard FileManager.default.isReadableFile(atPath: url.path) else {
+		let alert = NSAlert()
+		alert.messageText = "Can not read to path. Choose a different path."
+		alert.runModal()
+		return false
+	}
 	guard FileManager.default.isWritableFile(atPath: url.path) else {
 		let alert = NSAlert()
 		alert.messageText = "Can not write to path. Choose a different path."
