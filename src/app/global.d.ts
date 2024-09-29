@@ -5,23 +5,25 @@
 
 declare global {
 	interface Window {
-		APP: {
-			show: (
-				platform: "ios" | "mac",
-				enabled: boolean,
-				useSettingsInsteadOfPreferences: boolean,
-			) => void;
-			printVersion: (v: string, b: string) => void;
-			printDirectory: (d: string) => void;
+		webapp: {
+			updateDirectory: (directory: string) => void;
 		};
 		webkit: {
 			messageHandlers: {
 				controller: {
-					postMessage: function;
+					postMessage: <T extends MessageBody>(
+						message: T,
+					) => Promise<MessageReply<T>>;
 				};
 			};
 		};
 	}
 }
+
+type MessageBody = "INIT" | "CHANGE_DIRECTORY" | "OPEN_DIRECTORY";
+
+type MessageReply<T> = T extends "INIT"
+	? { build: string; version: string; directory: string }
+	: void;
 
 export {};

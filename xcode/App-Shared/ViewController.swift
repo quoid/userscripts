@@ -2,7 +2,7 @@ import WebKit
 
 private let logger = USLogger(#fileID)
 
-class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, UIDocumentPickerDelegate {
+class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandlerWithReply, UIDocumentPickerDelegate {
 
 	@IBOutlet var webView: WKWebView!
 
@@ -13,7 +13,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 		// https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/2875766-seturlschemehandler
 		configuration.setURLSchemeHandler(USchemeHandler(), forURLScheme: AppWebViewUrlScheme)
 		// https://developer.apple.com/documentation/webkit/wkusercontentcontroller
-		configuration.userContentController.add(self, name: "controller")
+		configuration.userContentController.addScriptMessageHandler(self, contentWorld: .page, name: "controller")
 		// https://developer.apple.com/documentation/webkit/wkwebview
 		self.webView = WKWebView(frame: .zero, configuration: configuration)
 		// https://developer.apple.com/documentation/webkit/wknavigationdelegate
@@ -40,12 +40,11 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 		webView.load(URLRequest(url: URL(string: "\(AppWebViewUrlScheme):///")!))
 	}
 
-	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-		let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "??"
-		let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "??"
-		webView.evaluateJavaScript("APP.printVersion('v\(appVersion)', '(\(buildNumber))')")
-		webView.evaluateJavaScript("APP.printDirectory('\(getCurrentScriptsDirectoryString())')")
-	}
+	// https://developer.apple.com/documentation/webkit/wknavigationdelegate/1455629-webview
+	// DOMContentLoaded
+//	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+//		webView.evaluateJavaScript("")
+//	}
 
 	func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
 		if navigationAction.navigationType == .linkActivated  {
@@ -79,32 +78,48 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
 		decisionHandler(.allow)
 	}
 
-	func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+	func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) async -> (
+		Any?,
+		String?
+	) {
 		guard let name = message.body as? String else {
 			logger?.error("\(#function, privacy: .public) - Userscripts iOS received a message without a name")
-			return
+			return (nil, "bad message body")
 		}
-		if name == "CHANGE_DIRECTORY" {
+		switch name {
+		case "INIT":
+			let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
+			let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
+			return ([
+				"build": buildNumber,
+				"version": appVersion,
+				"directory": getCurrentScriptsDirectoryString(),
+			], nil)
+		case "CHANGE_DIRECTORY":
 			// https://developer.apple.com/documentation/uikit/view_controllers/providing_access_to_directories
 			logger?.info("\(#function, privacy: .public) - Userscripts iOS has requested to set the readLocation")
 			let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
 			documentPicker.delegate = self
 			documentPicker.directoryURL = getDocumentsDirectory()
 			present(documentPicker, animated: true, completion: nil)
-		}
-		if name == "OPEN_DIRECTORY" {
+			break
+		case "OPEN_DIRECTORY":
 			guard var components = URLComponents(url: Preferences.scriptsDirectoryUrl, resolvingAgainstBaseURL: true) else {
-				return
+				return (nil, "ScriptsDirectoryUrl malformed")
 			}
 			components.scheme = "shareddocuments"
 			if let url = components.url, UIApplication.shared.canOpenURL(url) {
-				UIApplication.shared.open(url)
+				await UIApplication.shared.open(url)
 			}
+			break
+		default:
+			return (nil, "Unexpected message body")
 		}
+		return (nil, nil)
 	}
 
 	func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
 		Preferences.scriptsDirectoryUrl = url
-		webView.evaluateJavaScript("APP.printDirectory('\(getCurrentScriptsDirectoryString())')")
+		webView.evaluateJavaScript("webapp.updateDirectory('\(getCurrentScriptsDirectoryString())')")
 	}
 }
