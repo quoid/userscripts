@@ -3,9 +3,8 @@
 	import logo from "./img/logo.svg?raw";
 
 	const baseUrl = "https://github.com/quoid/userscripts";
+	const webkit = window.webkit.messageHandlers.controller;
 
-	let version = "v0.0.0";
-	let build = "(0)";
 	let directory = "init";
 
 	window.APP = {
@@ -19,6 +18,12 @@
 		},
 	};
 
+	async function initialize() {
+		const app = await webkit.postMessage("INIT");
+		directory = app.directory;
+		return app;
+	}
+
 	function changeDirectory() {
 		window.webkit?.messageHandlers.controller.postMessage("CHANGE_DIRECTORY");
 	}
@@ -29,44 +34,56 @@
 </script>
 
 <main>
-	<div class="section icons">
-		<img class="icon" src={icon} alt="Userscripts App Icon" draggable="false" />
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-		<div class="logo">{@html logo}</div>
-		<div class="version">
-			{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
-				<a href="{baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
-					{import.meta.env.GIT_TAG}
-				</a>
-				(<a href="{baseUrl}/commit/{import.meta.env.GIT_COMMIT}">
-					{import.meta.env.GIT_COMMIT.slice(0, 7)}
-				</a>)
-			{:else}
-				<span>{version}</span>
-				<span>{build}</span>
-			{/if}
+	{#await initialize() then app}
+		<div class="section icons">
+			<img
+				alt="Userscripts App Icon"
+				class="icon"
+				draggable="false"
+				src={icon}
+			/>
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			<div class="logo">{@html logo}</div>
+			<div class="version">
+				{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
+					<a href="{baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
+						{import.meta.env.GIT_TAG}
+					</a>
+					(<a href="{baseUrl}/commit/{import.meta.env.GIT_COMMIT}">
+						{import.meta.env.GIT_COMMIT.slice(0, 7)}
+					</a>)
+				{:else}
+					<span>v{app.version}</span>
+					<span>({app.build})</span>
+				{/if}
+			</div>
 		</div>
-	</div>
-	<div class="section guide">
-		<p>
-			You can turn on the Userscripts iOS Safari extension in Settings or
-			Safari, then use the extension in Safari. Please refer to the "Usage"
-			section in the
-			<a
-				href="{baseUrl}/blob/{import.meta.env.GIT_TAG ??
-					'main'}/README.md#usage">README of this version</a
-			>.
-		</p>
-	</div>
-	<div class="section action">
-		<button id="changedir" on:click={changeDirectory}>
-			Change Userscripts Directory
-		</button>
-		<div class="current">CURRENT DIRECTORY:</div>
-		<button id="directory" class="link" on:click={openDirectory}>
-			{directory}
-		</button>
-	</div>
+		<div class="section guide">
+			<p>
+				You can turn on the Userscripts iOS Safari extension in Settings or
+				Safari, then use the extension in Safari. Please refer to the "Usage"
+				section in the
+				<a
+					href="{baseUrl}/blob/{import.meta.env.GIT_TAG ??
+						'main'}/README.md#usage">README of this version</a
+				>.
+			</p>
+		</div>
+		<div class="section action">
+			<button id="changedir" on:click={changeDirectory}>
+				Change Userscripts Directory
+			</button>
+			<div class="current">CURRENT DIRECTORY:</div>
+			<button id="directory" class="link" on:click={openDirectory}>
+				{directory}
+			</button>
+		</div>
+	{:catch error}
+		<div class="section">
+			{error}
+		</div>
+	{/await}
+
 	<div class="section footer">
 		<div class="links">
 			<a href="{baseUrl}/blob/{import.meta.env.GIT_TAG ?? 'main'}/README.md"
