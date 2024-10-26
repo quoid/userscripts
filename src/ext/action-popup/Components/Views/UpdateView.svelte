@@ -24,7 +24,7 @@
 	<div class="none">
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html iconUpdate}
-		<div>
+		<div class="prompt">
 			There are no file updates available
 			<br />
 			<button class="link" on:click={checkClick}> Check Updates </button>
@@ -70,7 +70,7 @@
 		width: 4rem;
 	}
 
-	.none div:not(.link) {
+	.none div.prompt {
 		color: var(--text-color-disabled);
 		font-weight: 600;
 		margin-bottom: 2rem;
