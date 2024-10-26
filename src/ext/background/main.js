@@ -224,33 +224,7 @@ async function getContextMenuItems() {
 }
 
 async function addContextMenuItem(userscript) {
-	// context-menu items persist for a session
-	// to avoid duplication, when created, save the filename to session storage
-	const savedItems = sessionStorage.getItem("menu");
-	// if the session storage key doesn't exist use empty array
-	const activeItems = savedItems ? JSON.parse(savedItems) : [];
-	if (activeItems.indexOf(userscript.scriptObject.filename) !== -1) {
-		// if already saved, remove it, to get fresh code changes
-		await browser.menus.remove(userscript.scriptObject.filename);
-	}
-	// potential bug? https://developer.apple.com/forums/thread/685273
-	// https://stackoverflow.com/q/68431201
-	// parse through match values and change pathnames to deal with bug
 	const patterns = userscript.scriptObject.matches;
-	patterns.forEach((pattern, index) => {
-		try {
-			const url = new URL(pattern);
-			let pathname = url.pathname;
-			if (pathname.length > 1 && pathname.endsWith("/")) {
-				pathname = pathname.slice(0, -1);
-			}
-			patterns[index] = `${url.protocol}//${url.hostname}${pathname}`;
-		} catch (error) {
-			// prevent breaking when non-url pattern present
-			console.error(error);
-		}
-	});
-
 	browser.menus.create(
 		{
 			contexts: ["all"],
@@ -263,9 +237,6 @@ async function addContextMenuItem(userscript) {
 			if (!browser.menus.onClicked.hasListener(contextClick)) {
 				browser.menus.onClicked.addListener(contextClick);
 			}
-			// save the context-menu item reference to sessionStorage
-			const value = JSON.stringify([userscript.scriptObject.filename]);
-			sessionStorage.setItem("menu", value);
 		},
 	);
 }
