@@ -73,10 +73,10 @@
 		{/if}
 	</div>
 {/if}
-<div>
+<main>
 	<Sidebar />
 	<Editor />
-</div>
+</main>
 <ul>
 	{#each $notifications as item (item.id)}
 		<Notification on:click={() => notifications.remove(item.id)} {item} />
@@ -115,7 +115,7 @@
 		font: var(--text-medium);
 	}
 
-	div:not(.initializer) {
+	main {
 		display: flex;
 		flex: 1 0 0;
 		overflow: hidden;
