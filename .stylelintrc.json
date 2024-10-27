@@ -11,12 +11,6 @@
 	],
 	"rules": {
 		"alpha-value-notation": "number",
-		"comment-empty-line-before": [
-			"always",
-			{
-				"ignore": ["after-comment", "stylelint-commands"]
-			}
-		],
 		"custom-property-empty-line-before": null,
 		"no-descending-specificity": null,
 		"property-no-vendor-prefix": null,
