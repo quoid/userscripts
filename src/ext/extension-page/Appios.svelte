@@ -79,12 +79,6 @@
 		font: var(--text-medium);
 	}
 
-	div:not(.initializer) {
-		display: flex;
-		flex: 1 0 0;
-		overflow: hidden;
-	}
-
 	ul {
 		bottom: 1rem;
 		left: 50%;
