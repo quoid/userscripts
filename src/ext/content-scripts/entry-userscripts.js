@@ -44,7 +44,7 @@ function triageJS(userscript) {
 function injectJS(userscript) {
 	const filename = userscript.scriptObject.filename;
 	const name = userscript.scriptObject.name;
-	const code = `${userscript.code} //# sourceURL=${
+	const code = `(async () => {\n${userscript.code}\n})(); //# sourceURL=${
 		filename.replace(/\s/g, "-") + usTag
 	}`;
 	let injectInto = userscript.scriptObject["inject-into"];
