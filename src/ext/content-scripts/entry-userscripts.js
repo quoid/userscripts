@@ -44,9 +44,16 @@ function triageJS(userscript) {
 function injectJS(userscript) {
 	const filename = userscript.scriptObject.filename;
 	const name = userscript.scriptObject.name;
-	const code = `(async () => {\n${userscript.code}\n})(); //# sourceURL=${
-		filename.replace(/\s/g, "-") + usTag
-	}`;
+	const code = `\
+(async () => {
+	try {
+// ===UserScript===start===
+${userscript.code}
+// ===UserScript====end====
+	} catch (error) {
+		console.error(\`${filename.replaceAll("`", "\\`")}\`, error);
+	}
+})(); //# sourceURL=${filename.replace(/[\s"']/g, "-") + usTag}`;
 	let injectInto = userscript.scriptObject["inject-into"];
 	// change scope to content since strict CSP event detected
 	if (injectInto === "auto" && (userscript.fallback || cspFallbackAttempted)) {
@@ -79,7 +86,7 @@ function injectJS(userscript) {
 				code,
 			)(userscript.apis);
 		} catch (error) {
-			console.error(`"${filename}" error:`, error);
+			console.error(`${filename}`, error);
 		}
 		return;
 	}
