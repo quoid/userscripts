@@ -51,7 +51,7 @@ function injectJS(userscript) {
 ${userscript.code}
 // ===UserScript====end====
 	} catch (error) {
-		console.error(error);
+		console.error(\`${filename.replaceAll("`", "\\`")}\`, error);
 	}
 })(); //# sourceURL=${filename.replace(/[\s"']/g, "-") + usTag}`;
 	let injectInto = userscript.scriptObject["inject-into"];
@@ -86,7 +86,7 @@ ${userscript.code}
 				code,
 			)(userscript.apis);
 		} catch (error) {
-			console.error(error);
+			console.error(`${filename}`, error);
 		}
 		return;
 	}
