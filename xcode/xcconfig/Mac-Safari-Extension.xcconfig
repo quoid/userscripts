@@ -11,6 +11,7 @@ LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks @executabl
 PRODUCT_BUNDLE_IDENTIFIER = $(EXT_IDENTIFIER)
 PRODUCT_NAME = $(PROJECT_NAME)-$(TARGET_NAME)
 SKIP_INSTALL = YES
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = EXT $(inherited)
 
 // Provisioning Profile
 PROVISIONING_PROFILE_SPECIFIER[config=Release] = match AppStore $(EXT_IDENTIFIER) macos
