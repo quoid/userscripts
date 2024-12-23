@@ -8,6 +8,7 @@
 
 import UIKit
 
+// https://developer.apple.com/documentation/uikit/app_and_environment/managing_your_app_s_life_cycle
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 	var window: UIWindow?
@@ -18,6 +19,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 	func sceneWillResignActive(_ scene: UIScene) {
 		USLogStoreToFile()
+	}
+
+	func sceneWillEnterForeground(_ scene: UIScene) {
+		if let viewController = window?.rootViewController as? ViewController {
+			viewController.updateEnableLoggerState()
+		}
 	}
 
 }
