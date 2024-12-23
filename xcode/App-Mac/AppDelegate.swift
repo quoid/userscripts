@@ -58,7 +58,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		window.titlebarAppearsTransparent = true
 		// Initialize webview
 		window.contentViewController = ViewController()
-		window.backgroundColor = .clear // DEBUG
+		// https://developer.apple.com/documentation/uikit/appearance_customization/supporting_dark_mode_in_your_interface#2993897
+		window.backgroundColor = NSColor(named: NSColor.Name("USBackgroundColor"))
+//		window.backgroundColor = .clear // DEBUG
 		window.center()
 		window.setIsVisible(true)
 		window.makeMain()

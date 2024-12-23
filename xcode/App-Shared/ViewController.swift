@@ -39,7 +39,9 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 		self.webView = WKWebView(frame: .zero, configuration: configuration)
 #if os(iOS)
 		self.webView.isOpaque = false
-		self.webView.backgroundColor = .clear
+		// https://developer.apple.com/documentation/uikit/appearance_customization/supporting_dark_mode_in_your_interface#2993897
+		self.webView.backgroundColor = UIColor(named: "USBackgroundColor")
+//		self.webView.backgroundColor = .clear // DEBUG
 //		self.webView.scrollView.isScrollEnabled = false
 #elseif os(macOS)
 		self.webView.frame = NSRect(x: 0, y: 0, width: 600, height: 600)
