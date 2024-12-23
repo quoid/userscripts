@@ -1,53 +1,7 @@
 import Foundation
 
 private let logger = USLogger(#fileID)
-private let suiteName = Bundle.main.infoDictionary!["US_SHARED_GID"] as! String
-private let SDefaults = UserDefaults(suiteName: suiteName) // Shared UserDefaults
-
-let bundleIdentifier = Bundle.main.bundleIdentifier!
-let extIdentifier = Bundle.main.infoDictionary?["US_EXT_IDENTIFIER"] as! String
-
-func getDefaultScriptsDirectoryUrl() -> URL {
-	var url: URL
-	if #available(macOS 13.0, iOS 16.0, *) {
-		url = getDocumentsDirectory().appending(path: "scripts")
-	} else {
-		url = getDocumentsDirectory().appendingPathComponent("scripts")
-	}
-	// if not in safari extension environment, replace with extension path
-	if bundleIdentifier != extIdentifier {
-		var path: String
-		if #available(macOS 13.0, iOS 16.0, *) {
-			path = url.path(percentEncoded: false)
-		} else {
-			path = url.path.removingPercentEncoding ?? url.path
-		}
-		let truePath = path.replacingOccurrences(of: bundleIdentifier, with: extIdentifier)
-		url = URL(fileURLWithPath: truePath, isDirectory: true)
-	}
-	return url
-}
-
-func isCurrentDefaultScriptsDirectory() -> Bool {
-	return Preferences.scriptsDirectoryUrl == getDefaultScriptsDirectoryUrl()
-}
-
-func isCurrentInitialScriptsDirectory() -> Bool {
-	let url = Preferences.scriptsDirectoryUrl.standardizedFileURL
-	return url == getDocumentsDirectory().standardizedFileURL
-}
-
-func getCurrentScriptsDirectoryString() -> String {
-	let url = Preferences.scriptsDirectoryUrl.standardizedFileURL
-	if url == getDocumentsDirectory().standardizedFileURL {
-		return "Userscripts App Documents"
-	}
-	if #available(macOS 13.0, iOS 16.0, *) {
-		return url.path(percentEncoded: false)
-	} else {
-		return url.path.removingPercentEncoding ?? url.path
-	}
-}
+private let SDefaults = UserDefaults(suiteName: groupIdentifier) // Shared UserDefaults
 
 // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties#Property-Wrappers
 // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/generics/
@@ -248,7 +202,7 @@ private struct SecurityScopedBookmark {
 		do {
 			return try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
 		} catch {
-				logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
 		}
 		return nil
 	}
@@ -298,10 +252,11 @@ private struct SecurityScopedBookmark {
 		set(url) {
 			let k = key // key cannot be log directly with error: Escaping autoclosure captures mutating 'self' parameter
 			logger?.info("\(#function, privacy: .public) - try set bookmark: \(k, privacy: .public) \(url, privacy: .public)")
-			let didStartAccessing = url.startAccessingSecurityScopedResource()
-			defer {
-				if didStartAccessing { url.stopAccessingSecurityScopedResource() }
+			guard url.startAccessingSecurityScopedResource() else {
+				logger?.error("\(#function, privacy: .public) - failed access url: \(url, privacy: .public)")
+				return
 			}
+			defer { url.stopAccessingSecurityScopedResource() }
 			guard let data = createBookmark(url) else {
 				logger?.info("\(#function, privacy: .public) - failed create bookmark: \(k, privacy: .public) \(url, privacy: .public)")
 				return
@@ -312,15 +267,32 @@ private struct SecurityScopedBookmark {
 }
 #endif
 
-// Define shared preferences, default values ​​determine data type
+// Define shared preferences, default values determine data type
 struct Preferences {
-/* Example preference, can be get or set with: Preferences.propertyName
-	@SharedUserDefaults("SharedUserDefaultsKeyName")
-	static var propertyName = "DefaultValue" // String
-*/
+	// Example preference, can be get or set with: Preferences.propertyName
+	// @SharedUserDefaults("SharedUserDefaultsKeyName")
+	// static var propertyName = "DefaultValue" // Type -> String
+	
+	// This is a separate wrapper, type is URL
 	@SecurityScopedBookmark("ScriptsDirectoryUrlBookmarkData")
 	static var scriptsDirectoryUrl = getDefaultScriptsDirectoryUrl()
 
 	@SharedUserDefaults("EnableLogger")
 	static var enableLogger = false
+
+	@SharedUserDefaults("PromptLogger")
+	static var promptLogger = true
+	
+	@SharedUserDefaults("MaxLogFileSize")
+	static var maxLogFileSize = 500_000_000 // 500MB
+
+	@SharedUserDefaults("FirstRunTime")
+	static var firstRunTime = 0 {
+		willSet {
+			print("willSet \(newValue)")
+		}
+		didSet {
+			print("didSet \(oldValue)")
+		}
+	}
 }
