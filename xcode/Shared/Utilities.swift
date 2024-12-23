@@ -1,17 +1,11 @@
 import SwiftUI
-import os.log
 
-func USLogger(_ category: String) -> Logger? {
-	let subsystem = Bundle.main.bundleIdentifier!
-#if DEBUG // Always enable logger in DEBUG builds
-	return Logger(subsystem: subsystem, category: category)
-#else
-	if Preferences.enableLogger {
-		return Logger(subsystem: subsystem, category: category)
-	}
-	return nil
-#endif
-}
+let bundleIdentifier = Bundle.main.bundleIdentifier!
+let groupIdentifier = Bundle.main.infoDictionary!["US_SHARED_GID"] as! String
+let extIdentifier = Bundle.main.infoDictionary?["US_EXT_IDENTIFIER"] as! String
+let projectName = "Userscripts"
+//let projectName = Bundle.main.infoDictionary!["PROJECT_NAME"] as! String
+private let logger = USLogger(#fileID)
 
 func getDocumentsDirectory() -> URL {
 	let fm = FileManager.default
