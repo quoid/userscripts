@@ -33,18 +33,18 @@ async function buildResources(server, origin) {
 	 * copy public static assets
 	 */
 	await Utils.emptyBuildDir("dist");
-	await Utils.emptyBuildDir(Utils.SAFARI_EXT_RESOURCES);
-	Utils.cp("public/ext/shared", Utils.SAFARI_EXT_RESOURCES);
-	Utils.cp("public/ext/shared-dev", Utils.SAFARI_EXT_RESOURCES);
+	await Utils.emptyBuildDir(Utils.EXT_SAFARI_RESOURCES);
+	Utils.cp("public/ext/shared", Utils.EXT_SAFARI_RESOURCES);
+	Utils.cp("public/ext/shared-dev", Utils.EXT_SAFARI_RESOURCES);
 	if (process.env.SAFARI_PLATFORM === "ios") {
 		Utils.cp(
 			"public/ext/safari-dev/manifest-ios.json",
-			`${Utils.SAFARI_EXT_RESOURCES}/manifest.json`,
+			`${Utils.EXT_SAFARI_RESOURCES}/manifest.json`,
 		);
 	} else {
 		Utils.cp(
 			"public/ext/safari-dev/manifest-mac.json",
-			`${Utils.SAFARI_EXT_RESOURCES}/manifest.json`,
+			`${Utils.EXT_SAFARI_RESOURCES}/manifest.json`,
 		);
 	}
 
@@ -81,7 +81,7 @@ async function buildResources(server, origin) {
 				},
 			],
 			build: {
-				outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/content-scripts/`,
+				outDir: `${Utils.EXT_SAFARI_RESOURCES}/dist/content-scripts/`,
 				emptyOutDir: false,
 				copyPublicDir: false,
 				rollupOptions: {
@@ -128,7 +128,7 @@ async function buildResources(server, origin) {
 			},
 		],
 		build: {
-			outDir: `${Utils.SAFARI_EXT_RESOURCES}/dist/`,
+			outDir: `${Utils.EXT_SAFARI_RESOURCES}/dist/`,
 			emptyOutDir: false,
 			rollupOptions: {
 				input: {
