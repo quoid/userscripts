@@ -1,34 +1,10 @@
-import messages_en from "./_locales/en/messages.json?url";
-import messages_zh from "./_locales/zh/messages.json?url";
-
-import nativeLoggerCaveat_en from "./_locales/en/native-logger-caveat.md?url";
-import nativeLoggerCaveat_zh from "./_locales/zh/native-logger-caveat.md?url";
-
-import quickStartGuide_mac_en from "./_locales/en/quick-start-guide-mac.md?url";
-import quickStartGuide_mac_zh from "./_locales/zh/quick-start-guide-mac.md?url";
-import quickStartGuide_ios_en from "./_locales/en/quick-start-guide-ios.md?url";
-import quickStartGuide_ios_zh from "./_locales/zh/quick-start-guide-ios.md?url";
-
-/** @type {Types.MessagesL10n} */
-const messagesL10n = {
-	en: messages_en,
-	zh: messages_zh,
-};
-
-/** @type {Types.MarkdownL10n} */
-const markdownL10n = {
-	md_native_logger_caveat: {
-		en: nativeLoggerCaveat_en,
-		zh: nativeLoggerCaveat_zh,
-	},
-	md_quick_start_guide: {
-		en: { mac: quickStartGuide_mac_en, ios: quickStartGuide_ios_en },
-		zh: { mac: quickStartGuide_mac_zh, ios: quickStartGuide_ios_zh },
-	},
-};
+/**
+ * @typedef {typeof import("./_locales/en/messages.js").messages} MessagesT
+ * @typedef {typeof import("./_locales/en/messages.js").markdown} MarkdownT
+ */
 
 /**
- * @param {Object} messages
+ * @param {Types.I18nMessages} messages
  * @param {string} messageName
  * @param {string | string[]} substitutions
  * @returns {string}
@@ -54,52 +30,30 @@ function getLangFrom(messages, messageName, substitutions = undefined) {
 	return text;
 }
 
-/** @type {Types.I18n} */
-export async function i18n(platform) {
-	/** @type {string} */
-	let lang;
-	if (navigator.language in messagesL10n) {
-		lang = navigator.language;
-	} else {
-		const language = navigator.language.split("-").at(0);
-		lang = language in messagesL10n ? language : "en";
+export async function i18nInit() {
+	const languages = [navigator.language.replace("-", "_")];
+	if (["zh-HK", "zh-MO", "zh-TW"].includes(navigator.language)) {
+		languages.unshift("zh_Hant");
 	}
+	languages.push(navigator.language.split("-")[0]);
+	languages.push("en"); // fallback
 	if (import.meta.env.MODE === "development") {
-		// lang = "en"; // DEBUG
-		// lang = "zh"; // DEBUG
+		// languages.unshift("en"); // DEBUG
 	}
-	/** @type {Object} */
-	let messages;
-	/** @type {Object} */
-	let markdown = {};
-	/** @type {() => Promise} */
-	const fetchMessages = async () => {
-		const response = await fetch(messagesL10n[lang]);
-		messages = await response.json();
-	};
-	const promises = [fetchMessages()];
-	/** @type {(name: string, url: string) => Promise} */
-	const fetchMarkdown = async (name, url) => {
-		const response = await fetch(url);
-		markdown[name] = { message: await response.text() };
-	};
-	for (const [k, v] of Object.entries(markdownL10n)) {
-		const vl = v[lang];
-		if (typeof vl === "string") {
-			promises.push(fetchMarkdown(k, vl));
-		} else if (typeof vl === "object" && "mac" in vl && "ios" in vl) {
-			promises.push(fetchMarkdown(k, vl[platform]));
+	for (const language of languages) {
+		try {
+			/** @type {{messages: MessagesT, markdown: MarkdownT}} */
+			const module = await import(`./_locales/${language}/messages.js`);
+			const { messages, markdown } = module;
+			return {
+				/** @type {Types.GetLang<keyof MessagesT>} */
+				gl: (n, s) => getLangFrom(messages, n, s),
+				/** @type {Types.GetLang<keyof MarkdownT>} */
+				md: (n, s) => getLangFrom(markdown, n, s),
+			};
+		} catch (error) {
+			console.debug(error);
 		}
 	}
-	try {
-		await Promise.all(promises);
-	} catch (error) {
-		console.error(error);
-	}
-	if (import.meta.env.MODE === "development") {
-		console.debug(promises, messages, markdown);
-	}
-	return {
-		gl: (n, s) => getLangFrom({ ...messages, ...markdown }, n, s),
-	};
+	throw Error("I18n initialization failed");
 }

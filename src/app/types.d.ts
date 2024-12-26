@@ -1,26 +1,17 @@
 declare namespace Types {
-	type L10nLanguages = "en" | "zh";
-
-	type MessagesL10n = {
-		[x in L10nLanguages]: string;
-	};
-
-	type MarkdownL10n = {
+	/** @see {@link https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/i18n/Locale-Specific_Message_reference} */
+	type I18nMessages = {
 		[x: string]: {
-			[x in L10nLanguages]: string | { [x in SystemPlatform]: string };
+			message: string;
+			description?: string;
+			placeholders?: Object;
 		};
 	};
 
-	type GetLang = (
-		messageName: string,
+	type GetLang<T = string> = (
+		messageName: T,
 		substitutions?: string | string[],
 	) => string;
-
-	type I18n = (platform: SystemPlatform) => Promise<I18nObject>;
-
-	interface I18nObject {
-		gl: GetLang;
-	}
 
 	type SystemPlatform = "mac" | "ios";
 }
