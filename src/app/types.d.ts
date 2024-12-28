@@ -14,4 +14,30 @@ declare namespace Types {
 	) => string;
 
 	type SystemPlatform = "mac" | "ios";
+
+	type ExtensionStatus = "unknown" | "disabled" | "enabled" | "error";
+
+	type MessageBody =
+		| "INIT"
+		| "CHANGE_DIRECTORY"
+		| "OPEN_DIRECTORY"
+		| "SHOW_PREFERENCES"
+		| "EXPORT_LOG_FILES"
+		| "DISABLE_LOGGER"
+		| "DISMISS_LOGGER_PROMPT";
+
+	type MessageReply<T> = T extends "INIT"
+		? {
+				build: string;
+				version: string;
+				platform: SystemPlatform;
+				directory: string;
+				extStatus: ExtensionStatus;
+				useSettingsInsteadOfPreferences: boolean;
+				enableLogger: boolean;
+				promptLogger: boolean;
+				maxLogFileSize: number;
+				firstRunTime: number;
+			}
+		: void;
 }

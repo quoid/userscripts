@@ -9,7 +9,7 @@
 - **Enable the extension in Safari**
 
   - Manage extensions from Settings App (Settings > Safari > Extensions) or Safari App (`AA` button on iPhone, `extension-icon` on iPad, also where you open the extension's `popup` interface)
-  - For optimal experience it's recommended that you `Always Allow` Userscripts for `All Websites`, but you could also allow only the sites you want, but please don't forget your settings when your script doesn't work.
+  - For optimal experience it's recommended that you "Always Allow" Userscripts for "All Websites", but you could also allow only the sites you want, but please don't forget your settings when your script doesn't work.
 
 ### So, how do you install a userscript?
 

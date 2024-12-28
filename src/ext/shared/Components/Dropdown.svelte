@@ -4,6 +4,7 @@
 	export let icon = "plus";
 	export let disabled = false;
 	export let title;
+	export let right = false;
 
 	let active = false;
 
@@ -37,7 +38,7 @@
 
 <div class:active>
 	<IconButton {icon} on:click={dropdownClick} {title} {disabled} />
-	<ul>
+	<ul class:right>
 		<slot>
 			<li>At least one slot is required...</li>
 		</slot>
@@ -63,6 +64,11 @@
 		position: absolute;
 		top: 100%;
 		white-space: nowrap;
+	}
+
+	ul.right {
+		left: auto;
+		right: 0;
 	}
 
 	.active ul {
@@ -100,6 +106,7 @@
 	ul :global(button) {
 		text-align: left;
 		background: none;
+		color: var(--text-color-primary);
 		width: 100%;
 		border-radius: 2px;
 		padding: 0.5rem 1rem;

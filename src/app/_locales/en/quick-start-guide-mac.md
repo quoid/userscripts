@@ -9,7 +9,7 @@
 - **Enable the extension in Safari**
 
   - Enable Userscripts in Safari extensions list
-  - For optimal experience it's recommended that you `Always Allow` Userscripts for `All Websites`, but you could also allow only the sites you want, but please don't forget your settings when your script doesn't work.
+  - For optimal experience it's recommended that you "Always Allow" Userscripts for "All Websites", but you could also allow only the sites you want, but please don't forget your settings when your script doesn't work.
 
 That’s it, start improving your quality of life now!
 
