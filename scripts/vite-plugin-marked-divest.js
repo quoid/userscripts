@@ -8,7 +8,7 @@ import { marked } from "marked";
  * @returns {boolean}
  */
 function isExclude(id) {
-	const res = [/\/src\/app\/_locales\/[A-Za-z0-9_]+\/messages.js/];
+	const res = [/\/src\/app\/_locales\/[A-Za-z0-9_]+\/messages\.js/];
 	for (const re of res) {
 		if (re.test(id)) return false;
 	}
