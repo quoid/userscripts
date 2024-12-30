@@ -15,6 +15,7 @@
 
 import { build } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import pluginMarkedDivest from "./vite-plugin-marked-divest.js";
 import * as Utils from "./utils.js";
 
 /** @type {import("vite").InlineConfig} */
@@ -35,7 +36,7 @@ const sharedConfig = {
  */
 build({
 	...Utils.baseConfig,
-	plugins: [svelte()],
+	plugins: [svelte(), pluginMarkedDivest()],
 	build: {
 		...sharedConfig.build,
 		outDir: `${Utils.APP_SHARED_RESOURCES}/dist/`,
