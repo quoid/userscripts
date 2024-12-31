@@ -14,7 +14,6 @@ function getLangFrom(messages, messageName, substitutions = undefined) {
 		console.warn(`i18n - "${messageName}" not found`, messages);
 		return "";
 	}
-	/** @type {string} message */
 	let text = messages[messageName].message;
 	// handle substitutions
 	if (typeof substitutions === "string") {
