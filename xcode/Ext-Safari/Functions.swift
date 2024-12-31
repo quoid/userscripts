@@ -50,32 +50,6 @@ func normalizeWeight(_ weight: String) -> String {
 	}
 }
 
-func getSaveLocation() -> URL? {
-#if os(iOS)
-	if isCurrentDefaultScriptsDirectory() {
-		logger?.info("\(#function, privacy: .public) - Uninitialized save location")
-		return nil
-	}
-#endif
-	let url = Preferences.scriptsDirectoryUrl
-	logger?.debug("\(#function, privacy: .public) - \(url, privacy: .public)")
-	return url
-}
-
-func openSaveLocation() -> Bool {
-	#if os(macOS)
-		guard let saveLocation = getSaveLocation() else {
-			return false
-		}
-		let didStartAccessing = saveLocation.startAccessingSecurityScopedResource()
-		defer {
-			if didStartAccessing {saveLocation.stopAccessingSecurityScopedResource()}
-		}
-		NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: saveLocation.path)
-	#endif
-	return true
-}
-
 func validateUrl(_ urlString: String) -> Bool {
 	guard
 		let parts = jsLikeURL(urlString),

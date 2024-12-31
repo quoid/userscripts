@@ -1,0 +1,5 @@
+- The logger is for local debugging only and can be streamed through the macOS console while writing to a local file when enabled.
+- You can repeat the steps to reproduce the issue after enabling it, then export the log files and inspect them in the app.
+- There is no built-in upload function. If you need to submit it to developers, please manually attach the exported log files to your issue report.
+- To reduce energy consumption and disk reading and writing, please disbale the logger promptly after debugging.
+- If the log file exceeds $1, the logger will be automatically disbaled and the log files will be cleared.

@@ -1,9 +1,9 @@
 import WebKit
 import UniformTypeIdentifiers
 
-private let logger = USLogger(#fileID)
 let AppWebViewUrlScheme = "userscriptsapp"
 let AppWebViewEntryPage = "entry-app-webview.html"
+private let logger = USLogger(#fileID)
 
 // https://developer.apple.com/documentation/webkit/wkurlschemehandler
 // https://developer.apple.com/documentation/webkit/wkurlschemetask

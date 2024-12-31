@@ -3,7 +3,7 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-	private var window: NSWindow!
+	var window: NSWindow!
 	private var windowForego = false
 	private var windowLoaded = false
 	private let logger = USLogger(#fileID)
@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 				if NSApplication.shared.keyWindow?.identifier?.rawValue == "changeSaveLocation" { return }
 				if windowLoaded {
 					let viewController = window.contentViewController as? ViewController
-					viewController?.changeSaveLocation(nil)
+					viewController?.changeSaveLocation()
 				} else {
 					windowForego = true
 					schemeChangeSaveLocation()
@@ -48,14 +48,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		// Initialize menu items
 		enbaleNativeLogger.state = Preferences.enableLogger ? .on : .off
-		// Whether to initialize the main view
+		// Whether to initialize the main window
 		logger?.debug("\(#function, privacy: .public) - windowForego: \(self.windowForego, privacy: .public)")
 		if windowForego { return }
-		let storyboard = NSStoryboard(name: "View", bundle: Bundle.main)
-		let windowController = storyboard.instantiateInitialController() as! NSWindowController
-//		let viewController = windowController.contentViewController as! ViewController
-		window = windowController.window
+		// https://developer.apple.com/documentation/appkit/nswindow/
+		window = NSWindow()
+		window.styleMask = [.titled, .closable, .miniaturizable]
+//		window.styleMask = [.titled, .closable, .resizable, .miniaturizable] // DEBUG
+		window.titlebarAppearsTransparent = true
+		// Initialize webview
+		window.contentViewController = ViewController()
+		// https://developer.apple.com/documentation/uikit/appearance_customization/supporting_dark_mode_in_your_interface#2993897
+		window.backgroundColor = NSColor(named: NSColor.Name("USBackgroundColor"))
+//		window.backgroundColor = .clear // DEBUG
+		window.center()
 		window.setIsVisible(true)
+		window.makeMain()
+		window.makeKeyAndOrderFront(nil)
+//		window.level = NSWindow.Level.floating // DEBUG
 		windowLoaded = true
 	}
 
@@ -65,6 +75,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 	func applicationWillTerminate(_ notification: Notification) {
 		// Insert code here to tear down your application
+		USLogStoreToFile()
 	}
 
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -72,13 +83,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 
 	@IBAction func enableLogger(_ sender: NSMenuItem) {
-		if sender.state == .on {
-			Preferences.enableLogger = false
-			sender.state = .off
-		} else {
-			Preferences.enableLogger = true
-			sender.state = .on
-		}
+		let enable = sender.state == .on ? false : true
+		sender.state = enable ? .on : .off
+		USLoggerSwitch(enable)
 	}
 
 	@IBAction func applicationHelp(_ sender: NSMenuItem) {

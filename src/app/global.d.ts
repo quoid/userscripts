@@ -7,6 +7,8 @@ declare global {
 	interface Window {
 		webapp: {
 			updateDirectory: (directory: string) => void;
+			updateExtStatus: (extStatus: ExtensionStatus) => void;
+			switchLogger: (enableLogger: boolean, promptLogger: boolean) => void;
 		};
 		webkit: {
 			messageHandlers: {
@@ -19,11 +21,5 @@ declare global {
 		};
 	}
 }
-
-type MessageBody = "INIT" | "CHANGE_DIRECTORY" | "OPEN_DIRECTORY";
-
-type MessageReply<T> = T extends "INIT"
-	? { build: string; version: string; directory: string }
-	: void;
 
 export {};
