@@ -9,13 +9,13 @@
 
 - **Enable the extension in Safari**
 
-  - Manage extensions from the Settings App (Settings > Safari > Extensions) or Safari App (`AA` button on iPhone, `extension-icon` on iPad, the same location where you open the extension's `popup` interface)
+  - Manage extensions from the Settings App (Settings > Safari > Extensions) or Safari App (`AA` button on iPhone, `extension-icon` on iPad, the same location where you open the extension's `popup` interface).
   - For an optimal experience it's recommended that you "Always Allow" Userscripts for "All Websites", but you could also allow only the sites you want, but please don't forget your settings if your script doesn't work.
 
 ### How to you install a user script
 
 - Visit any `.user.js` URL in Safari, then open the extension popup and you will see an installation prompt, or it will pop up automatically if you have enhanced prompts turned on.
-- You can also save `.user.js` files directly to the Userscripts directory. The script file must contain a valid metadata block to match the page and be displayed in the extension popup,
+- You can also save `.user.js` files directly to the Userscripts directory. The script file must contain a valid metadata block to match the page and be displayed in the extension popup.
 
 ### That’s it, start improving your quality of life now!
 
