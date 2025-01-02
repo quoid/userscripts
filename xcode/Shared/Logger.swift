@@ -190,8 +190,8 @@ func USLogFilesExportTo(_ directory: URL) throws -> URL {
 		enum errType: String {
 			case notDirectory = "Not a directory URL"
 			case logDirURLNil = "Failed get logDirURL"
-			case noLogDir = "Log directory does not exist"
-			case noLogFiles = "The log directory is empty"
+			case noLogDir = "The log is not ready, please try again later (d)"
+			case noLogFiles = "The log is not ready, please try again later (f)"
 			case exportFailed = "Export failed"
 		}
 		let type: errType
