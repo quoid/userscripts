@@ -219,6 +219,10 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 	func updateEnableLoggerState() {
 		self.webView.evaluateJavaScript("webapp.switchLogger(\(Preferences.enableLogger),\(Preferences.promptLogger))")
 	}
+	
+	func updateCurrentDirectory() {
+		self.webView.evaluateJavaScript("webapp.updateDirectory('\(getCurrentScriptsDirectoryString())')")
+	}
 
 #if os(macOS)
 	deinit {
@@ -268,7 +272,7 @@ extension ViewController: UIDocumentPickerDelegate {
 
 	func changeSaveLocationHandler(_ url: URL) {
 		Preferences.scriptsDirectoryUrl = url
-		webView.evaluateJavaScript("webapp.updateDirectory('\(getCurrentScriptsDirectoryString())')")
+		self.updateCurrentDirectory()
 	}
 
 	func exportLogFiles() {
@@ -367,7 +371,7 @@ extension ViewController {
 			// try set new save location path to bookmark
 			guard setSaveLocationURL(url: url) else { return }
 			// update user interface text display
-			self.webView.evaluateJavaScript("webapp.updateDirectory('\(getCurrentScriptsDirectoryString())')")
+			self.updateCurrentDirectory()
 			// notify browser extension of relevant updates
 			sendExtensionMessage(
 				name: "SAVE_LOCATION_CHANGED",
