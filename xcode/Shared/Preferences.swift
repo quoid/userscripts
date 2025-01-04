@@ -252,11 +252,12 @@ private struct SecurityScopedBookmark {
 		set(url) {
 			let k = key // key cannot be log directly with error: Escaping autoclosure captures mutating 'self' parameter
 			logger?.info("\(#function, privacy: .public) - try set bookmark: \(k, privacy: .public) \(url, privacy: .public)")
-			guard url.startAccessingSecurityScopedResource() else {
-				logger?.error("\(#function, privacy: .public) - failed access url: \(url, privacy: .public)")
-				return
+			// true - when url from UIDocumentPicker
+			// false - when set default app document
+			let didStartAccessing = url.startAccessingSecurityScopedResource()
+			defer {
+				if didStartAccessing { url.stopAccessingSecurityScopedResource() }
 			}
-			defer { url.stopAccessingSecurityScopedResource() }
 			guard let data = createBookmark(url) else {
 				logger?.info("\(#function, privacy: .public) - failed create bookmark: \(k, privacy: .public) \(url, privacy: .public)")
 				return
