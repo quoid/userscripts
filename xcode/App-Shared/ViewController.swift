@@ -300,7 +300,7 @@ extension ViewController: UIDocumentPickerDelegate {
 			logger?.error("\(#function, privacy: .public) - Export failed: \(error)")
 			let alert = UIAlertController(
 				title: "Export failed",
-				message: error.localizedDescription,
+				message: "\(error)",
 				preferredStyle: .alert
 			)
 			alert.addAction(UIAlertAction(title: "OK", style: .default))

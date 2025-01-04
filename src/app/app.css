@@ -91,7 +91,7 @@ a,
 x-markdown {
 	display: flex;
 	flex-direction: column;
-	overflow: scroll;
+	overflow: auto;
 	text-align: left;
 	gap: var(--gap);
 	padding: 0 3rem;
