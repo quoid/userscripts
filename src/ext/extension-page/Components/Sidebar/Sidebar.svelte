@@ -274,7 +274,7 @@
 	.sidebar__count {
 		backdrop-filter: blur(3px);
 		-webkit-backdrop-filter: blur(3px);
-		background: rgba(47 51 55 / 0.65);
+		background: var(--editor-blurred-background);
 		border-radius: var(--border-radius);
 		bottom: 0.25rem;
 		color: var(--text-color-secondary);

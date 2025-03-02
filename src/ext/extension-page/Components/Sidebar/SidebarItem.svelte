@@ -68,7 +68,6 @@
 
 	.item.active {
 		background-color: var(--color-script-highlighted);
-		background-color: #364049;
 		cursor: default;
 	}
 

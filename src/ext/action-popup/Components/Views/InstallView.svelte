@@ -158,7 +158,7 @@
 	}
 
 	button {
-		background-color: #ffffffa6; /* -text-color-secondary */
+		background-color: var(--text-color-secondary);
 		border-radius: var(--border-radius);
 		color: var(--color-bg-primary);
 		flex-grow: 1;

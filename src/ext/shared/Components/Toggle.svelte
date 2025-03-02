@@ -37,7 +37,7 @@
 	}
 
 	span {
-		background-color: var(--color-black);
+		background-color: var(--text-color-disabled);
 		border-radius: 0.625em;
 		display: block;
 		height: 100%;

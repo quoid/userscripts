@@ -1,38 +1,48 @@
+/* Base styles */
 :root {
+	/* Layout variables */
 	--border-radius: 0.188rem;
-	--box-shadow: 0 0.5rem 1rem 0 rgb(0 0 0 / 0.25);
+	--font-family: -apple-system, "Helvetica Neue", "Helvetica", sans-serif;
+	--letter-spacing-default: -0.029rem;
+	--letter-spacing-large: -0.031rem;
+	--letter-spacing-medium: -0.018rem;
+	--letter-spacing-small: -0.008rem;
+	--opacity-disabled: 0.3;
+	--text-default: 1rem/1.5rem var(--font-family);
+	--text-large: 1.25rem/1.5rem var(--font-family);
+	--text-medium: 0.875rem/1.313rem var(--font-family);
+	--text-small: 0.719rem/1rem var(--font-family);
+
+	/* Editor layout variables */
+	--editor-font: monaco, monospace;
+	--editor-font-size: 14px;
+	--editor-line-height: 24px;
+	--editor-active-line: var(--color-bg-secondary);
+	--editor-error: var(--color-red);
+	--editor-non-matching-bracket: var(--editor-error);
+	--editor-selected-bg: rgb(116 178 235 / 0.35);
+	--editor-matched-highlight: rgb(116 178 235 / 0.2);
+	--editor-search-highlight: rgb(255 166 0 / 0.3);
+}
+
+/* Dark theme (default) */
+body {
 	--color-bg-primary: #323639;
 	--color-bg-secondary: #2f3337;
-	--color-script-highlighted: #364049; /* rgba(116, 178, 235, 0.1); */
+	--color-script-highlighted: #364049;
 	--color-black: #1d2023;
 	--color-blue: #74b1eb;
 	--color-green: #60f36c;
 	--color-grey: rgb(255 255 255 / 0.15);
 	--color-red: #ff453a;
 	--color-yellow: #e4f360;
-	--letter-spacing-large: -0.031rem;
-	--letter-spacing-default: -0.029rem;
-	--letter-spacing-medium: -0.018rem;
-	--letter-spacing-small: -0.008rem;
-	--opacity-disabled: 0.3;
 	--text-color-primary: rgb(255 255 255);
 	--text-color-secondary: rgb(255 255 255 / 0.65);
 	--text-color-disabled: rgb(255 255 255 / 0.4);
-	--font-family: -apple-system, "Helvetica Neue", "Helvetica", sans-serif;
-	--text-default: 1rem/1.5rem var(--font-family);
-	--text-large: 1.25rem/1.5rem var(--font-family);
-	--text-medium: 0.875rem/1.313rem var(--font-family);
-	--text-small: 0.719rem/1rem var(--font-family);
+	--box-shadow: 0 0.5rem 1rem 0 rgb(0 0 0 / 0.25);
 
-	/* editor variables */
-	--editor-font: monaco, monospace;
-	--editor-font-size: 14px;
-	--editor-line-height: 24px;
+	/* Editor dark theme colors */
 	--editor-invisible: rgb(255 255 255 / 0.15);
-	--editor-active-line: var(--color-bg-secondary);
-	--editor-selected-bg: rgb(116 178 235 / 0.35);
-	--editor-matched-highlight: rgb(116 178 235 / 0.2);
-	--editor-search-highlight: rgb(255 166 0 / 0.3);
 	--editor-number: #77e26a;
 	--editor-comment: rgb(255 255 255 / 0.35);
 	--editor-def: #efc371;
@@ -43,9 +53,41 @@
 	--editor-property: #e86c8a;
 	--editor-string: #f5eea2;
 	--editor-string-2: #cdabff;
-	--editor-error: var(--color-red);
 	--editor-cursor: #e3e7eb;
 	--editor-matching-bracket-color: #fff;
 	--editor-matching-bracket-border: var(--editor-number);
-	--editor-non-matching-bracket: var(--editor-error);
+	--editor-blurred-background: rgba(50 54 57 / 0.65);
+}
+
+/* Light theme */
+body.light-theme {
+	--color-bg-primary: #fafafa;
+	--color-bg-secondary: #f1f1f1;
+	--color-script-highlighted: #e2ebf3;
+	--color-black: #fff;
+	--color-blue: #317eff;
+	--color-green: #2bb239;
+	--color-grey: rgb(51 51 51 / 0.15);
+	--color-red: #ff453a;
+	--color-yellow: #b8722c;
+	--text-color-primary: rgb(51 51 51);
+	--text-color-secondary: rgb(51 51 51 / 0.65);
+	--text-color-disabled: rgb(51 51 51 / 0.35);
+
+	/* Editor light theme colors */
+	--editor-invisible: rgb(51 51 51 / 0.15);
+	--editor-number: var(--color-green);
+	--editor-comment: var(--text-color-disabled);
+	--editor-def: #b86d17;
+	--editor-default: #777;
+	--editor-keyword: #3a68ff;
+	--editor-atom: #00adad;
+	--editor-operator: #8c99a7;
+	--editor-property: #ff453a;
+	--editor-string: var(--editor-atom);
+	--editor-string-2: #a34fe6;
+	--editor-cursor: #7e7e7f;
+	--editor-matching-bracket-color: var(--text-color-primary);
+	--editor-matching-bracket-border: #ff00ea;
+	--editor-blurred-background: rgba(255 255 255 / 0.65); /* eeeeeea6 */
 }

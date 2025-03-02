@@ -311,7 +311,7 @@
 	}
 
 	.editor__footer {
-		background: rgba(50 54 57 / 0.65);
+		background: var(--editor-blurred-background);
 		border-radius: var(--border-radius);
 		bottom: 0.25rem;
 		padding: 0.5rem 1rem;
