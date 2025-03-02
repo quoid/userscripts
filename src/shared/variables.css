@@ -23,10 +23,8 @@
 	--editor-selected-bg: rgb(116 178 235 / 0.35);
 	--editor-matched-highlight: rgb(116 178 235 / 0.2);
 	--editor-search-highlight: rgb(255 166 0 / 0.3);
-}
 
-/* Dark theme (default) */
-body {
+	/* Dark theme (default) */
 	--color-bg-primary: #323639;
 	--color-bg-secondary: #2f3337;
 	--color-script-highlighted: #364049;
@@ -60,34 +58,37 @@ body {
 }
 
 /* Light theme */
-body.light-theme {
-	--color-bg-primary: #fafafa;
-	--color-bg-secondary: #f1f1f1;
-	--color-script-highlighted: #e2ebf3;
-	--color-black: #fff;
-	--color-blue: #317eff;
-	--color-green: #2bb239;
-	--color-grey: rgb(51 51 51 / 0.15);
-	--color-red: #ff453a;
-	--color-yellow: #b8722c;
-	--text-color-primary: rgb(51 51 51);
-	--text-color-secondary: rgb(51 51 51 / 0.65);
-	--text-color-disabled: rgb(51 51 51 / 0.35);
+@media (prefers-color-scheme: light) {
+	:root {
+		color-scheme: light dark;
+		--color-bg-primary: #fafafa;
+		--color-bg-secondary: #f1f1f1;
+		--color-script-highlighted: #e2ebf3;
+		--color-black: #fff;
+		--color-blue: #317eff;
+		--color-green: #2bb239;
+		--color-grey: rgb(51 51 51 / 0.15);
+		--color-red: #ff453a;
+		--color-yellow: #b8722c;
+		--text-color-primary: rgb(51 51 51);
+		--text-color-secondary: rgb(51 51 51 / 0.65);
+		--text-color-disabled: rgb(51 51 51 / 0.35);
 
-	/* Editor light theme colors */
-	--editor-invisible: rgb(51 51 51 / 0.15);
-	--editor-number: var(--color-green);
-	--editor-comment: var(--text-color-disabled);
-	--editor-def: #b86d17;
-	--editor-default: #777;
-	--editor-keyword: #3a68ff;
-	--editor-atom: #00adad;
-	--editor-operator: #8c99a7;
-	--editor-property: #ff453a;
-	--editor-string: var(--editor-atom);
-	--editor-string-2: #a34fe6;
-	--editor-cursor: #7e7e7f;
-	--editor-matching-bracket-color: var(--text-color-primary);
-	--editor-matching-bracket-border: #ff00ea;
-	--editor-blurred-background: rgba(255 255 255 / 0.65); /* eeeeeea6 */
+		/* Editor light theme colors */
+		--editor-invisible: rgb(51 51 51 / 0.15);
+		--editor-number: var(--color-green);
+		--editor-comment: var(--text-color-disabled);
+		--editor-def: #b86d17;
+		--editor-default: #777;
+		--editor-keyword: #3a68ff;
+		--editor-atom: #00adad;
+		--editor-operator: #8c99a7;
+		--editor-property: #ff453a;
+		--editor-string: var(--editor-atom);
+		--editor-string-2: #a34fe6;
+		--editor-cursor: #7e7e7f;
+		--editor-matching-bracket-color: var(--text-color-primary);
+		--editor-matching-bracket-border: #ff00ea;
+		--editor-blurred-background: rgba(255 255 255 / 0.65); /* eeeeeea6 */
+	}
 }
