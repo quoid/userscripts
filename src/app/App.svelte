@@ -2,7 +2,7 @@
 
 <script>
 	import logoIcon from "@shared/img/logo-icon.png";
-	import logoText from "@shared/img/logo-text.svg?raw";
+	import LogoText from "@shared/Components/LogoText.svelte";
 	import IconDebug from "@shared/img/icon-bug.svg?raw";
 	import Dropdown from "@shared/Components/Dropdown.svelte";
 	import { i18nInit } from "./i18n.js";
@@ -153,8 +153,9 @@
 				draggable="false"
 				src={logoIcon}
 			/>
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			<div class="logo">{@html logoText}</div>
+			<div class="logo">
+				<LogoText />
+			</div>
 			<div class="version">
 				{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
 					<a href="{baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
