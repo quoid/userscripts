@@ -6,15 +6,16 @@ import App from "./App.svelte";
 
 // vite feat that only import in dev mode
 if (import.meta.env.MODE === "development") {
-	const modules = import.meta.glob("@ext/dev.js", { eager: true });
-	const browser = modules["@ext/dev.js"]["browser"];
-	console.debug("DEV-ENV", import.meta.env, modules, browser);
-	if (!window?.browser?.extension) {
-		// assign to window simulation WebExtension APIs
-		window.browser = browser;
-		// macos popup simulation
-		const style = document.createElement("style");
-		style.textContent = `
+	try {
+		const modules = import.meta.glob("@ext/dev.js", { eager: true });
+		const browser = modules["/src/ext/shared/dev.js"]["browser"];
+		console.debug("DEV-ENV", import.meta.env, modules, browser);
+		if (!window?.browser?.extension && browser) {
+			// assign to window simulation WebExtension APIs
+			window.browser = browser;
+			// macos popup simulation
+			const style = document.createElement("style");
+			style.textContent = `
 body {
 	top: 20px;
 	left: 20px;
@@ -34,7 +35,10 @@ body:before {
 	border-radius: 9px;
 }
 `;
-		browser.platform === "macos" && document.head.append(style);
+			browser.platform === "macos" && document.head.append(style);
+		}
+	} catch (error) {
+		console.error(error);
 	}
 }
 
