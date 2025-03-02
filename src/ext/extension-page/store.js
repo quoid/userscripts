@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
-import { uniqueId, contentScriptRegistration } from "../shared/utils.js";
-import * as settingsStorage from "../shared/settings.js";
-import { sendNativeMessage } from "../shared/native.js";
+import { uniqueId, contentScriptRegistration } from "@ext/utils.js";
+import * as settingsStorage from "@ext/settings.js";
+import { sendNativeMessage } from "@ext/native.js";
 
 function notificationStore() {
 	const { subscribe, update } = writable([]);

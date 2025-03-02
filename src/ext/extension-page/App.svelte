@@ -7,8 +7,8 @@
 	import Settings from "./Components/Settings.svelte";
 	import ModalWrapper from "./Components/ModalWrapper.svelte";
 	import Notification from "./Components/Notification.svelte";
-	import logo from "../shared/img/logo.svg?raw";
-	import { connectNative, sendNativeMessage } from "../shared/native.js";
+	import logo from "@shared/img/logo-text.svg?raw";
+	import { connectNative, sendNativeMessage } from "@ext/native.js";
 
 	const logger = [];
 

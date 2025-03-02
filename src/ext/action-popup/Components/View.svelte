@@ -1,8 +1,8 @@
 <script>
 	import { quintInOut } from "svelte/easing";
-	import IconButton from "../../shared/Components/IconButton.svelte";
-	import Loader from "../../shared/Components/Loader.svelte";
-	import iconArrowLeft from "../../shared/img/icon-arrow-left.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import Loader from "@shared/Components/Loader.svelte";
+	import iconArrowLeft from "@shared/img/icon-arrow-left.svg?raw";
 
 	export let loading = false;
 	export let headerTitle = "View Header";

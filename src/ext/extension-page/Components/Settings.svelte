@@ -1,17 +1,17 @@
 <script>
-	import * as settingsStorage from "../../shared/settings.js";
+	import * as settingsStorage from "@ext/settings.js";
 	import { settings, log } from "../store.js";
 	import {
 		gl,
 		openInBlank,
 		downloadToFile,
 		parseMatchPatterns,
-	} from "../../shared/utils.js";
-	import { sendNativeMessage } from "../../shared/native.js";
-	import Toggle from "../../shared/Components/Toggle.svelte";
-	import IconButton from "../../shared/Components/IconButton.svelte";
-	import iconEdit from "../../shared/img/icon-edit.svg?raw";
-	import iconLoader from "../../shared/img/icon-loader.svg?raw";
+	} from "@ext/utils.js";
+	import { sendNativeMessage } from "@ext/native.js";
+	import Toggle from "@shared/Components/Toggle.svelte";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconEdit from "@shared/img/icon-edit.svg?raw";
+	import iconLoader from "@shared/img/icon-loader.svg?raw";
 
 	/** @type {"macos"|"ios"|"ipados"} */
 	export let platform;

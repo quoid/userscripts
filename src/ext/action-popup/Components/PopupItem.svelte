@@ -1,5 +1,5 @@
 <script>
-	import Tag from "../../shared/Components/Tag.svelte";
+	import Tag from "@shared/Components/Tag.svelte";
 
 	export let background;
 	export let enabled = false;

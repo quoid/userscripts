@@ -1,11 +1,11 @@
 <script>
-	import { gl } from "../../../shared/utils.js";
+	import { gl } from "@ext/utils.js";
 	import { items, settings, state } from "../../store.js";
-	import { settingsDictionary } from "../../../shared/settings.js";
-	import Dropdown from "../../../shared/Components/Dropdown.svelte";
-	import IconButton from "../../../shared/Components/IconButton.svelte";
-	import iconSort from "../../../shared/img/icon-sort.svg?raw";
-	import iconClear from "../../../shared/img/icon-clear.svg?raw";
+	import { settingsDictionary } from "@ext/settings.js";
+	import Dropdown from "@shared/Components/Dropdown.svelte";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconSort from "@shared/img/icon-sort.svg?raw";
+	import iconClear from "@shared/img/icon-clear.svg?raw";
 
 	$: disabled = !$state.includes("ready");
 

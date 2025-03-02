@@ -23,8 +23,7 @@
 		"sourceMap": true,
 
 		"paths": {
-			"@shared/*": ["../shared/*"],
-			"@ext/*": ["./shared/*"]
+			"@shared/*": ["./*"]
 		}
 	},
 	"include": ["**/*.d.ts", "**/*.js", "**/*.svelte"]

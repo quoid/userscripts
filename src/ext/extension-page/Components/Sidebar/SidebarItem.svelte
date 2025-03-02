@@ -1,6 +1,6 @@
 <script>
-	import Tag from "../../../shared/Components/Tag.svelte";
-	import Toggle from "../../../shared/Components/Toggle.svelte";
+	import Tag from "@shared/Components/Tag.svelte";
+	import Toggle from "@shared/Components/Toggle.svelte";
 
 	// the data that will populate the item contents in sidebar
 	export let data = {};

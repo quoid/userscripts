@@ -1,5 +1,5 @@
 import "./reset.css";
-import "../shared/variables.css";
+import "@shared/variables.css";
 import "./app.css";
 import { mount } from "svelte";
 import App from "./App.svelte";

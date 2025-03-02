@@ -4,8 +4,8 @@
 	import { log, notifications, settings, state } from "./store.js";
 	import Settings from "./Components/Settings.svelte";
 	import Notification from "./Components/Notification.svelte";
-	import logo from "../shared/img/logo.svg?raw";
-	import { sendNativeMessage } from "../shared/native.js";
+	import logo from "@shared/img/logo-text.svg?raw";
+	import { sendNativeMessage } from "@ext/native.js";
 
 	const logger = [];
 

@@ -1,13 +1,13 @@
-import "../shared/reset.css";
-import "../../shared/variables.css";
+import "@shared/reset.css";
+import "@shared/variables.css";
 import "./app.css";
 import { mount } from "svelte";
 import App from "./App.svelte";
 
 // vite feat that only import in dev mode
 if (import.meta.env.MODE === "development") {
-	const modules = import.meta.glob("../shared/dev.js", { eager: true });
-	const browser = modules["../shared/dev.js"]["browser"];
+	const modules = import.meta.glob("@ext/dev.js", { eager: true });
+	const browser = modules["@ext/dev.js"]["browser"];
 	console.debug("DEV-ENV", import.meta.env, modules, browser);
 	if (!window?.browser?.extension) {
 		// assign to window simulation WebExtension APIs

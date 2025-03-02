@@ -1,9 +1,9 @@
 <script>
 	import { tick } from "svelte";
-	import IconButton from "../../../shared/Components/IconButton.svelte";
-	import iconArrowDown from "../../../shared/img/icon-arrow-down.svg?raw";
-	import iconArrowUp from "../../../shared/img/icon-arrow-up.svg?raw";
-	import iconClose from "../../../shared/img/icon-close.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconArrowDown from "@shared/img/icon-arrow-down.svg?raw";
+	import iconArrowUp from "@shared/img/icon-arrow-up.svg?raw";
+	import iconClose from "@shared/img/icon-close.svg?raw";
 
 	// determines whether or not search bar is shown
 	export let active;

@@ -1,8 +1,8 @@
 <script>
 	export let closeHandler;
 	import { fade, fly } from "svelte/transition";
-	import IconButton from "../../shared/Components/IconButton.svelte";
-	import iconClose from "../../shared/img/icon-close.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconClose from "@shared/img/icon-close.svg?raw";
 
 	let nav = false;
 	const navAnchors = new Map();

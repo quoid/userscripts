@@ -191,4 +191,11 @@ export const baseConfig = {
 				"import.meta.env.GIT_TAG": JSON.stringify(gitTag),
 				"import.meta.env.GIT_COMMIT": JSON.stringify(gitCommit),
 			},
+	resolve: {
+		alias: {
+			// NOTE: Don't forget to modify the `paths` in `jsconfig.json` also
+			"@shared": fileURLToPath(new URL("../src/shared", import.meta.url)),
+			"@ext": fileURLToPath(new URL("../src/ext/shared", import.meta.url)),
+		},
+	},
 };

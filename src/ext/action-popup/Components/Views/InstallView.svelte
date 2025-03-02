@@ -1,6 +1,6 @@
 <script>
-	import iconWarn from "../../../shared/img/icon-warn.svg?raw";
-	import iconError from "../../../shared/img/icon-error.svg?raw";
+	import iconWarn from "@shared/img/icon-warn.svg?raw";
+	import iconError from "@shared/img/icon-error.svg?raw";
 
 	export let userscript;
 	export let installError;

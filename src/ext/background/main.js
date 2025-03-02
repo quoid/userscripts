@@ -1,9 +1,6 @@
-import {
-	contentScriptRegistration,
-	openExtensionPage,
-} from "../shared/utils.js";
-import * as settingsStorage from "../shared/settings.js";
-import { connectNative, sendNativeMessage } from "../shared/native.js";
+import { contentScriptRegistration, openExtensionPage } from "@ext/utils.js";
+import * as settingsStorage from "@ext/settings.js";
+import { connectNative, sendNativeMessage } from "@ext/native.js";
 
 // first sorts files by run-at value, then by weight value
 function userscriptSort(a, b) {
