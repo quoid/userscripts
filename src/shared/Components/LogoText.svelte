@@ -22,6 +22,6 @@
 	}
 
 	.safari {
-		fill: light-dark(#96c3ed, #96c3ed);
+		fill: light-dark(#288deb, #96c3ed);
 	}
 </style>
