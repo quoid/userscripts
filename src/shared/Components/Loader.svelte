@@ -49,6 +49,7 @@
 	.loader :global(svg) {
 		height: 2rem;
 		width: 2rem;
+		stroke: var(--text-color-primary);
 	}
 
 	.loader div {

@@ -652,6 +652,7 @@
 	.circling > :global(svg) {
 		height: 0.75rem;
 		width: 0.75rem;
+		stroke: var(--text-color-primary);
 	}
 
 	.textarea_box {
