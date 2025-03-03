@@ -661,19 +661,7 @@
 		margin: var(--row-gap) 0;
 	}
 
-	.textarea mark {
-		color: transparent;
-		color: var(--text-color-primary);
-		background-color: red;
-		border-radius: var(--border-radius);
-		opacity: 1;
-	}
-
-	.textarea mark.warn {
-		background-color: var(--color-yellow);
-		background-color: #808000;
-	}
-
+	/* Sync two layers */
 	.textarea,
 	textarea {
 		background-color: var(--color-bg-theme);
@@ -693,7 +681,13 @@
 		word-break: break-all;
 	}
 
+	/* Lower layer */
+	.textarea::-webkit-scrollbar {
+		display: none;
+	}
+
 	.textarea {
+		/* Text is colored by the upper layer by default */
 		color: transparent;
 		overflow: scroll;
 		user-select: none;
@@ -701,10 +695,20 @@
 		white-space: pre-wrap;
 	}
 
-	.textarea::-webkit-scrollbar {
-		display: none;
+	.textarea mark {
+		/* Deeper the color of marked text when lose focus */
+		color: var(--text-color-primary);
+		background-color: light-dark(#ffae9e, red);
+		border-radius: var(--border-radius);
+		opacity: 1;
 	}
 
+	.textarea mark.warn {
+		background-color: var(--color-yellow);
+		background-color: light-dark(#fff000, #808000);
+	}
+
+	/* Upper layer */
 	textarea {
 		background-color: transparent;
 		position: absolute;
@@ -733,6 +737,8 @@
 
 	textarea:focus {
 		opacity: 1;
+
+		/* Must have color when text selected, otherwise the text will fade */
 		color: var(--text-color-primary);
 	}
 
