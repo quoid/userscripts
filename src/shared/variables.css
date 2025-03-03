@@ -79,6 +79,7 @@
 		--text-color-primary: rgb(51 51 51);
 		--text-color-secondary: rgb(51 51 51 / 0.65);
 		--text-color-disabled: rgb(51 51 51 / 0.35);
+		--box-shadow: 0 0.25rem 1rem 0 rgb(0 0 0 / 0.15);
 		--button-color: var(--color-white);
 		--border-color: var(--color-grey);
 
