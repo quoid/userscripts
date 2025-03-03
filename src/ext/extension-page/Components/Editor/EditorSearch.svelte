@@ -163,7 +163,7 @@
 <style>
 	.editor__search {
 		align-items: center;
-		border: 1px solid black;
+		border: 1px solid var(--border-color);
 		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);

@@ -80,7 +80,7 @@
 		--text-color-secondary: rgb(51 51 51 / 0.65);
 		--text-color-disabled: rgb(51 51 51 / 0.35);
 		--button-color: var(--color-white);
-		--border-color: var(--color-white);
+		--border-color: var(--color-grey);
 
 		/* Editor light theme colors */
 		--editor-invisible: rgb(51 51 51 / 0.15);

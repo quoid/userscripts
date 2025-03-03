@@ -36,7 +36,7 @@
 
 .CodeMirror-hints {
 	background-color: var(--color-bg-theme);
-	border: 1px solid black;
+	border: 1px solid var(--border-color);
 	box-shadow: var(--box-shadow);
 	font: var(--text-small);
 	font-family: var(--editor-font);
@@ -181,7 +181,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .CodeMirror-lint-tooltip {
 	background-color: var(--color-bg-theme);
-	border: 1px solid black;
+	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius);
 	box-shadow: var(--box-shadow);
 	color: var(--text-color-secondary);
