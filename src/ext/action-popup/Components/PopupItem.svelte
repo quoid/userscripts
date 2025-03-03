@@ -50,7 +50,7 @@
 	span {
 		align-items: center;
 		background-color: var(--color-red);
-		border: 1px solid var(--color-black);
+		border: 1px solid var(--border-color);
 		border-radius: 50%;
 		display: flex;
 		display: none;

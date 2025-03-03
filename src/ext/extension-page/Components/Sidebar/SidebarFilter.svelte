@@ -75,7 +75,7 @@
 	}
 
 	input {
-		background-color: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border: none;
 		border-radius: var(--border-radius);
 		color: inherit;

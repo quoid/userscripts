@@ -129,7 +129,7 @@
 	}
 
 	.badge {
-		background-color: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		display: flex;
 		font: var(--text-small);

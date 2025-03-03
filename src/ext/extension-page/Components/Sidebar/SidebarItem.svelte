@@ -51,7 +51,7 @@
 <style>
 	.item {
 		background-color: var(--color-bg-secondary);
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		cursor: pointer;
 		padding: 1rem 1rem calc(1rem - 1px);
 	}

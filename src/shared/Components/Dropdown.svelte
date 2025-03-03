@@ -52,7 +52,7 @@
 	}
 
 	ul {
-		background-color: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border: 1px solid black;
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);
@@ -100,7 +100,7 @@
 
 	ul :global(li:hover:not(.separator)) {
 		background-color: var(--color-blue);
-		color: var(--color-black);
+		color: light-dark(var(--color-white), var(--color-black));
 	}
 
 	ul :global(button) {
@@ -118,7 +118,7 @@
 
 	ul :global(button:hover) {
 		background-color: var(--color-blue);
-		color: var(--color-black);
+		color: light-dark(var(--color-white), var(--color-black));
 	}
 
 	ul :global(button:active) {

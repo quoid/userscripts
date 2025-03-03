@@ -35,7 +35,7 @@
 <style>
 	.item {
 		align-items: center;
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		display: flex;
 		padding: 0.5rem 1rem;
 		text-align: left;

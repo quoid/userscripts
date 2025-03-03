@@ -51,7 +51,7 @@
 
 	.view__header {
 		background-color: var(--color-bg-secondary);
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		flex-shrink: 0;
 		font-weight: 600;
 		padding: 0.5rem 1rem calc(0.5rem - 1px);

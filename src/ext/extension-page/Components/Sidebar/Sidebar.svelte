@@ -247,7 +247,7 @@
 <style>
 	.sidebar {
 		background-color: var(--color-bg-secondary);
-		border-right: 1px solid var(--color-black);
+		border-right: 1px solid var(--border-color);
 		display: flex;
 		flex-direction: column;
 		flex: 0 0 23rem;
@@ -288,7 +288,7 @@
 
 	.sidebar__body {
 		background-color: inherit; /* need this property to pass to loader */
-		border-top: 1px solid var(--color-black);
+		border-top: 1px solid var(--border-color);
 		flex-basis: 100%;
 		overflow-y: auto;
 		position: relative;

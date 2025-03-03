@@ -657,7 +657,7 @@
 
 	.header .buttons {
 		align-items: center;
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		display: flex;
 		padding: 0.5rem 1rem calc(0.5rem - 1px);
 	}
@@ -746,7 +746,7 @@
 	}
 
 	.footer {
-		border-top: 1px solid var(--color-black);
+		border-top: 1px solid var(--border-color);
 		font-weight: 600;
 		line-height: 1.5rem;
 		padding: 0.5rem 0;

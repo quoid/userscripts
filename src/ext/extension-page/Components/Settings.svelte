@@ -551,8 +551,8 @@
 	.section_header {
 		display: flex;
 		align-items: center;
-		border-top: 1px solid var(--color-black);
-		border-bottom: 1px solid var(--color-black);
+		border-top: 1px solid var(--border-color);
+		border-bottom: 1px solid var(--border-color);
 		background-color: var(--color-bg-primary);
 		color: var(--text-color-primary);
 		font: var(--text-default);
@@ -569,7 +569,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--row-gap);
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		margin: 0 2rem;
 		padding: 1rem 0;
 	}
@@ -676,7 +676,7 @@
 
 	.textarea,
 	textarea {
-		background-color: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		border: 1px solid transparent;
 		color: inherit;
@@ -737,7 +737,7 @@
 	}
 
 	button.done {
-		background: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		color: var(--text-color-primary);
 		font-weight: 600;
@@ -759,7 +759,7 @@
 
 	.tools button {
 		flex: 1;
-		background: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		color: var(--text-color-primary);
 		font-weight: 600;
@@ -775,7 +775,7 @@
 	@media (hover: hover) {
 		.tools button:hover {
 			background-color: var(--color-blue);
-			color: var(--color-black);
+			color: light-dark(var(--color-white), var(--color-black));
 			opacity: 1;
 		}
 

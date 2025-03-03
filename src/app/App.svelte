@@ -371,7 +371,7 @@
 
 	button.red,
 	button.red2:hover {
-		color: light-dark(var(--color-black), var(--text-color-primary));
+		color: var(--color-white);
 		background-color: var(--color-red);
 	}
 
