@@ -60,7 +60,7 @@
 <style>
 	li {
 		background-color: var(--color-black);
-		border: 1px solid black;
+		border: 1px solid var(--color-black);
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);
 		color: var(--text-color-secondary);
