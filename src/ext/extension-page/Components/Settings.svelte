@@ -556,7 +556,7 @@
 		background-color: var(--color-bg-primary);
 		color: var(--text-color-primary);
 		font: var(--text-default);
-		font-weight: 500;
+		font-weight: 600;
 		letter-spacing: var(--letter-spacing-default);
 		padding: calc(1rem - 2px) 1rem 1rem;
 	}
@@ -594,9 +594,14 @@
 		color: var(--color-red);
 	}
 
+	.section_row .name {
+		font-weight: 500;
+	}
+
 	.section_row .desc {
 		color: var(--text-color-secondary);
 		font: var(--text-small);
+		font-weight: 500;
 	}
 
 	.row_grid {
@@ -641,6 +646,14 @@
 
 	select {
 		color: var(--text-color-primary);
+		font-size: 125%;
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		select {
+			font-size: 100%;
+		}
 	}
 
 	.circling {
