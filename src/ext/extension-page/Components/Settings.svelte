@@ -800,7 +800,7 @@
 
 		.tools button.danger:hover {
 			background: var(--color-red);
-			color: var(--text-color-primary);
+			color: var(--color-white);
 		}
 
 		button.reset:hover {
@@ -812,7 +812,7 @@
 	@supports (-webkit-touch-callout: none) {
 		.tools button.danger {
 			background: var(--color-red);
-			color: var(--text-color-primary);
+			color: var(--color-white);
 		}
 	}
 
@@ -824,7 +824,7 @@
 	button.reset {
 		background: var(--color-red);
 		border-radius: var(--border-radius);
-		color: var(--text-color-primary);
+		color: var(--color-white);
 		font-weight: 700;
 		line-height: calc(var(--toggle-font-size) + 0.1rem);
 		opacity: 0.75;
