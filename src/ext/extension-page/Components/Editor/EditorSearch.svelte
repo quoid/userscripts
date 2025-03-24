@@ -1,9 +1,9 @@
 <script>
 	import { tick } from "svelte";
-	import IconButton from "../../../shared/Components/IconButton.svelte";
-	import iconArrowDown from "../../../shared/img/icon-arrow-down.svg?raw";
-	import iconArrowUp from "../../../shared/img/icon-arrow-up.svg?raw";
-	import iconClose from "../../../shared/img/icon-close.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconArrowDown from "@shared/img/icon-arrow-down.svg?raw";
+	import iconArrowUp from "@shared/img/icon-arrow-up.svg?raw";
+	import iconClose from "@shared/img/icon-close.svg?raw";
 
 	// determines whether or not search bar is shown
 	export let active;
@@ -163,8 +163,8 @@
 <style>
 	.editor__search {
 		align-items: center;
-		border: 1px solid black;
-		background-color: var(--color-black);
+		border: 1px solid var(--border-color);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);
 		display: flex;

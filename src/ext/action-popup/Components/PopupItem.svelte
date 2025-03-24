@@ -1,5 +1,5 @@
 <script>
-	import Tag from "../../shared/Components/Tag.svelte";
+	import Tag from "@shared/Components/Tag.svelte";
 
 	export let background;
 	export let enabled = false;
@@ -50,7 +50,7 @@
 	span {
 		align-items: center;
 		background-color: var(--color-red);
-		border: 1px solid var(--color-black);
+		border: 1px solid var(--border-color);
 		border-radius: 50%;
 		display: flex;
 		display: none;

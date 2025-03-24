@@ -5,11 +5,11 @@
 	import { tweened } from "svelte/motion";
 	import { linear } from "svelte/easing";
 	import { notifications } from "../store.js";
-	import IconButton from "../../shared/Components/IconButton.svelte";
-	import iconClose from "../../shared/img/icon-close.svg?raw";
-	import iconError from "../../shared/img/icon-error.svg?raw";
-	import iconInfo from "../../shared/img/icon-info.svg?raw";
-	import iconWarn from "../../shared/img/icon-warn.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconClose from "@shared/img/icon-close.svg?raw";
+	import iconError from "@shared/img/icon-error.svg?raw";
+	import iconInfo from "@shared/img/icon-info.svg?raw";
+	import iconWarn from "@shared/img/icon-warn.svg?raw";
 
 	export let item;
 
@@ -59,8 +59,8 @@
 
 <style>
 	li {
-		background-color: var(--color-black);
-		border: 1px solid black;
+		background-color: var(--color-bg-theme);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
 		box-shadow: var(--box-shadow);
 		color: var(--text-color-secondary);

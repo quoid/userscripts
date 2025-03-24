@@ -1,10 +1,10 @@
 <svelte:options runes={true} />
 
 <script>
-	import icon from "./img/icon.png";
-	import logo from "./img/logo.svg?raw";
-	import IconDebug from "../ext/shared/img/icon-bug.svg?raw";
-	import Dropdown from "../ext/shared/Components/Dropdown.svelte";
+	import logoIcon from "@shared/img/logo-icon.png";
+	import LogoText from "@shared/Components/LogoText.svelte";
+	import IconDebug from "@shared/img/icon-bug.svg?raw";
+	import Dropdown from "@shared/Components/Dropdown.svelte";
 	import { i18nInit } from "./i18n.js";
 
 	const baseUrl = "https://github.com/quoid/userscripts";
@@ -151,10 +151,11 @@
 				alt="Userscripts App Icon"
 				class="icon"
 				draggable="false"
-				src={icon}
+				src={logoIcon}
 			/>
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			<div class="logo">{@html logo}</div>
+			<div class="logo">
+				<LogoText />
+			</div>
 			<div class="version">
 				{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
 					<a href="{baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
@@ -370,7 +371,7 @@
 
 	button.red,
 	button.red2:hover {
-		color: var(--text-color-primary);
+		color: var(--color-white);
 		background-color: var(--color-red);
 	}
 

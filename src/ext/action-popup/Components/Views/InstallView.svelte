@@ -1,6 +1,6 @@
 <script>
-	import iconWarn from "../../../shared/img/icon-warn.svg?raw";
-	import iconError from "../../../shared/img/icon-error.svg?raw";
+	import iconWarn from "@shared/img/icon-warn.svg?raw";
+	import iconError from "@shared/img/icon-error.svg?raw";
 
 	export let userscript;
 	export let installError;
@@ -129,7 +129,7 @@
 	}
 
 	.badge {
-		background-color: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		display: flex;
 		font: var(--text-small);
@@ -158,7 +158,7 @@
 	}
 
 	button {
-		background-color: #ffffffa6; /* -text-color-secondary */
+		background-color: var(--text-color-secondary);
 		border-radius: var(--border-radius);
 		color: var(--color-bg-primary);
 		flex-grow: 1;

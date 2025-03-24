@@ -1,8 +1,8 @@
 <script>
 	import { quintInOut } from "svelte/easing";
-	import IconButton from "../../shared/Components/IconButton.svelte";
-	import Loader from "../../shared/Components/Loader.svelte";
-	import iconArrowLeft from "../../shared/img/icon-arrow-left.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import Loader from "@shared/Components/Loader.svelte";
+	import iconArrowLeft from "@shared/img/icon-arrow-left.svg?raw";
 
 	export let loading = false;
 	export let headerTitle = "View Header";
@@ -51,7 +51,7 @@
 
 	.view__header {
 		background-color: var(--color-bg-secondary);
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		flex-shrink: 0;
 		font-weight: 600;
 		padding: 0.5rem 1rem calc(0.5rem - 1px);

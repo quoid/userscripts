@@ -40,7 +40,7 @@ export default [
 
 	/** @see {@link https://eslint.org/docs/latest/use/configure/migration-guide#configuring-language-options} */
 	{
-		files: ["scripts/**/*.js"],
+		files: ["*.js", "scripts/**/*.js"],
 		languageOptions: {
 			globals: {
 				...globals.node,
@@ -48,7 +48,7 @@ export default [
 		},
 	},
 	{
-		files: ["src/{app,dev}/**/*.{js,svelte}"],
+		files: ["src/{app,dev,shared}/**/*.{js,svelte}"],
 		languageOptions: {
 			globals: {
 				...globals.browser,

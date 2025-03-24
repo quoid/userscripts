@@ -2,15 +2,15 @@
 	import { tick } from "svelte";
 	import { fade } from "svelte/transition";
 	import { items, log, settings, state } from "../../store.js";
-	import { newScriptDefault, sortBy, uniqueId } from "../../../shared/utils.js";
-	import { sendNativeMessage } from "../../../shared/native.js";
+	import { newScriptDefault, sortBy, uniqueId } from "@ext/utils.js";
+	import { sendNativeMessage } from "@ext/native.js";
 	import SidebarFilter from "./SidebarFilter.svelte";
-	import IconButton from "../../../shared/Components/IconButton.svelte";
-	import Dropdown from "../../../shared/Components/Dropdown.svelte";
-	import Loader from "../../../shared/Components/Loader.svelte";
 	import SidebarItem from "./SidebarItem.svelte";
-	import iconPlus from "../../../shared/img/icon-plus.svg?raw";
-	import iconSettings from "../../../shared/img/icon-settings.svg?raw";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import Dropdown from "@shared/Components/Dropdown.svelte";
+	import Loader from "@shared/Components/Loader.svelte";
+	import iconPlus from "@shared/img/icon-plus.svg?raw";
+	import iconSettings from "@shared/img/icon-settings.svg?raw";
 	import {
 		cmChanged,
 		cmGetInstance,
@@ -247,7 +247,7 @@
 <style>
 	.sidebar {
 		background-color: var(--color-bg-secondary);
-		border-right: 1px solid var(--color-black);
+		border-right: 1px solid var(--border-color);
 		display: flex;
 		flex-direction: column;
 		flex: 0 0 23rem;
@@ -274,7 +274,7 @@
 	.sidebar__count {
 		backdrop-filter: blur(3px);
 		-webkit-backdrop-filter: blur(3px);
-		background: rgba(47 51 55 / 0.65);
+		background: var(--editor-blurred-background);
 		border-radius: var(--border-radius);
 		bottom: 0.25rem;
 		color: var(--text-color-secondary);
@@ -288,7 +288,7 @@
 
 	.sidebar__body {
 		background-color: inherit; /* need this property to pass to loader */
-		border-top: 1px solid var(--color-black);
+		border-top: 1px solid var(--border-color);
 		flex-basis: 100%;
 		overflow-y: auto;
 		position: relative;

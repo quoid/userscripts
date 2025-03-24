@@ -1,6 +1,6 @@
 <script>
 	import { fade } from "svelte/transition";
-	import iconLoader from "../../shared/img/icon-loader.svg?raw";
+	import iconLoader from "@shared/img/icon-loader.svg?raw";
 
 	export let abort = false;
 	export let abortClick = () => {};
@@ -49,6 +49,7 @@
 	.loader :global(svg) {
 		height: 2rem;
 		width: 2rem;
+		stroke: var(--text-color-primary);
 	}
 
 	.loader div {

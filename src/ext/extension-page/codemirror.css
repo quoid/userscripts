@@ -35,8 +35,8 @@
 }
 
 .CodeMirror-hints {
-	background-color: var(--color-black);
-	border: 1px solid black;
+	background-color: var(--color-bg-theme);
+	border: 1px solid var(--border-color);
 	box-shadow: var(--box-shadow);
 	font: var(--text-small);
 	font-family: var(--editor-font);
@@ -49,7 +49,7 @@
 
 li.CodeMirror-hint-active {
 	background-color: var(--color-blue);
-	color: var(--color-black);
+	color: light-dark(var(--color-white), var(--color-black));
 }
 
 .cm-s-default .CodeMirror-selected {
@@ -180,8 +180,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .CodeMirror-lint-tooltip {
-	background-color: var(--color-black);
-	border: 1px solid black;
+	background-color: var(--color-bg-theme);
+	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius);
 	box-shadow: var(--box-shadow);
 	color: var(--text-color-secondary);

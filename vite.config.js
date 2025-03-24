@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { baseConfig } from "./scripts/utils.js";
 
 /**
  * About `inline-svg`
@@ -22,4 +23,6 @@ export default defineConfig({
 	publicDir: "public/ext/vendor/",
 	plugins: [svelte()],
 	base: "./",
+	define: baseConfig.define,
+	resolve: baseConfig.resolve,
 });

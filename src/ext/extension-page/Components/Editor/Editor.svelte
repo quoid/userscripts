@@ -1,18 +1,18 @@
 <script>
 	import { items, log, state } from "../../store.js";
-	import Loader from "../../../shared/Components/Loader.svelte";
-	import IconButton from "../../../shared/Components/IconButton.svelte";
-	import Tag from "../../../shared/Components/Tag.svelte";
-	import { formatDate, downloadToFile } from "../../../shared/utils.js";
-	import { sendNativeMessage } from "../../../shared/native.js";
+	import Loader from "@shared/Components/Loader.svelte";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import Tag from "@shared/Components/Tag.svelte";
+	import { formatDate, downloadToFile } from "@ext/utils.js";
+	import { sendNativeMessage } from "@ext/native.js";
 	import CodeMirror, {
 		cmChanged,
 		cmGetInstance,
 		cmSetSavedCode,
 	} from "./CodeMirror.svelte";
-	import iconDownload from "../../../shared/img/icon-download.svg?raw";
-	import iconTrash from "../../../shared/img/icon-trash.svg?raw";
-	import iconSync from "../../../shared/img/icon-sync.svg?raw";
+	import iconDownload from "@shared/img/icon-download.svg?raw";
+	import iconTrash from "@shared/img/icon-trash.svg?raw";
+	import iconSync from "@shared/img/icon-sync.svg?raw";
 
 	// the data the populates editor elements
 	let canUpdate;
@@ -311,7 +311,7 @@
 	}
 
 	.editor__footer {
-		background: rgba(50 54 57 / 0.65);
+		background: var(--editor-blurred-background);
 		border-radius: var(--border-radius);
 		bottom: 0.25rem;
 		padding: 0.5rem 1rem;

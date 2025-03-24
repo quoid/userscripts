@@ -1,20 +1,20 @@
 <script>
 	import { onMount } from "svelte";
-	import IconButton from "../shared/Components/IconButton.svelte";
-	import Toggle from "../shared/Components/Toggle.svelte";
-	import Loader from "../shared/Components/Loader.svelte";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import Toggle from "@shared/Components/Toggle.svelte";
+	import Loader from "@shared/Components/Loader.svelte";
 	import PopupItem from "./Components/PopupItem.svelte";
 	import View from "./Components/View.svelte";
 	import UpdateView from "./Components/Views/UpdateView.svelte";
 	import InstallView from "./Components/Views/InstallView.svelte";
 	import AllItemsView from "./Components/Views/AllItemsView.svelte";
-	import iconOpen from "../shared/img/icon-open.svg?raw";
-	import iconUpdate from "../shared/img/icon-update.svg?raw";
-	import iconClear from "../shared/img/icon-clear.svg?raw";
-	import iconRefresh from "../shared/img/icon-refresh.svg?raw";
-	import { extensionPaths, openExtensionPage } from "../shared/utils.js";
-	import { connectNative, sendNativeMessage } from "../shared/native.js";
-	import * as settingsStorage from "../shared/settings.js";
+	import iconOpen from "@shared/img/icon-open.svg?raw";
+	import iconUpdate from "@shared/img/icon-update.svg?raw";
+	import iconClear from "@shared/img/icon-clear.svg?raw";
+	import iconRefresh from "@shared/img/icon-refresh.svg?raw";
+	import { extensionPaths, openExtensionPage } from "@ext/utils.js";
+	import { connectNative, sendNativeMessage } from "@ext/native.js";
+	import * as settingsStorage from "@ext/settings.js";
 
 	let errorNotification;
 	let active = true;
@@ -657,7 +657,7 @@
 
 	.header .buttons {
 		align-items: center;
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		display: flex;
 		padding: 0.5rem 1rem calc(0.5rem - 1px);
 	}
@@ -746,7 +746,7 @@
 	}
 
 	.footer {
-		border-top: 1px solid var(--color-black);
+		border-top: 1px solid var(--border-color);
 		font-weight: 600;
 		line-height: 1.5rem;
 		padding: 0.5rem 0;

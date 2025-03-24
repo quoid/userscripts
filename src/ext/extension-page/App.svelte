@@ -7,8 +7,8 @@
 	import Settings from "./Components/Settings.svelte";
 	import ModalWrapper from "./Components/ModalWrapper.svelte";
 	import Notification from "./Components/Notification.svelte";
-	import logo from "../shared/img/logo.svg?raw";
-	import { connectNative, sendNativeMessage } from "../shared/native.js";
+	import LogoText from "@shared/Components/LogoText.svelte";
+	import { connectNative, sendNativeMessage } from "@ext/native.js";
 
 	const logger = [];
 
@@ -64,8 +64,7 @@
 
 {#if $state.includes("init")}
 	<div class="initializer" out:blur={{ duration: 350 }}>
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-		{@html logo}
+		<LogoText />
 		{#if $state.includes("init-error")}
 			<span>Failed to initialize app, check the browser console</span>
 		{:else}

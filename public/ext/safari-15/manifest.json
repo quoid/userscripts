@@ -6,6 +6,7 @@
 	"version": "_VERSION_",
 	"icons": {
 		"48": "images/icon-48.png",
+		"64": "images/icon-64.png",
 		"96": "images/icon-96.png",
 		"128": "images/icon-128.png",
 		"256": "images/icon-256.png",
@@ -19,7 +20,8 @@
 		"default_popup": "dist/entry-ext-action-popup.html",
 		"default_icon": {
 			"16": "images/toolbar-icon-16.png",
-			"32": "images/toolbar-icon-32.png"
+			"32": "images/toolbar-icon-32.png",
+			"48": "images/toolbar-icon-48.png"
 		}
 	},
 	"options_ui": {

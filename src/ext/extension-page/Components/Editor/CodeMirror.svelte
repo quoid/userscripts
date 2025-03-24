@@ -30,11 +30,7 @@
 	import "../../codemirror.css";
 	import { settings, state } from "../../store.js";
 	import EditorSearch from "./EditorSearch.svelte";
-	import {
-		parseMetadata,
-		validGrants,
-		validMetaKeys,
-	} from "../../../shared/utils.js";
+	import { parseMetadata, validGrants, validMetaKeys } from "@ext/utils.js";
 
 	// the function to be called when save keybind is pressed
 	export let saveHandler;

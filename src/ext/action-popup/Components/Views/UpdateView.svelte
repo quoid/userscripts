@@ -1,5 +1,5 @@
 <script>
-	import iconUpdate from "../../../shared/img/icon-update.svg?raw";
+	import iconUpdate from "@shared/img/icon-update.svg?raw";
 
 	export let updates = [];
 	export let updateClick;
@@ -35,7 +35,7 @@
 <style>
 	.item {
 		align-items: center;
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		display: flex;
 		padding: 0.5rem 1rem;
 		text-align: left;

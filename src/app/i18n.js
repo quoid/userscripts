@@ -51,7 +51,7 @@ export async function i18nInit() {
 				md: (n, s) => getLangFrom(markdown, n, s),
 			};
 		} catch (error) {
-			console.debug(error);
+			console.debug("Will fall back to `en`", error);
 		}
 	}
 	throw Error("I18n initialization failed");

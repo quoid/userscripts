@@ -1,17 +1,17 @@
 <script>
-	import * as settingsStorage from "../../shared/settings.js";
+	import * as settingsStorage from "@ext/settings.js";
 	import { settings, log } from "../store.js";
 	import {
 		gl,
 		openInBlank,
 		downloadToFile,
 		parseMatchPatterns,
-	} from "../../shared/utils.js";
-	import { sendNativeMessage } from "../../shared/native.js";
-	import Toggle from "../../shared/Components/Toggle.svelte";
-	import IconButton from "../../shared/Components/IconButton.svelte";
-	import iconEdit from "../../shared/img/icon-edit.svg?raw";
-	import iconLoader from "../../shared/img/icon-loader.svg?raw";
+	} from "@ext/utils.js";
+	import { sendNativeMessage } from "@ext/native.js";
+	import Toggle from "@shared/Components/Toggle.svelte";
+	import IconButton from "@shared/Components/IconButton.svelte";
+	import iconEdit from "@shared/img/icon-edit.svg?raw";
+	import iconLoader from "@shared/img/icon-loader.svg?raw";
 
 	/** @type {"macos"|"ios"|"ipados"} */
 	export let platform;
@@ -551,12 +551,12 @@
 	.section_header {
 		display: flex;
 		align-items: center;
-		border-top: 1px solid var(--color-black);
-		border-bottom: 1px solid var(--color-black);
+		border-top: 1px solid var(--border-color);
+		border-bottom: 1px solid var(--border-color);
 		background-color: var(--color-bg-primary);
 		color: var(--text-color-primary);
 		font: var(--text-default);
-		font-weight: 500;
+		font-weight: 600;
 		letter-spacing: var(--letter-spacing-default);
 		padding: calc(1rem - 2px) 1rem 1rem;
 	}
@@ -569,7 +569,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--row-gap);
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		margin: 0 2rem;
 		padding: 1rem 0;
 	}
@@ -594,9 +594,14 @@
 		color: var(--color-red);
 	}
 
+	.section_row .name {
+		font-weight: 500;
+	}
+
 	.section_row .desc {
 		color: var(--text-color-secondary);
 		font: var(--text-small);
+		font-weight: 500;
 	}
 
 	.row_grid {
@@ -641,6 +646,14 @@
 
 	select {
 		color: var(--text-color-primary);
+		font-size: 125%;
+	}
+
+	/* ios */
+	@supports (-webkit-touch-callout: none) {
+		select {
+			font-size: 100%;
+		}
 	}
 
 	.circling {
@@ -652,6 +665,7 @@
 	.circling > :global(svg) {
 		height: 0.75rem;
 		width: 0.75rem;
+		stroke: var(--text-color-primary);
 	}
 
 	.textarea_box {
@@ -660,22 +674,10 @@
 		margin: var(--row-gap) 0;
 	}
 
-	.textarea mark {
-		color: transparent;
-		color: var(--text-color-primary);
-		background-color: red;
-		border-radius: var(--border-radius);
-		opacity: 1;
-	}
-
-	.textarea mark.warn {
-		background-color: var(--color-yellow);
-		background-color: #808000;
-	}
-
+	/* Sync two layers */
 	.textarea,
 	textarea {
-		background-color: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		border: 1px solid transparent;
 		color: inherit;
@@ -692,7 +694,13 @@
 		word-break: break-all;
 	}
 
+	/* Lower layer */
+	.textarea::-webkit-scrollbar {
+		display: none;
+	}
+
 	.textarea {
+		/* Text is colored by the upper layer by default */
 		color: transparent;
 		overflow: scroll;
 		user-select: none;
@@ -700,10 +708,20 @@
 		white-space: pre-wrap;
 	}
 
-	.textarea::-webkit-scrollbar {
-		display: none;
+	.textarea mark {
+		/* Deeper the color of marked text when lose focus */
+		color: var(--text-color-primary);
+		background-color: light-dark(#ffae9e, red);
+		border-radius: var(--border-radius);
+		opacity: 1;
 	}
 
+	.textarea mark.warn {
+		background-color: var(--color-yellow);
+		background-color: light-dark(#fff000, #808000);
+	}
+
+	/* Upper layer */
 	textarea {
 		background-color: transparent;
 		position: absolute;
@@ -732,11 +750,13 @@
 
 	textarea:focus {
 		opacity: 1;
+
+		/* Must have color when text selected, otherwise the text will fade */
 		color: var(--text-color-primary);
 	}
 
 	button.done {
-		background: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		color: var(--text-color-primary);
 		font-weight: 600;
@@ -758,7 +778,7 @@
 
 	.tools button {
 		flex: 1;
-		background: var(--color-black);
+		background-color: var(--color-bg-theme);
 		border-radius: var(--border-radius);
 		color: var(--text-color-primary);
 		font-weight: 600;
@@ -774,13 +794,13 @@
 	@media (hover: hover) {
 		.tools button:hover {
 			background-color: var(--color-blue);
-			color: var(--color-black);
+			color: light-dark(var(--color-white), var(--color-black));
 			opacity: 1;
 		}
 
 		.tools button.danger:hover {
 			background: var(--color-red);
-			color: var(--text-color-primary);
+			color: var(--color-white);
 		}
 
 		button.reset:hover {
@@ -792,7 +812,7 @@
 	@supports (-webkit-touch-callout: none) {
 		.tools button.danger {
 			background: var(--color-red);
-			color: var(--text-color-primary);
+			color: var(--color-white);
 		}
 	}
 
@@ -804,7 +824,7 @@
 	button.reset {
 		background: var(--color-red);
 		border-radius: var(--border-radius);
-		color: var(--text-color-primary);
+		color: var(--color-white);
 		font-weight: 700;
 		line-height: calc(var(--toggle-font-size) + 0.1rem);
 		opacity: 0.75;

@@ -1,6 +1,6 @@
 <script>
-	import Tag from "../../../shared/Components/Tag.svelte";
-	import Toggle from "../../../shared/Components/Toggle.svelte";
+	import Tag from "@shared/Components/Tag.svelte";
+	import Toggle from "@shared/Components/Toggle.svelte";
 
 	// the data that will populate the item contents in sidebar
 	export let data = {};
@@ -51,7 +51,7 @@
 <style>
 	.item {
 		background-color: var(--color-bg-secondary);
-		border-bottom: 1px solid var(--color-black);
+		border-bottom: 1px solid var(--border-color);
 		cursor: pointer;
 		padding: 1rem 1rem calc(1rem - 1px);
 	}
@@ -68,7 +68,6 @@
 
 	.item.active {
 		background-color: var(--color-script-highlighted);
-		background-color: #364049;
 		cursor: default;
 	}
 

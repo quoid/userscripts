@@ -20,7 +20,11 @@
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
-		"sourceMap": true
+		"sourceMap": true,
+
+		"paths": {
+			"@shared/*": ["../shared/*"]
+		}
 	},
 	"include": ["**/*.d.ts", "**/*.js", "**/*.svelte"]
 }
