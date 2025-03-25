@@ -181,10 +181,13 @@ Userscripts currently supports the following api methods. All methods are asynch
 
 > [!NOTE]
 >
-> The following API description applies to the latest development branch, you may need to check the documentation for the corresponding version. Please switch to the version you want to check via `Branches` or `Tags` at the top.
+> The following API description applies to the latest development branch, you may need to check the documentation for the corresponding version. Please switch to the version you want to check via `Branches` or `Tags` at the top. For example:
 >
-> For example, for the v4.x.x version of the App Store:
-> https://github.com/quoid/userscripts/tree/release/4.x.x
+> For the current version of the App Store:
+> https://github.com/quoid/userscripts/tree/release/4.x.x#api
+> 
+> For the v4.5.x and earlier versions:
+> https://github.com/quoid/userscripts/tree/v4.5.4#api
 
 For API type definitions, please refer to: [`types.d.ts`](https://github.com/userscriptsup/testscripts/blob/bfce18746cd6bcab0616727401fa7ab6ef4086ac/userscripts/types.d.ts)
 
