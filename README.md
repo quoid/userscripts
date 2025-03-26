@@ -204,7 +204,7 @@ Userscripts currently supports the following api methods. All methods are asynch
 >
 > For the current version of the App Store:
 > https://github.com/quoid/userscripts/tree/release/4.x.x#api
-> 
+>
 > For the v4.5.x and earlier versions:
 > https://github.com/quoid/userscripts/tree/v4.5.4#api
 
