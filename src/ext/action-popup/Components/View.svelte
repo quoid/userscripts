@@ -24,7 +24,7 @@
 <div class="view" transition:slide>
 	<div class="view__header">
 		{headerTitle}
-		<IconButton icon={iconArrowLeft} title={"Go back"} on:click={closeClick} />
+		<IconButton icon={iconArrowLeft} title="Go back" on:click={closeClick} />
 	</div>
 	<div class="view__body">
 		{#if loading && showLoaderOnDisabled}

@@ -214,10 +214,10 @@
 			warnDot={!$settings["global_active"]}
 			icon={iconSettings}
 			on:click={() => state.add("settings")}
-			title={"Open settings"}
+			title="Open settings"
 			{disabled}
 		/>
-		<Dropdown icon={iconPlus} title={"New item"} {disabled}>
+		<Dropdown icon={iconPlus} title="New item" {disabled}>
 			<button on:click={() => newItem("js")}>New JS</button>
 			<button on:click={() => newItem("css")}>New CSS</button>
 			<button on:click={newRemote}>New Remote</button>

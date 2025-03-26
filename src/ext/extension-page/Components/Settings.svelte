@@ -234,7 +234,7 @@
 </script>
 
 <div class="settings_box" bind:this={settingsBox}>
-	{#each groups as group}
+	{#each groups as group (group)}
 		<div class="section">
 			<div
 				class="section_header"
@@ -247,7 +247,7 @@
 					>
 				{/if}
 			</div>
-			{#each groupItems(group) as item}
+			{#each groupItems(group) as item (item.name)}
 				{@const ariaAttributes = {
 					"aria-labelledby": `${item.name}_label`,
 					"aria-describedby": `${item.name}_desc`,
@@ -289,7 +289,7 @@
 											$settings[item.name],
 										)}
 								>
-									{#each item.values as value}
+									{#each item.values as value (value)}
 										<option {value}>
 											{gl(`settings_${item.name}_${value}`) || value}
 										</option>
@@ -346,7 +346,7 @@
 								style:opacity={gemFocused ? 1 : "revert-layer"}
 								bind:this={gemRender}
 							>
-								{#each gemParsed.items as p}
+								{#each gemParsed.items as p (p)}
 									<!-- should not contain any newlines or indents -->
 									{p.start}{#if p.warn || p.error}<mark
 											class:warn={p.warn}

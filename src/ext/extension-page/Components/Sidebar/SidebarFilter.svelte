@@ -46,7 +46,7 @@
 		{disabled}
 	/>
 	<Dropdown icon={iconSort} {disabled} title={gl("settings_editor_list_sort")}>
-		{#each orders as order}
+		{#each orders as order (order)}
 			<button
 				class:selected={sortOrder === order}
 				on:click={() => updateSortOrder(order)}

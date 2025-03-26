@@ -197,19 +197,19 @@
 			<IconButton
 				icon={iconSync}
 				on:click={update}
-				title={"Check for updates"}
+				title="Check for updates"
 				disabled={disabled || !canUpdate}
 			/>
 			<IconButton
 				icon={iconDownload}
 				on:click={download}
-				title={"Download file"}
+				title="Download file"
 				{disabled}
 			/>
 			<IconButton
 				icon={iconTrash}
 				on:click={trash}
-				title={"Trash file"}
+				title="Trash file"
 				{disabled}
 			/>
 		</div>
