@@ -32,7 +32,7 @@ body {
 	 */
 	@supports (font: -apple-system-body) {
 		html {
-			/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+			/* stylelint-disable-next-line declaration-property-value-no-unknown,font-family-no-missing-generic-family-keyword */
 			font: -apple-system-title3; /* default 20px */
 		}
 	}

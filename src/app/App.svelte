@@ -136,7 +136,7 @@
 		{/if}
 		{#if enableLogger}
 			<div class="debug">
-				<Dropdown icon={IconDebug} title={"New item"} right>
+				<Dropdown icon={IconDebug} title="New item" right>
 					<button onclick={exportLogFiles}>
 						{gl("export_log_files")}
 					</button>

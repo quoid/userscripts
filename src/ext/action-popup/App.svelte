@@ -495,7 +495,7 @@
 
 {#if showUpdates}
 	<View
-		headerTitle={"Updates"}
+		headerTitle="Updates"
 		loading={disabled}
 		closeClick={() => (showUpdates = false)}
 		showLoaderOnDisabled={true}
@@ -511,7 +511,7 @@
 	</View>
 {:else if showInstall}
 	<View
-		headerTitle={"Install Userscript"}
+		headerTitle="Install Userscript"
 		loading={disabled}
 		closeClick={() => (showInstall = false)}
 		showLoaderOnDisabled={true}
@@ -525,7 +525,7 @@
 	</View>
 {:else if showAll}
 	<View
-		headerTitle={"All Userscripts"}
+		headerTitle="All Userscripts"
 		loading={disabled}
 		closeClick={() => {
 			showAll = false;
@@ -540,7 +540,7 @@
 		<div class="buttons">
 			<IconButton
 				icon={iconOpen}
-				title={"Open save location"}
+				title="Open save location"
 				on:click={openSaveLocation}
 				{disabled}
 			/>
@@ -548,18 +548,18 @@
 				icon={iconUpdate}
 				infoDot={!!updates.length}
 				on:click={() => (showUpdates = true)}
-				title={"Show updates"}
+				title="Show updates"
 				{disabled}
 			/>
 			<IconButton
 				icon={iconRefresh}
 				on:click={refreshView}
-				title={"Refresh view"}
+				title="Refresh view"
 				{disabled}
 			/>
 			<Toggle
 				checked={active}
-				title={"Toggle injection"}
+				title="Toggle injection"
 				on:click={toggleExtension}
 				{disabled}
 			/>
@@ -574,7 +574,7 @@
 				<IconButton
 					icon={iconClear}
 					on:click={() => (showBetaNews = false)}
-					title={"Close"}
+					title="Close"
 				/>
 			</div>
 		{/if}
@@ -595,7 +595,7 @@
 				<IconButton
 					icon={iconClear}
 					on:click={() => (errorNotification = undefined)}
-					title={"Clear error"}
+					title="Clear error"
 				/>
 			</div>
 		{/if}

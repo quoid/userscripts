@@ -22,8 +22,8 @@ export default [
 	/**
 	 * @see {@link https://github.com/sveltejs/eslint-plugin-svelte}
 	 */
-	...eslintPluginSvelte.configs["flat/recommended"],
-	...eslintPluginSvelte.configs["flat/prettier"],
+	...eslintPluginSvelte.configs.recommended,
+	...eslintPluginSvelte.configs.prettier,
 
 	/**
 	 * @see {@link https://github.com/prettier/eslint-config-prettier}

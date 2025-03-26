@@ -46,7 +46,7 @@
 		{#if nav}
 			<nav>
 				<ul>
-					{#each navAnchors as [node, lang]}
+					{#each navAnchors as [node, lang] (lang)}
 						<li>
 							<button on:click={() => navClick(node)}>
 								{lang}

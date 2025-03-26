@@ -17,20 +17,20 @@
 	},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
-		"@types/webextension-polyfill": "^0.12.1",
-		"autoprefixer": "^10.4.20",
+		"@types/webextension-polyfill": "^0.12.3",
+		"autoprefixer": "^10.4.21",
 		"cm-show-invisibles": "^3.1.0",
-		"codemirror": "^5.65.18",
-		"eslint": "^9.17.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-svelte": "^2.46.1",
-		"marked": "^15.0.4",
-		"prettier": "3.3.3",
-		"prettier-plugin-svelte": "3.3.2",
-		"stylelint": "^16.12.0",
+		"codemirror": "^5.65.19",
+		"eslint": "^9.23.0",
+		"eslint-config-prettier": "^10.1.1",
+		"eslint-plugin-svelte": "^3.3.3",
+		"marked": "^15.0.7",
+		"prettier": "3.5.3",
+		"prettier-plugin-svelte": "3.3.3",
+		"stylelint": "^16.17.0",
 		"stylelint-config-html": "^1.1.0",
-		"stylelint-config-standard": "^36.0.0",
-		"svelte": "^5.16.0",
-		"vite": "^6.0.6"
+		"stylelint-config-standard": "^37.0.0",
+		"svelte": "^5.25.3",
+		"vite": "^6.2.3"
 	}
 }
