@@ -1,0 +1,177 @@
+// ==UserScript==
+// @name         Substituir Câmera + Upload + Controles de Zoom
+// @namespace    https://www.onlinemictest.com/webcam-test/
+// @version      2.5
+// @description  Substitui a câmera com foto/vídeo e adiciona botões para upload, zoom e ajuste de posição.
+// @author       Hamilson Prolepse
+// @match        *https://visa.vfsglobal.com/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    let inputArquivo, videoElemento, canvas, ctx, stream;
+    let escala = 1.0; // Zoom inicial
+    let deslocamentoX = 0, deslocamentoY = 0; // Posição inicial
+    let isVideo = false;
+
+    function criarStreamFalso() {
+        canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        stream = canvas.captureStream(30);
+
+        navigator.mediaDevices.getUserMedia = async function () {
+            return new Promise((resolve) => resolve(stream));
+        };
+    }
+
+    function criarInputArquivo() {
+        inputArquivo = document.createElement('input');
+        inputArquivo.type = 'file';
+        inputArquivo.accept = 'image/*,video/*';
+        inputArquivo.style.display = 'none';
+
+        inputArquivo.addEventListener('change', function(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let url = URL.createObjectURL(file);
+            isVideo = file.type.includes('video');
+            substituirCameraPorArquivo(url);
+        });
+
+        document.body.appendChild(inputArquivo);
+    }
+
+    function substituirCameraPorArquivo(arquivoURL) {
+        if (isVideo) {
+            videoElemento = document.createElement('video');
+            videoElemento.src = arquivoURL;
+            videoElemento.autoplay = true;
+            videoElemento.loop = true;
+            videoElemento.muted = true;
+
+            videoElemento.onloadeddata = () => iniciarSubstituicao();
+        } else {
+            let img = new Image();
+            img.src = arquivoURL;
+            img.onload = function () {
+                videoElemento = img;
+                iniciarSubstituicao();
+            };
+        }
+    }
+
+    function iniciarSubstituicao() {
+        function desenharFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(canvas.width / 2 + deslocamentoX, canvas.height / 2 + deslocamentoY);
+            ctx.scale(escala, escala);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+            ctx.drawImage(videoElemento, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            if (isVideo) requestAnimationFrame(desenharFrame);
+        }
+
+        desenharFrame();
+    }
+
+    function adicionarBotaoUpload() {
+        let botaoUpload = document.createElement('button');
+        botaoUpload.innerText = '📷 Escolher Foto/Vídeo';
+        botaoUpload.style.position = 'fixed';
+        botaoUpload.style.top = '20px';
+        botaoUpload.style.left = '20px';
+        botaoUpload.style.padding = '10px';
+        botaoUpload.style.background = 'blue';
+        botaoUpload.style.color = 'white';
+        botaoUpload.style.border = 'none';
+        botaoUpload.style.cursor = 'pointer';
+        botaoUpload.style.fontSize = '16px';
+        botaoUpload.style.borderRadius = '5px';
+        botaoUpload.style.zIndex = '10000';
+
+        botaoUpload.onclick = () => {
+            if (!inputArquivo) criarInputArquivo();
+            inputArquivo.click();
+        };
+
+        document.body.appendChild(botaoUpload);
+    }
+
+    function adicionarControles() {
+        let controles = document.createElement('div');
+        controles.style.position = 'fixed';
+        controles.style.bottom = '20px';
+        controles.style.right = '20px';
+        controles.style.zIndex = '10000';
+        controles.style.display = 'grid';
+        controles.style.gridTemplateColumns = 'repeat(3, auto)';
+        controles.style.gap = '5px';
+        controles.style.padding = '10px';
+        controles.style.background = 'rgba(0, 0, 0, 0.7)';
+        controles.style.borderRadius = '10px';
+
+        let botaoMaisZoom = criarBotaoControle('🔍➕', () => atualizarTransformacao(0.1, 0, 0));
+        let botaoMenosZoom = criarBotaoControle('🔍➖', () => atualizarTransformacao(-0.1, 0, 0));
+        let botaoCima = criarBotaoControle('⬆️', () => atualizarTransformacao(0, 0, -10));
+        let botaoBaixo = criarBotaoControle('⬇️', () => atualizarTransformacao(0, 0, 10));
+        let botaoEsquerda = criarBotaoControle('⬅️', () => atualizarTransformacao(0, -10, 0));
+        let botaoDireita = criarBotaoControle('➡️', () => atualizarTransformacao(0, 10, 0));
+
+        controles.appendChild(botaoMaisZoom);
+        controles.appendChild(document.createElement('div')); // Espaço vazio
+        controles.appendChild(botaoMenosZoom);
+        controles.appendChild(botaoEsquerda);
+        controles.appendChild(botaoCima);
+        controles.appendChild(botaoDireita);
+        controles.appendChild(document.createElement('div')); // Espaço vazio
+        controles.appendChild(botaoBaixo);
+        controles.appendChild(document.createElement('div')); // Espaço vazio
+
+        document.body.appendChild(controles);
+    }
+
+    function atualizarTransformacao(zoomDelta, movX, movY) {
+        escala = Math.max(0.5, escala + zoomDelta);
+        deslocamentoX += movX;
+        deslocamentoY += movY;
+        iniciarSubstituicao();
+    }
+
+    function criarBotaoControle(texto, funcao) {
+        let botao = document.createElement('button');
+        botao.innerText = texto;
+        estilizarBotao(botao, 'auto', 'auto', 'gray');
+        botao.onclick = funcao;
+        return botao;
+    }
+
+    function estilizarBotao(botao, top, left, cor) {
+        botao.style.position = 'relative';
+        botao.style.padding = '8px';
+        botao.style.background = cor;
+        botao.style.color = 'white';
+        botao.style.border = 'none';
+        botao.style.cursor = 'pointer';
+        botao.style.fontSize = '14px';
+        botao.style.borderRadius = '5px';
+        botao.style.textAlign = 'center';
+        botao.style.zIndex = '10000';
+    }
+
+    window.addEventListener('load', () => {
+        criarStreamFalso();
+        adicionarBotaoUpload();
+        adicionarControles();
+    });
+})();
