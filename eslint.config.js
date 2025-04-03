@@ -12,6 +12,7 @@ import globals from "globals";
 import eslintPluginSvelte from "eslint-plugin-svelte";
 import eslintConfigPrettier from "eslint-config-prettier";
 
+/** @type {import("eslint").Linter.Config[]} */
 export default [
 	/**
 	 * @see {@link https://eslint.org/docs/latest/use/configure/configuration-files-new#using-predefined-configurations}
