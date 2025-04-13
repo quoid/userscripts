@@ -1,0 +1,159 @@
+// ==UserScript==
+
+// @name          Live Camera
+
+// @namespace    http://Violentmonkey.UserScript/
+
+// @version      2.0
+
+// @description  Substitui a câmera real por um vídeo simulado como se fosse ao vivo.
+
+// @author       BRAZUCA!
+
+// @match        https://idnvui.vfsglobal.com/*
+
+// @match        https://visa.vfsglobal.com/*
+
+// @grant        none
+
+// ==/UserScript==
+
+(function() {
+
+    'use strict';
+
+    async function substituirCamera(videoURL) {
+
+        let video = document.createElement('video');
+
+        video.src = videoURL;
+
+        video.loop = true;
+
+        video.muted = true;
+
+        video.autoplay = true;
+
+        await video.play();
+
+        let canvas = document.createElement('canvas');
+
+        let ctx = canvas.getContext('2d');
+
+        canvas.width = 640;
+
+        canvas.height = 480;
+
+        function desenharFrame() {
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            requestAnimationFrame(desenharFrame);
+
+        }
+
+        desenharFrame();
+
+        let stream = canvas.captureStream(30); // Simula uma câmera a 30 FPS
+
+        // Interceptar o acesso à câmera do site
+
+        navigator.mediaDevices.getUserMedia = async function(constraints) {
+
+            return new Promise((resolve) => {
+
+                resolve(stream);
+
+            });
+
+        };
+
+        console.log("Câmera falsa ativada!");
+
+    }
+
+    // Criar botão para selecionar vídeo
+
+    let videoButton = document.createElement('button');
+
+    videoButton.textContent = 'A MAFIA ACONTECE';
+
+    videoButton.style.position = 'fixed';
+
+    videoButton.style.top = '10px';
+
+    videoButton.style.right = '10px';
+
+    videoButton.style.padding = '10px 20px';
+
+    videoButton.style.backgroundColor = '#007BFF'; // Azul vibrante
+
+    videoButton.style.color = 'white';
+
+    videoButton.style.border = '2px solid #00FFFF'; // Borda brilhante azul-ciano
+
+    videoButton.style.borderRadius = '10px';
+
+    videoButton.style.cursor = 'pointer';
+
+    videoButton.style.zIndex = '9999';
+
+    videoButton.style.fontWeight = 'bold';
+
+    videoButton.style.fontSize = '16px';
+
+    videoButton.style.boxShadow = '0 0 10px #00FFFF'; // Efeito de brilho
+
+    // Efeito de brilho ao passar o mouse
+
+    videoButton.addEventListener('mouseover', () => {
+
+        videoButton.style.boxShadow = '0 0 20px #00FFFF';
+
+    });
+
+    videoButton.addEventListener('mouseout', () => {
+
+        videoButton.style.boxShadow = '0 0 10px #00FFFF';
+
+    });
+
+    document.body.appendChild(videoButton);
+
+    // Criar input para selecionar vídeo (oculto)
+
+    let fileInput = document.createElement('input');
+
+    fileInput.type = 'file';
+
+    fileInput.accept = 'video/*';
+
+    fileInput.style.display = 'none';
+
+    document.body.appendChild(fileInput);
+
+    // Evento para abrir seletor de arquivos
+
+    videoButton.addEventListener('click', () => {
+
+        fileInput.click();
+
+    });
+
+    // Evento para substituir a câmera pelo vídeo selecionado
+
+    fileInput.addEventListener('change', (event) => {
+
+        const file = event.target.files[0];
+
+        if (file) {
+
+            const url = URL.createObjectURL(file);
+
+            substituirCamera(url);
+
+        }
+
+    });
+
+})();
