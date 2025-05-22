@@ -1,13 +1,13 @@
 <script>
 	import { gl } from "@ext/utils.js";
-	import { items, settings, state } from "../../store.js";
+	import { items, settings, v4state } from "../../store.js";
 	import { settingsDictionary } from "@ext/settings.js";
 	import Dropdown from "@shared/Components/Dropdown.svelte";
 	import IconButton from "@shared/Components/IconButton.svelte";
 	import iconSort from "@shared/img/icon-sort.svg?raw";
 	import iconClear from "@shared/img/icon-clear.svg?raw";
 
-	$: disabled = !$state.includes("ready");
+	$: disabled = !$v4state.includes("ready");
 
 	$: sortOrder = $settings["editor_list_sort"];
 

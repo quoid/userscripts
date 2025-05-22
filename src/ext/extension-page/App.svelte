@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { blur } from "svelte/transition";
-	import { items, log, notifications, settings, state } from "./store.js";
+	import { items, log, notifications, settings, v4state } from "./store.js";
 	import Sidebar from "./Components/Sidebar/Sidebar.svelte";
 	import Editor from "./Components/Editor/Editor.svelte";
 	import Settings from "./Components/Settings.svelte";
@@ -39,15 +39,15 @@
 		const initData = await sendNativeMessage({ name: "PAGE_INIT_DATA" });
 		if (initData.error) return console.error(initData.error);
 		await settings.init(initData);
-		state.add("items-loading");
-		state.remove("init");
+		v4state.add("items-loading");
+		v4state.remove("init");
 
 		log.add("Requesting all files in save location", "info", false);
 		const files = await sendNativeMessage({ name: "PAGE_ALL_FILES" });
 		if (files.error) return console.error(files.error);
 		items.set(files);
-		state.remove("items-loading");
-		state.loadUrlState();
+		v4state.remove("items-loading");
+		v4state.loadUrlState();
 	});
 
 	// handle native app messages
@@ -62,10 +62,10 @@
 
 <svelte:window on:keydown={preventKeyCommands} />
 
-{#if $state.includes("init")}
+{#if $v4state.includes("init")}
 	<div class="initializer" out:blur={{ duration: 350 }}>
 		<LogoText />
-		{#if $state.includes("init-error")}
+		{#if $v4state.includes("init-error")}
 			<span>Failed to initialize app, check the browser console</span>
 		{:else}
 			<span>Initializing app...</span>
@@ -81,8 +81,8 @@
 		<Notification on:click={() => notifications.remove(item.id)} {item} />
 	{/each}
 </ul>
-{#if $state.includes("settings")}
-	<ModalWrapper closeHandler={() => state.remove("settings")} let:navRegister>
+{#if $v4state.includes("settings")}
+	<ModalWrapper closeHandler={() => v4state.remove("settings")} let:navRegister>
 		<Settings platform="macos" {nativePort} {navRegister} />
 	</ModalWrapper>
 {/if}

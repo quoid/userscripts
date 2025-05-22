@@ -108,7 +108,7 @@ function stateStore() {
 	};
 	return { subscribe, add, getOldState, remove, loadUrlState };
 }
-export const state = stateStore();
+export const v4state = stateStore();
 
 function settingsStore() {
 	const { subscribe, update, set } = writable({});

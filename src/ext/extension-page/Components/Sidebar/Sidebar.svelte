@@ -1,7 +1,7 @@
 <script>
 	import { tick } from "svelte";
 	import { fade } from "svelte/transition";
-	import { items, log, settings, state } from "../../store.js";
+	import { items, log, settings, v4state } from "../../store.js";
 	import { newScriptDefault, sortBy, uniqueId } from "@ext/utils.js";
 	import { sendNativeMessage } from "@ext/native.js";
 	import SidebarFilter from "./SidebarFilter.svelte";
@@ -19,7 +19,7 @@
 	} from "../Editor/CodeMirror.svelte";
 
 	// disable buttons accordingly
-	$: disabled = !$state.includes("ready");
+	$: disabled = !$v4state.includes("ready");
 
 	$: list = sortBy($items, $settings["editor_list_sort"]).filter(
 		(a) => a.visible !== false,
@@ -77,7 +77,7 @@
 
 	async function activate(item) {
 		// if not in ready state or the item is already active
-		if (!$state.includes("ready") || item.active) return;
+		if (!$v4state.includes("ready") || item.active) return;
 
 		// check if there's a temp item and it's not the item to be activated
 		// can occur when user clicks a non-temp item while a temp item exists
@@ -142,7 +142,7 @@
 			log.add("Failed to get remote content, invalid file type", "error", true);
 			return;
 		}
-		state.add("fetching");
+		v4state.add("fetching");
 		try {
 			const res = await fetch(url);
 			if (!res.ok) throw new Error(`httpcode-${res.status}`);
@@ -151,7 +151,7 @@
 		} catch (error) {
 			log.add(`Failed to get remote content - ${error}`, "error", true);
 		}
-		state.remove("fetching");
+		v4state.remove("fetching");
 	}
 
 	async function scrollToEl(filename) {
@@ -213,7 +213,7 @@
 		<IconButton
 			warnDot={!$settings["global_active"]}
 			icon={iconSettings}
-			on:click={() => state.add("settings")}
+			on:click={() => v4state.add("settings")}
 			title="Open settings"
 			{disabled}
 		/>
@@ -224,7 +224,7 @@
 		</Dropdown>
 	</div>
 	<div class="sidebar__body" on:scroll={sidebarScroll}>
-		{#if $state.includes("items-loading")}
+		{#if $v4state.includes("items-loading")}
 			<Loader />
 		{/if}
 		{#each list as item (item.filename)}

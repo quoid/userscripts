@@ -1,5 +1,5 @@
 <script>
-	import { items, log, state } from "../../store.js";
+	import { items, log, v4state } from "../../store.js";
 	import Loader from "@shared/Components/Loader.svelte";
 	import IconButton from "@shared/Components/IconButton.svelte";
 	import Tag from "@shared/Components/Tag.svelte";
@@ -29,7 +29,7 @@
 	let discardDisabled = true;
 	let saveDisabled = true;
 
-	$: disabled = !$state.includes("ready");
+	$: disabled = !$v4state.includes("ready");
 
 	$: activeItem = $items.find((a) => a.active);
 
@@ -53,12 +53,12 @@
 	async function save() {
 		if (
 			// save already in progress
-			!$state.includes("ready") ||
+			!$v4state.includes("ready") ||
 			// code hasn't changed and the active script in not a temp
 			(!cmChanged() && !activeItem.temp)
 		)
 			return;
-		state.add("saving");
+		v4state.add("saving");
 		// send the current script data for saving
 		const message = {
 			name: "PAGE_SAVE",
@@ -90,7 +90,7 @@
 			// refresh context-menu scripts
 			browser.runtime.sendMessage({ name: "REFRESH_CONTEXT_MENU_SCRIPTS" });
 		}
-		state.remove("saving");
+		v4state.remove("saving");
 	}
 
 	const discard = () => codemirror.discardChanges();
@@ -100,7 +100,7 @@
 	}
 
 	async function update() {
-		state.add("updating");
+		v4state.add("updating");
 		// get the editor's current contents
 		const message = { name: "PAGE_UPDATE", content: codemirror.getValue() };
 		const response = await sendNativeMessage(message);
@@ -113,19 +113,19 @@
 			toggleButtons(false, false);
 			log.add("Successfully updated code, review it and save!", "warn", true);
 		}
-		state.remove("updating");
+		v4state.remove("updating");
 	}
 
 	async function abort() {
 		const response = await sendNativeMessage({ name: "CANCEL_REQUESTS" });
-		if (response) state.remove("updating");
+		if (response) v4state.remove("updating");
 	}
 
 	async function trash() {
 		const m = "Are you sure you want to trash this file?";
 		const temporary = activeItem.temp;
 		if (!window.confirm(m)) return;
-		state.add("trashing");
+		v4state.add("trashing");
 		// since temporary files are not yet saved to the file system, can be trashed immediately
 		if (temporary) {
 			// can only trash an active script, update items filtering out the active one
@@ -140,7 +140,7 @@
 				log.add(`Successfully trashed ${activeItem.filename}`, "info", false);
 			}
 		}
-		state.remove("trashing");
+		v4state.remove("trashing");
 	}
 
 	function toggleButtons(discardButtonDisabled, saveButtonDisabled) {
@@ -160,7 +160,7 @@
 </script>
 
 <div class="editor">
-	{#if $state.includes("editor-loading") || $state.includes("fetching")}
+	{#if $v4state.includes("editor-loading") || $v4state.includes("fetching")}
 		<Loader />
 	{/if}
 	{#if !activeItem}
@@ -174,11 +174,11 @@
 			</div>
 			<div class="editor__status">
 				<div>
-					{#if $state.includes("saving")}
+					{#if $v4state.includes("saving")}
 						Saving...
-					{:else if $state.includes("trashing")}
+					{:else if $v4state.includes("trashing")}
 						（◞‸◟）
-					{:else if $state.includes("updating")}
+					{:else if $v4state.includes("updating")}
 						Updating code, <button class="link" on:click={abort}>
 							cancel request
 						</button>

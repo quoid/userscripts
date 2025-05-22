@@ -28,7 +28,7 @@
 <script>
 	import CodeMirror from "../../codemirror.js";
 	import "../../codemirror.css";
-	import { settings, state } from "../../store.js";
+	import { settings, v4state } from "../../store.js";
 	import EditorSearch from "./EditorSearch.svelte";
 	import { parseMetadata, validGrants, validMetaKeys } from "@ext/utils.js";
 
@@ -75,32 +75,35 @@
 
 	// svelte-ignore reactive_declaration_module_script_dependency
 	// store cursor position and disable on save
-	$: if ($state.includes("saving")) {
+	$: if ($v4state.includes("saving")) {
 		cursor = instance.getCursor();
 		disable();
 	}
 	// svelte-ignore reactive_declaration_module_script_dependency
 	// re-enable after, focus and set cursor back save completes
-	$: if ($state.includes("ready") && state.getOldState().includes("saving")) {
+	$: if (
+		$v4state.includes("ready") &&
+		v4state.getOldState().includes("saving")
+	) {
 		enable();
 		instance.focus();
 		instance.setCursor(cursor);
 	}
 
 	// disable when trashing or updating file
-	$: if ($state.includes("trashing") || $state.includes("updating")) {
+	$: if ($v4state.includes("trashing") || $v4state.includes("updating")) {
 		disable();
 	}
 	// svelte-ignore reactive_declaration_module_script_dependency
 	// reset saved and session code & re-enable after trashing completes
-	$: if ($state && state.getOldState().includes("trashing")) {
+	$: if ($v4state && v4state.getOldState().includes("trashing")) {
 		savedCode = null;
 		sessionCode = null;
 		enable();
 	}
 	// update session code and re-enable after updating completes
 	// svelte-ignore reactive_declaration_module_script_dependency
-	$: if ($state && state.getOldState().includes("updating")) {
+	$: if ($v4state && v4state.getOldState().includes("updating")) {
 		sessionCode = instance.getValue();
 		enable();
 	}
@@ -400,7 +403,7 @@
 
 	// function that is called for editor component when clicking discard button
 	export function discardChanges() {
-		if ($state.includes("ready")) {
+		if ($v4state.includes("ready")) {
 			instance.setValue(savedCode);
 			sessionCode = null;
 			instance.focus();
