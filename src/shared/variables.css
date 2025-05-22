@@ -58,7 +58,7 @@
 	--editor-cursor: #e3e7eb;
 	--editor-matching-bracket-color: #fff;
 	--editor-matching-bracket-border: var(--editor-number);
-	--editor-blurred-background: rgba(50 54 57 / 0.65);
+	--editor-blurred-background: rgb(50 54 57 / 0.65);
 }
 
 /* Light theme */
@@ -98,6 +98,6 @@
 		--editor-cursor: #7e7e7f;
 		--editor-matching-bracket-color: var(--text-color-primary);
 		--editor-matching-bracket-border: #ff00ea;
-		--editor-blurred-background: rgba(255 255 255 / 0.65); /* eeeeeea6 */
+		--editor-blurred-background: rgb(255 255 255 / 0.65); /* eeeeeea6 */
 	}
 }

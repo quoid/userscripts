@@ -70,7 +70,7 @@
 		align-items: center;
 		backdrop-filter: blur(3px);
 		-webkit-backdrop-filter: blur(3px);
-		background-color: light-dark(rgba(0 0 0 / 0.15), rgba(0 0 0 / 0.45));
+		background-color: light-dark(rgb(0 0 0 / 0.15), rgb(0 0 0 / 0.45));
 		color: var(--text-color-secondary);
 		display: flex;
 		font: var(--text-medium);
