@@ -246,7 +246,7 @@
 
 	.modal-overlay {
 		backdrop-filter: blur(5px);
-		background-color: rgba(0 0 0 / 0.5);
+		background-color: rgb(0 0 0 / 0.5);
 		place-content: center;
 		place-items: center;
 		position: fixed;

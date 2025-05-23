@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { blur } from "svelte/transition";
-	import { log, notifications, settings, state } from "./store.js";
+	import { log, notifications, settings, v4state } from "./store.js";
 	import Settings from "./Components/Settings.svelte";
 	import Notification from "./Components/Notification.svelte";
 	import LogoText from "@shared/Components/LogoText.svelte";
@@ -25,17 +25,17 @@
 		if (initData.error) return console.error(initData.error);
 		if (initData.platform === "ipados") platform = "ipados";
 		await settings.init(initData);
-		state.remove("init");
-		state.loadUrlState();
+		v4state.remove("init");
+		v4state.loadUrlState();
 		// Since now the only view on iOS
-		state.add("settings");
+		v4state.add("settings");
 	});
 </script>
 
-{#if $state.includes("init")}
+{#if $v4state.includes("init")}
 	<div class="initializer" out:blur={{ duration: 350 }}>
 		<LogoText />
-		{#if $state.includes("init-error")}
+		{#if $v4state.includes("init-error")}
 			<span>Failed to initialize app, check the browser console</span>
 		{:else}
 			<span>Initializing app...</span>
@@ -47,7 +47,7 @@
 		<Notification on:click={() => notifications.remove(item.id)} {item} />
 	{/each}
 </ul>
-{#if $state.includes("settings")}
+{#if $v4state.includes("settings")}
 	<Settings {platform} />
 {/if}
 
