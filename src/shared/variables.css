@@ -98,6 +98,6 @@
 		--editor-cursor: #7e7e7f;
 		--editor-matching-bracket-color: var(--text-color-primary);
 		--editor-matching-bracket-border: #ff00ea;
-		--editor-blurred-background: rgb(255 255 255 / 0.65); /* eeeeeea6 */
+		--editor-blurred-background: rgb(255 255 255 / 0.65);
 	}
 }
