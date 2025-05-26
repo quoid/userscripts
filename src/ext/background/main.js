@@ -392,6 +392,7 @@ async function handleMessage(message, sender) {
 				// initializing an xhr instance
 				const xhr = new XMLHttpRequest();
 				// establish a long-lived port connection to content script
+				/** @type {import("../global.d.ts").TypeBackground.XHRPort} */
 				const port = browser.tabs.connect(sender.tab.id, {
 					name: message.xhrPortName,
 				});
@@ -493,7 +494,21 @@ async function handleMessage(message, sender) {
 				// transfer to content script via text and then parse to document
 				if (responseType === "document") xhr.responseType = "text";
 				// add required listeners and send result back to the content script
-				const handlers = details.hasHandlers || {};
+				if (details.hasUploadHandlers) {
+					for (const handler of Object.keys(details.hasUploadHandlers)) {
+						/** @param {ProgressEvent} event */
+						xhr.upload[handler] = async (event) => {
+							/** @type {TypeExtMessages.XHRProgress} */
+							const progress = {
+								lengthComputable: event.lengthComputable,
+								loaded: event.loaded,
+								total: event.total,
+							};
+							port.postMessage({ handler, progress });
+						};
+					}
+				}
+				const handlers = details.hasHandlers ?? {};
 				for (const handler of Object.keys(handlers)) {
 					xhr[handler] = async () => {
 						// can not send xhr through postMessage
@@ -541,7 +556,7 @@ async function handleMessage(message, sender) {
 				// if onloadend not set in xhr details
 				// onloadend event won't be passed to content script
 				// if that happens port DISCONNECT message won't be posted
-				// if details lacks onloadend attach listener
+				// so if details lacks onloadend then attach the listener
 				if (!handlers.onloadend) {
 					xhr.onloadend = () => {
 						port.postMessage({ handler: "onloadend" });

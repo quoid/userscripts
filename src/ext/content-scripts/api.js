@@ -296,6 +296,7 @@ async function xhr(details, control, promise) {
 		url: String(details.url),
 		user: String(details.user),
 		hasHandlers: {},
+		hasUploadHandlers: {},
 	};
 	// preprocess data key
 	try {
@@ -340,6 +341,30 @@ async function xhr(details, control, promise) {
 			handlers[handler] = details[handler];
 		}
 	}
+	// preprocess upload handlers
+	/** @type {TypeExtMessages.XHRUploadHandlersObj} */
+	const uploadHandlers = {};
+	/** @type {TypeExtMessages.XHRUploadHandlers} */
+	const XHRUploadHHandlers = [
+		"onabort",
+		"onerror",
+		"onload",
+		"onloadend",
+		"onloadstart",
+		"onprogress",
+		"ontimeout",
+	];
+	if (typeof details.upload === "object") {
+		for (const handler of XHRUploadHHandlers) {
+			if (
+				handler in XMLHttpRequestEventTarget.prototype &&
+				typeof details.upload[handler] === "function"
+			) {
+				detailsParsed.hasUploadHandlers[handler] = true;
+				uploadHandlers[handler] = details.upload[handler];
+			}
+		}
+	}
 	// resolving asynchronous xmlHttpRequest
 	if (promise) {
 		detailsParsed.hasHandlers.onloadend = true;
@@ -363,14 +388,26 @@ async function xhr(details, control, promise) {
 	/**
 	 * port listener, most of the messaging logic goes here
 	 * @type {Parameters<typeof browser.runtime.onConnect.addListener>[0]}
+	 * @param {import("../global.d.ts").TypeContentScripts.XHRPort} port
 	 */
 	const listener = (port) => {
 		if (port.name !== xhrPortName) return;
+		// handle port messages
 		port.onMessage.addListener(async (msg) => {
-			/** @type {TypeExtMessages.XHRHandlers[number]} */
 			const handler = msg.handler;
+			// handle upload progress
 			if (
-				msg.response &&
+				"progress" in msg &&
+				detailsParsed.hasUploadHandlers[handler] &&
+				typeof uploadHandlers[handler] === "function"
+			) {
+				// call userscript handler
+				uploadHandlers[handler](msg.progress);
+				return;
+			}
+			// handle download events
+			if (
+				"response" in msg &&
 				detailsParsed.hasHandlers[handler] &&
 				typeof handlers[handler] === "function"
 			) {
@@ -387,7 +424,7 @@ async function xhr(details, control, promise) {
 				if (response.readyState === 4 && response.response !== null) {
 					xhrResponseProcessor(msgResponse, response);
 				}
-				// call userscript method
+				// call userscript handler
 				handlers[handler](response);
 				// call the deleted XHR.DONE handlers above
 				if (response.readyState === 4) {
