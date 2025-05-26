@@ -43,8 +43,22 @@ declare namespace TypeExtMessages {
 		"onloadend",
 	];
 
+	type XHRUploadHandlers = [
+		"onabort",
+		"onerror",
+		"onload",
+		"onloadend",
+		"onloadstart",
+		"onprogress",
+		"ontimeout",
+	];
+
 	type XHRHandlersObj = {
 		[handler in XHRHandlers[number]]?: (response: XHRResponse) => void;
+	};
+
+	type XHRUploadHandlersObj = {
+		[handler in XHRUploadHandlers[number]]?: (response: XHRProgress) => void;
 	};
 
 	interface XHRTransportableDetails {
@@ -59,6 +73,7 @@ declare namespace TypeExtMessages {
 		url: string;
 		user: string;
 		hasHandlers: { [handler in XHRHandlers[number]]?: boolean };
+		hasUploadHandlers: { [handler in XHRUploadHandlers[number]]?: boolean };
 	}
 
 	interface XHRTransportableResponse {
@@ -77,5 +92,11 @@ declare namespace TypeExtMessages {
 		response: any;
 		responseText?: string;
 		responseXML?: Document;
+	}
+
+	interface XHRProgress {
+		lengthComputable: boolean;
+		loaded: number;
+		total: number;
 	}
 }

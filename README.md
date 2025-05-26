@@ -208,7 +208,7 @@ Userscripts currently supports the following api methods. All methods are asynch
 > For the v4.5.x and earlier versions:
 > https://github.com/quoid/userscripts/tree/v4.5.4#api
 
-For API type definitions, please refer to: [`types.d.ts`](https://github.com/userscriptsup/testscripts/blob/bfce18746cd6bcab0616727401fa7ab6ef4086ac/userscripts/types.d.ts)
+For API type definitions, please refer to: [`types.d.ts`](https://github.com/userscriptsup/testscripts/blob/f2fcde4b556fa436fe806a44a89afb9eb5dccd0b/userscripts/types.d.ts)
 
 - `GM.addStyle(css)`
   - `css: String`
@@ -278,6 +278,19 @@ For API type definitions, please refer to: [`types.d.ts`](https://github.com/use
     - `data: String | Blob | ArrayBuffer | TypedArray | DataView | FormData | URLSearchParams` - optional
     - `responseType: String` - optional
     - refer to [`XMLHttpRequests`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
+  - upload event handlers:
+    - `upload: Object` - optional
+      - `onabort: Function` - optional
+      - `onerror: Function` - optional
+      - `onload: Function` - optional
+      - `onloadend: Function` - optional
+      - `onloadstart: Function` - optional
+      - `onprogress: Function` - optional
+      - `ontimeout: Function` - optional
+      - the progress object passed to the event handlers has the following properties:
+        - `lengthComputable`
+        - `loaded`
+        - `total`
   - event handlers:
     - `onabort: Function` - optional
     - `onerror: Function` - optional

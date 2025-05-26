@@ -198,7 +198,7 @@ async function injection() {
 		// loop through each userscript @grant value, add methods as needed
 		for (let j = 0; j < grants.length; j++) {
 			const grant = grants[j];
-			const method = grant.split(".")[1] || grant.split(".")[0];
+			const method = grant.startsWith("GM.") ? grant.slice(3) : grant;
 			// ensure API method exists in USAPI object
 			if (!Object.keys(USAPI).includes(method)) continue;
 			// add granted methods
