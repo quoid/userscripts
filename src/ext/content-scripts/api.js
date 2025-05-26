@@ -345,7 +345,7 @@ async function xhr(details, control, promise) {
 	/** @type {TypeExtMessages.XHRUploadHandlersObj} */
 	const uploadHandlers = {};
 	/** @type {TypeExtMessages.XHRUploadHandlers} */
-	const XHRUploadHHandlers = [
+	const XHRUploadHandlers = [
 		"onabort",
 		"onerror",
 		"onload",
@@ -355,7 +355,7 @@ async function xhr(details, control, promise) {
 		"ontimeout",
 	];
 	if (typeof details.upload === "object") {
-		for (const handler of XHRUploadHHandlers) {
+		for (const handler of XHRUploadHandlers) {
 			if (
 				handler in XMLHttpRequestEventTarget.prototype &&
 				typeof details.upload[handler] === "function"
