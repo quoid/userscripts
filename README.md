@@ -60,8 +60,9 @@ After installing the iOS App, you need two main steps to make the extension work
 
 There are two main ways to install a user script from the iOS version:
 
-- Visit any `.user.js` URL in Safari, then open the extension `popup` and you will see an installation prompt
-- You can also save `.user.js` files directly to the Userscripts directory you set above
+- Visit a `.user.js` URL in Safari, then open the extension `popup` and you will see an installation prompt
+- The URL should ending with `.user.js` in `PATH` part, not the `?QUERY` or `#HASH` parts
+- You could also save files that extension with `.user.js` directly to the Userscripts directory you set above
 
 > [!TIP]
 >
@@ -177,10 +178,13 @@ Userscripts Safari currently supports the following userscript metadata:
   - when paired with `@updateURL`, this will allow the user to update a userscript from a remote source, if the version on their machine is `<` version at the update URL
   - `@version` does nothing by itself, it needs to be paired with` @updateURL` for remote updating to function properly
 - `@updateURL`
-  - the remote url to check version against
+  - the remote url to check version against, the url `PATH` should ending with `.meta.js` and contains the Metadata block
   - if the version of the file located at the update URL is `>` the version on the local machine, the file will be updated
   - `@updateURL` does nothing by itself, it needs to be paired with `@version` for remote updating to function properly
+  - Read this [link](https://stackoverflow.com/questions/38023717/) for more details
+  - _Note: The extension does not correctly implement the entire update process, tracking in issue [#248](https://github.com/quoid/userscripts/issues/248)_
 - `@downloadURL`
+  - the url `PATH` should ending with `.user.js`, that is, it cannot be in `?QUERY` or `#HASH` parts
   - optional download location for a remotely updateable file (\*i.e. a file that has both `@version` and `@updateURL`)
   - when paired with `@version` and `@updateURL`, if the local version is `<` the version of the file that `@updateURL` points to, the extension will attempt to update the file's code with the contents of the file located at the `@downloadURL`
   - `@downloadURL` does nothing by itself, it needs `@version` and `@updateURL` to present in order to function properly
