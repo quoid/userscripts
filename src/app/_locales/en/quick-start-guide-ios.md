@@ -18,7 +18,7 @@
 - You could save files that extension with `.user.js` directly to the Userscripts directory.
   - The script file must contain a valid metadata block to match the web pages and be displayed in the extension popup.
 - When you visit a `.user.js` URL in Safari, open the extension popup and you will see an installation prompt, or it will pop up automatically if you have enhanced prompts turned on.
-  - The URL should ending with `.user.js` in `/PATH` part, not the `?QUERY` or `#HASH` parts, otherwise it will not be considered a valid user script URL by the extension.
+  - The URL should end with `.user.js` in `/PATH` part, not the `?QUERY` or `#HASH` parts, otherwise it will not be considered a valid user script URL by the extension.
 
 ### That’s it, start improving your quality of life now!
 
