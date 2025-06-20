@@ -59,10 +59,12 @@ func validateUrl(_ urlString: String) -> Bool {
 		logger?.error("\(#function, privacy: .public) - Invalid URL: \(urlString, privacy: .public)")
 		return false
 	}
-	if
-		(ptcl != "https:" && ptcl != "http:")
-		|| (!path.hasSuffix(".css") && !path.hasSuffix(".js"))
-	{
+	if ptcl != "https:" && ptcl != "http:" {
+		logger?.error("\(#function, privacy: .public) - Invalid URL protocol: \(urlString, privacy: .public)")
+		return false
+	}
+	if !path.hasSuffix(".css") && !path.hasSuffix(".js") {
+		logger?.error("\(#function, privacy: .public) - Invalid URL suffix: \(urlString, privacy: .public)")
 		return false
 	}
 	return true
@@ -829,7 +831,7 @@ func checkForRemoteUpdates(_ optionalFilesArray: [[String: Any]] = []) -> [[Stri
 			let currentVersion = metadata["version"]![0]
 			let updateUrl = metadata["updateURL"]![0]
 			// before fetching remote contents, ensure it points to a file of the same type
-			if !updateUrl.hasSuffix(type) {continue}
+			if !validateUrl(updateUrl) {continue}
 			guard
 				let remoteFileContents = getRemoteFileContents(updateUrl),
 				let remoteFileContentsParsed = parse(remoteFileContents),
@@ -1812,7 +1814,7 @@ func getFileRemoteUpdate(_ content: String) -> [String: String] {
 		return ["error": "Update failed, couldn't parse remote file contents"]
 	}
 	// check if update is needed
-	if version >= remoteVersion {
+	if !isVersionNewer(version, remoteVersion) {
 		return ["info": "No updates found"]
 	}
 	// at this point it is known an update is available, get new code from downloadURL
