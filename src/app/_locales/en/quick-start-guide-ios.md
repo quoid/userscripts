@@ -12,10 +12,15 @@
   - Manage extensions from the Settings App (Settings > Safari > Extensions) or Safari App (`AA` button on iPhone, `extension-icon` on iPad, the same location where you open the extension's `popup` interface).
   - For an optimal experience it's recommended that you "Always Allow" Userscripts for "All Websites", but you could also allow only the sites you want, but please don't forget your settings if your script doesn't work.
 
-### How to you install a user script
+### How to install and inject a user script and some things to note:
 
-- Visit any `.user.js` URL in Safari, then open the extension popup and you will see an installation prompt, or it will pop up automatically if you have enhanced prompts turned on.
-- You can also save `.user.js` files directly to the Userscripts directory. The script file must contain a valid metadata block to match the page and be displayed in the extension popup.
+- The mobile extension does not currently have a built-in script editor, but you could still write your own scripts and install them.
+- You could save files that extension with `.user.js` directly to the Userscripts directory.
+  - The script file must contain a valid metadata block to match the web pages and be displayed in the extension popup.
+- When you visit a `.user.js` URL in Safari, open the extension popup and you will see an installation prompt, or it will pop up automatically if you have enhanced prompts turned on.
+  - The URL should end with `.user.js` in `/PATH` part, not the `?QUERY` or `#HASH` parts, otherwise it will not be considered a valid user script URL by the extension.
+- When you enabled the extension and write the metadata correctly especially like `@match`, it will automatically complete the injection when you visit a matching web page.
+  - You could temporarily disable individual user scripts or all of them, just open the extension popup interface to toggle them.
 
 ### That’s it, start improving your quality of life now!
 
