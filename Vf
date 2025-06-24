@@ -1,0 +1,536 @@
+// ==UserScript==
+// @name         Virtual Cam Melhorado
+// @namespace    http://tampermonkey.net/
+// @version      2.0
+// @description  Substitui a webcam real por um vídeo com interface melhorada
+// @author       Lucy (Melhorado)
+// @match        https://idnvui.vfsglobal.com/*
+// @match        https://visa.vfsglobal.com/*
+// @grant        GM_addStyle
+// @grant        window.onurlchange
+// @require      https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Configuração e variáveis
+    const config = {
+        frameRate: 30,
+        uiPosition: 'left', // 'left' ou 'right'
+        debug: false
+    };
+
+    let state = {
+        virtualCamera: null,
+        realCamera: null,
+        currentSource: null,
+        videoFile: null,
+        isActive: false
+    };
+
+    // Elementos de UI que serão referenciados
+    let UI = {
+        container: null,
+        videoPreview: null,
+        loadButton: null,
+        toggleButton: null,
+        statusElement: null,
+        fileInput: null,
+    };
+
+    // Logger com níveis para mensagens mais informativas
+    const logger = {
+        info: (msg) => {
+            if (config.debug) console.info(`[VirtualCam] ${msg}`);
+            updateStatus(msg);
+        },
+        error: (msg, err) => {
+            if (config.debug) console.error(`[VirtualCam] ${msg}`, err);
+            updateStatus(msg, true);
+        },
+        warn: (msg) => {
+            if (config.debug) console.warn(`[VirtualCam] ${msg}`);
+        }
+    };
+
+    // Estilos CSS compactos para mobile
+    function injectStyles() {
+        GM_addStyle(`
+            #virtualCamUI {
+                position: fixed;
+                top: 5px;
+                ${config.uiPosition === 'left' ? 'left: 5px' : 'right: 5px'};
+                background: rgba(0,0,0,0.9);
+                padding: 8px;
+                border-radius: 8px;
+                z-index: 999999;
+                color: white;
+                font-family: Arial, sans-serif;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                width: 40px;
+                transition: all 0.3s;
+                max-height: 95vh;
+                overflow: hidden;
+            }
+
+            #virtualCamUI.vcam-expanded {
+                width: 200px;
+            }
+
+            .vcam-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 5px;
+                border-bottom: 1px solid #444;
+                padding-bottom: 3px;
+            }
+
+            .vcam-title {
+                font-weight: bold;
+                margin: 0;
+                font-size: 12px;
+                display: none;
+            }
+
+            .vcam-expanded .vcam-title {
+                display: block;
+            }
+
+            .vcam-minimize {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                font-size: 12px;
+                padding: 2px;
+            }
+
+            .vcam-btn {
+                background: #2196F3;
+                border: none;
+                color: white;
+                padding: 6px;
+                margin: 3px 0;
+                border-radius: 4px;
+                cursor: pointer;
+                width: 100%;
+                transition: all 0.2s;
+                font-size: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .vcam-btn-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+                padding: 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+            }
+
+            .vcam-btn:active {
+                transform: scale(0.95);
+            }
+
+            .vcam-btn:disabled {
+                background: #999;
+                cursor: not-allowed;
+            }
+
+            .vcam-btn-danger {
+                background: #f44336;
+            }
+
+            #videoPreview {
+                display: none;
+                width: 100%;
+                max-height: 100px;
+                margin: 5px 0;
+                border-radius: 4px;
+            }
+
+            #status {
+                font-size: 10px;
+                text-align: center;
+                margin-top: 5px;
+                color: #4CAF50;
+                padding: 2px;
+                display: none;
+            }
+
+            .vcam-expanded #status {
+                display: block;
+            }
+
+            .vcam-drag-handle {
+                cursor: move;
+                padding: 2px;
+                font-size: 12px;
+            }
+
+            .vcam-collapsed .vcam-content {
+                display: none;
+            }
+
+            .vcam-options {
+                margin-top: 5px;
+                padding-top: 5px;
+                border-top: 1px solid #444;
+            }
+
+            .vcam-file-info {
+                font-size: 9px;
+                color: #ccc;
+                margin: 3px 0;
+                word-break: break-word;
+                display: none;
+            }
+
+            .vcam-expanded .vcam-file-info {
+                display: block;
+            }
+
+            .vcam-toggle-expand {
+                background: #333;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                cursor: pointer;
+                margin: auto;
+            }
+
+            .vcam-content {
+                display: none;
+            }
+
+            .vcam-expanded .vcam-content {
+                display: block;
+            }
+
+            /* Ajustes para telas muito pequenas */
+            @media screen and (max-height: 500px) {
+                #virtualCamUI {
+                    max-height: 90vh;
+                }
+
+                #videoPreview {
+                    max-height: 80px;
+                }
+            }
+        `);
+    }
+
+    // Criar a UI compacta
+    function createUI() {
+        const ui = document.createElement('div');
+        ui.id = 'virtualCamUI';
+        ui.innerHTML = `
+            <div class="vcam-toggle-expand" id="toggleExpand">📷</div>
+            <div class="vcam-header">
+                <div class="vcam-drag-handle">↔️</div>
+                <h3 class="vcam-title">VCam</h3>
+                <button class="vcam-minimize" id="vcamMinimize">×</button>
+            </div>
+            <div class="vcam-content">
+                <input type="file" id="vcamFile" accept="video/*" hidden>
+                <div class="vcam-file-info" id="fileInfo">Sem vídeo</div>
+                <button class="vcam-btn" id="loadVideo">📁 Vídeo</button>
+                <button class="vcam-btn" id="toggleCam" disabled>🎥 Iniciar</button>
+                <video id="videoPreview" controls></video>
+                <div id="status">Pronto</div>
+            </div>
+        `;
+        document.body.appendChild(ui);
+
+        // Referências aos elementos
+        UI.container = ui;
+        UI.videoPreview = document.getElementById('videoPreview');
+        UI.loadButton = document.getElementById('loadVideo');
+        UI.toggleButton = document.getElementById('toggleCam');
+        UI.statusElement = document.getElementById('status');
+        UI.fileInput = document.getElementById('vcamFile');
+        UI.fileInfo = document.getElementById('fileInfo');
+        UI.minimizeButton = document.getElementById('vcamMinimize');
+        UI.toggleExpand = document.getElementById('toggleExpand');
+
+        // Tornar o painel movível
+        makeDraggable(ui, document.querySelector('.vcam-drag-handle'));
+    }
+
+    // Fazer o painel arrastável
+    function makeDraggable(element, handle) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+        handle.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+
+            // Mantenha o elemento dentro da viewport
+            const rect = element.getBoundingClientRect();
+            const newTop = element.offsetTop - pos2;
+            const newLeft = element.offsetLeft - pos1;
+
+            if (newTop > 0 && newTop < window.innerHeight - rect.height) {
+                element.style.top = newTop + "px";
+            }
+
+            if (newLeft > 0 && newLeft < window.innerWidth - rect.width) {
+                element.style.left = newLeft + "px";
+            }
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    // Interceptar getUserMedia
+    function interceptMediaDevices() {
+        const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+
+        navigator.mediaDevices.getUserMedia = async (constraints) => {
+            if (constraints.video && state.isActive) {
+                logger.info('Interceptando chamada getUserMedia - usando câmera virtual');
+                return getVirtualCamera();
+            }
+            logger.info('Usando câmera real');
+            return originalGetUserMedia(constraints);
+        };
+    }
+
+    // Obter stream da câmera virtual
+    async function getVirtualCamera() {
+        try {
+            if (!state.virtualCamera) {
+                await setupVirtualCamera();
+            }
+            return state.virtualCamera;
+        } catch (error) {
+            logger.error('Erro ao obter câmera virtual', error);
+            throw error;
+        }
+    }
+
+    // Configurar câmera virtual
+    async function setupVirtualCamera() {
+        if (!state.videoFile) {
+            throw new Error('Nenhum vídeo selecionado');
+        }
+
+        const video = document.createElement('video');
+        video.src = state.videoFile;
+        video.muted = true;
+        video.loop = true;
+
+        try {
+            await video.play();
+            const stream = video.captureStream(config.frameRate);
+            if (!stream.getVideoTracks().length) {
+                throw new Error('Não foi possível capturar o vídeo');
+            }
+            state.virtualCamera = new MediaStream(stream.getVideoTracks());
+            return state.virtualCamera;
+        } catch (error) {
+            logger.error('Erro ao configurar câmera virtual', error);
+            throw error;
+        }
+    }
+
+    // Iniciar câmera virtual
+    async function startVirtualCamera() {
+        if (!state.videoFile) {
+            logger.error('Carregue um vídeo primeiro!');
+            return false;
+        }
+
+        try {
+            await setupVirtualCamera();
+            state.isActive = true;
+            logger.info('Webcam virtual ativada com sucesso!');
+            UI.toggleButton.classList.add('vcam-btn-danger');
+            return true;
+        } catch (error) {
+            logger.error(`Erro ao iniciar webcam virtual: ${error.message}`);
+            return false;
+        }
+    }
+
+    // Parar câmera virtual
+    async function stopVirtualCamera() {
+        if (state.virtualCamera) {
+            state.virtualCamera.getTracks().forEach(track => track.stop());
+            state.virtualCamera = null;
+        }
+        state.isActive = false;
+        UI.toggleButton.classList.remove('vcam-btn-danger');
+        logger.info('Webcam real restaurada');
+    }
+
+    // Atualizar status
+    function updateStatus(message, isError = false) {
+        if (!UI.statusElement) return;
+
+        UI.statusElement.textContent = message;
+        UI.statusElement.style.color = isError ? '#ff5252' : '#4CAF50';
+        UI.statusElement.style.background = isError ? 'rgba(255,0,0,0.1)' : 'rgba(0,0,0,0.2)';
+
+        // Garantir que a mensagem seja visível por algum tempo
+        UI.statusElement.style.opacity = '1';
+        setTimeout(() => {
+            if (UI.statusElement) {
+                UI.statusElement.style.opacity = '0.8';
+            }
+        }, 3000);
+    }
+
+    // Configurar manipuladores de eventos
+    function setupEventListeners() {
+        // Expandir/recolher a interface
+        UI.toggleExpand.addEventListener('click', () => {
+            UI.container.classList.toggle('vcam-expanded');
+        });
+
+        // Carregar vídeo
+        UI.loadButton.addEventListener('click', () => {
+            UI.fileInput.click();
+        });
+
+        // Alternar câmera
+        UI.toggleButton.addEventListener('click', async () => {
+            if (state.isActive) {
+                await stopVirtualCamera();
+                UI.toggleButton.textContent = '🎥 Iniciar';
+                UI.toggleExpand.textContent = '📷';
+            } else {
+                const success = await startVirtualCamera();
+                if (success) {
+                    UI.toggleButton.textContent = '⏹ Parar';
+                    UI.toggleExpand.textContent = '🎬';
+                }
+            }
+        });
+
+        // Manipular carregamento de arquivo
+        UI.fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                // Limpar qualquer URL anterior
+                if (state.videoFile) {
+                    URL.revokeObjectURL(state.videoFile);
+                }
+
+                state.videoFile = URL.createObjectURL(file);
+                UI.videoPreview.src = state.videoFile;
+                UI.videoPreview.style.display = 'block';
+                UI.toggleButton.disabled = false;
+
+                // Nome curto do arquivo para economizar espaço
+                const shortName = file.name.length > 15 ?
+                    file.name.substring(0, 12) + '...' :
+                    file.name;
+
+                UI.fileInfo.textContent = `${shortName} (${(file.size / (1024 * 1024)).toFixed(1)}MB)`;
+
+                logger.info('Vídeo ok!');
+            } catch (error) {
+                logger.error(`Erro: ${error.message}`);
+            }
+        });
+
+        // Fechamento/minimização da UI
+        UI.minimizeButton.addEventListener('click', () => {
+            UI.container.style.display = 'none';
+
+            // Criar botão flutuante pequeno para restaurar
+            const restoreBtn = document.createElement('div');
+            restoreBtn.innerHTML = '📷';
+            restoreBtn.style.cssText = `
+                position: fixed;
+                bottom: 10px;
+                ${config.uiPosition === 'left' ? 'left: 10px' : 'right: 10px'};
+                background: rgba(0,0,0,0.7);
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 999999;
+                font-size: 16px;
+            `;
+            document.body.appendChild(restoreBtn);
+
+            restoreBtn.addEventListener('click', () => {
+                UI.container.style.display = 'block';
+                restoreBtn.remove();
+            });
+        });
+
+        // Alternar posição ao clicar duas vezes no ícone de arrasto
+        document.querySelector('.vcam-drag-handle').addEventListener('dblclick', () => {
+            if (config.uiPosition === 'left') {
+                config.uiPosition = 'right';
+                UI.container.style.left = 'auto';
+                UI.container.style.right = '5px';
+            } else {
+                config.uiPosition = 'left';
+                UI.container.style.right = 'auto';
+                UI.container.style.left = '5px';
+            }
+        });
+
+        // Limpeza ao descarregar a página
+        window.addEventListener('beforeunload', () => {
+            if (state.virtualCamera) {
+                state.virtualCamera.getTracks().forEach(track => track.stop());
+            }
+            if (state.videoFile) {
+                URL.revokeObjectURL(state.videoFile);
+            }
+        });
+    }
+
+    // Inicialização principal
+    function init() {
+        injectStyles();
+        createUI();
+        interceptMediaDevices();
+        setupEventListeners();
+        logger.info('Virtual Cam inicializado e pronto');
+    }
+
+    // Inicializar o script quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
