@@ -1,4 +1,5 @@
 import USAPI from "./api.js";
+import { getColor } from "@shared/colors.js";
 
 // code received from background page will be stored in this variable
 // code referenced again when strict CSPs block initial injection attempt
@@ -62,13 +63,13 @@ ${userscript.code}
 	}
 	const world = injectInto === "content" ? "content" : "page";
 	if (window.self === window.top) {
-		console.info(`Injecting: ${name} %c(js/${world})`, "color: #fff600");
+		console.info(`Injecting: ${name} %c(js/${world})`, getColor("yellow"));
 	} else {
 		console.info(
 			`Injecting: ${name} %c(js/${world})%c - %cframe(${label})(${window.location})`,
-			"color: #fff600",
-			"color: inherit",
-			"color: #006fff",
+			getColor("yellow"),
+			getColor(),
+			getColor("blue"),
 		);
 	}
 	if (world === "page") {
@@ -94,13 +95,13 @@ ${userscript.code}
 
 function injectCSS(name, code) {
 	if (window.self === window.top) {
-		console.info(`Injecting ${name} %c(css)`, "color: #60f36c");
+		console.info(`Injecting ${name} %c(css)`, getColor("green"));
 	} else {
 		console.info(
 			`Injecting ${name} %c(css)%c - %cframe(${label})(${window.location})`,
-			"color: #60f36c",
-			"color: inherit",
-			"color: #006fff",
+			getColor("green"),
+			getColor(),
+			getColor("blue"),
 		);
 	}
 	// Safari lacks full support for tabs.insertCSS
@@ -246,7 +247,7 @@ function listeners() {
 			for (let i = 0; i < data.files.menu.length; i++) {
 				const item = data.files.menu[i];
 				if (item.scriptObject.filename === filename) {
-					console.info(`Injecting ${filename} %c(js)`, "color: #fff600");
+					console.info(`Injecting ${filename} %c(js)`, getColor("yellow"));
 					injectJS(item);
 					return;
 				}
