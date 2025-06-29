@@ -1,8 +1,5 @@
 <svelte:options runes={true} />
 
-<script>
-</script>
-
 <svg viewBox="0 0 181 24">
 	<g fill="none">
 		<path
