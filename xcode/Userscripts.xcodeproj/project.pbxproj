@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		007596BF2E10B67F008F8C04 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 007596BE2E10B67F008F8C04 /* AppIcon.icon */; };
+		007596C02E10B67F008F8C04 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 007596BE2E10B67F008F8C04 /* AppIcon.icon */; };
 		030C64F62AC62CC900548FBD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 030C64F52AC62CC900548FBD /* Settings.bundle */; };
 		030C64FC2AD0B24C00548FBD /* Initialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030C64FB2AD0B24C00548FBD /* Initialization.swift */; };
 		030FCAD42B182008004D13CD /* UrlCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030FCAD32B182008004D13CD /* UrlCodecTests.swift */; };
@@ -112,6 +114,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		007596BE2E10B67F008F8C04 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		030C64F52AC62CC900548FBD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		030C64FB2AD0B24C00548FBD /* Initialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Initialization.swift; sourceTree = "<group>"; };
 		030FCAD32B182008004D13CD /* UrlCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlCodecTests.swift; sourceTree = "<group>"; };
@@ -204,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				039F59512AD95485002E9977 /* Resources */,
+				007596BE2E10B67F008F8C04 /* AppIcon.icon */,
 				03D405482CC66DC90091FE6F /* Shared.xcassets */,
 				4A4CF6E9270A38BD00111584 /* ViewController.swift */,
 				039F59552ADA2FE2002E9977 /* USchemeHandler.swift */,
@@ -501,6 +505,7 @@
 				4A4CF6F0270A38BD00111584 /* Main.storyboard in Resources */,
 				4A4CF6ED270A38BD00111584 /* LaunchScreen.storyboard in Resources */,
 				03D4054B2CC66DC90091FE6F /* Shared.xcassets in Resources */,
+				007596BF2E10B67F008F8C04 /* AppIcon.icon in Resources */,
 				030C64F62AC62CC900548FBD /* Settings.bundle in Resources */,
 				4A4CF710270A38BF00111584 /* Assets.xcassets in Resources */,
 				039F59532AD9591C002E9977 /* dist in Resources */,
@@ -523,6 +528,7 @@
 			files = (
 				4A57B9F9227235CE008A9763 /* Assets.xcassets in Resources */,
 				032CBD3C2CBCF19A00B31D5E /* dist in Resources */,
+				007596C02E10B67F008F8C04 /* AppIcon.icon in Resources */,
 				03D4054D2CC66DC90091FE6F /* Shared.xcassets in Resources */,
 				4A57B9F5227235CD008A9763 /* Main.storyboard in Resources */,
 			);

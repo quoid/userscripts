@@ -1,7 +1,7 @@
 <svelte:options runes={true} />
 
 <script>
-	import logoIcon from "@shared/img/logo-icon.png";
+	import LogoIcon from "@shared/Components/LogoIcon.svelte";
 	import LogoText from "@shared/Components/LogoText.svelte";
 	import IconDebug from "@shared/img/icon-bug.svg?raw";
 	import Dropdown from "@shared/Components/Dropdown.svelte";
@@ -147,15 +147,8 @@
 			</div>
 		{/if}
 		<div class="section app">
-			<img
-				alt="Userscripts App Icon"
-				class="icon"
-				draggable="false"
-				src={logoIcon}
-			/>
-			<div class="logo">
-				<LogoText />
-			</div>
+			<div class="logo-icon"><LogoIcon /></div>
+			<div class="logo-text"><LogoText /></div>
 			<div class="version">
 				{#if import.meta.env.GIT_TAG && import.meta.env.GIT_COMMIT}
 					<a href="{baseUrl}/releases/tag/{import.meta.env.GIT_TAG}">
@@ -307,12 +300,12 @@
 		color: var(--color-blue);
 	}
 
-	.section.app .icon {
-		height: min(8rem, 256px);
-		width: min(8rem, 256px);
+	.section.app .logo-icon :global(svg) {
+		height: min(7rem, 150px);
+		padding: 0.7rem;
 	}
 
-	.section.app .logo :global(svg) {
+	.section.app .logo-text :global(svg) {
 		display: flex;
 		height: min(1.5rem, 32px);
 	}
