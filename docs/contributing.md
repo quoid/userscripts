@@ -117,4 +117,4 @@ If you are not a member of the project, first you need to fork the master branch
 
 # About
 
-[Userscripts](https://github.com/quoid/userscripts) @ 2018-2023
+[Userscripts](https://github.com/quoid/userscripts)

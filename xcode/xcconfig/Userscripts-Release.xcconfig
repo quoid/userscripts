@@ -1,6 +1,6 @@
 #include "Userscripts-Base.xcconfig"
 
-INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2018–2024 Justin Wasack. All rights reserved.
+INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2018–2025 Justin Wasack. All rights reserved.
 CURRENT_PROJECT_VERSION = 1
 MARKETING_VERSION = 1.0.0
 

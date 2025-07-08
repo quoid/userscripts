@@ -38,4 +38,4 @@ Build the project from here to extension bundled app
 
 # About
 
-[Userscripts](https://github.com/quoid/userscripts) @ 2018-2023
+[Userscripts](https://github.com/quoid/userscripts)

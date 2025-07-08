@@ -79,4 +79,4 @@ Note that all existing `.xcconfig` files already include `.dev.xcconfig` files o
 
 # About
 
-[Userscripts](https://github.com/quoid/userscripts) @ 2018-2024
+[Userscripts](https://github.com/quoid/userscripts)
