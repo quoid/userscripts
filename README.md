@@ -56,7 +56,7 @@ After installing the iOS App, you need two main steps to make the extension work
 >
 > The App cannot detect whether you have enabled the extension in Safari, therefore, the App prompt will not change after you enable the extension. Currently the App interface is only used to set or change the userscripts directory.
 >
-> You could select an iCloud folder for syncing scripts between macOS and iOS, but please note that there may be delays in synchronization, and you may encounter files be evictioned due to iCloud optimization, please refer to [#424](https://github.com/quoid/userscripts/issues/424).
+> You could select an iCloud folder for syncing scripts between macOS and iOS, but please note that there may be delays in synchronization, and you may encounter files be evictioned due to iCloud optimization, please refer to [#424](https://github.com/quoid/userscripts/issues/424). (**Since macOS 15 / iOS 18, please set "keep downloaded" for the folder to avoid eviction**)
 
 There are two main ways to install a user script from the iOS version:
 
