@@ -186,6 +186,7 @@ async function serverCheck(url) {
 	/** run development server */
 	const server = await createServer({
 		...sharedConfig,
+		publicDir: "public/ext/vendor/",
 		plugins: [svelte()],
 		server: {
 			host: true,
