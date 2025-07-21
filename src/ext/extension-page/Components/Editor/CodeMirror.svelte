@@ -150,11 +150,6 @@
 				"Cmd-S": () => saveHandler(),
 				"Cmd-F": () => activateSearch(),
 				Esc: () => (searchActive = false),
-				Tab: (cm) => {
-					// convert tabs to spaces and add invisible elements
-					const s = Array(cm.getOption("indentUnit") + 1).join(" ");
-					cm.replaceSelection(s);
-				},
 			},
 		});
 
