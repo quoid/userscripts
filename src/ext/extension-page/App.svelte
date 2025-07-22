@@ -66,6 +66,10 @@
 	const editorMinWidth = "20rem";
 
 	function sidebarSwitch() {
+		if (!sidebarHidden && !$items.find((i) => i.active)) {
+			log.add("Please select or create a new item first.", "info", true);
+			return;
+		}
 		sidebarHidden = !sidebarHidden;
 	}
 
@@ -168,7 +172,7 @@
 		cursor: col-resize;
 		position: fixed;
 		inset: 0;
-		z-index: 200;
+		z-index: 20;
 	}
 
 	.splitter {
@@ -182,7 +186,7 @@
 		left: calc(var(--sidebar-fixed-width) - var(--splitter-offset));
 		width: var(--splitter-width);
 		height: 100svh;
-		z-index: 201;
+		z-index: 21;
 		transition: background-color 0.2s ease-in-out;
 
 		&:hover,

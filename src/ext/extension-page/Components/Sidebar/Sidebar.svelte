@@ -81,8 +81,8 @@
 	}
 
 	async function activate(item) {
-		// if not in ready state or the item is already active
-		if (!$v4state.includes("ready") || item.active) return;
+		// if item is empty or already active
+		if (!item || item.active) return;
 
 		// check if there's a temp item and it's not the item to be activated
 		// can occur when user clicks a non-temp item while a temp item exists
@@ -228,7 +228,7 @@
 			title="Open settings"
 			{disabled}
 		/>
-		<Dropdown icon={iconPlus} title="New item" {disabled} right>
+		<Dropdown icon={iconPlus} title="New item" {disabled}>
 			<button on:click={() => newItem("js")}>New JS</button>
 			<button on:click={() => newItem("css")}>New CSS</button>
 			<button on:click={newRemote}>New Remote</button>
