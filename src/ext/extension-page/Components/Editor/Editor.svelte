@@ -255,19 +255,16 @@
 	}
 
 	.editor__empty {
-		align-items: center;
 		background-color: inherit;
 		color: var(--text-color-disabled);
-		display: flex;
 		font: var(--text-large);
-		height: 100%;
-		justify-content: center;
-		left: 0;
 		letter-spacing: var(--letter-spacing-large);
+		display: flex;
+		place-content: center;
+		place-items: center;
 		position: absolute;
-		top: 0;
-		width: 100%;
-		z-index: 85;
+		inset: 0;
+		z-index: 10;
 	}
 
 	.editor__header {
