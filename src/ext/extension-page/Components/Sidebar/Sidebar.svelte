@@ -262,6 +262,7 @@
 		display: flex;
 		flex-direction: column;
 		width: var(--sidebar-width);
+		min-width: var(--sidebar-min-width);
 		position: relative;
 	}
 

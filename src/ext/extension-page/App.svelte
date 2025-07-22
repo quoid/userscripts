@@ -62,6 +62,7 @@
 	let splitterActive = false;
 	let sidebarHidden = false;
 	let sidebarWidth = "23svw";
+	const sidebarMinWidth = "20rem";
 
 	function sidebarSwitch() {
 		sidebarHidden = !sidebarHidden;
@@ -75,7 +76,7 @@
 		} else if (event.type === "mousemove") {
 			const vw = window.innerWidth;
 			const sw = (event.x / vw) * 100;
-			sidebarWidth = `max(min(${sw}svw, 100svw - 20rem), 20rem)`;
+			sidebarWidth = `max(min(${sw}svw, 100svw - 20rem), ${sidebarMinWidth})`;
 		}
 		event.preventDefault();
 	}
@@ -93,7 +94,10 @@
 		{/if}
 	</div>
 {/if}
-<main style:--sidebar-width={sidebarWidth}>
+<main
+	style:--sidebar-width={sidebarWidth}
+	style:--sidebar-min-width={sidebarMinWidth}
+>
 	{#if !sidebarHidden}
 		<Sidebar {sidebarSwitch} />
 	{/if}
@@ -167,10 +171,15 @@
 	}
 
 	.splitter {
+		--splitter-width: 6px;
+		--splitter-offset: calc(var(--splitter-width) / 2);
+		--sidebar-fixed-width: max(var(--sidebar-min-width), var(--sidebar-width));
+
+		background-color: transparent;
 		cursor: col-resize;
 		position: fixed;
-		left: calc(var(--sidebar-width) - 3px);
-		width: 6px;
+		left: calc(var(--sidebar-fixed-width) - var(--splitter-offset));
+		width: var(--splitter-width);
 		height: 100svh;
 		z-index: 201;
 		transition: background-color 0.2s ease-in-out;
