@@ -63,6 +63,7 @@
 	let sidebarHidden = false;
 	let sidebarWidth = "23svw";
 	const sidebarMinWidth = "20rem";
+	const editorMinWidth = "20rem";
 
 	function sidebarSwitch() {
 		sidebarHidden = !sidebarHidden;
@@ -76,7 +77,7 @@
 		} else if (event.type === "mousemove") {
 			const vw = window.innerWidth;
 			const sw = (event.x / vw) * 100;
-			sidebarWidth = `max(min(${sw}svw, 100svw - 20rem), ${sidebarMinWidth})`;
+			sidebarWidth = `max(min(${sw}svw, 100svw - ${editorMinWidth}), ${sidebarMinWidth})`;
 		}
 		event.preventDefault();
 	}
