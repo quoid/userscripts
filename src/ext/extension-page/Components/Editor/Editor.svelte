@@ -173,7 +173,7 @@
 				<div class="editor__title truncate">{name}</div>
 			</div>
 			<div class="editor__status">
-				<div>
+				<div class="truncate">
 					{#if $v4state.includes("saving")}
 						Saving...
 					{:else if $v4state.includes("trashing")}
