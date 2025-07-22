@@ -66,6 +66,10 @@
 	const editorMinWidth = "20rem";
 
 	function sidebarSwitch() {
+		if (!sidebarHidden && !$items.find((i) => i.active)) {
+			log.add("Please select or create a new item first.", "info", true);
+			return;
+		}
 		sidebarHidden = !sidebarHidden;
 	}
 
