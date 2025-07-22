@@ -261,8 +261,7 @@
 		border-right: 1px solid var(--border-color);
 		display: flex;
 		flex-direction: column;
-		flex: 0 0 23rem;
-		max-width: 23rem;
+		width: var(--sidebar-width);
 		position: relative;
 	}
 
@@ -274,7 +273,6 @@
 		align-items: center;
 		display: flex;
 		flex-shrink: 0;
-		flex-wrap: wrap;
 		padding: 1rem;
 		gap: 0.5rem;
 	}

@@ -246,6 +246,7 @@
 		flex-grow: 1;
 		overflow: hidden;
 		position: relative;
+		width: calc(100svw - var(--sidebar-width));
 	}
 
 	.info {
@@ -273,7 +274,8 @@
 		align-items: center;
 		display: flex;
 		flex-shrink: 0;
-		padding: 1rem 0.5rem 1rem 1.5rem;
+		padding: 1rem;
+		gap: 1rem;
 	}
 
 	.sidebar-switch {
