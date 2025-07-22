@@ -58,6 +58,11 @@
 			window.location.reload();
 		}
 	});
+	let sidebarHidden = false;
+
+	function sidebarSwitch() {
+		sidebarHidden = !sidebarHidden;
+	}
 </script>
 
 <svelte:window on:keydown={preventKeyCommands} />
@@ -72,9 +77,10 @@
 		{/if}
 	</div>
 {/if}
-<main>
-	<Sidebar />
-	<Editor />
+	{#if !sidebarHidden}
+		<Sidebar {sidebarSwitch} />
+	{/if}
+	<Editor {sidebarHidden} {sidebarSwitch} />
 </main>
 <ul>
 	{#each $notifications as item (item.id)}

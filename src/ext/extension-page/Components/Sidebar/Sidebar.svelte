@@ -11,12 +11,15 @@
 	import Loader from "@shared/Components/Loader.svelte";
 	import iconPlus from "@shared/img/icon-plus.svg?raw";
 	import iconSettings from "@shared/img/icon-settings.svg?raw";
+	import iconSidebar from "@shared/img/icon-sidebar.svg?raw";
 	import {
 		cmChanged,
 		cmGetInstance,
 		cmSetSavedCode,
 		cmSetSessionCode,
 	} from "../Editor/CodeMirror.svelte";
+
+	export let sidebarSwitch;
 
 	// disable buttons accordingly
 	$: disabled = !$v4state.includes("ready");
@@ -210,6 +213,13 @@
 	class:sidebar--compact={!$settings["editor_list_descriptions"]}
 >
 	<div class="sidebar__header">
+		<div class="sidebar-switch">
+			<IconButton
+				icon={iconSidebar}
+				on:click={sidebarSwitch}
+				title="Hide sidebar"
+			/>
+		</div>
 		<div class="sidebar__filter"><SidebarFilter /></div>
 		<IconButton
 			warnDot={!$settings["global_active"]}
@@ -254,6 +264,10 @@
 		flex: 0 0 23rem;
 		max-width: 23rem;
 		position: relative;
+	}
+
+	.sidebar-switch {
+		scale: 1.5;
 	}
 
 	.sidebar__header {
