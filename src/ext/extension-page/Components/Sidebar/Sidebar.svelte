@@ -30,6 +30,8 @@
 	$: if (list.find((a) => a.active)) {
 		const active = list.find((a) => a.active);
 		scrollToEl(active.filename);
+	} else {
+		activate(list[0]);
 	}
 
 	/**
