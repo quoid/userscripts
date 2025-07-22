@@ -105,14 +105,14 @@
 >
 	{#if !sidebarHidden}
 		<Sidebar {sidebarSwitch} />
+		<div
+			role="none"
+			class="splitter"
+			class:dragging={splitterActive}
+			on:mousedown={handleSplitterDrag}
+			on:mouseup={handleSplitterDrag}
+		></div>
 	{/if}
-	<div
-		role="none"
-		class="splitter"
-		class:dragging={splitterActive}
-		on:mousedown={handleSplitterDrag}
-		on:mouseup={handleSplitterDrag}
-	></div>
 	<Editor {sidebarHidden} {sidebarSwitch} />
 </main>
 {#if splitterActive}
