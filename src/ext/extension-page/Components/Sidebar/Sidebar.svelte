@@ -81,8 +81,8 @@
 	}
 
 	async function activate(item) {
-		// if not in ready state or the item is already active
-		if (!$v4state.includes("ready") || item.active) return;
+		// if item is empty or already active
+		if (!item || item.active) return;
 
 		// check if there's a temp item and it's not the item to be activated
 		// can occur when user clicks a non-temp item while a temp item exists
