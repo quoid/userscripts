@@ -13,6 +13,10 @@
 	import iconDownload from "@shared/img/icon-download.svg?raw";
 	import iconTrash from "@shared/img/icon-trash.svg?raw";
 	import iconSync from "@shared/img/icon-sync.svg?raw";
+	import iconSidebar from "@shared/img/icon-sidebar.svg?raw";
+
+	export let sidebarHidden;
+	export let sidebarSwitch;
 
 	// the data the populates editor elements
 	let canUpdate;
@@ -167,13 +171,22 @@
 		<div class="editor__empty">No Item Selected</div>
 	{/if}
 	<div class="editor__header">
+		{#if sidebarHidden}
+			<div class="sidebar-switch">
+				<IconButton
+					icon={iconSidebar}
+					on:click={sidebarSwitch}
+					title="Show sidebar"
+				/>
+			</div>
+		{/if}
 		<div class="editor__header__content">
 			<div>
 				<Tag {type} />
 				<div class="editor__title truncate">{name}</div>
 			</div>
 			<div class="editor__status">
-				<div>
+				<div class="truncate">
 					{#if $v4state.includes("saving")}
 						Saving...
 					{:else if $v4state.includes("trashing")}
@@ -233,6 +246,7 @@
 		flex-grow: 1;
 		overflow: hidden;
 		position: relative;
+		width: calc(100svw - var(--sidebar-width));
 	}
 
 	.info {
@@ -260,7 +274,12 @@
 		align-items: center;
 		display: flex;
 		flex-shrink: 0;
-		padding: 1rem 0.5rem 1rem 1.5rem;
+		padding: 1rem;
+		gap: 1rem;
+	}
+
+	.sidebar-switch {
+		scale: 1.5;
 	}
 
 	.editor__header__content {

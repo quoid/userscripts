@@ -42,7 +42,10 @@
 		<Toggle checked={!data.disabled} on:click={toggleClick} />
 	</div>
 	{#if description}
-		<div class="item__description" title={showTitle ? data.description : null}>
+		<div
+			class="item__description truncate"
+			title={showTitle ? data.description : null}
+		>
 			{description}
 		</div>
 	{/if}

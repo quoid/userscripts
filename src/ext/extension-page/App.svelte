@@ -58,6 +58,29 @@
 			window.location.reload();
 		}
 	});
+
+	let splitterActive = false;
+	let sidebarHidden = false;
+	let sidebarWidth = "23svw";
+	const sidebarMinWidth = "20rem";
+	const editorMinWidth = "20rem";
+
+	function sidebarSwitch() {
+		sidebarHidden = !sidebarHidden;
+	}
+
+	function handleSplitterDrag(event) {
+		if (event.type === "mouseup") {
+			splitterActive = false;
+		} else if (event.type === "mousedown") {
+			splitterActive = true;
+		} else if (event.type === "mousemove") {
+			const vw = window.innerWidth;
+			const sw = (event.x / vw) * 100;
+			sidebarWidth = `max(min(${sw}svw, 100svw - ${editorMinWidth}), ${sidebarMinWidth})`;
+		}
+		event.preventDefault();
+	}
 </script>
 
 <svelte:window on:keydown={preventKeyCommands} />
@@ -72,10 +95,30 @@
 		{/if}
 	</div>
 {/if}
-<main>
-	<Sidebar />
-	<Editor />
+<main
+	style:--sidebar-width={sidebarWidth}
+	style:--sidebar-min-width={sidebarMinWidth}
+>
+	{#if !sidebarHidden}
+		<Sidebar {sidebarSwitch} />
+	{/if}
+	<div
+		role="none"
+		class="splitter"
+		class:dragging={splitterActive}
+		on:mousedown={handleSplitterDrag}
+		on:mouseup={handleSplitterDrag}
+	></div>
+	<Editor {sidebarHidden} {sidebarSwitch} />
 </main>
+{#if splitterActive}
+	<div
+		role="none"
+		class="resize-mask"
+		on:mouseup={handleSplitterDrag}
+		on:mousemove={handleSplitterDrag}
+	></div>
+{/if}
 <ul>
 	{#each $notifications as item (item.id)}
 		<Notification on:click={() => notifications.remove(item.id)} {item} />
@@ -118,6 +161,34 @@
 		display: flex;
 		flex: 1 0 0;
 		overflow: hidden;
+	}
+
+	.resize-mask {
+		background-color: transparent;
+		cursor: col-resize;
+		position: fixed;
+		inset: 0;
+		z-index: 200;
+	}
+
+	.splitter {
+		--splitter-width: 6px;
+		--splitter-offset: calc(var(--splitter-width) / 2);
+		--sidebar-fixed-width: max(var(--sidebar-min-width), var(--sidebar-width));
+
+		background-color: transparent;
+		cursor: col-resize;
+		position: fixed;
+		left: calc(var(--sidebar-fixed-width) - var(--splitter-offset));
+		width: var(--splitter-width);
+		height: 100svh;
+		z-index: 201;
+		transition: background-color 0.2s ease-in-out;
+
+		&:hover,
+		&.dragging {
+			background-color: var(--color-blue);
+		}
 	}
 
 	ul {

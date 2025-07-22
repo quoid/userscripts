@@ -11,12 +11,15 @@
 	import Loader from "@shared/Components/Loader.svelte";
 	import iconPlus from "@shared/img/icon-plus.svg?raw";
 	import iconSettings from "@shared/img/icon-settings.svg?raw";
+	import iconSidebar from "@shared/img/icon-sidebar.svg?raw";
 	import {
 		cmChanged,
 		cmGetInstance,
 		cmSetSavedCode,
 		cmSetSessionCode,
 	} from "../Editor/CodeMirror.svelte";
+
+	export let sidebarSwitch;
 
 	// disable buttons accordingly
 	$: disabled = !$v4state.includes("ready");
@@ -30,6 +33,8 @@
 	$: if (list.find((a) => a.active)) {
 		const active = list.find((a) => a.active);
 		scrollToEl(active.filename);
+	} else {
+		activate(list[0]);
 	}
 
 	/**
@@ -204,11 +209,17 @@
 </script>
 
 <div
-	class="sidebar {!$settings['editor_list_descriptions']
-		? 'sidebar--compact'
-		: ''}"
+	class="sidebar"
+	class:sidebar--compact={!$settings["editor_list_descriptions"]}
 >
 	<div class="sidebar__header">
+		<div class="sidebar-switch">
+			<IconButton
+				icon={iconSidebar}
+				on:click={sidebarSwitch}
+				title="Hide sidebar"
+			/>
+		</div>
 		<div class="sidebar__filter"><SidebarFilter /></div>
 		<IconButton
 			warnDot={!$settings["global_active"]}
@@ -217,7 +228,7 @@
 			title="Open settings"
 			{disabled}
 		/>
-		<Dropdown icon={iconPlus} title="New item" {disabled}>
+		<Dropdown icon={iconPlus} title="New item" {disabled} right>
 			<button on:click={() => newItem("js")}>New JS</button>
 			<button on:click={() => newItem("css")}>New CSS</button>
 			<button on:click={newRemote}>New Remote</button>
@@ -250,25 +261,25 @@
 		border-right: 1px solid var(--border-color);
 		display: flex;
 		flex-direction: column;
-		flex: 0 0 23rem;
-		max-width: 23rem;
+		width: var(--sidebar-width);
+		min-width: var(--sidebar-min-width);
 		position: relative;
+	}
+
+	.sidebar-switch {
+		scale: 1.5;
 	}
 
 	.sidebar__header {
 		align-items: center;
 		display: flex;
 		flex-shrink: 0;
-		flex-wrap: wrap;
 		padding: 1rem;
+		gap: 0.5rem;
 	}
 
 	.sidebar__filter {
 		flex-grow: 1;
-	}
-
-	:global(.sidebar__filter + button) {
-		margin: 0 0.5rem;
 	}
 
 	.sidebar__count {

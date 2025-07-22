@@ -28,6 +28,7 @@
 		color: inherit;
 		cursor: pointer;
 		display: flex;
+		flex-shrink: 0;
 		height: 1.5rem;
 		justify-content: center;
 		overflow: visible;
