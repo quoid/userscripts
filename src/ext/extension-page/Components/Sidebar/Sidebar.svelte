@@ -206,9 +206,8 @@
 </script>
 
 <div
-	class="sidebar {!$settings['editor_list_descriptions']
-		? 'sidebar--compact'
-		: ''}"
+	class="sidebar"
+	class:sidebar--compact={!$settings["editor_list_descriptions"]}
 >
 	<div class="sidebar__header">
 		<div class="sidebar__filter"><SidebarFilter /></div>
