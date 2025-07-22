@@ -262,14 +262,11 @@
 		flex-shrink: 0;
 		flex-wrap: wrap;
 		padding: 1rem;
+		gap: 0.5rem;
 	}
 
 	.sidebar__filter {
 		flex-grow: 1;
-	}
-
-	:global(.sidebar__filter + button) {
-		margin: 0 0.5rem;
 	}
 
 	.sidebar__count {
