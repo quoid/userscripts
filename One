@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог Товарів</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* Controls section */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .control-group input[type="text"],
+        .control-group select {
+            padding: 10px 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .control-group input[type="text"]:focus,
+        .control-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        .category-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-filters label {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-filters label:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .category-filters input[type="checkbox"] {
+            display: none;
+        }
+
+        .category-filters input[type="checkbox"]:checked + span {
+            background-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.4);
+        }
+        
+        .category-filters label span {
+            padding: 0;
+            margin: 0;
+        }
+
+        .reset-button {
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            align-self: flex-end;
+        }
+
+        .reset-button:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Product grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        /* Product card animation */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .product-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            animation: fadeInScale 0.5s ease-out forwards;
+            cursor: pointer; /* Make the whole card clickable for details */
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .product-card p {
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .product-card .price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: auto;
+            margin-bottom: 15px;
+        }
+
+        .product-card .tags {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .add-to-cart-button {
+            background-color: #2ecc71;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 10px; /* Space from other content */
+        }
+
+        .add-to-cart-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .add-to-cart-button:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Style for button when item is in cart */
+        .add-to-cart-button.added {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* No results message */
+        .no-results {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #888;
+            padding: 50px;
+            display: none;
+        }
+
+        /* Cart button */
+        .cart-button-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .cart-button {
+            background-color: #f39c12;
+            color: #fff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            position: relative;
+        }
+
+        .cart-button:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+        .cart-button:active {
+            transform: scale(1);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #e74c3c;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 50%;
+            padding: 5px 8px;
+            min-width: 20px;
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            max-height: 90vh; /* Limit height for scrollable content */
+            overflow-y: auto; /* Enable scroll if content overflows */
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+
+        /* Cart specific styles */
+        .cart-items-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-info {
+            flex-grow: 1;
+        }
+
+        .cart-item-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .cart-item-info p {
+            margin: 0;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .remove-item-button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-item-button:hover {
+            background-color: #c0392b;
+        }
+
+        .cart-summary {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .checkout-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .checkout-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .checkout-button:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Product Details Modal specific styles */
+        #product-details-modal .modal-content {
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #product-details-modal img {
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        #product-details-modal h2 {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        #product-details-modal .detail-section {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        #product-details-modal .detail-section h3 {
+            margin-top: 0;
+            color: #34495e;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        #product-details-modal .detail-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #product-details-modal .detail-section ul li {
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        #product-details-modal .detail-section p {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        #product-details-modal .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        #product-details-modal .modal-buttons .add-to-cart-button,
+        #product-details-modal .modal-buttons .edit-product-button {
+            width: auto;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            margin-top: 0;
+            align-self: flex-end;
+        }
+        #product-details-modal .modal-buttons .edit-product-button {
+            background-color: #8e44ad;
+        }
+        #product-details-modal .modal-buttons .edit-product-button:hover {
+            background-color: #9b59b6;
+        }
+
+        /* Edit Product Modal specific styles */
+        #edit-product-modal .modal-content {
+            max-width: 500px;
+        }
+        #edit-product-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        #edit-product-form label {
+            font-weight: bold;
+            color: #555;
+        }
+        #edit-product-form input[type="text"],
+        #edit-product-form textarea,
+        #edit-product-form input[type="number"] {
+            padding: 10px 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #edit-product-form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        #edit-product-form button {
+            background-color: #28a745;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        #edit-product-form button:hover {
+            background-color: #218838;
+        }
+
+        /* Message box */
+        .message-box {
+            position: fixed;
+            bottom: 90px;
+            right: 30px;
+            background-color: #333;
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1002;
+        }
+
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Loading indicator (kept for general heavy operations, though not used for AI image gen anymore) */
+        .loading-indicator {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            z-index: 1003;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .loading-indicator.show {
+            display: block;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                min-width: unset;
+                width: 100%;
+            }
+
+            .reset-button {
+                align-self: stretch;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Каталог Товарів</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="search-input">Пошук:</label>
+                <input type="text" id="search-input" placeholder="Введіть назву товару...">
+            </div>
+
+            <div class="control-group">
+                <label>Категорії:</label>
+                <div class="category-filters" id="category-filters">
+                    <!-- Categories will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="sort-select">Сортувати за:</label>
+                <select id="sort-select">
+                    <option value="default">За замовчуванням</option>
+                    <option value="price-asc">Ціна (від низької до високої)</option>
+                    <option value="price-desc">Ціна (від високої до низької)</option>
+                    <option value="title-asc">Назва (А-Я)</option>
+                    <option value="title-desc">Назва (Я-А)</option>
+                </select>
+            </div>
+
+            <button class="reset-button" id="reset-filters-button">Скинути все</button>
+        </div>
+
+        <div class="product-grid" id="product-list">
+            <!-- Product cards will be dynamically inserted here -->
+        </div>
+
+        <div class="no-results" id="no-results-message">
+            Немає результатів, що відповідають вашим критеріям.
+        </div>
+    </div>
+
+    <div class="cart-button-container">
+        <button class="cart-button" id="open-cart-button">
+            🛒 <span class="cart-count" id="cart-item-count">0</span>
+        </button>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-cart-button">&times;</span>
+            <h2>Ваш кошик</h2>
+            <ul id="cart-items-list" class="cart-items-list">
+                <!-- Cart items will be dynamically inserted here -->
+            </ul>
+            <div class="cart-summary">
+                Загальна сума: <span id="cart-total-price">0.00 ₴</span>
+            </div>
+            <button class="checkout-button" id="checkout-button">Оформити замовлення</button>
+        </div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div id="product-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-product-details-modal">&times;</span>
+            <img id="details-product-image" src="" alt="Product Image">
+            <h2 id="details-product-title"></h2>
+            <p>Ціна: <span id="details-product-price"></span></p>
+            <p>Категорія: <span id="details-product-category"></span></p>
+            <p>Теги: <span id="details-product-tags"></span></p>
+            
+            <div class="detail-section">
+                <h3>Опис:</h3>
+                <p id="details-product-description"></p>
+            </div>
+
+            <div class="detail-section">
+                <h3>Технічні характеристики:</h3>
+                <ul id="details-product-tech-specs"></ul>
+            </div>
+
+            <div class="detail-section">
+                <h3>Відгуки:</h3>
+                <ul id="details-product-reviews"></ul>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="add-to-cart-button" id="details-add-to-cart-button">Додати в кошик</button>
+                <button class="edit-product-button" id="details-edit-product-button">Редагувати товар</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="edit-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-edit-product-modal">&times;</span>
+            <h2>Редагувати товар</h2>
+            <form id="edit-product-form">
+                <input type="hidden" id="edit-product-id">
+                <label for="edit-product-title">Назва:</label>
+                <input type="text" id="edit-product-title" required>
+
+                <label for="edit-product-category">Категорія:</label>
+                <input type="text" id="edit-product-category" required>
+
+                <label for="edit-product-price">Ціна:</label>
+                <input type="number" id="edit-product-price" required step="0.01">
+
+                <label for="edit-product-image">URL зображення:</label>
+                <input type="text" id="edit-product-image" required>
+
+                <label for="edit-product-tags">Теги (через кому):</label>
+                <input type="text" id="edit-product-tags">
+
+                <label for="edit-product-description">Опис:</label>
+                <textarea id="edit-product-description" required></textarea>
+
+                <label for="edit-product-tech-specs">Технічні характеристики (JSON):</label>
+                <textarea id="edit-product-tech-specs" placeholder='{"Дисплей": "1.4 дюйма", "Батарея": "7 днів"}'></textarea>
+
+                <label for="edit-product-reviews">Відгуки (кожен відгук з нового рядка):</label>
+                <textarea id="edit-product-reviews" placeholder='Відгук 1\nВідгук 2'></textarea>
+
+                <button type="submit">Зберегти зміни</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="message-box" class="message-box"></div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator">Завантаження...</div>
+
+    <script>
+        // IIFE for encapsulation
+        (function() {
+            // Product data with new fields for tech specs and reviews
+            const productsData = [
+                {
+                    "id": 1,
+                    "title": "Смарт-годинник Pro",
+                    "category": "Годинники",
+                    "price": 11990,
+                    "image": "https://placehold.co/400x200/4CAF50/FFFFFF?text=Smartwatch+Pro",
+                    "tags": ["gps", "premium", "titan"],
+                    "description": "Цей смарт-годинник Pro поєднує елегантний дизайн та передові технології. Він оснащений GPS, моніторингом серцевого ритму та водонепроникним корпусом з титану, ідеально підходить для активного способу життя та повсякденного використання.",
+                    "techSpecs": {
+                        "Дисплей": "AMOLED, 1.4 дюйма",
+                        "Батарея": "До 7 днів",
+                        "Водонепроникність": "5 ATM",
+                        "Матеріал": "Титан, сапфірове скло"
+                    },
+                    "reviews": [
+                        "Дуже задоволений годинником, працює чудово!",
+                        "Стильний та функціональний, рекомендую."
+                    ]
+                },
+                {
+                    "id": 2,
+                    "title": "Бездротові навушники X2",
+                    "category": "Навушники",
+                    "price": 3499,
+                    "image": "https://placehold.co/400x200/2196F3/FFFFFF?text=Headphones+X2",
+                    "tags": ["bluetooth", "sport"],
+                    "description": "Бездротові навушники X2 забезпечують кришталево чистий звук та глибокі баси. Легкі та зручні, вони ідеально підходять для занять спортом та щоденного прослуховування музики. До 20 годин автономної роботи та швидка зарядка.",
+                    "techSpecs": {
+                        "Тип підключення": "Bluetooth 5.0",
+                        "Час роботи": "20 годин",
+                        "Особливості": "Шумозаглушення, вологозахист"
+                    },
+                    "reviews": [
+                        "Звук просто супер, зручно сидять!",
+                        "Батарея тримає довго, задоволений покупкою."
+                    ]
+                },
+                {
+                    "id": 3,
+                    "title": "Ігровий ноутбук Ultima",
+                    "category": "Ноутбуки",
+                    "price": 45000,
+                    "image": "https://placehold.co/400x200/FF9800/FFFFFF?text=Gaming+Laptop",
+                    "tags": ["gaming", "performance"],
+                    "description": "Ігровий ноутбук Ultima - це потужна машина для справжніх геймерів. Оснащений новітнім процесором та відеокартою, він забезпечує максимальну продуктивність та плавну графіку у будь-яких іграх. Яскравий дисплей та ефективна система охолодження гарантують незабутній ігровий досвід.",
+                    "techSpecs": {
+                        "Процесор": "Intel Core i9",
+                        "Відеокарта": "NVIDIA GeForce RTX 4080",
+                        "ОЗУ": "32GB DDR5",
+                        "Накопичувач": "1TB SSD"
+                    },
+                    "reviews": [
+                        "Просто звір! Всі ігри літають.",
+                        "Трохи шумний під навантаженням, але продуктивність того варта."
+                    ]
+                },
+                {
+                    "id": 4,
+                    "title": "Електронна книга ReaderGo",
+                    "category": "Електроніка",
+                    "price": 2800,
+                    "image": "https://placehold.co/400x200/9C27B0/FFFFFF?text=E-Reader",
+                    "tags": ["e-ink", "light"],
+                    "description": "Електронна книга ReaderGo з E-Ink екраном забезпечує комфортне читання без напруги для очечей. Легка та компактна, вона ідеально підходить для подорожей. Тисячі книг у вашій кишені з тривалим часом роботи від батареї.",
+                    "techSpecs": {
+                        "Екран": "6 дюймів E-Ink Carta",
+                        "Підсвічування": "Регульоване",
+                        "Пам'ять": "8GB",
+                        "Формати": "EPUB, PDF, FB2"
+                    },
+                    "reviews": [
+                        "Очі не втомлюються, читаю годинами.",
+                        "Дуже зручна та легка, ідеально для поїздок."
+                    ]
+                },
+                {
+                    "id": 5,
+                    "title": "Фоторамка DigitalArt",
+                    "category": "Електроніка",
+                    "price": 1500,
+                    "image": "https://placehold.co/400x200/00BCD4/FFFFFF?text=Digital+Frame",
+                    "tags": ["display", "home"],
+                    "description": "Цифрова фоторамка DigitalArt дозволить вам насолоджуватися улюбленими спогадами. Висока роздільна здатність екрану та просте керування роблять її ідеальною доповненням до будь-якого інтер'єру. Автоматичне слайд-шоу та підтримка різних форматів.",
+                    "techSpecs": {
+                        "Дисплей": "10.1 дюйма IPS",
+                        "Роздільна здатність": "1280x800",
+                        "Пам'ять": "16GB",
+                        "Підключення": "Wi-Fi, USB"
+                    },
+                    "reviews": [
+                        "Чудовий подарунок, якість зображення вражає.",
+                        "Легко налаштовується, фотографії виглядають чудово."
+                    ]
+                },
+                {
+                    "id": 6,
+                    "title": "Механічний годинник Elegance",
+                    "category": "Годинники",
+                    "price": 8900,
+                    "image": "https://placehold.co/400x200/795548/FFFFFF?text=Classic+Watch",
+                    "tags": ["classic", "analog"],
+                    "description": "Механічний годинник Elegance - це втілення класичного стилю та майстерності. Вишуканий дизайн, точний механізм та високоякісні матеріали роблять його ідеальним аксесуаром для справжніх поціновувачів. Водонепроникний корпус та сапфірове скло.",
+                    "techSpecs": {
+                        "Механізм": "Автоматичний, швейцарський",
+                        "Матеріал корпусу": "Нержавіюча сталь",
+                        "Скло": "Сапфірове",
+                        "Водонепроникність": "100 метрів"
+                    },
+                    "reviews": [
+                        "Виглядає дуже дорого, якість на висоті.",
+                        "Класика, яка ніколи не вийде з моди."
+                    ]
+                },
+                {
+                    "id": 7,
+                    "title": "Бездротова миша HyperSpeed",
+                    "category": "Комп'ютерні аксесуари",
+                    "price": 1800,
+                    "image": "https://placehold.co/400x200/FFC107/333333?text=Gaming+Mouse",
+                    "tags": ["gaming", "ergonomic"],
+                    "description": "Бездротова миша HyperSpeed розроблена для максимальної точності та швидкості в іграх. Ергономічний дизайн забезпечує комфорт навіть під час тривалих сесій. Налаштовувані кнопки та сенсор високої роздільної здатності.",
+                    "techSpecs": {
+                        "Сенсор": "Оптичний, 16000 DPI",
+                        "Підключення": "Бездротове 2.4 ГГц",
+                        "Кнопки": "8 програмованих",
+                        "Батарея": "До 50 годин"
+                    },
+                    "reviews": [
+                        "Ідеальна миша для геймінгу, дуже точна.",
+                        "Зручно лежить в руці, довго тримає заряд."
+                    ]
+                },
+                {
+                    "id": 8,
+                    "title": "Вебкамера UltraHD Streamer",
+                    "category": "Комп'ютерні аксесуари",
+                    "price": 4500,
+                    "image": "https://placehold.co/400x200/607D8B/FFFFFF?text=Webcam+4K",
+                    "tags": ["streaming", "4k"],
+                    "description": "Вебкамера UltraHD Streamer забезпечує надзвичайно чітке зображення у 4K, ідеально підходить для стрімінгу та відеоконференцій. Вбудований мікрофон з шумозаглушенням та автоматичне фокусування. Легке підключення Plug-and-Play.",
+                    "techSpecs": {
+                        "Роздільна здатність": "4K Ultra HD",
+                        "Частота кадрів": "30fps (4K), 60fps (1080p)",
+                        "Мікрофон": "Вбудований, шумозаглушення",
+                        "Фокус": "Автоматичний"
+                    },
+                    "reviews": [
+                        "Якість зображення вражає, для стрімінгу те, що треба.",
+                        "Легка в підключенні, працює без нарікань."
+                    ]
+                }
+            ];
+
+            /**
+             * ProductCardRenderer class
+             * Responsible for generating HTML markup for a single product card.
+             */
+            class ProductCardRenderer {
+                /**
+                 * Generates the HTML string for a product card.
+                 * @param {Object} product - The product object.
+                 * @param {boolean} isInCart - True if the product is currently in the cart.
+                 * @returns {string} HTML string for the product card.
+                 */
+                static render(product, isInCart) {
+                    const priceFormatter = new Intl.NumberFormat('uk-UA', {
+                        style: 'currency',
+                        currency: 'UAH',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    });
+
+                    const buttonClass = isInCart ? 'add-to-cart-button added' : 'add-to-cart-button';
+                    const buttonText = isInCart ? 'У кошику' : 'Додати в кошик';
+                    const buttonDisabled = isInCart ? 'disabled' : '';
+
+                    return `
+                        <div class="product-card" data-id="${product.id}">
+                            <img src="${product.image}" alt="${product.title}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/cccccc/333333?text=Зображення+відсутнє';">
+                            <div class="product-card-content">
+                                <h3>${product.title}</h3>
+                                <p>Категорія: ${product.category}</p>
+                                <p class="tags">Теги: ${product.tags.join(', ')}</p>
+                                <div class="price">${priceFormatter.format(product.price)}</div>
+                                <button class="${buttonClass}" data-product-id="${product.id}" ${buttonDisabled}>${buttonText}</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            /**
+             * Catalog class
+             * Manages rendering the entire list of products into a DOM container.
+             */
+            class Catalog {
+                /**
+                 * @param {HTMLElement} containerElement - The DOM element to render products into.
+                 * @param {HTMLElement} noResultsMessageElement - The DOM element for the no results message.
+                 */
+                constructor(containerElement, noResultsMessageElement) {
+                    this.container = containerElement;
+                    this.noResultsMessage = noResultsMessageElement;
+                }
+
+                /**
+                 * Renders a list of products into the catalog container.
+                 * @param {Array<Object>} products - An array of product objects.
+                 * @param {Set<number>} productsInCartIds - A set of product IDs currently in the cart.
+                 */
+                renderProducts(products, productsInCartIds) {
+                    this.container.innerHTML = ''; // Clear existing products
+                    if (products.length === 0) {
+                        this.noResultsMessage.style.display = 'block';
+                    } else {
+                        this.noResultsMessage.style.display = 'none';
+                        products.forEach(product => {
+                            const isInCart = productsInCartIds.has(product.id);
+                            this.container.insertAdjacentHTML('beforeend', ProductCardRenderer.render(product, isInCart));
+                        });
+                    }
+                }
+
+                /**
+                 * Updates the state of "Add to cart" buttons for currently displayed products.
+                 * @param {Set<number>} productsInCartIds - A set of product IDs currently in the cart.
+                 */
+                updateProductCardButtons(productsInCartIds) {
+                    this.container.querySelectorAll('.product-card').forEach(cardElement => {
+                        const productId = parseInt(cardElement.dataset.id);
+                        const button = cardElement.querySelector('.add-to-cart-button');
+                        if (button) {
+                            const isInCart = productsInCartIds.has(productId);
+                            if (isInCart) {
+                                button.classList.add('added');
+                                button.disabled = true;
+                                button.textContent = 'У кошику';
+                            } else {
+                                button.classList.remove('added');
+                                button.disabled = false;
+                                button.textContent = 'Додати в кошик';
+                            }
+                        }
+                    });
+                }
+            }
+
+            /**
+             * Filter class
+             * Manages the UI for category filtering.
+             */
+            class Filter {
+                /**
+                 * @param {HTMLElement} containerElement - The DOM element containing category checkboxes.
+                 * @param {Array<Object>} allProducts - The initial array of all products to extract categories.
+                 */
+                constructor(containerElement, allProducts) {
+                    this.container = containerElement;
+                    this.allProducts = allProducts;
+                    this.categories = this._extractUniqueCategories();
+                    this.onFilterChangeCallback = null;
+                    this._renderCategoryCheckboxes();
+                    this._addEventListeners();
+                }
+
+                /**
+                 * Extracts unique categories from the product data.
+                 * @returns {Array<string>} An array of unique category names.
+                 */
+                _extractUniqueCategories() {
+                    const categories = new Set();
+                    this.allProducts.forEach(product => categories.add(product.category));
+                    return Array.from(categories);
+                }
+
+                /**
+                 * Renders category checkboxes dynamically.
+                 */
+                _renderCategoryCheckboxes() {
+                    this.container.innerHTML = '';
+                    this.categories.forEach(category => {
+                        const checkboxId = `category-${category.replace(/\s+/g, '-').toLowerCase()}`;
+                        this.container.insertAdjacentHTML('beforeend', `
+                            <label for="${checkboxId}">
+                                <input type="checkbox" id="${checkboxId}" value="${category}" checked>
+                                <span>${category}</span>
+                            </label>
+                        `);
+                    });
+                }
+
+                /**
+                 * Adds event listeners for filter changes.
+                 */
+                _addEventListeners() {
+                    this.container.addEventListener('change', () => {
+                        if (this.onFilterChangeCallback) {
+                            this.onFilterChangeCallback();
+                        }
+                    });
+                }
+
+                /**
+                 * Gets the currently selected categories.
+                 * @returns {Array<string>} An array of selected category names.
+                 */
+                getSelectedCategories() {
+                    const checkboxes = this.container.querySelectorAll('input[type="checkbox"]:checked');
+                    return Array.from(checkboxes).map(cb => cb.value);
+                }
+
+                /**
+                 * Registers a callback function to be called when filters change.
+                 * @param {Function} callback - The callback function.
+                 */
+                onFilterChange(callback) {
+                    this.onFilterChangeCallback = callback;
+                }
+
+                /**
+                 * Resets all category filters to checked.
+                 */
+                reset() {
+                    this.container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.checked = true;
+                    });
+                    if (this.onFilterChangeCallback) {
+                        this.onFilterChangeCallback();
+                    }
+                }
+            }
+
+            /**
+             * Sort class
+             * Manages the UI for product sorting.
+             */
+            class Sort {
+                /**
+                 * @param {HTMLElement} selectElement - The HTML select element for sorting.
+                 */
+                constructor(selectElement) {
+                    this.select = selectElement;
+                    this.onSortChangeCallback = null;
+                    this._addEventListeners();
+                }
+
+                /**
+                 * Adds event listeners for sort changes.
+                 */
+                _addEventListeners() {
+                    this.select.addEventListener('change', () => {
+                        if (this.onSortChangeCallback) {
+                            this.onSortChangeCallback();
+                        }
+                    });
+                }
+
+                /**
+                 * Gets the current sort order.
+                 * @returns {string} The value of the selected option (e.g., 'price-asc', 'title-desc').
+                 */
+                getSortOrder() {
+                    return this.select.value;
+                }
+
+                /**
+                 * Registers a callback function to be called when sort order changes.
+                 * @param {Function} callback - The callback function.
+                 */
+                onSortChange(callback) {
+                    this.onSortChangeCallback = callback;
+                }
+
+                /**
+                 * Resets the sort order to default.
+                 */
+                reset() {
+                    this.select.value = 'default';
+                    if (this.onSortChangeCallback) {
+                        this.onSortChangeCallback();
+                    }
+                }
+            }
+
+            /**
+             * Search class
+             * Manages the UI for product search with debounce.
+             */
+            class Search {
+                /**
+                 * @param {HTMLElement} inputElement - The HTML input element for search.
+                 * @param {number} debounceDelay - The delay in milliseconds for debouncing.
+                 */
+                constructor(inputElement, debounceDelay = 300) {
+                    this.input = inputElement;
+                    this.debounceDelay = debounceDelay;
+                    this.onSearchChangeCallback = null;
+                    this.debounceTimeout = null;
+                    this._addEventListeners();
+                }
+
+                /**
+                 * Adds event listeners for search input with debounce.
+                 */
+                _addEventListeners() {
+                    this.input.addEventListener('input', () => {
+                        clearTimeout(this.debounceTimeout);
+                        this.debounceTimeout = setTimeout(() => {
+                            if (this.onSearchChangeCallback) {
+                                this.onSearchChangeCallback();
+                            }
+                        }, this.debounceDelay);
+                    });
+                }
+
+                /**
+                 * Gets the current search query.
+                 * @returns {string} The trimmed search query in lowercase.
+                 */
+                getSearchQuery() {
+                    return this.input.value.trim().toLowerCase();
+                }
+
+                /**
+                 * Registers a callback function to be called when search query changes (debounced).
+                 * @param {Function} callback - The callback function.
+                 */
+                onSearchChange(callback) {
+                    this.onSearchChangeCallback = callback;
+                }
+
+                /**
+                 * Resets the search input field.
+                 */
+                reset() {
+                    this.input.value = '';
+                    clearTimeout(this.debounceTimeout); // Clear any pending debounce
+                    if (this.onSearchChangeCallback) {
+                        this.onSearchChangeCallback();
+                    }
+                }
+            }
+
+            /**
+             * Cart class
+             * Manages cart logic, including adding/removing items, total calculation, and localStorage persistence.
+             */
+            class Cart {
+                constructor() {
+                    this.items = this._loadCart();
+                    this.priceFormatter = new Intl.NumberFormat('uk-UA', {
+                        style: 'currency',
+                        currency: 'UAH',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    });
+                    this.onCartChangeCallback = null;
+                }
+
+                /**
+                 * Loads cart items from localStorage.
+                 * @returns {Array<Object>} An array of cart items.
+                 */
+                _loadCart() {
+                    try {
+                        const cart = localStorage.getItem('ecom_cart');
+                        return cart ? JSON.parse(cart) : [];
+                    } catch (e) {
+                        console.error("Помилка завантаження кошика з localStorage:", e);
+                        return [];
+                    }
+                }
+
+                /**
+                 * Saves cart items to localStorage.
+                 */
+                _saveCart() {
+                    try {
+                        localStorage.setItem('ecom_cart', JSON.stringify(this.items));
+                        if (this.onCartChangeCallback) {
+                            this.onCartChangeCallback();
+                        }
+                    } catch (e) {
+                        console.error("Помилка збереження кошика в localStorage:", e);
+                    }
+                }
+
+                /**
+                 * Adds a product to the cart.
+                 * @param {Object} product - The product object to add.
+                 */
+                addItem(product) {
+                    const existingItem = this.items.find(item => item.id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        this.items.push({ ...product,
+                            quantity: 1
+                        });
+                    }
+                    this._saveCart();
+                }
+
+                /**
+                 * Removes an item from the cart by product ID. If quantity drops to 0, removes the item entirely.
+                 * @param {number} productId - The ID of the product to remove.
+                 */
+                removeItem(productId) {
+                    const itemIndex = this.items.findIndex(item => item.id === productId);
+                    if (itemIndex > -1) {
+                        if (this.items[itemIndex].quantity > 1) {
+                            this.items[itemIndex].quantity--;
+                        } else {
+                            this.items.splice(itemIndex, 1);
+                        }
+                        this._saveCart();
+                    }
+                }
+
+                /**
+                 * Clears all items from the cart.
+                 */
+                clear() {
+                    this.items = [];
+                    this._saveCart();
+                }
+
+                /**
+                 * Gets the total number of items (sum of quantities) in the cart.
+                 * @returns {number} Total item count.
+                 */
+                getTotalItemsCount() {
+                    return this.items.reduce((total, item) => total + item.quantity, 0);
+                }
+
+                /**
+                 * Gets the total price of all items in the cart.
+                 * @returns {string} Formatted total price.
+                 */
+                getTotalPrice() {
+                    const total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    return this.priceFormatter.format(total);
+                }
+
+                /**
+                 * Gets all items currently in the cart.
+                 * @returns {Array<Object>} An array of cart items.
+                 */
+                getItems() {
+                    return [...this.items]; // Return a copy to prevent direct modification
+                }
+
+                /**
+                 * Returns a Set of product IDs currently in the cart for quick lookup.
+                 * @returns {Set<number>} A set of product IDs in the cart.
+                 */
+                getProductsInCartIds() {
+                    return new Set(this.items.map(item => item.id));
+                }
+
+                /**
+                 * Registers a callback function to be called when the cart changes.
+                 * @param {Function} callback - The callback function.
+                 */
+                onCartChange(callback) {
+                    this.onCartChangeCallback = callback;
+                }
+            }
+
+            /**
+             * UIController class
+             * Acts as the central orchestrator, coordinating interactions between all classes.
+             */
+            class UIController {
+                /**
+                 * @param {Array<Object>} initialProducts - The original, unfiltered product data.
+                 */
+                constructor(initialProducts) {
+                    this.allProducts = initialProducts;
+                    this.catalog = new Catalog(
+                        document.getElementById('product-list'),
+                        document.getElementById('no-results-message')
+                    );
+                    this.filter = new Filter(
+                        document.getElementById('category-filters'),
+                        this.allProducts
+                    );
+                    this.sort = new Sort(document.getElementById('sort-select'));
+                    this.search = new Search(document.getElementById('search-input'));
+                    this.cart = new Cart();
+
+                    this.cartModal = document.getElementById('cart-modal');
+                    this.cartItemsList = document.getElementById('cart-items-list');
+                    this.cartTotalPrice = document.getElementById('cart-total-price');
+                    this.cartItemCount = document.getElementById('cart-item-count');
+                    this.messageBox = document.getElementById('message-box');
+
+                    this.productDetailsModal = document.getElementById('product-details-modal');
+                    this.closeProductDetailsModalButton = document.getElementById('close-product-details-modal');
+                    this.detailsProductImage = document.getElementById('details-product-image');
+                    this.detailsProductTitle = document.getElementById('details-product-title');
+                    this.detailsProductPrice = document.getElementById('details-product-price');
+                    this.detailsProductCategory = document.getElementById('details-product-category');
+                    this.detailsProductTags = document.getElementById('details-product-tags');
+                    this.detailsProductDescription = document.getElementById('details-product-description');
+                    this.detailsProductTechSpecs = document.getElementById('details-product-tech-specs');
+                    this.detailsProductReviews = document.getElementById('details-product-reviews');
+                    this.detailsAddToCartButton = document.getElementById('details-add-to-cart-button');
+                    this.detailsEditProductButton = document.getElementById('details-edit-product-button');
+
+
+                    this.editProductModal = document.getElementById('edit-product-modal');
+                    this.closeEditProductModalButton = document.getElementById('close-edit-product-modal');
+                    this.editProductForm = document.getElementById('edit-product-form');
+                    this.editProductIdInput = document.getElementById('edit-product-id');
+                    this.editProductTitleInput = document.getElementById('edit-product-title');
+                    this.editProductCategoryInput = document.getElementById('edit-product-category');
+                    this.editProductPriceInput = document.getElementById('edit-product-price');
+                    this.editProductImageInput = document.getElementById('edit-product-image');
+                    this.editProductTagsInput = document.getElementById('edit-product-tags');
+                    this.editProductDescriptionInput = document.getElementById('edit-product-description');
+                    this.editProductTechSpecsInput = document.getElementById('edit-product-tech-specs');
+                    this.editProductReviewsInput = document.getElementById('edit-product-reviews');
+
+
+                    this.loadingIndicator = document.getElementById('loading-indicator');
+
+
+                    this._setupEventListeners();
+                    this.updateCartUI(); // Initial cart UI update
+                }
+
+                /**
+                 * Sets up all necessary event listeners for UI interactions.
+                 */
+                _setupEventListeners() {
+                    // Filter, Sort, Search change events
+                    this.filter.onFilterChange(() => this.updateCatalog());
+                    this.sort.onSortChange(() => this.updateCatalog());
+                    this.search.onSearchChange(() => this.updateCatalog());
+
+                    // Delegated event listener for product card clicks (for details)
+                    document.getElementById('product-list').addEventListener('click', (event) => {
+                        const productCard = event.target.closest('.product-card');
+                        if (productCard) {
+                            const productId = parseInt(productCard.dataset.id);
+                            // Only open details if not clicking the "Add to Cart" button directly
+                            if (!event.target.classList.contains('add-to-cart-button')) {
+                                this.openProductDetailsModal(productId);
+                            }
+                        }
+                    });
+
+                    // Add to Cart button on product cards (delegated event listener)
+                    document.getElementById('product-list').addEventListener('click', (event) => {
+                        if (event.target.classList.contains('add-to-cart-button')) {
+                            const productId = parseInt(event.target.dataset.productId);
+                            const productToAdd = this.allProducts.find(p => p.id === productId);
+                            if (productToAdd) {
+                                this.cart.addItem(productToAdd);
+                                this.showMessage(`"${productToAdd.title}" додано до кошика!`);
+                            }
+                        }
+                    });
+
+                    // Cart button and modal
+                    document.getElementById('open-cart-button').addEventListener('click', () => this.openCartModal());
+                    document.getElementById('close-cart-button').addEventListener('click', () => this.closeCartModal());
+                    this.cartModal.addEventListener('click', (event) => {
+                        if (event.target === this.cartModal) {
+                            this.closeCartModal();
+                        }
+                    });
+
+                    // Product Details Modal close and buttons
+                    this.closeProductDetailsModalButton.addEventListener('click', () => this.closeProductDetailsModal());
+                    this.productDetailsModal.addEventListener('click', (event) => {
+                        if (event.target === this.productDetailsModal) {
+                            this.closeProductDetailsModal();
+                        }
+                    });
+                    this.detailsAddToCartButton.addEventListener('click', (event) => {
+                        const productId = parseInt(event.target.dataset.productId);
+                        const productToAdd = this.allProducts.find(p => p.id === productId);
+                        if (productToAdd) {
+                            this.cart.addItem(productToAdd);
+                            this.showMessage(`"${productToAdd.title}" додано до кошика!`);
+                            this.closeProductDetailsModal(); // Close details after adding to cart
+                        }
+                    });
+                    this.detailsEditProductButton.addEventListener('click', (event) => {
+                        const productId = parseInt(event.target.dataset.productId);
+                        this.closeProductDetailsModal(); // Close details before opening edit
+                        this.openEditProductModal(productId);
+                    });
+
+
+                    // Close Edit Product Modal
+                    this.closeEditProductModalButton.addEventListener('click', () => this.closeEditProductModal());
+                    this.editProductModal.addEventListener('click', (event) => {
+                        if (event.target === this.editProductModal) {
+                            this.closeEditProductModal();
+                        }
+                    });
+
+                    // Save Product Changes
+                    this.editProductForm.addEventListener('submit', (event) => {
+                        event.preventDefault(); // Prevent default form submission
+                        this.saveProductChanges();
+                    });
+
+
+                    // Remove from cart button (delegated)
+                    this.cartItemsList.addEventListener('click', (event) => {
+                        if (event.target.classList.contains('remove-item-button')) {
+                            const productId = parseInt(event.target.dataset.productId);
+                            this.cart.removeItem(productId);
+                            this.showMessage('Товар видалено з кошика.');
+                        }
+                    });
+
+                    // Checkout button
+                    document.getElementById('checkout-button').addEventListener('click', () => this.checkout());
+
+                    // Reset filters button
+                    document.getElementById('reset-filters-button').addEventListener('click', () => this.resetAll());
+
+                    // Cart change listener
+                    this.cart.onCartChange(() => this.updateCartUI());
+                }
+
+                /**
+                 * Applies filters, search, and sorting to the product data and re-renders the catalog.
+                 */
+                updateCatalog() {
+                    let filteredProducts = [...this.allProducts];
+
+                    // 1. Apply category filters
+                    const selectedCategories = this.filter.getSelectedCategories();
+                    // Only filter if not all categories are selected
+                    if (selectedCategories.length > 0 && selectedCategories.length < this.filter.categories.length) {
+                        filteredProducts = filteredProducts.filter(product =>
+                            selectedCategories.includes(product.category)
+                        );
+                    }
+
+                    // 2. Apply search query
+                    const searchQuery = this.search.getSearchQuery();
+                    if (searchQuery) {
+                        filteredProducts = filteredProducts.filter(product =>
+                            product.title.toLowerCase().includes(searchQuery) ||
+                            product.category.toLowerCase().includes(searchQuery) ||
+                            product.tags.some(tag => tag.toLowerCase().includes(searchQuery)) ||
+                            product.description.toLowerCase().includes(searchQuery)
+                        );
+                    }
+
+                    // 3. Apply sorting
+                    const sortOrder = this.sort.getSortOrder();
+                    switch (sortOrder) {
+                        case 'price-asc':
+                            filteredProducts.sort((a, b) => a.price - b.price);
+                            break;
+                        case 'price-desc':
+                            filteredProducts.sort((a, b) => b.price - a.price);
+                            break;
+                        case 'title-asc':
+                            filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
+                            break;
+                        case 'title-desc':
+                            filteredProducts.sort((a, b) => b.title.localeCompare(a.title));
+                            break;
+                        case 'default':
+                        default:
+                            // No specific sorting, maintain original or default order
+                            break;
+                    }
+
+                    const productsInCartIds = this.cart.getProductsInCartIds();
+                    this.catalog.renderProducts(filteredProducts, productsInCartIds);
+                    this.catalog.updateProductCardButtons(productsInCartIds);
+                }
+
+                /**
+                 * Updates the cart UI, including item count and modal content, and product card button states.
+                 */
+                updateCartUI() {
+                    this.cartItemCount.textContent = this.cart.getTotalItemsCount();
+                    this.cartTotalPrice.textContent = this.cart.getTotalPrice();
+
+                    this.cartItemsList.innerHTML = '';
+                    const items = this.cart.getItems();
+                    if (items.length === 0) {
+                        this.cartItemsList.innerHTML = '<li style="text-align: center; color: #888; padding: 20px;">Кошик порожній.</li>';
+                    } else {
+                        items.forEach(item => {
+                            const formattedPrice = this.cart.priceFormatter.format(item.price * item.quantity);
+                            this.cartItemsList.insertAdjacentHTML('beforeend', `
+                                <li class="cart-item">
+                                    <div class="cart-item-info">
+                                        <h4>${item.title}</h4>
+                                        <p>Кількість: ${item.quantity} | Ціна: ${this.cart.priceFormatter.format(item.price)} за шт.</p>
+                                    </div>
+                                    <span>${formattedPrice}</span>
+                                    <button class="remove-item-button" data-product-id="${item.id}">Видалити</button>
+                                </li>
+                            `);
+                        });
+                    }
+                    // Update the state of "Add to cart" buttons on the product cards
+                    this.catalog.updateProductCardButtons(this.cart.getProductsInCartIds());
+                }
+
+                /**
+                 * Opens the cart modal.
+                 */
+                openCartModal() {
+                    this.updateCartUI(); // Ensure cart UI is fresh before opening
+                    this.cartModal.classList.add('show');
+                }
+
+                /**
+                 * Closes the cart modal.
+                 */
+                closeCartModal() {
+                    this.cartModal.classList.remove('show');
+                }
+
+                /**
+                 * Handles the checkout process.
+                 */
+                checkout() {
+                    if (this.cart.getTotalItemsCount() === 0) {
+                        this.showMessage('Ваш кошик порожній. Додайте товари перед оформленням замовлення.');
+                        return;
+                    }
+                    this.cart.clear();
+                    // updateCartUI() is called via cart.onCartChange callback
+                    this.closeCartModal();
+                    this.showMessage('Ваше замовлення успішно оформлено! Дякуємо за покупку.');
+                }
+
+                /**
+                 * Resets all filters, search, and sorting to their default states.
+                 */
+                resetAll() {
+                    this.filter.reset();
+                    this.sort.reset();
+                    this.search.reset();
+                    this.updateCatalog(); // Re-render catalog after reset
+                    this.showMessage('Фільтри, пошук та сортування скинуто.');
+                }
+
+                /**
+                 * Displays a temporary message to the user.
+                 * @param {string} message - The message to display.
+                 * @param {number} duration - Duration in milliseconds (default: 3000).
+                 */
+                showMessage(message, duration = 3000) {
+                    this.messageBox.textContent = message;
+                    this.messageBox.classList.add('show');
+                    setTimeout(() => {
+                        this.messageBox.classList.remove('show');
+                    }, duration);
+                }
+
+                /**
+                 * Opens the product details modal.
+                 * @param {number} productId - The ID of the product to display.
+                 */
+                openProductDetailsModal(productId) {
+                    const product = this.allProducts.find(p => p.id === productId);
+                    if (!product) {
+                        this.showMessage('Помилка: товар не знайдено.');
+                        return;
+                    }
+
+                    // Populate details modal
+                    this.detailsProductImage.src = product.image;
+                    this.detailsProductImage.alt = product.title;
+                    this.detailsProductTitle.textContent = product.title;
+                    this.detailsProductPrice.textContent = this.cart.priceFormatter.format(product.price);
+                    this.detailsProductCategory.textContent = product.category;
+                    this.detailsProductTags.textContent = product.tags.join(', ');
+                    this.detailsProductDescription.textContent = product.description;
+
+                    // Populate tech specs
+                    this.detailsProductTechSpecs.innerHTML = '';
+                    if (product.techSpecs) {
+                        for (const [key, value] of Object.entries(product.techSpecs)) {
+                            const li = document.createElement('li');
+                            li.textContent = `${key}: ${value}`;
+                            this.detailsProductTechSpecs.appendChild(li);
+                        }
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = 'Немає даних про технічні характеристики.';
+                        this.detailsProductTechSpecs.appendChild(li);
+                    }
+
+                    // Populate reviews
+                    this.detailsProductReviews.innerHTML = '';
+                    if (product.reviews && product.reviews.length > 0) {
+                        product.reviews.forEach(review => {
+                            const li = document.createElement('li');
+                            li.textContent = `"${review}"`;
+                            this.detailsProductReviews.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = 'Відгуків поки немає.';
+                        this.detailsProductReviews.appendChild(li);
+                    }
+
+                    // Update Add to Cart button state in details modal
+                    const isInCart = this.cart.getProductsInCartIds().has(productId);
+                    if (isInCart) {
+                        this.detailsAddToCartButton.classList.add('added');
+                        this.detailsAddToCartButton.disabled = true;
+                        this.detailsAddToCartButton.textContent = 'У кошику';
+                    } else {
+                        this.detailsAddToCartButton.classList.remove('added');
+                        this.detailsAddToCartButton.disabled = false;
+                        this.detailsAddToCartButton.textContent = 'Додати в кошик';
+                    }
+                    this.detailsAddToCartButton.dataset.productId = productId; // Set product ID for button
+
+                    // Set product ID for edit button
+                    this.detailsEditProductButton.dataset.productId = productId;
+
+                    this.productDetailsModal.classList.add('show');
+                }
+
+                /**
+                 * Closes the product details modal.
+                 */
+                closeProductDetailsModal() {
+                    this.productDetailsModal.classList.remove('show');
+                }
+
+                /**
+                 * Opens the product editing modal.
+                 * @param {number} productId - The ID of the product to edit.
+                 */
+                openEditProductModal(productId) {
+                    const product = this.allProducts.find(p => p.id === productId);
+                    if (!product) {
+                        this.showMessage('Помилка: товар не знайдено для редагування.');
+                        return;
+                    }
+
+                    // Populate the form fields
+                    this.editProductIdInput.value = product.id;
+                    this.editProductTitleInput.value = product.title;
+                    this.editProductCategoryInput.value = product.category;
+                    this.editProductPriceInput.value = product.price;
+                    this.editProductImageInput.value = product.image;
+                    this.editProductTagsInput.value = product.tags.join(', ');
+                    this.editProductDescriptionInput.value = product.description;
+                    
+                    // Convert techSpecs object to JSON string for editing
+                    this.editProductTechSpecsInput.value = product.techSpecs ? JSON.stringify(product.techSpecs, null, 2) : '';
+                    // Convert reviews array to newline-separated string for editing
+                    this.editProductReviewsInput.value = product.reviews ? product.reviews.join('\n') : '';
+
+                    this.editProductModal.classList.add('show');
+                }
+
+                /**
+                 * Closes the product editing modal.
+                 */
+                closeEditProductModal() {
+                    this.editProductModal.classList.remove('show');
+                }
+
+                /**
+                 * Saves changes from the product editing form.
+                 */
+                saveProductChanges() {
+                    const productId = parseInt(this.editProductIdInput.value);
+                    const productIndex = this.allProducts.findIndex(p => p.id === productId);
+
+                    if (productIndex === -1) {
+                        this.showMessage('Помилка: товар для збереження не знайдено.');
+                        return;
+                    }
+
+                    // Update product data
+                    this.allProducts[productIndex].title = this.editProductTitleInput.value;
+                    this.allProducts[productIndex].category = this.editProductCategoryInput.value;
+                    this.allProducts[productIndex].price = parseFloat(this.editProductPriceInput.value);
+                    this.allProducts[productIndex].image = this.editProductImageInput.value;
+                    this.allProducts[productIndex].tags = this.editProductTagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+                    this.allProducts[productIndex].description = this.editProductDescriptionInput.value;
+
+                    // Parse techSpecs from JSON string
+                    try {
+                        this.allProducts[productIndex].techSpecs = JSON.parse(this.editProductTechSpecsInput.value || '{}');
+                    } catch (e) {
+                        this.showMessage('Помилка формату технічних характеристик (JSON).');
+                        console.error('JSON parse error for tech specs:', e);
+                        return; // Prevent saving with bad data
+                    }
+
+                    // Parse reviews from newline-separated string
+                    this.allProducts[productIndex].reviews = this.editProductReviewsInput.value.split('\n').map(review => review.trim()).filter(review => review !== '');
+
+                    this.closeEditProductModal();
+                    this.updateCatalog(); // Re-render catalog with updated product
+                    this.showMessage('Зміни збережено успішно!');
+                }
+
+                /**
+                 * Shows the loading indicator.
+                 */
+                showLoading() {
+                    this.loadingIndicator.classList.add('show');
+                }
+
+                /**
+                 * Hides the loading indicator.
+                 */
+                hideLoading() {
+                    this.loadingIndicator.classList.remove('show');
+                }
+            }
+
+            // Initialize the application after the DOM is fully loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                const uiController = new UIController(productsData);
+                uiController.updateCatalog(); // Initial rendering of all products
+            });
+        })();
+    </script>
+</body>
+</html>
