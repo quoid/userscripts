@@ -1,0 +1,3 @@
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/nouralddin-abdullah/Blue-Lock-Rivals/refs/heads/main/entrymob.lua"))()
+```
