@@ -24,19 +24,23 @@ function triageJS(userscript) {
 		if (document.readyState !== "loading") {
 			injectJS(userscript);
 		} else {
-			document.addEventListener("DOMContentLoaded", () => {
-				injectJS(userscript);
-			});
+			document.addEventListener(
+				"DOMContentLoaded",
+				() => injectJS(userscript),
+				{ once: true },
+			);
 		}
 	} else if (runAt === "document-idle") {
 		if (document.readyState === "complete") {
 			injectJS(userscript);
 		} else {
-			document.addEventListener("readystatechange", () => {
+			const handle = () => {
 				if (document.readyState === "complete") {
 					injectJS(userscript);
+					document.removeEventListener("readystatechange", handle);
 				}
-			});
+			};
+			document.addEventListener("readystatechange", handle);
 		}
 	}
 }
@@ -222,6 +226,10 @@ async function injection() {
 }
 
 function listeners() {
+	/** listen for CSP violations */
+	document.addEventListener("securitypolicyviolation", cspFallback, {
+		once: true,
+	});
 	// listens for messages from background, popup, etc...
 	browser.runtime.onMessage.addListener((request) => {
 		const name = request.name;
@@ -244,8 +252,6 @@ function listeners() {
 			console.error(`Couldn't find ${filename} code!`);
 		}
 	});
-	// listen for CSP violations
-	document.addEventListener("securitypolicyviolation", cspFallback);
 }
 
 async function initialize() {
