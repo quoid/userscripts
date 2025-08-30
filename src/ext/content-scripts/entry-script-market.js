@@ -9,10 +9,10 @@ async function injection() {
 		);
 	}
 	for (const link of links) {
+		if (link["href"]) url = link["href"];
 		link.addEventListener(
 			"click",
 			(e) => {
-				url = link["href"];
 				e.stopImmediatePropagation();
 				e.preventDefault();
 				browser.runtime.sendMessage({ name: "WEB_USERJS_POPUP" });
@@ -23,14 +23,27 @@ async function injection() {
 }
 
 async function listeners() {
-	browser.runtime.onMessage.addListener(async (message) => {
+	/**
+	 * handle messages from background, popup, etc...
+	 * @type {import("webextension-polyfill").Runtime.OnMessageListener}
+	 */
+	const handleMessage = async (message) => {
 		if (import.meta.env.MODE === "development") {
 			console.debug(message, url);
 		}
 		if (message === "TAB_CLICK_USERJS") {
-			const response = url;
-			url = undefined; // respond only once of click event
-			return response;
+			return url;
+		}
+	};
+	/** Dynamically remove listeners to avoid memory leaks */
+	if (document.visibilityState === "visible") {
+		browser.runtime.onMessage.addListener(handleMessage);
+	}
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			browser.runtime.onMessage.removeListener(handleMessage);
+		} else {
+			browser.runtime.onMessage.addListener(handleMessage);
 		}
 	});
 }
