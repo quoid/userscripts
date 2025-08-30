@@ -25,19 +25,23 @@ function triageJS(userscript) {
 		if (document.readyState !== "loading") {
 			injectJS(userscript);
 		} else {
-			document.addEventListener("DOMContentLoaded", () => {
-				injectJS(userscript);
-			});
+			document.addEventListener(
+				"DOMContentLoaded",
+				() => injectJS(userscript),
+				{ once: true },
+			);
 		}
 	} else if (runAt === "document-idle") {
 		if (document.readyState === "complete") {
 			injectJS(userscript);
 		} else {
-			document.addEventListener("readystatechange", () => {
+			const handle = () => {
 				if (document.readyState === "complete") {
 					injectJS(userscript);
+					document.removeEventListener("readystatechange", handle);
 				}
-			});
+			};
+			document.addEventListener("readystatechange", handle);
 		}
 	}
 }
@@ -233,17 +237,23 @@ async function injection() {
 }
 
 function listeners() {
-	// listens for messages from background, popup, etc...
-	browser.runtime.onMessage.addListener((request) => {
-		const name = request.name;
+	/** listen for CSP violations */
+	document.addEventListener("securitypolicyviolation", cspFallback, {
+		once: true,
+	});
+	/**
+	 * listens for messages from background, popup, etc...
+	 * @type {import("webextension-polyfill").Runtime.OnMessageListener}
+	 */
+	const handleMessage = (message) => {
+		const name = message.name;
 		if (name === "CONTEXT_RUN") {
 			// from bg script when context-menu item is clicked
 			// double check to ensure context-menu scripts only run in top windows
 			if (window !== window.top) return;
-
 			// loop through context-menu scripts saved to data object and find match
 			// if no match found, nothing will execute and error will log
-			const filename = request.menuItemId;
+			const filename = message.menuItemId;
 			for (let i = 0; i < data.files.menu.length; i++) {
 				const item = data.files.menu[i];
 				if (item.scriptObject.filename === filename) {
@@ -254,9 +264,18 @@ function listeners() {
 			}
 			console.error(`Couldn't find ${filename} code!`);
 		}
+	};
+	/** Dynamically remove listeners to avoid memory leaks */
+	if (document.visibilityState === "visible") {
+		browser.runtime.onMessage.addListener(handleMessage);
+	}
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			browser.runtime.onMessage.removeListener(handleMessage);
+		} else {
+			browser.runtime.onMessage.addListener(handleMessage);
+		}
 	});
-	// listen for CSP violations
-	document.addEventListener("securitypolicyviolation", cspFallback);
 }
 
 async function initialize() {
