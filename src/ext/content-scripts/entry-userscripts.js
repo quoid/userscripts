@@ -230,17 +230,19 @@ function listeners() {
 	document.addEventListener("securitypolicyviolation", cspFallback, {
 		once: true,
 	});
-	// listens for messages from background, popup, etc...
-	browser.runtime.onMessage.addListener((request) => {
-		const name = request.name;
+	/**
+	 * listens for messages from background, popup, etc...
+	 * @type {import("webextension-polyfill").Runtime.OnMessageListener}
+	 */
+	const handleMessage = (message) => {
+		const name = message.name;
 		if (name === "CONTEXT_RUN") {
 			// from bg script when context-menu item is clicked
 			// double check to ensure context-menu scripts only run in top windows
 			if (window !== window.top) return;
-
 			// loop through context-menu scripts saved to data object and find match
 			// if no match found, nothing will execute and error will log
-			const filename = request.menuItemId;
+			const filename = message.menuItemId;
 			for (let i = 0; i < data.files.menu.length; i++) {
 				const item = data.files.menu[i];
 				if (item.scriptObject.filename === filename) {
@@ -250,6 +252,17 @@ function listeners() {
 				}
 			}
 			console.error(`Couldn't find ${filename} code!`);
+		}
+	};
+	/** Dynamically remove listeners to avoid memory leaks */
+	if (document.visibilityState === "visible") {
+		browser.runtime.onMessage.addListener(handleMessage);
+	}
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			browser.runtime.onMessage.removeListener(handleMessage);
+		} else {
+			browser.runtime.onMessage.addListener(handleMessage);
 		}
 	});
 }
