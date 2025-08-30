@@ -38,7 +38,7 @@ jobs:
       - run: npm run build:${{ matrix.platform }}-safari-15
         if: ${{ ! github.event.release.prerelease }}
       - name: Set xcode version
-        run: sudo xcode-select -s "/Applications/Xcode_26_beta.app" # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
+        run: sudo xcode-select -s "/Applications/Xcode_26_beta_6.app" # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
       - run: xcodebuild -downloadPlatform iOS # Temporary fix for Xcode_26_beta
       - name: Run fastlane
         id: fastlane
