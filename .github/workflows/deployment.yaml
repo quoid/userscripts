@@ -40,6 +40,7 @@ jobs:
       - name: Set xcode version
         run: sudo xcode-select -s "/Applications/Xcode_26_beta_6.app" # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
       - run: xcodebuild -downloadPlatform iOS # Temporary fix for Xcode_26_beta
+        if: matrix.platform == 'ios'
       - name: Run fastlane
         id: fastlane
         working-directory: ./fastlane
