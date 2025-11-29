@@ -149,7 +149,7 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 				self.extensionState = state.isEnabled ? .on : .off
 			} catch {
 				self.extensionState = .error
-				logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+				logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 			}
 			if #available(macOS 13, *) {
 				useSettingsInsteadOfPreferences = true
@@ -193,7 +193,7 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 			do {
 				try await SFSafariApplication.showPreferencesForExtension(withIdentifier: extIdentifier)
 			} catch {
-				logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+				logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 				return (nil, error.localizedDescription)
 			}
 			break
@@ -344,7 +344,7 @@ extension ViewController {
 			} else {
 				status = .error
 				if let error = error {
-					logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+					logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 				} else {
 					logger?.error("\(#function, privacy: .public) - couldn't get safari extension state in containing app")
 				}

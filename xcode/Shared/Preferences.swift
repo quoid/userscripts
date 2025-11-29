@@ -60,7 +60,7 @@ private struct SecurityScopedBookmark {
 				relativeTo: nil
 			)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -74,7 +74,7 @@ private struct SecurityScopedBookmark {
 				bookmarkDataIsStale: &isStale
 			)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -202,7 +202,7 @@ private struct SecurityScopedBookmark {
 		do {
 			return try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -211,7 +211,7 @@ private struct SecurityScopedBookmark {
 		do {
 			return try URL(resolvingBookmarkData: data, bookmarkDataIsStale: &isStale)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
