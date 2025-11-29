@@ -36,7 +36,7 @@ class ViewController: NSViewController {
 			guard let state = state else {
 				self.enabledText.stringValue = "Safari Extension State Unknown"
 				if let error = error {
-					logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+					logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 				} else {
 					logger?.error("\(#function, privacy: .public) - couldn't get safari extension state in containing app")
 				}

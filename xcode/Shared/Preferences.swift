@@ -60,7 +60,7 @@ private struct SecurityScopedBookmark {
 				relativeTo: nil
 			)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -74,7 +74,7 @@ private struct SecurityScopedBookmark {
 				bookmarkDataIsStale: &isStale
 			)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -202,7 +202,7 @@ private struct SecurityScopedBookmark {
 		do {
 			return try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -211,7 +211,7 @@ private struct SecurityScopedBookmark {
 		do {
 			return try URL(resolvingBookmarkData: data, bookmarkDataIsStale: &isStale)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 		}
 		return nil
 	}
@@ -237,7 +237,9 @@ private struct SecurityScopedBookmark {
 			}
 			var isStale = false
 			guard let url = resolvBookmark(data, &isStale) else { // get security-scoped URL
-				SDefaults?.removeObject(forKey: key) // remove data that cannot be resolved
+				// Note: temporary mitigation measures for occasional failures on some iOS devices
+//				SDefaults?.removeObject(forKey: key) // remove data that cannot be resolved
+				logger?.warning("\(#function, privacy: .public) - faild resolv bookmark, return default")
 				return defaultValue
 			}
 			if isStale, url.startAccessingSecurityScopedResource() { // renew URL bookmark

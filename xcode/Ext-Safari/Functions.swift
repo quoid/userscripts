@@ -220,7 +220,7 @@ func updateManifest(with data: Manifest) -> Bool {
 		try fileContent.write(to: url, atomically: false, encoding: .utf8)
 		return true
 	} catch {
-		logger?.error("\(#function, privacy: .public) - failed to update manifest: \(error.localizedDescription, privacy: .public)")
+		logger?.error("\(#function, privacy: .public) - failed to update manifest: \(error, privacy: .public)")
 		return false
 	}
 }
@@ -742,7 +742,7 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 			do {
 				try FileManager.default.removeItem(at: directory)
 			} catch {
-				logger?.error("\(#function, privacy: .public) - failed to remove directory: \(error.localizedDescription, privacy: .public)")
+				logger?.error("\(#function, privacy: .public) - failed to remove directory: \(error, privacy: .public)")
 			}
 		}
 		return true
@@ -796,11 +796,11 @@ func getRequiredCode(_ filename: String, _ resources: [String], _ fileType: Stri
 				try FileManager.default.removeItem(at: abandonFileUrl)
 				logger?.info("\(#function, privacy: .public) - cleanup abandoned resource: \(unsanitize(abandonFileUrl.lastPathComponent), privacy: .public)")
 			} catch {
-				logger?.error("\(#function, privacy: .public) - failed to remove abandoned resource: \(error.localizedDescription, privacy: .public)")
+				logger?.error("\(#function, privacy: .public) - failed to remove abandoned resource: \(error, privacy: .public)")
 			}
 		}
 	} catch {
-		logger?.error("\(#function, privacy: .public) - failed to cleanup resources: \(error.localizedDescription, privacy: .public)")
+		logger?.error("\(#function, privacy: .public) - failed to cleanup resources: \(error, privacy: .public)")
 	}
 	return true
 }
@@ -877,7 +877,7 @@ func getRemoteFileContents(_ url: String) -> String? {
 			}
 		}
 		if let error = error {
-			logger?.error("\(#function, privacy: .public) - task error: \(error.localizedDescription, privacy: .public) (\(url, privacy: .public))")
+			logger?.error("\(#function, privacy: .public) - task error: \(error, privacy: .public) (\(url, privacy: .public))")
 		}
 		semaphore.signal()
 	}
@@ -984,7 +984,7 @@ func checkDefaultDirectories() -> Bool {
 				try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
 			} catch {
 				// could not create the save location directory, show error
-				logger?.error("\(#function, privacy: .public) - failed at (1) - \(url, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+				logger?.error("\(#function, privacy: .public) - failed at (1) - \(url, privacy: .public) - \(error, privacy: .public)")
 				return false
 			}
 		}
@@ -1763,7 +1763,7 @@ func trashFile(_ item: [String: Any]) -> Bool {
 		do {
 			try FileManager.default.trashItem(at: url, resultingItemURL: nil)
 		} catch {
-			logger?.error("\(#function, privacy: .public) - \(error.localizedDescription, privacy: .public)")
+			logger?.error("\(#function, privacy: .public) - \(error, privacy: .public)")
 			return false
 		}
 	}
