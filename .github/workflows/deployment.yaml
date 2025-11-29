@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix: # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
         platform: [mac, ios]
-    runs-on: macos-15 # https://github.com/actions/runner-images
+    runs-on: macos-26 # https://github.com/actions/runner-images
     steps:
       - uses: actions/checkout@v4 # https://github.com/actions/checkout
         with:
@@ -37,10 +37,10 @@ jobs:
         if: ${{ github.event.release.prerelease }}
       - run: npm run build:${{ matrix.platform }}-safari-15
         if: ${{ ! github.event.release.prerelease }}
-      - name: Set xcode version
-        run: sudo xcode-select -s "/Applications/Xcode_26_beta_6.app" # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-      - run: xcodebuild -downloadPlatform iOS # Temporary fix for Xcode_26_beta
-        if: matrix.platform == 'ios'
+      # - name: Set xcode version
+      #   run: sudo xcode-select -s "/Applications/Xcode_26.1.1.app" # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md#xcode
+      # - run: xcodebuild -downloadPlatform iOS # Temporary fix for Xcode_26_beta
+      #   if: matrix.platform == 'ios'
       - name: Run fastlane
         id: fastlane
         working-directory: ./fastlane
