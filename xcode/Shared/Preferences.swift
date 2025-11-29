@@ -237,7 +237,9 @@ private struct SecurityScopedBookmark {
 			}
 			var isStale = false
 			guard let url = resolvBookmark(data, &isStale) else { // get security-scoped URL
-				SDefaults?.removeObject(forKey: key) // remove data that cannot be resolved
+				// Note: temporary mitigation measures for occasional failures on some iOS devices
+//				SDefaults?.removeObject(forKey: key) // remove data that cannot be resolved
+				logger?.warning("\(#function, privacy: .public) - faild resolv bookmark, return default")
 				return defaultValue
 			}
 			if isStale, url.startAccessingSecurityScopedResource() { // renew URL bookmark
