@@ -1,0 +1,20 @@
+// ==UserScript==
+// @name       Bato Image Replacer
+// @match      https://bato.to/*
+// @run-at     document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    function rewriteImages() {
+        document.querySelectorAll('img[src^="https://k"][src$=".webp"]').forEach(img => { img.src = img.src.replace("https://k", "https://n"); });
+    }
+
+    // Run once when the page loads
+    document.addEventListener("DOMContentLoaded", rewriteImages);
+
+    // Run continuously when Bato loads new images dynamically
+    const observer = new MutationObserver(rewriteImages);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
